@@ -65,6 +65,8 @@ interface State {
   showCategoriesUpload: boolean
   /** whether to show task size */
   showTaskSize: boolean
+  /** submit with multiple files or a single complete file*/
+  submitSingleFile: boolean
 }
 
 /**
@@ -90,7 +92,8 @@ export default class CreateForm extends React.Component<Props, State> {
       demoMode: false,
       hasSubmitted: false,
       showCategoriesUpload: true,
-      showTaskSize: true
+      showTaskSize: true,
+      submitSingleFile: false
     }
   }
 
@@ -192,37 +195,67 @@ export default class CreateForm extends React.Component<Props, State> {
             />{" "}
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
-            <StyledUpload
-              required={true}
-              label={"Item List*"}
-              form_id={FormField.ITEMS}
-              with_json
+            <FormControlLabel
+              control={
+                <StyledCheckbox
+                  checked={this.state.submitSingleFile}
+                  onChange={() => {
+                    this.setState({
+                      submitSingleFile: !this.state.submitSingleFile
+                    })
+                  }}
+                />
+              }
+              id="single_file"
+              name={FormField.SINGLE_FILE}
+              value={this.state.submitSingleFile}
+              label="Submit single file"
+              labelPlacement="end"
             />
-            {this.state.showCategoriesUpload ? (
+          </FormGroup>
+          {this.state.submitSingleFile ? (
+            <FormGroup row={true} className={classes.formGroup}>
               <StyledUpload
                 required={true}
-                label={"Categories*"}
-                form_id={FormField.CATEGORIES}
+                label={"Dataset*"}
+                form_id={FormField.DATASET}
+                with_json
               />
-            ) : null}
-            <StyledUpload
-              required={false}
-              label={"Attributes"}
-              form_id={FormField.ATTRIBUTES}
-            />
-            <StyledUpload
-              required={false}
-              label={"Label Specification"}
-              form_id={FormField.LABEL_SPEC}
-              with_json
-            />
-            {/* <StyledUpload
-              required={false}
-              label={"Sensors"}
-              form_id={FormField.SENSORS}
-              with_json
-            /> */}
-          </FormGroup>
+            </FormGroup>
+          ) : (
+            <FormGroup row={true} className={classes.formGroup}>
+              <StyledUpload
+                required={true}
+                label={"Item List*"}
+                form_id={FormField.ITEMS}
+                with_json
+              />
+              {this.state.showCategoriesUpload ? (
+                <StyledUpload
+                  required={true}
+                  label={"Categories*"}
+                  form_id={FormField.CATEGORIES}
+                />
+              ) : null}
+              <StyledUpload
+                required={false}
+                label={"Attributes"}
+                form_id={FormField.ATTRIBUTES}
+              />
+              <StyledUpload
+                required={false}
+                label={"Label Specification"}
+                form_id={FormField.LABEL_SPEC}
+                with_json
+              />
+              {/* <StyledUpload
+                required={false}
+                label={"Sensors"}
+                form_id={FormField.SENSORS}
+                with_json
+              /> */}
+            </FormGroup>
+          )}
           <FormGroup row={true} className={classes.formGroup}>
             <TextField
               required={this.state.showTaskSize}

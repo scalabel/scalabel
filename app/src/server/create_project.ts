@@ -15,7 +15,7 @@ import {
   makeTask,
   makeTrack
 } from "../functional/states"
-import { ItemExport } from "../types/export"
+import { DatasetExport, ItemExport } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
   Attribute,
@@ -171,6 +171,34 @@ export async function parseFiles(
 }
 
 /**
+ * Parses item, category, and attribute files from paths
+ *
+ * @param storage
+ * @param labelType
+ */
+export async function parseSingleFile(
+  storage: Storage,
+  labelType: string,
+  files: { [key: string]: string }
+): Promise<FormFileData> {
+  const dataset: Promise<DatasetExport> = readConfig(
+    storage,
+    _.get(files, FormField.DATASET),
+    getDefaultDataset(labelType)
+  )
+
+  return await dataset.then((dataset: DatasetExport) => {
+    return {
+      items: dataset.frames as Array<Partial<ItemExport>>,
+      sensors: [],
+      templates: [],
+      attributes: dataset.config.attributes as Attribute[],
+      categories: dataset.config.categories
+    }
+  })
+}
+
+/**
  * Read the config file, for example items or attributes
  * Can be in json or yaml format
  * If the path is undefined or empty, use the default
@@ -227,6 +255,22 @@ function getDefaultAttributes(labelType: string): Attribute[] {
     default:
       return defaults.dummyAttributes
   }
+}
+
+/**
+ * Get default dataset if it wasn't provided
+ *
+ * @param labelType
+ */
+function getDefaultDataset(labelType: string): DatasetExport {
+  const dataset: DatasetExport = {
+    frames: [],
+    config: {
+      attributes: getDefaultAttributes(labelType),
+      categories: []
+    }
+  }
+  return dataset
 }
 
 /**
