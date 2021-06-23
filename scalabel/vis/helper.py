@@ -2,10 +2,11 @@
 
 import numpy as np
 
+from ..common.typing import NDArray64
 from ..label.typing import Intrinsics
 
 
-def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:
+def get_intrinsic_matrix(intrinsics: Intrinsics) -> NDArray64:
     """Get the camera intrinsic matrix."""
     calibration = np.identity(3)
     calibration[0, 2] = intrinsics.center[0]
@@ -15,6 +16,6 @@ def get_intrinsic_matrix(intrinsics: Intrinsics) -> np.ndarray:
     return calibration
 
 
-def random_color() -> np.ndarray:
+def random_color() -> NDArray64:
     """Generate a random color (RGB)."""
     return np.array(np.random.rand(3))

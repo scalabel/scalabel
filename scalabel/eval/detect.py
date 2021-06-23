@@ -7,7 +7,7 @@ import argparse
 import datetime
 import json
 import os
-from typing import Dict, List, Optional
+from typing import cast, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
