@@ -89,7 +89,7 @@ def test_dump() -> None:
     """Test dump labels."""
     filepath = get_test_file("image_list_with_auto_labels.json")
     labels = load(filepath).frames
-    labels_dict = [dump(label) for label in labels]
+    labels_dict = [dump(label.dict()) for label in labels]
     assert labels_dict[0]["frameIndex"] == labels[0].frame_index
     assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index
     assert "box3d" not in labels_dict[0]["labels"][0]
