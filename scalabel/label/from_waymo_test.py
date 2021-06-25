@@ -4,6 +4,8 @@ import shutil
 from argparse import Namespace
 from typing import List
 
+import pytest
+
 from ..unittest.util import get_test_file
 from .from_waymo import run
 from .io import load
@@ -18,15 +20,25 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
         assert frame.frame_index == frame_ref.frame_index
         if frame.intrinsics is not None:
             assert frame_ref.intrinsics is not None
-            assert frame.intrinsics.focal == frame_ref.intrinsics.focal
-            assert frame.intrinsics.center == frame_ref.intrinsics.center
-            assert frame.intrinsics.skew == frame_ref.intrinsics.skew
+            assert frame.intrinsics.focal == pytest.approx(
+                frame_ref.intrinsics.focal
+            )
+            assert frame.intrinsics.center == pytest.approx(
+                frame_ref.intrinsics.center
+            )
+            assert frame.intrinsics.skew == pytest.approx(
+                frame_ref.intrinsics.skew
+            )
         else:
             assert frame.intrinsics == frame_ref.intrinsics
         if frame.extrinsics is not None:
             assert frame_ref.extrinsics is not None
-            assert frame.extrinsics.location == frame_ref.extrinsics.location
-            assert frame.extrinsics.rotation == frame_ref.extrinsics.rotation
+            assert frame.extrinsics.location == pytest.approx(
+                frame_ref.extrinsics.location
+            )
+            assert frame.extrinsics.rotation == pytest.approx(
+                frame_ref.extrinsics.rotation
+            )
         else:
             assert frame.extrinsics == frame_ref.extrinsics
 
@@ -37,19 +49,23 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
                 assert label.category == label_ref.category
                 if label.box2d is not None:
                     assert label_ref.box2d is not None
-                    assert label.box2d.x1 == label_ref.box2d.x1
-                    assert label.box2d.y1 == label_ref.box2d.y1
-                    assert label.box2d.x2 == label_ref.box2d.x2
-                    assert label.box2d.y2 == label_ref.box2d.y2
+                    assert label.box2d.x1 == pytest.approx(label_ref.box2d.x1)
+                    assert label.box2d.y1 == pytest.approx(label_ref.box2d.y1)
+                    assert label.box2d.x2 == pytest.approx(label_ref.box2d.x2)
+                    assert label.box2d.y2 == pytest.approx(label_ref.box2d.y2)
                 else:
                     assert label.box2d == label_ref.box2d
 
                 if label.box3d is not None:
                     assert label_ref.box3d is not None
-                    assert label.box3d.location == label_ref.box3d.location
-                    assert label.box3d.dimension == label_ref.box3d.dimension
-                    assert (
-                        label.box3d.orientation == label_ref.box3d.orientation
+                    assert label.box3d.location == pytest.approx(
+                        label_ref.box3d.location
+                    )
+                    assert label.box3d.dimension == pytest.approx(
+                        label_ref.box3d.dimension
+                    )
+                    assert label.box3d.orientation == pytest.approx(
+                        label_ref.box3d.orientation
                     )
                 else:
                     assert label.box3d == label_ref.box3d
