@@ -51,7 +51,7 @@ def load(
         content = json.load(open(fp, "r"))
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
-            raw_cfg = content["config"]  # pylint: disable=unused-variable
+            raw_cfg = content["config"]
         elif isinstance(content, list):
             raw_frames.extend(content)
         else:
