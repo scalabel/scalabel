@@ -6,7 +6,7 @@ isort
 joblib
 motmetrics
 mypy
-numpy
+numpy==1.20.*
 pandas
 Pillow
 plyfile
