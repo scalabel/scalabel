@@ -12,7 +12,6 @@ from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
 
 from ..common.typing import NDArray64
-
 from .seg_base import SegBase
 
 try:

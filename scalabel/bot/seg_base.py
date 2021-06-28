@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-import numpy as np
+from ..common.typing import NDArray64
 
 
 class SegBase(ABC):
@@ -10,7 +10,7 @@ class SegBase(ABC):
 
     @abstractmethod
     def convert_rect_to_poly(
-        self, imgs: List[np.ndarray], bboxes: List[List[float]]
+        self, imgs: List[NDArray64], bboxes: List[List[float]]
     ) -> List[List[List[float]]]:
         """Predict rectangles -> polygons.
 

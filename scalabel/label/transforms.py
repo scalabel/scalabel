@@ -8,7 +8,6 @@ import numpy as np
 from matplotlib.path import Path
 
 from ..common.typing import NDArray64
-
 from .coco_typing import CatType, PolygonType
 from .typing import Box2D, Config, ImageSize, Poly2D
 from .utils import get_leaf_categories

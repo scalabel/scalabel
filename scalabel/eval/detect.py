@@ -7,7 +7,7 @@ import argparse
 import datetime
 import json
 import os
-from typing import cast, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
@@ -149,10 +149,12 @@ def evaluate_workflow(
         coco_eval.accumulate()
         coco_eval.summarize()
         stats_all[i, :] = coco_eval.stats
-        eval_param["precision"][:, :, i, :, :] = coco_eval.eval[
+        eval_param["precision"][:, :, i, :, :] = coco_eval.eval[  # type: ignore # pylint: disable=line-too-long
             "precision"
-        ].reshape((n_thr, n_rec, n_area, n_mdet))
-        eval_param["recall"][:, i, :, :] = coco_eval.eval["recall"].reshape(
+        ].reshape(
+            (n_thr, n_rec, n_area, n_mdet)
+        )
+        eval_param["recall"][:, i, :, :] = coco_eval.eval["recall"].reshape(  # type: ignore # pylint: disable=line-too-long
             (n_thr, n_area, n_mdet)
         )
 
