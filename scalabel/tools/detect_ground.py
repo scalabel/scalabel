@@ -15,19 +15,19 @@ import plyfile
 import yaml
 from tqdm import tqdm
 
+from ..common.typing import NDArray64
+
 # Define the ground return type
-GroundOutputType = Union[
-    None, Tuple[np.ndarray, float, np.ndarray, np.ndarray]
-]
+GroundOutputType = Union[None, Tuple[NDArray64, float, NDArray64, NDArray64]]
 
 
 def estimate_ground_plane(
-    points: np.ndarray,
+    points: NDArray64,
     sample_size: float,
     iters: int,
     dist_cutoff: List[float],
     height_cutoff: List[float],
-    expected_normal: np.ndarray,
+    expected_normal: NDArray64,
     max_normal_deviation: float,
     inlier_cutoff: float = 0.15,
 ) -> GroundOutputType:

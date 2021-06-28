@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
 
+from ..common.typing import NDArray64
 from .coco_typing import CatType, PolygonType
 from .typing import Box2D, Config, ImageSize, Poly2D
 from .utils import get_leaf_categories
@@ -41,7 +42,7 @@ def box2d_to_bbox(box2d: Box2D) -> List[float]:
     return [box2d.x1, box2d.y1, width, height]
 
 
-def mask_to_box2d(mask: np.ndarray) -> Box2D:
+def mask_to_box2d(mask: NDArray64) -> Box2D:
     """Convert mask into Box2D."""
     x_inds = np.nonzero(np.sum(mask, axis=0))[0]
     y_inds = np.nonzero(np.sum(mask, axis=1))[0]
@@ -51,7 +52,7 @@ def mask_to_box2d(mask: np.ndarray) -> Box2D:
     return box2d
 
 
-def mask_to_bbox(mask: np.ndarray) -> List[float]:
+def mask_to_bbox(mask: NDArray64) -> List[float]:
     """Convert mask into bbox."""
     box2d = mask_to_box2d(mask)
     bbox = box2d_to_bbox(box2d)
@@ -105,7 +106,7 @@ def poly_to_patch(
     )
 
 
-def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
+def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArray64:
     """Converting Poly2D to mask."""
     fig = plt.figure(facecolor="0")
     fig.set_size_inches(
@@ -129,13 +130,13 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
         )
 
     fig.canvas.draw()
-    mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
+    mask: NDArray64 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
     mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
     plt.close()
     return mask
 
 
-def close_contour(contour: np.ndarray) -> np.ndarray:
+def close_contour(contour: NDArray64) -> NDArray64:
     """Explicitly close the contour."""
     if not np.array_equal(contour[0], contour[-1]):
         contour = np.vstack((contour, contour[0]))
