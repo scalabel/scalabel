@@ -11,6 +11,7 @@ import requests
 from flask import Flask, Response, jsonify, make_response, request
 from PIL import Image
 
+from ..common.typing import NDArray64
 from .seg_base import SegBase
 
 try:
@@ -24,7 +25,7 @@ def homepage() -> str:
     return "Test server for segmentation\n"
 
 
-def load_images(urls: List[str]) -> Dict[str, np.ndarray]:
+def load_images(urls: List[str]) -> Dict[str, NDArray64]:
     """Load image for each url and cache results in a dictionary."""
     url_to_img = {}
     for url in urls:
@@ -49,7 +50,7 @@ def predict_poly(seg_model: SegBase) -> Response:
         response: Response = make_response("Bad image url provided.")
         return response
 
-    images: List[np.ndarray] = []
+    images: List[NDArray64] = []
     boxes: List[List[float]] = []
     for data in receive_data:
         box: Dict[str, float] = data["labels"][0]["box2d"]

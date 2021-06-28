@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
+from ..common.typing import NDArray64
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -43,9 +44,7 @@ METRIC_MAPS = {
 }
 
 
-def parse_objects(
-    objects: List[Label], classes: List[str]
-) -> List[np.ndarray]:
+def parse_objects(objects: List[Label], classes: List[str]) -> List[NDArray64]:
     """Parse objects under Scalable formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
     for obj in objects:
@@ -66,7 +65,7 @@ def parse_objects(
     return list(map(np.array, [bboxes, labels, ids, ignore_bboxes]))
 
 
-def intersection_over_area(preds: np.ndarray, gts: np.ndarray) -> np.ndarray:
+def intersection_over_area(preds: NDArray64, gts: NDArray64) -> NDArray64:
     """Returns the intersection over the area of the predicted box."""
     out = np.zeros((len(preds), len(gts)))
     for i, p in enumerate(preds):
@@ -125,7 +124,7 @@ def acc_single_video_mot(
                         fps[n] = False
                 # 2. ignore by iof
                 iofs = intersection_over_area(pred_bboxes_c, gt_ignores)
-                ignores = (iofs > ignore_iof_thr).any(axis=1)
+                ignores = (iofs > ignore_iof_thr).any(axis=1)  # type: ignore
                 # 3. filter preds
                 valid_inds = ~(fps & ignores)
                 pred_ids_c = pred_ids_c[valid_inds]
