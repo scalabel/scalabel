@@ -4,11 +4,11 @@ from typing import Dict, List
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from ..common.typing import NDArray64
+from ..common.typing import NDArrayF64
 from .typing import Category, Extrinsics, Intrinsics, Label
 
 
-def get_intrinsics_from_matrix(matrix: NDArray64) -> Intrinsics:
+def get_intrinsics_from_matrix(matrix: NDArrayF64) -> Intrinsics:
     """Get intrinsics data structure from 3x3 matrix."""
     intrinsics = Intrinsics(
         focal=(matrix[0, 0], matrix[1, 1]),
@@ -18,7 +18,7 @@ def get_intrinsics_from_matrix(matrix: NDArray64) -> Intrinsics:
     return intrinsics
 
 
-def get_matrix_from_intrinsics(intrinsics: Intrinsics) -> NDArray64:
+def get_matrix_from_intrinsics(intrinsics: Intrinsics) -> NDArrayF64:
     """Get the camera intrinsic matrix."""
     calibration = np.identity(3)
     calibration[0, 2] = intrinsics.center[0]
@@ -29,7 +29,7 @@ def get_matrix_from_intrinsics(intrinsics: Intrinsics) -> NDArray64:
     return calibration
 
 
-def get_extrinsics_from_matrix(matrix: NDArray64) -> Extrinsics:
+def get_extrinsics_from_matrix(matrix: NDArrayF64) -> Extrinsics:
     """Get extrinsics data structure from 4x4 matrix."""
     extrinsics = Extrinsics(
         location=(matrix[0, -1], matrix[1, -1], matrix[2, -1]),
@@ -40,7 +40,7 @@ def get_extrinsics_from_matrix(matrix: NDArray64) -> Extrinsics:
     return extrinsics
 
 
-def get_matrix_from_extrinsics(extrinsics: Extrinsics) -> NDArray64:
+def get_matrix_from_extrinsics(extrinsics: Extrinsics) -> NDArrayF64:
     """Convert Extrinsics class object to rotation matrix."""
     rot_mat = Rotation.from_euler("xyz", extrinsics.rotation).as_matrix()
     translation = np.array(extrinsics.location)
