@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from ..common.typing import UintArray
+from ..common.typing import NDArrayU8
 from .seg_base import SegBase
 
 
@@ -16,7 +16,7 @@ class SegDummy(SegBase):
         return
 
     def convert_rect_to_poly(
-        self, imgs: List[UintArray], bboxes: List[List[float]]
+        self, imgs: List[NDArrayU8], bboxes: List[List[float]]
     ) -> List[List[List[float]]]:
         """Predict rectangles -> dummy polygons."""
         output: List[List[List[float]]] = []

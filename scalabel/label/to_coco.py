@@ -12,7 +12,7 @@ from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
 from ..common.logger import logger
-from ..common.typing import UintArray
+from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
 from .transforms import box2d_to_bbox, get_coco_categories, poly2ds_to_mask
@@ -71,7 +71,7 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     return annotation
 
 
-def set_seg_object_geometry(annotation: AnnType, mask: UintArray) -> AnnType:
+def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
     """Parsing bbox, area, polygon from seg ann."""
     if not mask.sum():
         return annotation

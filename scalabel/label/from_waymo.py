@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from ..common.typing import FloatArray
+from ..common.typing import NDArrayF32
 
 try:
     from simple_waymo_open_dataset_reader import (
@@ -91,7 +91,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def cart2hom(pts_3d: FloatArray) -> FloatArray:
+def cart2hom(pts_3d: NDArrayF32) -> NDArrayF32:
     """Nx3 points in Cartesian to Homogeneous by appending ones."""
     n = pts_3d.shape[0]
     pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
@@ -99,8 +99,8 @@ def cart2hom(pts_3d: FloatArray) -> FloatArray:
 
 
 def project_points_to_image(
-    points: FloatArray, intrinsics: FloatArray
-) -> FloatArray:
+    points: NDArrayF32, intrinsics: NDArrayF32
+) -> NDArrayF32:
     """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
     pts_3d_rect = cart2hom(points)
     campad = np.identity(4)
@@ -123,7 +123,7 @@ def rotation_y_to_alpha(
     return alpha
 
 
-def points_transform(points: FloatArray, calib: FloatArray) -> FloatArray:
+def points_transform(points: NDArrayF32, calib: NDArrayF32) -> NDArrayF32:
     """Transform points from global to camera coordinate system."""
     axes_transform = np.array(
         [[0, -1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]],
@@ -133,7 +133,7 @@ def points_transform(points: FloatArray, calib: FloatArray) -> FloatArray:
     return np.dot(cart2hom(points), transform.T)[:, :3]  # type: ignore
 
 
-def heading_transform(heading: float, calib: FloatArray) -> float:
+def heading_transform(heading: float, calib: NDArrayF32) -> float:
     """Transform heading from global to camera coordinate system."""
     # waymo heading given in lateral direction (negative)
     points = np.array([[0.0, 0.0, 0.0], [-1.0, 0.0, 0.0]])

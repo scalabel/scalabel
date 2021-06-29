@@ -7,6 +7,6 @@ import numpy.typing as npt
 
 DictStrAny = Dict[str, Any]  # type: ignore[misc]
 
-FloatArray = npt.NDArray[np.float32]
-IntArray = npt.NDArray[np.int32]
-UintArray = npt.NDArray[np.uint8]
+NDArrayF32 = npt.NDArray[np.float32]
+NDArrayI32 = npt.NDArray[np.int32]
+NDArrayU8 = npt.NDArray[np.uint8]
