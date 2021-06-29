@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 from Tool.tool import Tool  # pylint: disable=import-error
 
-from ..common.typing import NDArray64
+from ..common.typing import UintArray
 from .seg_base import SegBase
 
 
@@ -25,7 +25,7 @@ class PolyrnnAdapter(SegBase):
         self.tool = Tool(exp, net)
 
     def convert_rect_to_poly(
-        self, imgs: List[NDArray64], bboxes: List[List[float]]
+        self, imgs: List[UintArray], bboxes: List[List[float]]
     ) -> List[List[List[float]]]:
         """Convert rectangles to polygons."""
         # marshal into segmentation codebase's format

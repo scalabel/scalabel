@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
-from ..common.typing import NDArray64
+from ..common.typing import FloatArray, IntArray
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -44,8 +44,10 @@ METRIC_MAPS = {
 }
 
 
-def parse_objects(objects: List[Label], classes: List[str]) -> List[NDArray64]:
-    """Parse objects under Scalable formats."""
+def parse_objects(
+    objects: List[Label], classes: List[str]
+) -> Tuple[FloatArray, IntArray, IntArray, FloatArray]:
+    """Parse objects under Scalabel formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
     for obj in objects:
         box_2d = obj.box2d
@@ -62,12 +64,16 @@ def parse_objects(objects: List[Label], classes: List[str]) -> List[NDArray64]:
                 ids.append(obj.id)
         else:
             raise KeyError(f"Unknown category: {category}")
-    return list(map(np.array, [bboxes, labels, ids, ignore_bboxes]))
+    bboxes_arr = np.array(bboxes, dtype=np.float32)
+    labels_arr = np.array(labels, dtype=np.int32)
+    ids_arr = np.asarray(ids, dtype=np.int32)
+    ignore_bboxes_arr = np.array(ignore_bboxes, dtype=np.float32)
+    return (bboxes_arr, labels_arr, ids_arr, ignore_bboxes_arr)
 
 
-def intersection_over_area(preds: NDArray64, gts: NDArray64) -> NDArray64:
+def intersection_over_area(preds: FloatArray, gts: FloatArray) -> FloatArray:
     """Returns the intersection over the area of the predicted box."""
-    out = np.zeros((len(preds), len(gts)))
+    out = np.zeros((len(preds), len(gts)), dtype=np.float32)
     for i, p in enumerate(preds):
         for j, g in enumerate(gts):
             w = min(p[0] + p[2], g[0] + g[2]) - max(p[0], g[0])
@@ -117,16 +123,16 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps = np.ones(pred_bboxes_c.shape[0]).astype(np.bool8)
+                fps = np.ones(pred_bboxes_c.shape[0]).astype(bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
                         fps[n] = False
                 # 2. ignore by iof
                 iofs = intersection_over_area(pred_bboxes_c, gt_ignores)
-                ignores = (iofs > ignore_iof_thr).any(axis=1)  # type: ignore
+                ignores: bool = np.greater(iofs, ignore_iof_thr).any(axis=1)
                 # 3. filter preds
-                valid_inds = ~(fps & ignores)
+                valid_inds = np.logical_not(np.logical_and(fps, ignores))
                 pred_ids_c = pred_ids_c[valid_inds]
                 distances = distances[:, valid_inds]
             if distances.shape != (0, 0):

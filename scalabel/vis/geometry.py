@@ -6,17 +6,17 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
-from ..common.typing import NDArray64
+from ..common.typing import FloatArray
 from ..label.typing import Box3D
 
 
 def rotate_vector(
-    vector: NDArray64,
+    vector: FloatArray,
     rot_x: float = 0,
     rot_y: float = 0,
     rot_z: float = 0,
-    center: Union[NDArray64, None] = None,
-) -> NDArray64:
+    center: Union[FloatArray, None] = None,
+) -> FloatArray:
     """Rotate a vector given axis-angles."""
     if center is not None:
         vector -= center
@@ -33,7 +33,9 @@ def rotate_vector(
     return vector
 
 
-def vector_3d_to_2d(vector: NDArray64, calibration: NDArray64) -> List[float]:
+def vector_3d_to_2d(
+    vector: FloatArray, calibration: FloatArray
+) -> List[float]:
     """Project 3d vector to the 2d camera view."""
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
@@ -43,7 +45,7 @@ def vector_3d_to_2d(vector: NDArray64, calibration: NDArray64) -> List[float]:
 
 
 def check_side_of_line(
-    point: NDArray64, line: Tuple[NDArray64, NDArray64]
+    point: FloatArray, line: Tuple[FloatArray, FloatArray]
 ) -> int:
     """Chece which side does a point locate."""
     p1, p2 = line
@@ -53,7 +55,7 @@ def check_side_of_line(
     return int(np.sign(det))
 
 
-def check_clockwise(points: List[NDArray64]) -> int:
+def check_clockwise(points: List[FloatArray]) -> int:
     """Check whether the 4 points in a clockwise order."""
     p1, p2, p3, p4 = points
     s1 = check_side_of_line(p3, (p1, p2))
@@ -72,7 +74,7 @@ class Vertex:
     v3d: List[float]
     v2d: List[float]
 
-    def __init__(self, vector: NDArray64, calibration: NDArray64) -> None:
+    def __init__(self, vector: FloatArray, calibration: FloatArray) -> None:
         """Init the vector."""
         self.v3d = vector.tolist()
         self.v2d = vector_3d_to_2d(vector, calibration)
@@ -81,7 +83,7 @@ class Vertex:
 class Label3d:
     """Generate the 2D edges of a 3D bounding box."""
 
-    def __init__(self, vertices: List[NDArray64]) -> None:
+    def __init__(self, vertices: List[FloatArray]) -> None:
         """Init the vector."""
         self.vertices = vertices
 
@@ -92,7 +94,7 @@ class Label3d:
         center = np.array([x, y, z])
         height, width, depth = np.array(box3d.dimension)
 
-        def rotate(vector: NDArray64) -> NDArray64:
+        def rotate(vector: FloatArray) -> FloatArray:
             if len(box3d.orientation) == 3:
                 rot_x, rot_y, rot_z = box3d.orientation
                 rotated = rotate_vector(vector, rot_x, rot_y, rot_z, center)
@@ -114,7 +116,7 @@ class Label3d:
         return cls([v000, v001, v010, v011, v100, v101, v110, v111])
 
     def get_edges_with_visibility(
-        self, calibration: NDArray64
+        self, calibration: FloatArray
     ) -> Dict[str, List[List[List[float]]]]:
         """Get edges with visibility."""
         vertices = [Vertex(v, calibration) for v in self.vertices]

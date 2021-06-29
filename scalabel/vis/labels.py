@@ -23,7 +23,7 @@ from matplotlib.path import Path
 from PIL import Image
 
 from ..common.logger import logger
-from ..common.typing import NDArray64
+from ..common.typing import FloatArray, UintArray
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
 from ..label.utils import check_crowd, get_matrix_from_intrinsics
@@ -98,7 +98,7 @@ class ViewerConfig:
 
 
 # Function to fetch images
-def fetch_image(inputs: Tuple[Frame, str]) -> NDArray64:
+def fetch_image(inputs: Tuple[Frame, str]) -> UintArray:
     """Fetch the image given image information."""
     frame, image_dir = inputs
     logger.info("Loading image: %s", frame.name)
@@ -106,7 +106,7 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArray64:
     # Fetch image
     if frame.url is not None and len(frame.url) > 0:
         image_data = urllib.request.urlopen(frame.url, timeout=300).read()
-        im = np.asarray(Image.open(io.BytesIO(image_data)))
+        im = np.asarray(Image.open(io.BytesIO(image_data)), dtype=np.uint8)
     else:
         image_path = os.path.join(image_dir, frame.name)
         print("Local path:", image_path)
@@ -155,7 +155,7 @@ class LabelViewer:
         # animation
         self._run_animation: bool = False
         self._timer: Timer = Timer(0.4, self.tick)
-        self._label_colors: Dict[str, NDArray64] = dict()
+        self._label_colors: Dict[str, FloatArray] = dict()
 
         # load label file
         print("Label file:", args.labels)
@@ -172,7 +172,7 @@ class LabelViewer:
 
         logger.info("Load images: %d", len(self.frames))
 
-        self.images: Dict[str, "concurrent.futures.Future[NDArray64]"] = dict()
+        self.images: Dict[str, "concurrent.futures.Future[UintArray]"] = dict()
         # Cache the images in separate threads.
         for frame in self.frames:
             self.images[frame.name] = executor.submit(
@@ -440,7 +440,7 @@ class LabelViewer:
         self,
         vertices: List[Tuple[float, float]],
         types: str,
-        color: NDArray64,
+        color: FloatArray,
         alpha: float,
     ) -> None:
         """Draw the polygon vertices / control points."""
@@ -516,7 +516,7 @@ class LabelViewer:
         types: str,
         closed: bool = False,
         alpha: float = 1.0,
-        color: Optional[NDArray64] = None,
+        color: Optional[FloatArray] = None,
     ) -> mpatches.PathPatch:
         """Convert 2D polygon vertices into patch."""
         moves = {"L": Path.LINETO, "C": Path.CURVE4}
@@ -551,7 +551,7 @@ class LabelViewer:
             and (o.category not in ["drivable area", "lane"])
         ]
 
-    def get_label_color(self, label_id: str) -> NDArray64:
+    def get_label_color(self, label_id: str) -> FloatArray:
         """Get color by id (if not found, then create a random color)."""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
