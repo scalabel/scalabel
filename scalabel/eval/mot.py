@@ -294,22 +294,34 @@ def evaluate_track(
     super_classes = get_parent_categories(config.categories)
 
     logger.info("accumulating...")
-    with Pool(nproc) as pool:
-        accs = pool.starmap(
-            partial(
-                acc_single_video,
-                classes=[c.name for c in classes],
-                iou_thr=iou_thr,
-                ignore_iof_thr=ignore_iof_thr,
-            ),
-            zip(gts, results),
-        )
+    class_names = [c.name for c in classes]
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            accs = pool.starmap(
+                partial(
+                    acc_single_video,
+                    classes=class_names,
+                    iou_thr=iou_thr,
+                    ignore_iof_thr=ignore_iof_thr,
+                ),
+                zip(gts, results),
+            )
+    else:
+        accs = [
+            acc_single_video(gt, result, class_names, iou_thr, ignore_iof_thr)
+            for gt, result in zip(gts, results)
+        ]
 
     names, accs, items = aggregate_accs(accs, classes, super_classes)
 
     logger.info("evaluating...")
-    with Pool(nproc) as pool:
-        summaries = pool.starmap(evaluate_single_class, zip(names, accs))
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            summaries = pool.starmap(evaluate_single_class, zip(names, accs))
+    else:
+        summaries = [
+            evaluate_single_class(name, acc) for name, acc in zip(names, accs)
+        ]
 
     logger.info("rendering...")
     eval_results = render_results(
