@@ -23,7 +23,7 @@ from matplotlib.path import Path
 from PIL import Image
 
 from ..common.logger import logger
-from ..common.typing import NDArrayF32, NDArrayU8
+from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
 from ..label.utils import check_crowd, get_matrix_from_intrinsics
@@ -155,7 +155,7 @@ class LabelViewer:
         # animation
         self._run_animation: bool = False
         self._timer: Timer = Timer(0.4, self.tick)
-        self._label_colors: Dict[str, NDArrayF32] = dict()
+        self._label_colors: Dict[str, NDArrayF64] = dict()
 
         # load label file
         print("Label file:", args.labels)
@@ -440,7 +440,7 @@ class LabelViewer:
         self,
         vertices: List[Tuple[float, float]],
         types: str,
-        color: NDArrayF32,
+        color: NDArrayF64,
         alpha: float,
     ) -> None:
         """Draw the polygon vertices / control points."""
@@ -516,7 +516,7 @@ class LabelViewer:
         types: str,
         closed: bool = False,
         alpha: float = 1.0,
-        color: Optional[NDArrayF32] = None,
+        color: Optional[NDArrayF64] = None,
     ) -> mpatches.PathPatch:
         """Convert 2D polygon vertices into patch."""
         moves = {"L": Path.LINETO, "C": Path.CURVE4}
@@ -551,7 +551,7 @@ class LabelViewer:
             and (o.category not in ["drivable area", "lane"])
         ]
 
-    def get_label_color(self, label_id: str) -> NDArrayF32:
+    def get_label_color(self, label_id: str) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()

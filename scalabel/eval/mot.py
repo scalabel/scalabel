@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
-from ..common.typing import NDArrayF32, NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -46,7 +46,7 @@ METRIC_MAPS = {
 
 def parse_objects(
     objects: List[Label], classes: List[str]
-) -> Tuple[NDArrayF32, NDArrayI32, NDArrayI32, NDArrayF32]:
+) -> Tuple[NDArrayF64, NDArrayI32, NDArrayI32, NDArrayF64]:
     """Parse objects under Scalabel formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
     for obj in objects:
@@ -71,7 +71,7 @@ def parse_objects(
     return (bboxes_arr, labels_arr, ids_arr, ignore_bboxes_arr)
 
 
-def intersection_over_area(preds: NDArrayF32, gts: NDArrayF32) -> NDArrayF32:
+def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
     """Returns the intersection over the area of the predicted box."""
     out = np.zeros((len(preds), len(gts)), dtype=np.float32)
     for i, p in enumerate(preds):
