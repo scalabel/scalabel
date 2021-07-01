@@ -1,5 +1,5 @@
 import { uid } from "../common/uid"
-import { BotConfig } from "../types/config"
+import { ServerConfig } from "../types/config"
 import { BotData, RegisterMessageType } from "../types/message"
 import { Bot } from "./bot"
 import Logger from "./logger"
@@ -12,15 +12,11 @@ import { RedisPubSub } from "./redis_pub_sub"
  */
 export class BotManager {
   /** env variables */
-  protected config: BotConfig
+  protected config: ServerConfig
   /** the redis message broker */
   protected subscriber: RedisPubSub
   /** the redis client for storage */
   protected redisClient: RedisClient
-  /** the model request message broker */
-  protected modelRequestPublisher: RedisPubSub | undefined
-  /** the model response message broker */
-  protected modelResponseSubscriber: RedisPubSub | undefined
   /** the time in between polls that check session activity */
   protected pollTime: number
 
@@ -30,23 +26,17 @@ export class BotManager {
    * @param config
    * @param subscriber
    * @param redisClient
-   * @param modelRequestPublisher
-   * @param modelResponseSubscriber
    * @param pollTime
    */
   constructor(
-    config: BotConfig,
+    config: ServerConfig,
     subscriber: RedisPubSub,
     redisClient: RedisClient,
-    modelRequestPublisher?: RedisPubSub,
-    modelResponseSubscriber?: RedisPubSub,
     pollTime?: number
   ) {
     this.config = config
     this.subscriber = subscriber
     this.redisClient = redisClient
-    this.modelRequestPublisher = modelRequestPublisher
-    this.modelResponseSubscriber = modelResponseSubscriber
     if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
@@ -174,10 +164,9 @@ export class BotManager {
     )
     const bot = new Bot(
       botData,
-      this.config.host,
-      this.config.port,
-      this.modelRequestPublisher,
-      this.modelResponseSubscriber
+      this.config.bot.host,
+      this.config.bot.port,
+      this.config.redis
     )
 
     // Only use this disable if we are certain all the errors are handled

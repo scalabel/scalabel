@@ -1,3 +1,4 @@
+import { RedisConfig } from "../types/config"
 import { ItemExport } from "../types/export"
 import { RegisterMessageType } from "../types/message"
 import { RedisClient } from "./redis_client"
@@ -82,4 +83,15 @@ export class RedisPubSub {
       })
     })
   }
+}
+
+/**
+ * Make a publisher or subscriber for redis
+ * Subscribers can't take other actions, so separate clients for pub and sub
+ *
+ * @param config
+ */
+export function makeRedisPubSub(config: RedisConfig): RedisPubSub {
+  const client = new RedisClient(config)
+  return new RedisPubSub(client)
 }

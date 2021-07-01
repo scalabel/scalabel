@@ -22,7 +22,7 @@ import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
 import { ProjectStore } from "./project_store"
 import { RedisCache } from "./redis_cache"
 import { RedisClient } from "./redis_client"
-import { RedisPubSub } from "./redis_pub_sub"
+import { RedisPubSub, makeRedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
@@ -114,40 +114,19 @@ function startHTTPServer(
 }
 
 /**
- * Make a publisher or subscriber for redis
- * Subscribers can't take other actions, so separate clients for pub and sub
- *
- * @param config
- */
-function makeRedisPubSub(config: ServerConfig): RedisPubSub {
-  const client = new RedisClient(config.redis)
-  return new RedisPubSub(client)
-}
-
-/**
  * Starts a bot manager if config says to
  *
  * @param config
  * @param subscriber
  * @param cacheClient
- * @param modelRequestPublisher
- * @param modelResponseSubscriber
  */
 async function makeBotManager(
   config: ServerConfig,
   subscriber: RedisPubSub,
-  cacheClient: RedisClient,
-  modelRequestPublisher: RedisPubSub,
-  modelResponseSubscriber: RedisPubSub
+  cacheClient: RedisClient
 ): Promise<void> {
   if (config.bot.on) {
-    const botManager = new BotManager(
-      config.bot,
-      subscriber,
-      cacheClient,
-      modelRequestPublisher,
-      modelResponseSubscriber
-    )
+    const botManager = new BotManager(config, subscriber, cacheClient)
     await botManager.listen()
   }
 }
@@ -274,24 +253,15 @@ async function main(): Promise<void> {
    */
   const cacheClient = new RedisClient(config.redis)
   const redisStore = new RedisCache(config.redis, storage, cacheClient)
-  const publisher = makeRedisPubSub(config)
-  const subscriber = makeRedisPubSub(config)
+  const publisher = makeRedisPubSub(config.redis)
+  const subscriber = makeRedisPubSub(config.redis)
 
   // Initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 
-  const modelRequestPublisher = makeRedisPubSub(config)
-  const modelResponseSubscriber = makeRedisPubSub(config)
-
-  await makeBotManager(
-    config,
-    subscriber,
-    cacheClient,
-    modelRequestPublisher,
-    modelResponseSubscriber
-  )
+  await makeBotManager(config, subscriber, cacheClient)
   await startServers(config, projectStore, userManager, publisher)
 }
 

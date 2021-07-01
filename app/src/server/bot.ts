@@ -6,6 +6,7 @@ import { index2str } from "../common/util"
 import { PREDICT } from "../const/action"
 import { EventName } from "../const/connection"
 import { AddLabelsAction, BaseAction, PredictionAction } from "../types/action"
+import { RedisConfig } from "../types/config"
 import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
@@ -18,7 +19,7 @@ import { ReduxStore } from "../types/redux"
 import { State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
-import { RedisPubSub } from "./redis_pub_sub"
+import { RedisPubSub, makeRedisPubSub } from "./redis_pub_sub"
 
 /**
  * Manages virtual sessions for a single bot
@@ -47,9 +48,9 @@ export class Bot {
   /** interface with model data type */
   protected modelInterface: ModelInterface
   /** the redis message broker */
-  protected modelRequestPublisher: RedisPubSub | undefined
+  protected publisher: RedisPubSub
   /** the redis message broker */
-  protected modelResponseSubscriber: RedisPubSub | undefined
+  protected subscriber: RedisPubSub
   /** Number of actions received via broadcast */
   private actionCount: number
 
@@ -57,17 +58,15 @@ export class Bot {
    * Constructor
    *
    * @param botData
-   * @param modelRequestPublisher
-   * @param modelResponseSubscriber
    * @param botHost
    * @param botPort
+   * @param redisConfig
    */
   constructor(
     botData: BotData,
     botHost: string,
     botPort: number,
-    modelRequestPublisher?: RedisPubSub,
-    modelResponseSubscriber?: RedisPubSub
+    redisConfig: RedisConfig
   ) {
     this.projectName = botData.projectName
     this.taskIndex = botData.taskIndex
@@ -75,12 +74,8 @@ export class Bot {
     this.address = botData.address
     this.sessionId = uid()
 
-    if (modelRequestPublisher !== undefined) {
-      this.modelRequestPublisher = modelRequestPublisher
-    }
-    if (modelRequestPublisher !== undefined) {
-      this.modelResponseSubscriber = modelResponseSubscriber
-    }
+    this.publisher = makeRedisPubSub(redisConfig)
+    this.subscriber = makeRedisPubSub(redisConfig)
 
     this.actionCount = 0
 
@@ -113,7 +108,7 @@ export class Bot {
    * Listen for model response
    */
   public async listen(): Promise<void> {
-    await this.modelResponseSubscriber?.subscribeModelResponseEvent(
+    await this.subscriber.subscribeModelResponseEvent(
       this.modelResponseHandler.bind(this)
     )
   }
@@ -252,12 +247,11 @@ export class Bot {
 
     try {
       if (sendData.length > 0) {
-        if (this.modelRequestPublisher !== undefined)
-          this.modelRequestPublisher.publishModelRequestEvent([
-            sendData,
-            itemIndices,
-            actionPacketId
-          ])
+        this.publisher.publishModelRequestEvent([
+          sendData,
+          itemIndices,
+          actionPacketId
+        ])
       }
     } catch (e) {
       Logger.info("Failed!")
