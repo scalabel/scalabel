@@ -3,7 +3,7 @@ import socketio from "socket.io"
 
 import { index2str } from "../common/util"
 import * as actionConsts from "../const/action"
-import { EventName } from "../const/connection"
+import { EventName, RedisChannel } from "../const/connection"
 import { ServerConfig } from "../types/config"
 import { RegisterMessageType, SyncActionMessageType } from "../types/message"
 import { StateMetadata } from "../types/project"
@@ -117,7 +117,7 @@ export class Hub {
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
     // Notify other processes of registration
-    this.publisher.publishRegisterEvent(data)
+    this.publisher.publishEvent(RedisChannel.REGISTER_EVENT, data)
   }
 
   /**

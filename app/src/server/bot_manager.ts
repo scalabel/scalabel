@@ -1,4 +1,5 @@
 import { uid } from "../common/uid"
+import { RedisChannel } from "../const/connection"
 import { ServerConfig } from "../types/config"
 import { BotData, RegisterMessageType } from "../types/message"
 import { Bot } from "./bot"
@@ -49,8 +50,11 @@ export class BotManager {
    */
   public async listen(): Promise<BotData[]> {
     // Listen for new sessions
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
+    await this.subscriber.subscribeEvent(
+      RedisChannel.REGISTER_EVENT,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this.handleRegister.bind(this)
+    )
     return await this.restoreBots()
   }
 

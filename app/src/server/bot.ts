@@ -4,7 +4,7 @@ import { configureStore } from "../common/configure_store"
 import { uid } from "../common/uid"
 import { index2str } from "../common/util"
 import { PREDICT } from "../const/action"
-import { EventName } from "../const/connection"
+import { EventName, RedisChannel } from "../const/connection"
 import { AddLabelsAction, BaseAction, PredictionAction } from "../types/action"
 import { RedisConfig } from "../types/config"
 import { ItemExport } from "../types/export"
@@ -13,7 +13,9 @@ import {
   BotData,
   ModelRequestType,
   RegisterMessageType,
-  SyncActionMessageType
+  SyncActionMessageType,
+  ModelRequestMessageType,
+  ModelRegisterMessageType
 } from "../types/message"
 import { ReduxStore } from "../types/redux"
 import { State } from "../types/state"
@@ -108,7 +110,11 @@ export class Bot {
    * Listen for model response
    */
   public async listen(): Promise<void> {
-    await this.subscriber.subscribeModelResponseEvent(
+    const projectName = this.projectName
+    const taskId = index2str(this.taskIndex)
+    const channel = `${RedisChannel.MODEL_RESPONSE}_${projectName}_${taskId}`
+    await this.subscriber.subscribeEvent(
+      channel,
       this.modelResponseHandler.bind(this)
     )
   }
@@ -138,6 +144,16 @@ export class Bot {
    */
   public registerAckHandler(syncState: State): void {
     this.store = configureStore(syncState)
+
+    const modelRegisterMessage: ModelRegisterMessageType = {
+      projectName: this.projectName,
+      taskId: index2str(this.taskIndex),
+      items: this.store.getState().present.task.items
+    }
+    this.publisher.publishEvent(
+      RedisChannel.MODEL_REGISTER,
+      modelRegisterMessage
+    )
   }
 
   /**
@@ -247,11 +263,17 @@ export class Bot {
 
     try {
       if (sendData.length > 0) {
-        this.publisher.publishModelRequestEvent([
-          sendData,
-          itemIndices,
-          actionPacketId
-        ])
+        const modelRequestMessage: ModelRequestMessageType = {
+          projectName: this.projectName,
+          taskId: index2str(this.taskIndex),
+          items: sendData,
+          itemIndices: itemIndices,
+          actionPacketId: actionPacketId
+        }
+        this.publisher.publishEvent(
+          RedisChannel.MODEL_REQUEST,
+          modelRequestMessage
+        )
       }
     } catch (e) {
       Logger.info("Failed!")
@@ -274,7 +296,10 @@ export class Bot {
 
         const state = this.store.getState().present
         if (action.type === PREDICT) {
-          const request = this.actionToRequest(state, action as AddLabelsAction)
+          const request = this.actionToRequest(
+            state,
+            action as PredictionAction
+          )
           if (request !== null) {
             modelRequests.push(request)
           }
