@@ -282,7 +282,8 @@ def parse_frame(
             if not os.path.exists(os.path.dirname(img_filepath)):
                 os.mkdir(os.path.dirname(img_filepath))
             im_bytes = utils.get(frame.images, camera_id).image
-            open(img_filepath, "wb").write(im_bytes)
+            with open(img_filepath, "wb") as fp:
+                fp.write(im_bytes)
 
         if use_lidar_labels:
             labels = parse_lidar_labels(

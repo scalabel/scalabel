@@ -58,7 +58,9 @@ def launch() -> None:
         logger.info("Launching python server")
         logger.info(" ".join(py_command))
 
-        subprocess.Popen(py_command, env=py_env)
+        subprocess.Popen(  # pylint: disable=consider-using-with
+            py_command, env=py_env
+        )
 
     # Try to use all the available memory for this single instance launcher
     memory = psutil.virtual_memory()
