@@ -24,7 +24,7 @@ def load_config(filepath: str) -> DictStrAny:
         config_dict = toml.load(filepath)
     elif ext == ".json":
         with open(filepath, "r") as fp:
-            config_dict = json.load(fp)  # type: ignore
+            config_dict = json.load(fp)
     else:
         raise NotImplementedError(f"Config extention {ext} not supported")
     assert isinstance(config_dict, dict)
