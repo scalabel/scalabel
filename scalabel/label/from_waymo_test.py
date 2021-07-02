@@ -6,6 +6,7 @@ from typing import List
 
 import pytest
 
+from ..common.parallel import NPROC
 from ..unittest.util import get_test_file
 from .from_waymo import run
 from .io import load
@@ -84,7 +85,7 @@ def test_run() -> None:
         output=output_dir,
         save_images=True,
         use_lidar_labels=False,
-        nproc=4,
+        nproc=NPROC,
     )
     run(args)
     result = load(os.path.join(output_dir, "scalabel_anns.json")).frames

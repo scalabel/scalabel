@@ -8,6 +8,7 @@ from typing import List, Tuple
 
 import numpy as np
 
+from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
 
 try:
@@ -85,7 +86,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--nproc",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for conversion",
     )
     return parser.parse_args()
@@ -332,7 +333,7 @@ def from_waymo(
     output_dir: str,
     save_images: bool = False,
     use_lidar_labels: bool = False,
-    nproc: int = 4,
+    nproc: int = NPROC,
 ) -> List[Frame]:
     """Function converting Waymo data to Scalabel format."""
     if not os.path.exists(output_dir):

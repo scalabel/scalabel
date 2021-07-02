@@ -1,7 +1,8 @@
 """Utilities for cpu parallelization."""
 from __future__ import annotations
 
-from multiprocessing import Process, Queue, cpu_count
+import os
+from multiprocessing import Process, Queue
 
 # Disabling unused import becase we need Tuple in typing
 from typing import (  # pylint: disable=unused-import
@@ -15,6 +16,9 @@ from typing import (  # pylint: disable=unused-import
 
 Inputs = TypeVar("Inputs")
 Return = TypeVar("Return")
+
+cpu_num = os.cpu_count()
+NPROC: int = max(4, cpu_num if cpu_num else 1)
 
 
 def run(
@@ -33,7 +37,7 @@ def run(
 def pmap(
     func: Callable[[Inputs], Return],
     inputs: Iterable[Inputs],
-    nprocs: int = cpu_count(),
+    nprocs: int = NPROC,
 ) -> List[Return]:
     """Parrell mapping func to arguments.
 

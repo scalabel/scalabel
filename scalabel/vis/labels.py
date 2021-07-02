@@ -23,6 +23,7 @@ from matplotlib.path import Path
 from PIL import Image
 
 from ..common.logger import logger
+from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
@@ -759,7 +760,7 @@ Export images:
     parser.add_argument(
         "--nproc",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for json loading",
     )
 

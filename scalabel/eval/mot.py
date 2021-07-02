@@ -1,7 +1,6 @@
 """Multi-object Tracking evaluation code."""
 import argparse
 import json
-import os
 import time
 from functools import partial
 from multiprocessing import Pool
@@ -12,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
+from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
@@ -269,7 +269,7 @@ def evaluate_track(
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
-    nproc: int = 4,
+    nproc: int = NPROC,
 ) -> EvalResults:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
@@ -350,8 +350,7 @@ def parse_arguments() -> argparse.Namespace:
         "see scalabel/label/configs.toml",
     )
     parser.add_argument(
-        "--out-dir",
-        "-o",
+        "--out-file",
         default="none",
         help="Output path for mot evaluation results.",
     )
@@ -371,7 +370,7 @@ def parse_arguments() -> argparse.Namespace:
         "--nproc",
         "-p",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for mot evaluation",
     )
     return parser.parse_args()
@@ -393,7 +392,6 @@ if __name__ == "__main__":
         args.ignore_iof_thr,
         args.nproc,
     )
-    if args.out_dir != "none":
-        output_filename = os.path.join(args.out_dir, "scores.json")
-        with open(output_filename, "w") as fp:
+    if args.out_dir:
+        with open(args.out_file, "w") as fp:
             json.dump(scores, fp)
