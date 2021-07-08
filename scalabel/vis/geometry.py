@@ -215,13 +215,13 @@ class Label3d:
             "dashed": [],
             "solid": [],
         }
-        for edge in edges:
+        for edge, vertices in edges.items():
             if dashed_edges[edge]:
                 edges_with_visibility["dashed"].append(
-                    [v.v2d for v in edges[edge]]
+                    [v.v2d for v in vertices]
                 )
             else:
                 edges_with_visibility["solid"].append(
-                    [v.v2d for v in edges[edge]]
+                    [v.v2d for v in vertices]
                 )
         return edges_with_visibility
