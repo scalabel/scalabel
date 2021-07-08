@@ -46,9 +46,10 @@ def load(
     if not osp.exists(inputs):
         raise FileNotFoundError(f"{inputs} does not exist.")
 
-    def process_file(fp: str) -> Optional[DictStrAny]:
+    def process_file(filepath: str) -> Optional[DictStrAny]:
         raw_cfg = None
-        content = json.load(open(fp, "r"))
+        with open(filepath, "r") as fp:
+            content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
             raw_cfg = content["config"]
