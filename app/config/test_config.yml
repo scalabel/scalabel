@@ -1,11 +1,11 @@
 ---
 http:
-    port: 8687
+  port: 8687
 storage:
-    data: "./test_data"
-    database: "local"
+  data: "./test_data"
+  database: "local"
 mode:
-    sync: false
-    autosave: false
+  sync: false
+  autosave: false
 redis:
-    port: 6378
+  port: 6379
