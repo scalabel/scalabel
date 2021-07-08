@@ -106,8 +106,8 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
 
     # Fetch image
     if frame.url is not None and len(frame.url) > 0:
-        with urllib.request.urlopen(frame.url, timeout=300) as request:
-            image_data = request.read()
+        with urllib.request.urlopen(frame.url, timeout=300) as req:
+            image_data = req.read()
         im = np.asarray(Image.open(io.BytesIO(image_data)), dtype=np.uint8)
     else:
         image_path = os.path.join(image_dir, frame.name)
