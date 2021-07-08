@@ -18,7 +18,7 @@ Inputs = TypeVar("Inputs")
 Return = TypeVar("Return")
 
 cpu_num = os.cpu_count()
-NPROC: int = max(4, cpu_num if cpu_num else 1)
+NPROC: int = min(4, cpu_num if cpu_num else 1)
 
 
 def run(
