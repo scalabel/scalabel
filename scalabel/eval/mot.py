@@ -66,7 +66,7 @@ def parse_objects(
             raise KeyError(f"Unknown category: {category}")
     bboxes_arr = np.array(bboxes, dtype=np.float32)
     labels_arr = np.array(labels, dtype=np.int32)
-    ids_arr = np.asarray(ids, dtype=np.int32)
+    ids_arr = np.array(ids, dtype=np.int32)
     ignore_bboxes_arr = np.array(ignore_bboxes, dtype=np.float32)
     return (bboxes_arr, labels_arr, ids_arr, ignore_bboxes_arr)
 
