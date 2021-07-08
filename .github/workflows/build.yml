@@ -103,9 +103,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+          --port 6378
         ports:
           # Maps port 6379 on service container to the host
-          - 6379:6379
+          - 6378:6378
 
     steps:
       - uses: actions/checkout@v2
