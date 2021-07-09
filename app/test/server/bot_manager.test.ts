@@ -24,7 +24,7 @@ afterAll(async () => {
   await subClient.close()
 })
 
-describe("Test bot user manager", () => {
+describe.skip("Test bot user manager", () => {
   test("Test registration", async () => {
     const botManager = new BotManager(config.bot, subscriber, client)
 
@@ -81,7 +81,7 @@ describe("Test bot user manager", () => {
     expect(oldBots.length).toBe(goodRegisterMessages.length)
   })
 
-  test("Test deregistration after no activity", async () => {
+  test.skip("Test deregistration after no activity", async () => {
     const msTimeout = 300
     const botManager = new BotManager(config.bot, subscriber, client, msTimeout)
     const registerData = makeRegisterData("project2", 0, "user2", false)

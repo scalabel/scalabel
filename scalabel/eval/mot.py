@@ -1,7 +1,6 @@
 """Multi-object Tracking evaluation code."""
 import argparse
 import json
-import os
 import time
 from functools import partial
 from multiprocessing import Pool
@@ -12,6 +11,8 @@ import numpy as np
 import pandas as pd
 
 from ..common.logger import logger
+from ..common.parallel import NPROC
+from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -45,8 +46,8 @@ METRIC_MAPS = {
 
 def parse_objects(
     objects: List[Label], classes: List[str]
-) -> List[np.ndarray]:
-    """Parse objects under Scalable formats."""
+) -> Tuple[NDArrayF64, NDArrayI32, NDArrayI32, NDArrayF64]:
+    """Parse objects under Scalabel formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
     for obj in objects:
         box_2d = obj.box2d
@@ -63,12 +64,16 @@ def parse_objects(
                 ids.append(obj.id)
         else:
             raise KeyError(f"Unknown category: {category}")
-    return list(map(np.array, [bboxes, labels, ids, ignore_bboxes]))
+    bboxes_arr = np.array(bboxes, dtype=np.float32)
+    labels_arr = np.array(labels, dtype=np.int32)
+    ids_arr = np.array(ids, dtype=np.int32)
+    ignore_bboxes_arr = np.array(ignore_bboxes, dtype=np.float32)
+    return (bboxes_arr, labels_arr, ids_arr, ignore_bboxes_arr)
 
 
-def intersection_over_area(preds: np.ndarray, gts: np.ndarray) -> np.ndarray:
+def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
     """Returns the intersection over the area of the predicted box."""
-    out = np.zeros((len(preds), len(gts)))
+    out = np.zeros((len(preds), len(gts)), dtype=np.float32)
     for i, p in enumerate(preds):
         for j, g in enumerate(gts):
             w = min(p[0] + p[2], g[0] + g[2]) - max(p[0], g[0])
@@ -118,16 +123,16 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps = np.ones(pred_bboxes_c.shape[0]).astype(np.bool8)
+                fps = np.ones(pred_bboxes_c.shape[0]).astype(bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
                         fps[n] = False
                 # 2. ignore by iof
                 iofs = intersection_over_area(pred_bboxes_c, gt_ignores)
-                ignores = (iofs > ignore_iof_thr).any(axis=1)
+                ignores: bool = np.greater(iofs, ignore_iof_thr).any(axis=1)
                 # 3. filter preds
-                valid_inds = ~(fps & ignores)
+                valid_inds = np.logical_not(np.logical_and(fps, ignores))
                 pred_ids_c = pred_ids_c[valid_inds]
                 distances = distances[:, valid_inds]
             if distances.shape != (0, 0):
@@ -264,7 +269,7 @@ def evaluate_track(
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
-    nproc: int = 4,
+    nproc: int = NPROC,
 ) -> EvalResults:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
@@ -289,22 +294,34 @@ def evaluate_track(
     super_classes = get_parent_categories(config.categories)
 
     logger.info("accumulating...")
-    with Pool(nproc) as pool:
-        accs = pool.starmap(
-            partial(
-                acc_single_video,
-                classes=[c.name for c in classes],
-                iou_thr=iou_thr,
-                ignore_iof_thr=ignore_iof_thr,
-            ),
-            zip(gts, results),
-        )
+    class_names = [c.name for c in classes]
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            accs = pool.starmap(
+                partial(
+                    acc_single_video,
+                    classes=class_names,
+                    iou_thr=iou_thr,
+                    ignore_iof_thr=ignore_iof_thr,
+                ),
+                zip(gts, results),
+            )
+    else:
+        accs = [
+            acc_single_video(gt, result, class_names, iou_thr, ignore_iof_thr)
+            for gt, result in zip(gts, results)
+        ]
 
     names, accs, items = aggregate_accs(accs, classes, super_classes)
 
     logger.info("evaluating...")
-    with Pool(nproc) as pool:
-        summaries = pool.starmap(evaluate_single_class, zip(names, accs))
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            summaries = pool.starmap(evaluate_single_class, zip(names, accs))
+    else:
+        summaries = [
+            evaluate_single_class(name, acc) for name, acc in zip(names, accs)
+        ]
 
     logger.info("rendering...")
     eval_results = render_results(
@@ -333,8 +350,7 @@ def parse_arguments() -> argparse.Namespace:
         "see scalabel/label/configs.toml",
     )
     parser.add_argument(
-        "--out-dir",
-        "-o",
+        "--out-file",
         default="none",
         help="Output path for mot evaluation results.",
     )
@@ -354,7 +370,7 @@ def parse_arguments() -> argparse.Namespace:
         "--nproc",
         "-p",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for mot evaluation",
     )
     return parser.parse_args()
@@ -376,7 +392,6 @@ if __name__ == "__main__":
         args.ignore_iof_thr,
         args.nproc,
     )
-    if args.out_dir != "none":
-        output_filename = os.path.join(args.out_dir, "scores.json")
-        with open(output_filename, "w") as fp:
+    if args.out_dir:
+        with open(args.out_file, "w") as fp:
             json.dump(scores, fp)

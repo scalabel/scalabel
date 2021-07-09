@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --ignore-installed -r scripts/requirements.txt
+          python3 -m pip install --ignore-installed -r scripts/optional.txt
       - name: Build mypy cache
         continue-on-error: true
         run: python3 -m mypy scalabel
@@ -32,7 +33,7 @@ jobs:
         run: |
           python3 -m pylint scalabel
           python3 -m pydocstyle --convention=google scalabel
-          python3 -m mypy --strict scalabel
+          python3 -m mypy --strict --allow-untyped-calls --show-error-codes scalabel
           python3 -m black --check scalabel
           python3 -m isort -c scalabel/**/*.py
 
@@ -53,6 +54,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
+          pip install --ignore-installed -r scripts/optional.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
@@ -75,6 +77,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
+          pip install --ignore-installed -r scripts/optional.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
@@ -88,7 +91,21 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 13.x, 14.x]
-        redis-version: [6.x, 5.x]
+        redis-version: [6, 5]
+
+    services:
+      redis:
+        # Docker Hub image
+        image: redis:${{ matrix.redis-version }}
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps port 6379 on service container to the host
+          - 6378:6379
 
     steps:
       - uses: actions/checkout@v2
@@ -96,18 +113,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Use Redis ${{ matrix.redis-version }}
-        uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: ${{ matrix.redis-version }}
       - name: Install node packages
         run: |
           # add library dependencies for canvas package in case we need to compile from source
           sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
           npm ci
       - name: Lint
-        run: |
-          npx eslint -c .eslintrc.json --ext .ts,.tsx app/src app/test
+        run: npx eslint -c .eslintrc.json --ext .ts,.tsx app/src app/test
       - name: Test
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

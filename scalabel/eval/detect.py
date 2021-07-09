@@ -6,7 +6,6 @@ results are from the COCO toolkit.
 import argparse
 import datetime
 import json
-import os
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -14,7 +13,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 from tabulate import tabulate
 
-from ..common.typing import DictStrAny
+from ..common.parallel import NPROC
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
@@ -48,7 +47,6 @@ def evaluate_det(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
     config: Config,
-    out_dir: str = "none",
 ) -> Dict[str, float]:
     """Load the ground truth and prediction results.
 
@@ -56,7 +54,6 @@ def evaluate_det(
         ann_frames: the ground truth annotations in Scalabel format
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
-        out_dir: output_directory
 
     Returns:
         dict: detection metric scores
@@ -87,14 +84,13 @@ def evaluate_det(
     coco_eval = COCOeval(coco_gt, coco_dt, ann_type)
     coco_eval.params.imgIds = img_ids
 
-    return evaluate_workflow(coco_eval, cat_ids, cat_names, out_dir)
+    return evaluate_workflow(coco_eval, cat_ids, cat_names)
 
 
 def evaluate_workflow(
     coco_eval: COCOeval,
     cat_ids: List[int],
     cat_names: List[str],
-    out_dir: str = "none",
 ) -> Dict[str, float]:
     """Execute evaluation."""
     n_tit = 12  # number of evaluation titles
@@ -149,10 +145,12 @@ def evaluate_workflow(
         coco_eval.accumulate()
         coco_eval.summarize()
         stats_all[i, :] = coco_eval.stats
-        eval_param["precision"][:, :, i, :, :] = coco_eval.eval[
+        eval_param["precision"][:, :, i, :, :] = coco_eval.eval[  # type: ignore # pylint: disable=line-too-long
             "precision"
-        ].reshape((n_thr, n_rec, n_area, n_mdet))
-        eval_param["recall"][:, i, :, :] = coco_eval.eval["recall"].reshape(
+        ].reshape(
+            (n_thr, n_rec, n_area, n_mdet)
+        )
+        eval_param["recall"][:, i, :, :] = coco_eval.eval["recall"].reshape(  # type: ignore # pylint: disable=line-too-long
             (n_thr, n_area, n_mdet)
         )
 
@@ -183,32 +181,14 @@ def evaluate_workflow(
         "AR_medium",
         "AR_large",
     ]
-    scores: Dict[str, float] = {}
+    scores_dict: Dict[str, float] = {}
 
     for title, stat in zip(score_titles, stats):
-        scores[title] = stat.item()
+        scores_dict[title] = stat.item()
+    for i, cat_name in enumerate(cat_names):
+        scores_dict["AP_{}".format(cat_name)] = stats_all[i, 0]
 
-    if out_dir != "none":
-        write_eval(out_dir, scores, eval_param)
-    return scores
-
-
-def write_eval(
-    out_dir: str, scores: Dict[str, float], eval_param: DictStrAny
-) -> None:
-    """Write the evaluation results to file, print in tabulate format."""
-    output_filename = os.path.join(out_dir, "scores.json")
-    with open(output_filename, "w") as fp:
-        json.dump(scores, fp)
-
-    # print the overall performance in the tabulate format
-    print(create_small_table(scores))
-
-    eval_param["precision"] = eval_param["precision"].flatten().tolist()
-    eval_param["recall"] = eval_param["recall"].flatten().tolist()
-
-    with open(os.path.join(out_dir, "eval.json"), "w") as fp:
-        json.dump(eval_param, fp)
+    return scores_dict
 
 
 def create_small_table(small_dict: Dict[str, float]) -> str:
@@ -256,16 +236,15 @@ def parse_arguments() -> argparse.Namespace:
         "see scalabel/label/configs.toml",
     )
     parser.add_argument(
-        "--out-dir",
-        "-o",
-        default="none",
-        help="Output path for detection evaluation results.",
+        "--out-file",
+        default="",
+        help="Output file for detection evaluation results.",
     )
     parser.add_argument(
         "--nproc",
         "-p",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for detection evaluation",
     )
     return parser.parse_args()
@@ -279,4 +258,7 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    evaluate_det(gts, preds, cfg, args.out_dir)
+    scores = evaluate_det(gts, preds, cfg)
+    if args.out_dir:
+        with open(args.out_file, "w") as fp:
+            json.dump(scores, fp)

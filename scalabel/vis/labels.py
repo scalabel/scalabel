@@ -23,11 +23,13 @@ from matplotlib.path import Path
 from PIL import Image
 
 from ..common.logger import logger
+from ..common.parallel import NPROC
+from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.io import load
 from ..label.typing import Box2D, Box3D, Frame, Intrinsics, Label
-from ..label.utils import check_crowd
+from ..label.utils import check_crowd, get_matrix_from_intrinsics
 from .geometry import Label3d
-from .helper import get_intrinsic_matrix, random_color
+from .helper import random_color
 
 
 @dataclass
@@ -97,15 +99,16 @@ class ViewerConfig:
 
 
 # Function to fetch images
-def fetch_image(inputs: Tuple[Frame, str]) -> np.ndarray:
+def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
     """Fetch the image given image information."""
     frame, image_dir = inputs
     logger.info("Loading image: %s", frame.name)
 
     # Fetch image
     if frame.url is not None and len(frame.url) > 0:
-        image_data = urllib.request.urlopen(frame.url, timeout=300).read()
-        im = np.asarray(Image.open(io.BytesIO(image_data)))
+        with urllib.request.urlopen(frame.url, timeout=300) as req:
+            image_data = req.read()
+        im = np.asarray(Image.open(io.BytesIO(image_data)), dtype=np.uint8)
     else:
         image_path = os.path.join(image_dir, frame.name)
         print("Local path:", image_path)
@@ -154,7 +157,7 @@ class LabelViewer:
         # animation
         self._run_animation: bool = False
         self._timer: Timer = Timer(0.4, self.tick)
-        self._label_colors: Dict[str, np.ndarray] = dict()
+        self._label_colors: Dict[str, NDArrayF64] = dict()
 
         # load label file
         print("Label file:", args.labels)
@@ -171,9 +174,7 @@ class LabelViewer:
 
         logger.info("Load images: %d", len(self.frames))
 
-        self.images: Dict[
-            str, "concurrent.futures.Future[np.ndarray]"
-        ] = dict()
+        self.images: Dict[str, "concurrent.futures.Future[NDArrayU8]"] = dict()
         # Cache the images in separate threads.
         for frame in self.frames:
             self.images[frame.name] = executor.submit(
@@ -441,7 +442,7 @@ class LabelViewer:
         self,
         vertices: List[Tuple[float, float]],
         types: str,
-        color: np.ndarray,
+        color: NDArrayF64,
         alpha: float,
     ) -> None:
         """Draw the polygon vertices / control points."""
@@ -517,7 +518,7 @@ class LabelViewer:
         types: str,
         closed: bool = False,
         alpha: float = 1.0,
-        color: Optional[np.ndarray] = None,
+        color: Optional[NDArrayF64] = None,
     ) -> mpatches.PathPatch:
         """Convert 2D polygon vertices into patch."""
         moves = {"L": Path.LINETO, "C": Path.CURVE4}
@@ -552,7 +553,7 @@ class LabelViewer:
             and (o.category not in ["drivable area", "lane"])
         ]
 
-    def get_label_color(self, label_id: str) -> np.ndarray:
+    def get_label_color(self, label_id: str) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
@@ -587,7 +588,7 @@ class LabelViewer:
         """Generate individual bounding box from 3d label."""
         label = Label3d.from_box3d(box3d)
         edges = label.get_edges_with_visibility(
-            get_intrinsic_matrix(intrinsics)
+            get_matrix_from_intrinsics(intrinsics)
         )
 
         box_color = self.get_label_color(label_id)
@@ -628,7 +629,7 @@ class LabelViewer:
         out_paths = []
 
         self.frame_index = self.start_index
-        os.makedirs(self.config.out_dir, True)
+        os.makedirs(self.config.out_dir, exist_ok=True)
         while self.frame_index < len(self.frames):
             out_name = (
                 os.path.splitext(
@@ -760,7 +761,7 @@ Export images:
     parser.add_argument(
         "--nproc",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for json loading",
     )
 

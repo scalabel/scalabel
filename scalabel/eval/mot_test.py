@@ -46,10 +46,8 @@ class TestBDD100KMotEval(unittest.TestCase):
             "mMOTA": 0.24324204637536687,
             "mMOTP": 0.5001285135514636,
         }
-        for key in result["OVERALL"]:
-            self.assertAlmostEqual(
-                result["OVERALL"][key], overall_reference[key]
-            )
+        for key, val in overall_reference.items():
+            self.assertAlmostEqual(result["OVERALL"][key], val)
 
 
 class TestRenderResults(unittest.TestCase):
