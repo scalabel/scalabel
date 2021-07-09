@@ -8,6 +8,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from tqdm import tqdm
 
+from ..common.parallel import NPROC
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
@@ -30,7 +31,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--nproc",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for conversion",
     )
     return parser.parse_args()

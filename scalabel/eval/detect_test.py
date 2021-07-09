@@ -33,5 +33,5 @@ class TestBDD100KDetectEval(unittest.TestCase):
             "AR_medium": 0.5838594871794872,
             "AR_large": 0.6604261954261954,
         }
-        for key, val in result.items():
-            self.assertAlmostEqual(val, overall_reference[key])
+        for key, val in overall_reference.items():
+            self.assertAlmostEqual(val, result[key])

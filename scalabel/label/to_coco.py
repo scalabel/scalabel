@@ -12,6 +12,7 @@ from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
 from ..common.logger import logger
+from ..common.parallel import NPROC
 from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
@@ -49,7 +50,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--nproc",
         type=int,
-        default=4,
+        default=NPROC,
         help="number of processes for conversion",
     )
     parser.add_argument(
@@ -101,7 +102,7 @@ def poly2ds_list_to_coco(
     shape: List[ImageSize],
     annotations: List[AnnType],
     poly2ds: List[List[Poly2D]],
-    nproc: int,
+    nproc: int = NPROC,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
     with Pool(nproc) as pool:
@@ -177,7 +178,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_ins_seg(
-    frames: List[Frame], config: Config, nproc: int = 4
+    frames: List[Frame], config: Config, nproc: int = NPROC
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     image_id, ann_id = 0, 0
@@ -331,7 +332,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_seg_track(
-    frames: List[Frame], config: Config, nproc: int = 4
+    frames: List[Frame], config: Config, nproc: int = NPROC
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
