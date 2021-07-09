@@ -72,6 +72,9 @@ export class Label2DHandler {
       if (this._highlightedLabel !== null) {
         this.selectHighlighted()
       } else {
+        if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
+          return false
+        }
         Session.dispatch(
           selectLabels(
             {},
@@ -263,6 +266,8 @@ export class Label2DHandler {
       case Key.ENTER:
         if (this._state.session.trackLinking) {
           this.mergeTracks()
+        } else {
+          commit2DLabels([...this._labelList.popUpdatedLabels()])
         }
         break
     }
