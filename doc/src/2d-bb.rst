@@ -21,7 +21,7 @@ left side.
 
    Changing category/attributes of a selected box
 
-Click on a bounding box to select the label, and press ``Backspace`` to delete it.
+Click on a bounding box to select the label, and press ``Backspace`` (or ``delete`` on Mac) to delete it.
 Drag the control points on the bounding box to resize it.
 
 .. figure:: ../media/doc/videos/box2d_select-delete.gif
