@@ -8,6 +8,12 @@ from typing import List, Tuple
 
 import numpy as np
 
+from scalabel.label.utils import (
+    cart2hom,
+    project_points_to_image,
+    rotation_y_to_alpha,
+)
+
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
 
@@ -90,38 +96,6 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for conversion",
     )
     return parser.parse_args()
-
-
-def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:
-    """Nx3 points in Cartesian to Homogeneous by appending ones."""
-    n = pts_3d.shape[0]
-    pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
-    return pts_3d_hom
-
-
-def project_points_to_image(
-    points: NDArrayF64, intrinsics: NDArrayF64
-) -> NDArrayF64:
-    """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
-    pts_3d_rect = cart2hom(points)
-    campad = np.identity(4)
-    campad[: intrinsics.shape[0], : intrinsics.shape[1]] = intrinsics
-    pts_2d = np.dot(pts_3d_rect, np.transpose(campad))  # nx3
-    pts_2d[:, 0] /= pts_2d[:, 2]
-    pts_2d[:, 1] /= pts_2d[:, 2]
-    return pts_2d[:, :2]  # type: ignore
-
-
-def rotation_y_to_alpha(
-    rotation_y: float, center_proj_x: float, focal_x: float, center_x: float
-) -> float:
-    """Convert rotation around y-axis to viewpoint angle (alpha)."""
-    alpha = rotation_y - math.atan2(center_proj_x - center_x, focal_x)
-    if alpha > math.pi:
-        alpha -= 2 * math.pi
-    if alpha <= -math.pi:
-        alpha += 2 * math.pi
-    return alpha
 
 
 def points_transform(points: NDArrayF64, calib: NDArrayF64) -> NDArrayF64:
