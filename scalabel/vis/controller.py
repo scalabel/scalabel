@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayF64, NDArrayU8
+from ..common.typing import NDArrayU8  # pylint: disable=unused-import
+from ..common.typing import NDArrayF64
 from ..label.io import load
 from .helper import fetch_image
 from .viewer import DisplayConfig, LabelViewer, UIConfig
