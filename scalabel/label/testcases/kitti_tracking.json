@@ -1,8 +1,8 @@
 {
   "frames": [
     {
-      "name": "tracking/training/image_02/0001/000000.png",
-      "videoName": "0001",
+      "name": "000000.png",
+      "videoName": "tracking/training/image_02/0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,
@@ -231,8 +231,8 @@
       ]
     },
     {
-      "name": "tracking/training/image_02/0001/000001.png",
-      "videoName": "0001",
+      "name": "000001.png",
+      "videoName": "tracking/training/image_02/0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,

@@ -179,11 +179,14 @@ def from_kitti_det(
                 )
                 track_id += 1
 
-        img_name = osp.join(img_dir, img_name)
-        img_name = data_type + img_name.split(data_type)[-1]
+        image_name = osp.join(img_dir, img_name)
+        image_name = data_type + image_name.split(data_type)[-1]
+
+        video_name = "/".join(image_name.split("/")[:-1])
 
         f = Frame(
             name=img_name,
+            video_name=video_name,
             frame_index=img_id,
             size=image_size,
             extrinsics=cam2global,
@@ -342,9 +345,11 @@ def from_kitti(
 
             img_name = data_type + img_name.split(data_type)[-1]
 
+            video_name = "/".join(img_name.split("/")[:-1])
+
             f = Frame(
-                name=img_name,
-                video_name=vid_name,
+                name=img_name.split("/")[-1],
+                video_name=video_name,
                 frame_index=fr,
                 size=image_size,
                 extrinsics=cam2global,
