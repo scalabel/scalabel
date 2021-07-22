@@ -4,7 +4,7 @@ import glob
 import math
 import os
 from functools import partial
-from typing import List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
@@ -217,6 +217,30 @@ def parse_camera_labels(
     return labels
 
 
+def parse_frame_attributes(
+    frame: dataset_pb2.Frame,
+    use_lidar_labels: bool = False,
+) -> Dict[str, Union[str, float]]:
+    """Parse the camera-based attributes."""
+    check_attribute = lambda x: x if x else "undefined"
+    s = frame.context.stats
+
+    attributes = {
+        "time_of_day": check_attribute(s.time_of_day),
+        "weather": check_attribute(s.weather),
+        "location": check_attribute(s.location),
+    }
+
+    ocs = s.laser_object_counts if use_lidar_labels else s.camera_object_counts
+    sensor = "laser" if use_lidar_labels else "camera"
+    for oc in ocs:
+        o_name = classes_type2name[oc.type]
+        attribute_name = f"{sensor}_{o_name}_counts"
+        attributes[attribute_name] = oc.count
+
+    return attributes
+
+
 def get_calibration(
     frame: dataset_pb2.Frame, camera_id: int
 ) -> Tuple[Extrinsics, Extrinsics, Intrinsics, ImageSize]:
@@ -244,6 +268,7 @@ def parse_frame(
 ) -> List[Frame]:
     """Parse information in single frame to Scalabel Frame per camera."""
     frame_name = frame.context.name + "_{:07d}.jpg".format(frame_id)
+    attributes = parse_frame_attributes(frame, use_lidar_labels)
     results = []
     for camera_id, camera in cameras_id2name.items():
         cam2global, cam2car, intrinsics, image_size = get_calibration(
@@ -265,6 +290,7 @@ def parse_frame(
             )
         else:
             labels = parse_camera_labels(frame, camera_id)
+
         f = Frame(
             name=frame_name,
             video_name=seq_dir,
@@ -273,6 +299,7 @@ def parse_frame(
             extrinsics=cam2global,
             intrinsics=intrinsics,
             labels=labels,
+            attributes=attributes,
         )
         results.append(f)
 
