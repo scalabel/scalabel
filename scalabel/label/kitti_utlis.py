@@ -1,26 +1,47 @@
+"""Functions for KITTI."""
 import os
+from typing import List
+
 import numpy as np
+import utm  # type: ignore
 
-import utm
+from ..common.typing import NDArrayF64
 
 
-# Same as angle2rot from kio_slim
-def angle2rot(rotation, inverse=False):
+def angle2rot(rotation: NDArrayF64, inverse: bool = False) -> NDArrayF64:
+    """Transform eular to rotation matrix.
+
+    Args:
+        rotation : rotation along X, Y, Z
+        inverse: rotate order
+
+    Returns:
+        rotation matrix
+    """
     return rotate(np.eye(3), rotation, inverse=inverse)
 
 
-def rot_axis(angle, axis):
-    # RX = np.array([ [1,             0,              0],
-    #                 [0, np.cos(gamma), -np.sin(gamma)],
-    #                 [0, np.sin(gamma),  np.cos(gamma)]])
-    #
-    # RY = np.array([ [ np.cos(beta), 0, np.sin(beta)],
-    #                 [            0, 1,            0],
-    #                 [-np.sin(beta), 0, np.cos(beta)]])
-    #
-    # RZ = np.array([ [np.cos(alpha), -np.sin(alpha), 0],
-    #                 [np.sin(alpha),  np.cos(alpha), 0],
-    #                 [            0,              0, 1]])
+def rot_axis(angle: NDArrayF64, axis: int) -> NDArrayF64:
+    """Rotation matrices around the X (gamma), Y (beta), and Z (alpha) axis.
+
+    Input:
+        angle: one of [gamma, beta, alpha]
+        axis: one of [X, Y, Z]
+    Output:
+        rotation matrix
+
+    r_x = np.array([ [1,             0,              0],
+                    [0, np.cos(gamma), -np.sin(gamma)],
+                    [0, np.sin(gamma),  np.cos(gamma)]])
+
+    r_y = np.array([ [ np.cos(beta), 0, np.sin(beta)],
+                    [            0, 1,            0],
+                    [-np.sin(beta), 0, np.cos(beta)]])
+
+    r_z = np.array([ [np.cos(alpha), -np.sin(alpha), 0],
+                    [np.sin(alpha),  np.cos(alpha), 0],
+                    [            0,              0, 1]])
+    """
     cg = np.cos(angle)
     sg = np.sin(angle)
     if axis == 0:  # X
@@ -29,109 +50,69 @@ def rot_axis(angle, axis):
         v = [4, 0, 6, 2, 8]
     else:  # Z
         v = [8, 0, 1, 3, 4]
-    RX = np.zeros(9)
-    RX[v[0]] = 1.0
-    RX[v[1]] = cg
-    RX[v[2]] = -sg
-    RX[v[3]] = sg
-    RX[v[4]] = cg
-    return RX.reshape(3, 3)
+    rot = np.zeros(9)
+    rot[v[0]] = 1.0
+    rot[v[1]] = cg
+    rot[v[2]] = -sg
+    rot[v[3]] = sg
+    rot[v[4]] = cg
+    return rot.reshape(3, 3)
 
 
-def rotate(vector, angle, inverse=False):
-    """
-    Rotation of x, y, z axis
+def rotate(
+    vector: NDArrayF64, angle: NDArrayF64, inverse: bool = False
+) -> NDArrayF64:
+    """Rotation of x, y, z axis.
+
     Forward rotate order: Z, Y, X
-    Inverse rotate order: X^T, Y^T,Z^T
+    Inverse rotate order: X^T, Y^T, Z^T
+
     Input:
         vector: vector in 3D coordinates
-        angle: rotation along X, Y, Z (raw data from GTA)
+        angle: rotation along X, Y, Z
+        inverse: rotate order
     Output:
         out: rotated vector
     """
     gamma, beta, alpha = angle[0], angle[1], angle[2]
 
     # Rotation matrices around the X (gamma), Y (beta), and Z (alpha) axis
-    RX = rot_axis(gamma, 0)
-    RY = rot_axis(beta, 1)
-    RZ = rot_axis(alpha, 2)
+    r_x = rot_axis(gamma, 0)
+    r_y = rot_axis(beta, 1)
+    r_z = rot_axis(alpha, 2)
 
-    # Composed rotation matrix with (RX, RY, RZ)
+    # Composed rotation matrix
     if inverse:
-        return np.dot(np.dot(np.dot(RX.T, RY.T), RZ.T), vector)
+        rot_mat = np.dot(np.dot(np.dot(r_x.T, r_y.T), r_z.T), vector)
     else:
-        return np.dot(np.dot(np.dot(RZ, RY), RX), vector)
+        rot_mat = np.dot(np.dot(np.dot(r_z, r_y), r_x), vector)
 
-
-class Pose:
-    """Calibration matrices in KITTI
-    3d XYZ in <label>.txt are in rect camera coord.
-    2d box xy are in image2 coord
-    Points in <lidar>.bin are in Velodyne coord.
-
-    y_image2 = P^2_rect * x_rect
-    y_image2 = P^2_rect * R0_rect * Tr_velo_to_cam * x_velo
-    x_ref = Tr_velo_to_cam * x_velo
-    x_rect = R0_rect * x_ref
-
-    P^2_rect = [f^2_u,  0,      c^2_u,  -f^2_u b^2_x;
-                0,      f^2_v,  c^2_v,  -f^2_v b^2_y;
-                0,      0,      1,      0]
-             = K * [1|t]
-
-    image2 coord:
-    X (z) ----> x-axis (u)
-    |
-    |
-    v y-axis (v)
-
-    velodyne coord (KITTI):
-    front x, left y, up z
-
-    world coord (GTA):
-    right x, front y, up z
-
-    velodyne coord (nuScenes):
-    right x, front y, up z
-
-    velodyne coord (Waymo):
-    front x, left y, up z
-
-    rect/ref camera coord (KITTI, GTA, nuScenes):
-    right x, down y, front z
-
-    camera coord (Waymo):
-    front x, left y, up z
-
-    Ref (KITTI paper): http://www.cvlibs.net/publications/Geiger2013IJRR.pdf
-    """
-
-    def __init__(self, position, rotation):
-        # relative position to the 1st frame: (X, Y, Z)
-        # relative rotation to the previous frame: (r_x, r_y, r_z)
-        self.position = position
-        if rotation.shape == (3, 3):
-            # rotation matrices already
-            self.rotation = rotation
-        else:
-            # rotation vector
-            self.rotation = angle2rot(np.array(rotation))
+    return rot_mat  # type: ignore
 
 
 # Functions from kio_slim
 class KittiPoseParser:
-    def __init__(self, fields=None):
-        self.latlon = None
-        self.roll = 0
-        self.pitch = 0
-        self.yaw = 0
-        self.position = None
-        self.rotation = None
+    """Calibration matrices in KITTI."""
+
+    def __init__(self, fields: List[str]) -> None:
+        """Init parameters and set pose with fields."""
+        self.latlon: List[float]
+        self.position: NDArrayF64
+        self.roll: float
+        self.pitch: float
+        self.yaw: float
+        self.rotation: NDArrayF64
+
         if fields is not None:
             self.set_oxt(fields)
 
-    def set_oxt(self, fields):
-        fields = [float(f) for f in fields]
+    def set_oxt(self, fields_str: List[str]) -> None:
+        """Assign the pose information from corresponding fields.
+
+        Input:
+            fields: list of oxts information
+        """
+        fields = [float(f) for f in fields_str]
         self.latlon = fields[:2]
         location = utm.from_latlon(*self.latlon)
         self.position = np.array([location[0], location[1], fields[2]])
@@ -146,63 +127,14 @@ class KittiPoseParser:
         self.rotation = rotation.dot(imu_to_camera)
 
 
-def rad2deg(rad):
-    return rad * 180.0 / np.pi
+def read_oxts(oxts_dir: str, seq_idx: int) -> List[List[str]]:
+    """Read oxts file and return each fields for KittiPoseParser.
 
-
-def deg2rad(deg):
-    return deg / 180.0 * np.pi
-
-
-def rot_y2alpha(rot_y, x, FOCAL_LENGTH):
-    """
-    Get alpha by rotation_y - theta
-    rotation_y : Rotation ry around Y-axis in camera coordinates [-pi..pi]
-    x : Object center x to the camera center (x-W/2), in pixels
-    alpha : Observation angle of object, ranging [-pi..pi]
-    """
-    alpha = rot_y - np.arctan2(x, FOCAL_LENGTH)
-    alpha = (alpha + np.pi) % (2 * np.pi) - np.pi
-    return alpha
-
-
-def alpha2rot_y(alpha, x, FOCAL_LENGTH):
-    """
-    Get rotation_y by alpha + theta
-    alpha : Observation angle of object, ranging [-pi..pi]
-    x : Object center x to the camera center (x-W/2), in pixels
-    rotation_y : Rotation ry around Y-axis in camera coordinates [-pi..pi]
-    """
-    rot_y = alpha + np.arctan2(x, FOCAL_LENGTH)
-    rot_y = (rot_y + np.pi) % (2 * np.pi) - np.pi
-    return rot_y
-
-
-def parse_seq_map(path_seq_map: str):
-    """get #sequences and #frames per sequence from test mapping
-
-    Args:
-        path_seq_map (str): path to the seq_map file
-
-    Returns:
-        sequence_name (list): name of each sequence
-        n_frames (list): number of frames in each sequence
-    """
-    n_frames = []
-    sequence_name = []
-    with open(path_seq_map, "r") as fh:
-        for lines in fh:
-            fields = lines.split(" ")
-            sequence_name.append(fields[0])
-            n_frames.append(int(fields[3]) - int(fields[2]) + 1)
-    return sequence_name, n_frames
-
-
-def read_oxts(oxts_dir, seq_idx):
-    """Read oxts file and return each fields for KittiPoseParser
-    e.g.,
-        fields = read_oxts(oxt_dir, vid_id)
-        poses = [KittiPoseParser(field) for field in fields]
+    Input:
+        oxts_dir: path of oxts file
+        seq_idx: index of the sequence
+    Output:
+        fields: list of oxts information
     """
     oxts_path = os.path.join(oxts_dir, f"{seq_idx:04d}.txt")
     with open(oxts_path, "r") as f:
@@ -210,8 +142,9 @@ def read_oxts(oxts_dir, seq_idx):
     return fields
 
 
-def read_calib(calib_dir, seq_idx, cam=2):
-    """Read calibration file and return camera matrix
+def read_calib(calib_dir: str, seq_idx: int, cam: int = 2) -> NDArrayF64:
+    """Read calibration file and return camera matrix.
+
     e.g.,
         projection = read_calib(cali_dir, vid_id)
     """
@@ -220,8 +153,9 @@ def read_calib(calib_dir, seq_idx, cam=2):
     return np.asarray(fields[cam][1:], dtype=np.float32).reshape(3, 4)
 
 
-def read_calib_det(calib_dir, img_idx, cam=2):
-    """Read calibration file and return camera matrix
+def read_calib_det(calib_dir: str, img_idx: int, cam: int = 2) -> NDArrayF64:
+    """Read calibration file and return camera matrix.
+
     e.g.,
         projection = read_calib(cali_dir, img_id)
     """
@@ -230,7 +164,9 @@ def read_calib_det(calib_dir, img_idx, cam=2):
     return np.asarray(fields[cam][1:], dtype=np.float32).reshape(3, 4)
 
 
-def list_from_file(filename, prefix="", offset=0, max_num=0):
+def list_from_file(
+    filename: str, prefix: str = "", offset: int = 0, max_num: int = 0
+) -> List[str]:
     """Load a text file and parse the content as a list of strings.
 
     Args:
@@ -249,30 +185,8 @@ def list_from_file(filename, prefix="", offset=0, max_num=0):
         for _ in range(offset):
             f.readline()
         for line in f:
-            if max_num > 0 and cnt >= max_num:
+            if cnt >= max_num > 0:
                 break
             item_list.append(prefix + line.rstrip("\n"))
             cnt += 1
     return item_list
-
-
-def cameratoimage(corners, projection, invalid_value=-1000):
-    """
-    corners: (N, 3), N points on X(right)-Y(down)-Z(front) camera plane
-    projection: (3, 4), projection matrix
-
-    points: (N, 2), N points on X-Y image plane
-    """
-    assert corners.shape[1] == 3, "Shape ({}) not fit".format(corners.shape)
-
-    points = np.hstack([corners, np.ones((corners.shape[0], 1))]).dot(
-        projection.T
-    )
-
-    # [x, y, z] -> [x/z, y/z]
-    mask = points[:, 2:3] > 0
-    points = (points[:, :2] / points[:, 2:3]) * mask + invalid_value * (
-        1 - mask
-    )
-
-    return points

@@ -1,7 +1,7 @@
 {
   "frames": [
     {
-      "name": "data/KITTI/tracking/training/image_02/0001/000000.png",
+      "name": "tracking/training/image_02/0001/000000.png",
       "videoName": "0001",
       "intrinsics": {
         "focal": [
@@ -231,7 +231,7 @@
       ]
     },
     {
-      "name": "data/KITTI/tracking/training/image_02/0001/000001.png",
+      "name": "tracking/training/image_02/0001/000001.png",
       "videoName": "0001",
       "intrinsics": {
         "focal": [
