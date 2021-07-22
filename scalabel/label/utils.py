@@ -1,4 +1,5 @@
 """Utility functions for label."""
+import math
 from typing import Dict, List
 
 import numpy as np
@@ -110,3 +111,31 @@ def check_truncated(label: Label) -> bool:
     else:
         truncated = False
     return truncated
+
+
+def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:
+    """Nx3 points in Cartesian to Homogeneous by appending ones."""
+    n = pts_3d.shape[0]
+    pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
+    return pts_3d_hom
+
+
+def project_points_to_image(
+    points: NDArrayF64, intrinsics: NDArrayF64
+) -> NDArrayF64:
+    """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
+    hom_cam_coords = points / points[:, 2:3]
+    pts_2d = np.dot(hom_cam_coords, np.transpose(intrinsics))
+    return pts_2d[:, :2]  # type: ignore
+
+
+def rotation_y_to_alpha(
+    rotation_y: float, center_proj_x: float, focal_x: float, center_x: float
+) -> float:
+    """Convert rotation around y-axis to viewpoint angle (alpha)."""
+    alpha = rotation_y - math.atan2(center_proj_x - center_x, focal_x)
+    if alpha > math.pi:
+        alpha -= 2 * math.pi
+    if alpha <= -math.pi:
+        alpha += 2 * math.pi
+    return alpha

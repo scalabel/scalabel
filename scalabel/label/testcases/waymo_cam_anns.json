@@ -26,6 +26,12 @@
           1.0045936022892092
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "10"
+      },
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -140,6 +146,12 @@
           1.7724726676144995
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "10"
+      },
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -184,6 +196,12 @@
           0.22497558306538765
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "10"
+      },
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -216,6 +234,12 @@
           2.56334335330154
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "10"
+      },
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -247,6 +271,12 @@
           -0.017401993218687073,
           -0.5679893450571987
         ]
+      },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "10"
       },
       "frameIndex": 0,
       "size": {
@@ -291,6 +321,12 @@
           -0.025159215974322358,
           1.0064178588135275
         ]
+      },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "11"
       },
       "frameIndex": 1,
       "size": {
@@ -406,6 +442,12 @@
           1.774281304679923
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "11"
+      },
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -460,6 +502,12 @@
           0.22673913667327206
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "11"
+      },
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -492,6 +540,12 @@
           2.565038916403966
         ]
       },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "11"
+      },
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -523,6 +577,12 @@
           -0.017121832900372835,
           -0.5662032154208696
         ]
+      },
+      "attributes": {
+        "timeOfDay": "Day",
+        "weather": "rain",
+        "location": "location_sf",
+        "cameraVehicleCounts": "11"
       },
       "frameIndex": 1,
       "size": {
