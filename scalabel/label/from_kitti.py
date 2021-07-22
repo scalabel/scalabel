@@ -3,9 +3,8 @@ import argparse
 import os
 import os.path as osp
 from typing import List
+from PIL import Image
 
-import pdb
-import cv2
 from scipy.spatial.transform import Rotation as R
 
 from ..common.parallel import NPROC
@@ -15,7 +14,6 @@ from .kitti_utlis import (
     read_oxts,
     KittiPoseParser,
     list_from_file,
-    cameratoimage,
 )
 
 from .io import save
@@ -173,10 +171,10 @@ def from_kitti_det(
             if osp.splitext(img_name)[0] not in det_val_sets:
                 continue
         print(f"DET: {img_name.split('.')[0]}")
-        img = cv2.imread(osp.join(img_dir, img_name))
 
-        height, width, _ = img.shape
-        image_size = ImageSize(height=height, width=width)
+        with Image.open(osp.join(img_dir, img_name)) as img:
+            width, height = img.size
+            image_size = ImageSize(height=height, width=width)
 
         projection = read_calib_det(cali_dir, int(img_name.split(".")[0]))
 
@@ -314,10 +312,10 @@ def from_kitti(
         for fr, img_name in enumerate(sorted(img_names)):
             if mode == "mini" and fr == 2:
                 break
-            img = cv2.imread(img_name)
 
-            height, width, _ = img.shape
-            image_size = ImageSize(height=height, width=width)
+            with Image.open(img_name) as img:
+                width, height = img.size
+                image_size = ImageSize(height=height, width=width)
 
             fields = read_oxts(oxt_dir, int(vid_name))
             poses = [KittiPoseParser(fields[i]) for i in range(len(fields))]

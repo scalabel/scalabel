@@ -94,3 +94,23 @@ Available arguments:
                             If the conversion script should use the LiDAR labels as GT for conversion (3D + 2D projected). Default is Camera labels (2D only).
     --nproc NPROC
                             Number of processes for conversion. Default is 4.
+
+from_kitti
+-----------------
+
+``from_kitti`` converts KITTI annotations into Scalabel format.
+
+Available arguments:
+
+.. code-block:: bash
+
+    --input_dir INPUT, -i INPUT
+                            path to KITTI data (images + annotations).
+    --output_dir OUTPUT, -o OUTPUT
+                            Output path for Scalabel format annotations.
+    --mode, MODE
+                            one of [mini, subtrain, subval, train, test]
+    --data_type DATA_TYPE
+                            one of [tracking, detection]
+    --nproc NPROC
+                            Number of processes for conversion. Default is 4.

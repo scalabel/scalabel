@@ -1,4 +1,3 @@
-import numba
 import os
 import numpy as np
 
@@ -10,7 +9,6 @@ def angle2rot(rotation, inverse=False):
     return rotate(np.eye(3), rotation, inverse=inverse)
 
 
-@numba.jit(nopython=True, nogil=True)
 def rot_axis(angle, axis):
     # RX = np.array([ [1,             0,              0],
     #                 [0, np.cos(gamma), -np.sin(gamma)],
@@ -31,7 +29,7 @@ def rot_axis(angle, axis):
         v = [4, 0, 6, 2, 8]
     else:  # Z
         v = [8, 0, 1, 3, 4]
-    RX = np.zeros(9, dtype=numba.float64)
+    RX = np.zeros(9)
     RX[v[0]] = 1.0
     RX[v[1]] = cg
     RX[v[2]] = -sg
@@ -40,7 +38,6 @@ def rot_axis(angle, axis):
     return RX.reshape(3, 3)
 
 
-@numba.jit(nopython=True, nogil=True)
 def rotate(vector, angle, inverse=False):
     """
     Rotation of x, y, z axis
