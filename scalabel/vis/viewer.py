@@ -6,7 +6,7 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 import io
 from dataclasses import dataclass
 from functools import partial
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -15,7 +15,12 @@ from matplotlib.font_manager import FontProperties
 
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.typing import Frame, Intrinsics, Label
-from ..label.utils import check_crowd
+from ..label.utils import (
+    check_crowd,
+    check_ignored,
+    check_occluded,
+    check_truncated,
+)
 from .helper import (
     GenBoxFunc,
     gen_2d_rect,
@@ -79,9 +84,13 @@ class DisplayConfig:
 
 
 class LabelViewer:
-    """Visualize 2D and 3D bounding boxes."""
+    """Visualize 2D and 3D bounding boxes and polygons."""
 
-    def __init__(self, ui_cfg: UIConfig, display_cfg: DisplayConfig) -> None:
+    def __init__(
+        self,
+        ui_cfg: UIConfig = UIConfig(),
+        display_cfg: DisplayConfig = DisplayConfig(),
+    ) -> None:
         """Initializer."""
         self.ui_cfg = ui_cfg
         self.display_cfg = display_cfg
@@ -97,22 +106,28 @@ class LabelViewer:
         self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
         self.ax.axis("off")
 
+    def show(self) -> None:  # pylint: disable=no-self-use
+        """Display image."""
+        plt.show()
+
     def write(self, out_path: str) -> None:
         """Write image."""
         self.fig.savefig(out_path, self.ui_cfg.dpi)
 
-    def draw_image(self, title: str, img: NDArrayU8) -> None:
+    def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
-        self.fig.canvas.manager.set_window_title(title)
+        if title is not None:
+            self.fig.canvas.manager.set_window_title(title)
         self.ax.imshow(img, interpolation="nearest", aspect="auto")
 
-    def _get_label_color(self, label_id: str) -> NDArrayF64:
+    def _get_label_color(self, label: Label) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
+        label_id = label.id
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
         return self._label_colors[label_id]
 
-    def show_frame_attributes(self, frame: Frame) -> None:
+    def draw_attributes(self, frame: Frame) -> None:
         """Visualize attribute infomation of a frame."""
         if frame.attributes is None or len(frame.attributes) == 0:
             return
@@ -143,13 +158,16 @@ class LabelViewer:
             if label.category is not None
             else self.ui_cfg.default_category
         )
-        attributes = label.attributes if label.attributes is not None else {}
-        if "occluded" in attributes and attributes["occluded"]:
-            text += ",o"
-        if "truncated" in attributes and attributes["truncated"]:
+        if check_truncated(label):
             text += ",t"
+        if check_occluded(label):
+            text += ",o"
         if check_crowd(label):
             text += ",c"
+        if check_ignored(label):
+            text += ",i"
+        if label.score is not None:
+            text += "{:.2f}".format(label.score)
         self.ax.text(
             x_coord,
             y_coord,
@@ -163,13 +181,13 @@ class LabelViewer:
             },
         )
 
-    def _draw_box(self, labels: List[Label], gen_box_func: GenBoxFunc) -> None:
+    def _draw_boxes(
+        self, labels: List[Label], gen_box_func: GenBoxFunc
+    ) -> None:
         """Draw Box on the axes."""
         for label in labels:
-            occluded = False
-            if label.attributes is not None and "occluded" in label.attributes:
-                occluded = bool(label.attributes["occluded"])
-            color = self._get_label_color(label.id).tolist()
+            color = self._get_label_color(label).tolist()
+            occluded = check_occluded(label)
             alpha = 0.5 if occluded else 0.8
             for result in gen_box_func(label, color, occluded, alpha):
                 self.ax.add_patch(result)
@@ -181,26 +199,22 @@ class LabelViewer:
                     (label.box2d.y1 - 4),  # type: ignore
                 )
 
-    def draw_box2d(self, labels: List[Label]) -> None:
+    def draw_box2ds(self, labels: List[Label]) -> None:
         """Draw Box2d on the axes."""
         labels = [label for label in labels if label.box2d is not None]
-        self._draw_box(labels, gen_2d_rect)
+        self._draw_boxes(labels, gen_2d_rect)
 
-    def draw_box3d(self, labels: List[Label], intrinsics: Intrinsics) -> None:
+    def draw_box3ds(self, labels: List[Label], intrinsics: Intrinsics) -> None:
         """Draw Box3d on the axes."""
         labels = [label for label in labels if label.box3d is not None]
-        self._draw_box(labels, partial(gen_3d_cube, intrinsics=intrinsics))
+        self._draw_boxes(labels, partial(gen_3d_cube, intrinsics=intrinsics))
 
-    def draw_poly2d(self, labels: List[Label]) -> None:
+    def draw_poly2ds(self, labels: List[Label], alpha: float = 0.5) -> None:
         """Draw poly2d labels not in 'lane' and 'drivable' categories."""
         for label in labels:
             if label.poly2d is None:
                 continue
-            if label.category in ["drivable area", "lane"]:
-                continue
-
-            color = self._get_label_color(label.id)
-            alpha = 0.5
+            color = self._get_label_color(label)
 
             # Record the tightest bounding box
             x1, x2 = self.ui_cfg.width * self.ui_cfg.scale, 0.0

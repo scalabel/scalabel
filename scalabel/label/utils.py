@@ -92,3 +92,21 @@ def check_ignored(label: Label) -> bool:
     else:
         ignored = False
     return ignored
+
+
+def check_occluded(label: Label) -> bool:
+    """Check occluded attribute."""
+    if label.attributes is not None:
+        occluded = bool(label.attributes.get("occluded", False))
+    else:
+        occluded = False
+    return occluded
+
+
+def check_truncated(label: Label) -> bool:
+    """Check truncated attribute."""
+    if label.attributes is not None:
+        truncated = bool(label.attributes.get("truncated", False))
+    else:
+        truncated = False
+    return truncated

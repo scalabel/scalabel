@@ -1,7 +1,4 @@
-"""An offline label visualizer for Scalable file.
-
-Works for 2D / 3D bounding box, segmentation masks, etc.
-"""
+"""An offline visualzation controller for Scalabel file."""
 
 import argparse
 import concurrent.futures
@@ -12,8 +9,6 @@ from typing import Dict
 
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
@@ -32,7 +27,6 @@ class ControllerConfig:
     out_dir: str
 
     # content
-    with_seg: bool
     with_attr: bool
     with_box2d: bool
     with_box3d: bool
@@ -42,7 +36,6 @@ class ControllerConfig:
         self,
         image_dir: str,
         output_dir: str,
-        with_seg: bool = False,
         with_attr: bool = True,
         with_box2d: bool = True,
         with_box3d: bool = False,
@@ -51,7 +44,6 @@ class ControllerConfig:
         """Initialize with args."""
         self.image_dir = image_dir
         self.out_dir = output_dir
-        self.with_seg = with_seg
         self.with_attr = with_attr
         self.with_box2d = with_box2d
         self.with_box3d = with_box3d
@@ -59,7 +51,7 @@ class ControllerConfig:
 
 
 class ViewController:
-    """Visualize 2D and 3D bounding boxes.
+    """Visualization controller for Scalabel.
 
     Keymap:
     -  n / p: Show next or previous image
@@ -78,15 +70,14 @@ class ViewController:
     def __init__(
         self,
         config: ControllerConfig,
-        ui_cfg: UIConfig,
-        display_cfg: DisplayConfig,
+        viewer: LabelViewer,
         inp_path: str,
         nproc: int,
         executor: concurrent.futures.ThreadPoolExecutor,
     ) -> None:
         """Initializer."""
         self.config = config
-        self.viewer = LabelViewer(ui_cfg, display_cfg)
+        self.viewer = viewer
 
         self.frame_index: int = 0
 
@@ -115,7 +106,7 @@ class ViewController:
         if self.config.out_dir is None:
             plt.connect("key_release_event", self.key_press)
             self.show_frame()
-            plt.show()
+            self.viewer.show()
         else:
             os.makedirs(self.config.out_dir, exist_ok=True)
             while self.frame_index < len(self.frames):
@@ -140,8 +131,6 @@ class ViewController:
         elif event.key == "t":
             self.config.with_box2d = not self.config.with_box2d
             self.config.with_box3d = not self.config.with_box3d
-        elif event.key == "y":
-            self.config.with_seg = not self.config.with_seg
         elif event.key == " ":
             if not self._run_animation:
                 self.start_animation()
@@ -201,21 +190,7 @@ class ViewController:
         frame = self.frames[self.frame_index % len(self.frames)]
         # Fetch the image
         img = self.images[frame.name].result()
-
-        if self.config.with_seg:
-            image_seg_path = os.path.join(
-                self.config.image_dir, frame.name.replace("img", "seg")
-            )
-            if os.path.exists(image_seg_path):
-                print("Local segmentation image path:", image_seg_path)
-                img_seg: NDArrayU8 = np.asarray(
-                    Image.open(image_seg_path)
-                ).astype(np.uint8)
-                self.viewer.draw_image(frame.name, img_seg)
-                return True
-            print("Segmentation mask not found.")
-
-        self.viewer.draw_image(frame.name, img)
+        self.viewer.draw_image(img, frame.name)
 
         # show label
         if frame.labels is None or len(frame.labels) == 0:
@@ -224,13 +199,13 @@ class ViewController:
 
         labels = frame.labels
         if self.config.with_attr:
-            self.viewer.show_frame_attributes(frame)
+            self.viewer.draw_attributes(frame)
         if self.config.with_box2d:
-            self.viewer.draw_box2d(labels)
+            self.viewer.draw_box2ds(labels)
         if self.config.with_box3d and frame.intrinsics is not None:
-            self.viewer.draw_box3d(labels, frame.intrinsics)
+            self.viewer.draw_box3ds(labels, frame.intrinsics)
         if self.config.with_poly2d:
-            self.viewer.draw_poly2d(labels)
+            self.viewer.draw_poly2ds(labels)
 
         return True
 
@@ -243,7 +218,6 @@ Interface keymap:
     -  n / p: Show next or previous image
     -  Space: Start / stop animation
     -  t: Toggle 2D / 3D bounding box (if avaliable)
-    -  y: Toggle image / segmentation view (if avaliable)
     -  a: Toggle the display of the attribute tags on boxes or polygons.
     -  c: Toggle the display of polygon vertices.
     -  Up: Increase the size of polygon vertices.
@@ -349,8 +323,9 @@ def main() -> None:
             image_dir=args.image_dir,
             output_dir=args.output_dir,
         )
+        viewer = LabelViewer(ui_cfg, display_cfg)
         controller = ViewController(
-            ctrl_cfg, ui_cfg, display_cfg, args.labels, args.nproc, executor
+            ctrl_cfg, viewer, args.labels, args.nproc, executor
         )
         controller.view()
 

@@ -38,6 +38,18 @@ Available arguments:
     --nproc NUM_PROCESS
                             number of processes for json loading and parsing
 
+In the visualization window, you may use these keys for controlling:
+
+.. code-block:: yaml
+
+    - n / p: Show next or previous image
+    - Space: Start / stop animation
+    - t: Toggle 2D / 3D bounding box (if avaliable)
+    - a: Toggle the display of the attribute tags on boxes or polygons.
+    - c: Toggle the display of polygon vertices.
+    - Up: Increase the size of polygon vertices.
+    - Down: Decrease the size of polygon vertices.
+
 
 Python API
 -------------
@@ -55,25 +67,35 @@ It provides these methods:
     - write():
         - out_path: str, output path
     - draw_image():
-        - title: str (title of ``plt.show()``)
         - img: 3d np.array of the image
-    - show_frame_attributes():
+        - title: Optional[str] (title of ``plt.show()``)
+    - draw_attributes(): Draw frame attributes
         - frame: Frame
     - draw_box2d():
-        - label: Label
+        - labels: List[Label]
     - draw_box3d():
-        - label: Label
+        - labels: List[Label]
         - intrinsics: Intrinsics
     - draw_poly2d():
         - labels: List[Label]
+        - alpha: int (0.5 as default)
 
 ``UIConfig`` and ``DisplayConfig`` are configuration classes for specify the
 LabelViewer instance.
 
 Below is an simple example to use LabelViewer:
+
 .. code-block:: python
 
-    viewer = LabelViewer(UIConfig(), DisplayConfig())
+    from scalabel.vis.viewer import DisplayConfig, LabelViewer, UIConfig
+
+    # img: np.ndarray
+    # labels: List[Label]
+
+    viewer = LabelViewer()
     viewer.draw_image(img)
-    viewer.draw_box2d(label)
-    viewer.write(out_path)
+    viewer.draw_box2d(labels)
+    viewer.show()
+
+For advanded usage, you may refer the implementation of ``scalabel.vis.controller.ViewController``
+as an example, or check the source code of ``LabelViewer``.
