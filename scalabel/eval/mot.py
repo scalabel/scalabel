@@ -45,7 +45,7 @@ METRIC_MAPS = {
 
 
 def parse_objects(
-    objects: List[Label], classes: List[str]
+    objects: List[Label], classes: List[str], ignore_unknown_cats: bool = False
 ) -> Tuple[NDArrayF64, NDArrayI32, NDArrayI32, NDArrayF64]:
     """Parse objects under Scalabel formats."""
     bboxes, labels, ids, ignore_bboxes = [], [], [], []
@@ -63,7 +63,8 @@ def parse_objects(
                 labels.append(classes.index(category))
                 ids.append(obj.id)
         else:
-            raise KeyError(f"Unknown category: {category}")
+            if not ignore_unknown_cats:
+                raise KeyError(f"Unknown category: {category}")
     bboxes_arr = np.array(bboxes, dtype=np.float32)
     labels_arr = np.array(labels, dtype=np.int32)
     ids_arr = np.array(ids, dtype=np.int32)
@@ -82,12 +83,35 @@ def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
     return out
 
 
+def label_ids_to_int(frames: List[Frame]) -> None:
+    """Converts any type of label index to a string representing an integer."""
+    assert len(frames) > 0
+    assert frames[0].labels is not None
+
+    # if label ids are strings not representing integers, convert them
+    if not frames[0].labels[0].id.isdigit():
+        labels = []
+        for frame in frames:
+            assert frame.labels is not None
+            if not isinstance(frame.labels[0], int):
+                labels.extend(frame.labels)
+
+        ids = [l.id for l in labels]
+        ids_to_int = {y: x + 1 for x, y in enumerate(sorted(set(ids)))}
+
+        for frame in frames:
+            assert frame.labels is not None
+            for label in frame.labels:
+                label.id = str(ids_to_int[label.id])
+
+
 def acc_single_video_mot(
     gts: List[Frame],
     results: List[Frame],
     classes: List[str],
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
+    ignore_unknown_cats: bool = False,
 ) -> List[mm.MOTAccumulator]:
     """Accumulate results for one video."""
     assert len(gts) == len(results)
@@ -98,13 +122,20 @@ def acc_single_video_mot(
     gts = sorted(gts, key=get_frame_index)
     results = sorted(results, key=get_frame_index)
     accs = [mm.MOTAccumulator(auto_id=True) for _ in range(num_classes)]
+
+    label_ids_to_int(gts)
+
     for gt, result in zip(gts, results):
         assert gt.frame_index == result.frame_index
         gt_bboxes, gt_labels, gt_ids, gt_ignores = parse_objects(
-            gt.labels if gt.labels is not None else [], classes
+            gt.labels if gt.labels is not None else [],
+            classes,
+            ignore_unknown_cats,
         )
         pred_bboxes, pred_labels, pred_ids, _ = parse_objects(
-            result.labels if result.labels is not None else [], classes
+            result.labels if result.labels is not None else [],
+            classes,
+            ignore_unknown_cats,
         )
         for i in range(num_classes):
             gt_inds, pred_inds = gt_labels == i, pred_labels == i
@@ -269,6 +300,7 @@ def evaluate_track(
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
+    ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
 ) -> EvalResults:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
@@ -280,6 +312,8 @@ def evaluate_track(
         config: Config object
         iou_thr: Minimum IoU for a bounding box to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
+        ignore_unknown_cats: if False, raise KeyError when trying to evaluate
+            unknown categories.
         nproc: processes number for loading files
 
     Returns:
@@ -303,6 +337,7 @@ def evaluate_track(
                     classes=class_names,
                     iou_thr=iou_thr,
                     ignore_iof_thr=ignore_iof_thr,
+                    ignore_unknown_cats=ignore_unknown_cats,
                 ),
                 zip(gts, results),
             )
@@ -367,6 +402,12 @@ def parse_arguments() -> argparse.Namespace:
         help="ignore iof threshold for mot evaluation",
     )
     parser.add_argument(
+        "--ignore-unknown-cats",
+        type=bool,
+        default=False,
+        help="ignore unknown categories for mot evaluation",
+    )
+    parser.add_argument(
         "--nproc",
         "-p",
         type=int,
@@ -390,6 +431,7 @@ if __name__ == "__main__":
         cfg,
         args.iou_thr,
         args.ignore_iof_thr,
+        args.ignore_unknown_cats,
         args.nproc,
     )
     if args.out_dir:
