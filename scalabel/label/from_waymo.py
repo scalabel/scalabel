@@ -4,9 +4,15 @@ import glob
 import math
 import os
 from functools import partial
-from typing import List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
+
+from scalabel.label.utils import (
+    cart2hom,
+    project_points_to_image,
+    rotation_y_to_alpha,
+)
 
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
@@ -90,38 +96,6 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for conversion",
     )
     return parser.parse_args()
-
-
-def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:
-    """Nx3 points in Cartesian to Homogeneous by appending ones."""
-    n = pts_3d.shape[0]
-    pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
-    return pts_3d_hom
-
-
-def project_points_to_image(
-    points: NDArrayF64, intrinsics: NDArrayF64
-) -> NDArrayF64:
-    """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
-    pts_3d_rect = cart2hom(points)
-    campad = np.identity(4)
-    campad[: intrinsics.shape[0], : intrinsics.shape[1]] = intrinsics
-    pts_2d = np.dot(pts_3d_rect, np.transpose(campad))  # nx3
-    pts_2d[:, 0] /= pts_2d[:, 2]
-    pts_2d[:, 1] /= pts_2d[:, 2]
-    return pts_2d[:, :2]  # type: ignore
-
-
-def rotation_y_to_alpha(
-    rotation_y: float, center_proj_x: float, focal_x: float, center_x: float
-) -> float:
-    """Convert rotation around y-axis to viewpoint angle (alpha)."""
-    alpha = rotation_y - math.atan2(center_proj_x - center_x, focal_x)
-    if alpha > math.pi:
-        alpha -= 2 * math.pi
-    if alpha <= -math.pi:
-        alpha += 2 * math.pi
-    return alpha
 
 
 def points_transform(points: NDArrayF64, calib: NDArrayF64) -> NDArrayF64:
@@ -243,6 +217,30 @@ def parse_camera_labels(
     return labels
 
 
+def parse_frame_attributes(
+    frame: dataset_pb2.Frame,
+    use_lidar_labels: bool = False,
+) -> Dict[str, Union[str, float]]:
+    """Parse the camera-based attributes."""
+    check_attribute = lambda x: x if x else "undefined"
+    s = frame.context.stats
+
+    attributes = {
+        "time_of_day": check_attribute(s.time_of_day),
+        "weather": check_attribute(s.weather),
+        "location": check_attribute(s.location),
+    }
+
+    ocs = s.laser_object_counts if use_lidar_labels else s.camera_object_counts
+    sensor = "laser" if use_lidar_labels else "camera"
+    for oc in ocs:
+        o_name = classes_type2name[oc.type]
+        attribute_name = f"{sensor}_{o_name}_counts"
+        attributes[attribute_name] = oc.count
+
+    return attributes
+
+
 def get_calibration(
     frame: dataset_pb2.Frame, camera_id: int
 ) -> Tuple[Extrinsics, Extrinsics, Intrinsics, ImageSize]:
@@ -270,6 +268,7 @@ def parse_frame(
 ) -> List[Frame]:
     """Parse information in single frame to Scalabel Frame per camera."""
     frame_name = frame.context.name + "_{:07d}.jpg".format(frame_id)
+    attributes = parse_frame_attributes(frame, use_lidar_labels)
     results = []
     for camera_id, camera in cameras_id2name.items():
         cam2global, cam2car, intrinsics, image_size = get_calibration(
@@ -291,6 +290,7 @@ def parse_frame(
             )
         else:
             labels = parse_camera_labels(frame, camera_id)
+
         f = Frame(
             name=frame_name,
             video_name=seq_dir,
@@ -299,6 +299,7 @@ def parse_frame(
             extrinsics=cam2global,
             intrinsics=intrinsics,
             labels=labels,
+            attributes=attributes,
         )
         results.append(f)
 
