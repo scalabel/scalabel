@@ -68,4 +68,12 @@ It provides these methods:
         - labels: List[Label]
 
 ``UIConfig`` and ``DisplayConfig`` are configuration classes for specify the
-LabelViewer instance
+LabelViewer instance.
+
+Below is an simple example to use LabelViewer:
+.. code-block:: python
+
+    viewer = LabelViewer(UIConfig(), DisplayConfig())
+    viewer.draw_image(img)
+    viewer.draw_box2d(label)
+    viewer.write(out_path)
