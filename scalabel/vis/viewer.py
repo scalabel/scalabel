@@ -14,7 +14,7 @@ import numpy as np
 from matplotlib.font_manager import FontProperties
 
 from ..common.typing import NDArrayF64, NDArrayU8
-from ..label.typing import Frame, Label
+from ..label.typing import Frame, Intrinsics, Label
 from ..label.utils import check_crowd
 from .helper import (
     GenBoxFunc,
@@ -101,9 +101,9 @@ class LabelViewer:
         """Write image."""
         self.fig.savefig(out_path, self.ui_cfg.dpi)
 
-    def draw_image(self, name: str, img: NDArrayU8) -> None:
+    def draw_image(self, title: str, img: NDArrayU8) -> None:
         """Draw image."""
-        self.fig.canvas.manager.set_window_title(name)
+        self.fig.canvas.manager.set_window_title(title)
         self.ax.imshow(img, interpolation="nearest", aspect="auto")
 
     def _get_label_color(self, label_id: str) -> NDArrayF64:
@@ -186,7 +186,7 @@ class LabelViewer:
         labels = [label for label in labels if label.box2d is not None]
         self._draw_box(labels, gen_2d_rect)
 
-    def draw_box3d(self, labels: List[Label], intrinsics) -> None:
+    def draw_box3d(self, labels: List[Label], intrinsics: Intrinsics) -> None:
         """Draw Box3d on the axes."""
         labels = [label for label in labels if label.box3d is not None]
         self._draw_box(labels, partial(gen_3d_cube, intrinsics=intrinsics))

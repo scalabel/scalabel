@@ -16,7 +16,6 @@ from ..label.typing import Frame, Intrinsics, Label
 from ..label.utils import get_matrix_from_intrinsics
 from .geometry import Label3d
 
-
 GenBoxFunc = Callable[
     [Label, List[float], int, float], List[mpatches.Rectangle]
 ]

@@ -227,7 +227,7 @@ class ViewController:
             self.viewer.show_frame_attributes(frame)
         if self.config.with_box2d:
             self.viewer.draw_box2d(labels)
-        if self.config.with_box3d:
+        if self.config.with_box3d and frame.intrinsics is not None:
             self.viewer.draw_box3d(labels, frame.intrinsics)
         if self.config.with_poly2d:
             self.viewer.draw_poly2d(labels)
@@ -259,7 +259,7 @@ Export images:
         "--labels",
         required=False,
         default="labels.json",
-        help="corresponding bounding box annotation (json file)",
+        help="Path to the json file",
         type=str,
     )
     parser.add_argument(
@@ -313,7 +313,7 @@ Export images:
         required=False,
         default=None,
         type=str,
-        help="output image file with bbox visualization. "
+        help="output image directory with label visualization. "
         "If it is set, the images will be written to the "
         "output folder instead of being displayed "
         "interactively.",
