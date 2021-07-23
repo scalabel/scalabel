@@ -3,7 +3,7 @@ import copy
 import io
 import os
 import urllib.request
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import matplotlib.patches as mpatches
 import numpy as np
@@ -15,10 +15,6 @@ from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.typing import Frame, Intrinsics, Label
 from ..label.utils import get_matrix_from_intrinsics
 from .geometry import Label3d
-
-GenBoxFunc = Callable[
-    [Label, List[float], int, float], List[mpatches.Rectangle]
-]
 
 
 def random_color() -> NDArrayF64:
@@ -53,7 +49,6 @@ def gen_2d_rect(
     label: Label,
     color: List[float],
     linewidth: int,
-    alpha: float,  # pylint: disable=unused-argument
 ) -> List[mpatches.Rectangle]:
     """Generate individual bounding box from 2d label."""
     assert label.box2d is not None
@@ -84,7 +79,16 @@ def gen_3d_cube(
     intrinsics: Intrinsics,
     alpha: float,
 ) -> List[mpatches.Polygon]:
-    """Generate individual bounding box from 3d label."""
+    """Generate individual bounding box from 3d label.
+
+    Assumes the following format:
+    * location: 3D center of the box, stored as 3D point in camera coordinates,
+     meaning the axes (x,y,z) point right, down, and forward.
+    * orientation: 3D orientation of the bounding box, stored as axis angles in
+     the same coordinate frame as the location.
+    * dimension: 3D box size, with length in x direction, height in y direction
+     and width in z direction
+    """
     assert label.box3d is not None
     box3d = label.box3d
     label3d = Label3d.from_box3d(box3d)

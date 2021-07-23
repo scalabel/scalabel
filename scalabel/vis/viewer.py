@@ -5,7 +5,6 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 
 import io
 from dataclasses import dataclass
-from functools import partial
 from typing import Dict, List, Optional, Tuple
 
 import matplotlib.patches as mpatches
@@ -21,13 +20,7 @@ from ..label.utils import (
     check_occluded,
     check_truncated,
 )
-from .helper import (
-    GenBoxFunc,
-    gen_2d_rect,
-    gen_3d_cube,
-    poly2patch,
-    random_color,
-)
+from .helper import gen_2d_rect, gen_3d_cube, poly2patch, random_color
 
 
 @dataclass
@@ -181,33 +174,41 @@ class LabelViewer:
             },
         )
 
-    def _draw_boxes(
-        self, labels: List[Label], gen_box_func: GenBoxFunc
-    ) -> None:
-        """Draw Box on the axes."""
-        for label in labels:
-            color = self._get_label_color(label).tolist()
-            occluded = check_occluded(label)
-            alpha = 0.5 if occluded else 0.8
-            for result in gen_box_func(label, color, occluded, alpha):
-                self.ax.add_patch(result)
-
-            if self.display_cfg.show_tags:
-                self._draw_label_attributes(
-                    label,
-                    label.box2d.x1,  # type: ignore
-                    (label.box2d.y1 - 4),  # type: ignore
-                )
-
     def draw_box2ds(self, labels: List[Label]) -> None:
         """Draw Box2d on the axes."""
-        labels = [label for label in labels if label.box2d is not None]
-        self._draw_boxes(labels, gen_2d_rect)
+        for label in labels:
+            if label.box2d is not None:
+                color = self._get_label_color(label).tolist()
+                for result in gen_2d_rect(
+                    label, color, int(2 * self.ui_cfg.scale)
+                ):
+                    self.ax.add_patch(result)
+
+                if self.display_cfg.show_tags:
+                    self._draw_label_attributes(
+                        label,
+                        label.box2d.x1,
+                        (label.box2d.y1 - 4),
+                    )
 
     def draw_box3ds(self, labels: List[Label], intrinsics: Intrinsics) -> None:
         """Draw Box3d on the axes."""
-        labels = [label for label in labels if label.box3d is not None]
-        self._draw_boxes(labels, partial(gen_3d_cube, intrinsics=intrinsics))
+        for label in labels:
+            if label.box3d is not None:
+                color = self._get_label_color(label).tolist()
+                occluded = check_occluded(label)
+                alpha = 0.5 if occluded else 0.8
+                for result in gen_3d_cube(
+                    label, color, int(2 * self.ui_cfg.scale), intrinsics, alpha
+                ):
+                    self.ax.add_patch(result)
+
+                if self.display_cfg.show_tags and label.box2d is not None:
+                    self._draw_label_attributes(
+                        label,
+                        label.box2d.x1,
+                        (label.box2d.y1 - 4),
+                    )
 
     def draw_poly2ds(self, labels: List[Label], alpha: float = 0.5) -> None:
         """Draw poly2d labels not in 'lane' and 'drivable' categories."""
