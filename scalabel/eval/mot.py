@@ -86,23 +86,19 @@ def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
 def label_ids_to_int(frames: List[Frame]) -> None:
     """Converts any type of label index to a string representing an integer."""
     assert len(frames) > 0
-    assert frames[0].labels is not None
-
     # if label ids are strings not representing integers, convert them
-    if not frames[0].labels[0].id.isdigit():
-        labels = []
-        for frame in frames:
-            assert frame.labels is not None
-            if not isinstance(frame.labels[0], int):
-                labels.extend(frame.labels)
+    ids = []
+    for frame in frames:
+        if frame.labels is not None:
+            ids.extend([l.id for l in frame.labels])
 
-        ids = [l.id for l in labels]
+    if any(not id.isdigit() for id in ids):
         ids_to_int = {y: x + 1 for x, y in enumerate(sorted(set(ids)))}
 
         for frame in frames:
-            assert frame.labels is not None
-            for label in frame.labels:
-                label.id = str(ids_to_int[label.id])
+            if frame.labels is not None and not frame.labels[0].id.isdigit():
+                for label in frame.labels:
+                    label.id = str(ids_to_int[label.id])
 
 
 def acc_single_video_mot(
