@@ -96,7 +96,7 @@ def label_ids_to_int(frames: List[Frame]) -> None:
         ids_to_int = {y: x + 1 for x, y in enumerate(sorted(set(ids)))}
 
         for frame in frames:
-            if frame.labels is not None and not frame.labels[0].id.isdigit():
+            if frame.labels is not None:
                 for label in frame.labels:
                     label.id = str(ids_to_int[label.id])
 
