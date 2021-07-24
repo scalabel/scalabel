@@ -92,7 +92,7 @@ class Label3d:
         """Get 8 vertex points of a 3D bounding box."""
         x, y, z = box3d.location
         center = np.array([x, y, z])
-        height, width, depth = np.array(box3d.dimension)
+        height, width, length = np.array(box3d.dimension)
 
         def rotate(vector: NDArrayF64) -> NDArrayF64:
             if len(box3d.orientation) == 3:
@@ -105,14 +105,16 @@ class Label3d:
                 )
             return rotated
 
-        v000 = rotate(center + np.array([-width / 2, -height / 2, -depth / 2]))
-        v001 = rotate(center + np.array([-width / 2, -height / 2, depth / 2]))
-        v010 = rotate(center + np.array([-width / 2, height / 2, -depth / 2]))
-        v011 = rotate(center + np.array([-width / 2, height / 2, depth / 2]))
-        v100 = rotate(center + np.array([width / 2, -height / 2, -depth / 2]))
-        v101 = rotate(center + np.array([width / 2, -height / 2, depth / 2]))
-        v110 = rotate(center + np.array([width / 2, height / 2, -depth / 2]))
-        v111 = rotate(center + np.array([width / 2, height / 2, depth / 2]))
+        v000 = rotate(
+            center + np.array([-length / 2, -height / 2, -width / 2])
+        )
+        v001 = rotate(center + np.array([-length / 2, -height / 2, width / 2]))
+        v010 = rotate(center + np.array([-length / 2, height / 2, -width / 2]))
+        v011 = rotate(center + np.array([-length / 2, height / 2, width / 2]))
+        v100 = rotate(center + np.array([length / 2, -height / 2, -width / 2]))
+        v101 = rotate(center + np.array([length / 2, -height / 2, width / 2]))
+        v110 = rotate(center + np.array([length / 2, height / 2, -width / 2]))
+        v111 = rotate(center + np.array([length / 2, height / 2, width / 2]))
         return cls([v000, v001, v010, v011, v100, v101, v110, v111])
 
     def get_edges_with_visibility(
@@ -135,6 +137,8 @@ class Label3d:
             "BR": [v101, v111],
             "BD": [v011, v111],
             "BL": [v001, v011],
+            "MR": [v100, v111],
+            "BM": [v101, v110],
         }
 
         faces: Dict[str, Dict[str, Union[List[str], List[Vertex]]]] = {
@@ -179,6 +183,8 @@ class Label3d:
             "BR": True,
             "BD": True,
             "BL": True,
+            "MR": False,
+            "BM": False,
         }
         for pair in face_pairs:
             face1: str = pair[0]
