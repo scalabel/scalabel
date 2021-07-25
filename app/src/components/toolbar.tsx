@@ -328,6 +328,8 @@ export class ToolBar extends Component<Props> {
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+    } else {
+      window.alert("Selected tracks have overlapping frames.")
     }
   }
 

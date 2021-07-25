@@ -473,6 +473,8 @@ export class Label2DHandler {
     const tracks = getSelectedTracks(this._state)
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+    } else {
+      window.alert("Selected tracks have overlapping frames.")
     }
   }
 }
