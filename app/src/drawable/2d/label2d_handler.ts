@@ -3,7 +3,8 @@ import {
   linkLabels,
   mergeTracks,
   startLinkTrack,
-  unlinkLabels
+  unlinkLabels,
+  splitTrack
 } from "../../action/common"
 import { selectLabels, unselectLabels } from "../../action/select"
 import Session from "../../common/session"
@@ -18,6 +19,7 @@ import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
 import { Label2D } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
+import { makeTrack } from "../../functional/states"
 
 /**
  * List of drawable labels
@@ -267,6 +269,12 @@ export class Label2DHandler {
           )
         }
         break
+      case Key.U_LOW:
+      case Key.U_UP:
+        if (this._state.task.config.tracking) {
+          this.unlinkTrack()
+        }
+        break
       case Key.ENTER:
         if (this._state.session.trackLinking) {
           this.mergeTracks()
@@ -480,5 +488,16 @@ export class Label2DHandler {
     } else {
       window.alert("Selected tracks have overlapping frames.")
     }
+  }
+
+  /**
+   * Unlink selected track
+   */
+  private unlinkTrack(): void {
+    const select = this._state.user.select
+    const track = getSelectedTracks(this._state)[0]
+    const newTrackId = makeTrack().id
+
+    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
   }
 }

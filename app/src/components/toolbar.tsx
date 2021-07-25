@@ -7,6 +7,7 @@ import {
   changeSelect,
   changeViewerConfig,
   mergeTracks,
+  splitTrack,
   startLinkTrack
 } from "../action/common"
 import {
@@ -20,7 +21,7 @@ import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
-import { isValidId } from "../functional/states"
+import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, State } from "../types/state"
 import { makeButton } from "./button"
@@ -165,6 +166,13 @@ export class ToolBar extends Component<Props> {
                 : makeButton("Link Tracks", () => {
                     this.startLinkTrack()
                   })}
+            </div>
+          )}
+          {this.state.task.config.tracking && (
+            <div>
+              {makeButton("Unlink Track", () => {
+                this.unlinkSelectedTrack(this.state)
+              })}
             </div>
           )}
         </div>
@@ -347,6 +355,19 @@ export class ToolBar extends Component<Props> {
     } else {
       window.alert("Selected tracks have overlapping frames.")
     }
+  }
+
+  /**
+   * Unlink selected track
+   *
+   * @param state
+   */
+  private unlinkSelectedTrack(state: State): void {
+    const select = this.state.user.select
+    const track = getSelectedTracks(state)[0]
+    const newTrackId = makeTrack().id
+
+    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
   }
 
   /**
