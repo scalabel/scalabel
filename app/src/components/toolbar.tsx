@@ -12,6 +12,7 @@ import {
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
+  deleteSelectedLabelsfromTracks,
   terminateSelectedTracks
 } from "../action/select"
 import { addLabelTag } from "../action/tag"
@@ -96,6 +97,16 @@ export class ToolBar extends Component<Props> {
   }
 
   /**
+   * Whether a specific key is pressed down
+   *
+   * @param {string} key - the key to check
+   * @return {boolean}
+   */
+  protected isKeyDown(key: string): boolean {
+    return this._keyDownMap[key]
+  }
+
+  /**
    * Add keyDown Event Listener
    */
   public componentDidMount(): void {
@@ -164,14 +175,19 @@ export class ToolBar extends Component<Props> {
   /**
    * handler for the delete button/key
    *
-   * @param {string} alignment
    */
   private deletePressed(): void {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
       if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
-        Session.dispatch(terminateSelectedTracks(this.state, select.item))
+        if (!this.isKeyDown(Key.S_LOW)) {
+          Session.dispatch(terminateSelectedTracks(this.state, select.item))
+        } else {
+          Session.dispatch(
+            deleteSelectedLabelsfromTracks(this.state, select.item)
+          )
+        }
       } else {
         Session.dispatch(deleteSelectedLabels(this.state))
       }

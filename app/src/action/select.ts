@@ -5,7 +5,7 @@ import { LabelTypeName } from "../const/common"
 import * as actionTypes from "../types/action"
 import { IdType, Select, State } from "../types/state"
 import { changeLabelsProps, changeSelect, deleteLabels } from "./common"
-import { deleteTracks, terminateTracks } from "./track"
+import { deleteTracks, terminateTracks, deleteLabelsFromTracks } from "./track"
 
 /**
  * Delete given label
@@ -49,6 +49,30 @@ export function deleteSelectedTracks(
     }
   }
   return deleteTracks(_.uniq(tracks))
+}
+
+/**
+ * Delete selected labels in a single frame from tracks
+ *
+ * @param state
+ * @param index
+ */
+export function deleteSelectedLabelsfromTracks(
+  state: State,
+  index: number
+): actionTypes.DeleteLabelsAction {
+  const select = state.user.select
+  const tracks = []
+  for (const key of Object.keys(select.labels)) {
+    const index = Number(key)
+    for (const labelId of select.labels[index]) {
+      const label = state.task.items[index].labels[labelId]
+      if (label.track in state.task.tracks) {
+        tracks.push(state.task.tracks[label.track])
+      }
+    }
+  }
+  return deleteLabelsFromTracks(_.uniq(tracks), index)
 }
 
 /**

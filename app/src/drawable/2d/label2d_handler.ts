@@ -94,6 +94,10 @@ export class Label2DHandler {
         )
         if (label !== null) {
           label.initTemp(state, coord)
+          if (this.isKeyDown(Key.S_LOW)) {
+            // When s is pressed, this initialized label will not propagated.
+            label.single = true
+          }
           this._labelList.selectedLabels.push(label)
           this._labelList.labelList.push(label)
           label.onMouseDown(coord, handleIndex)

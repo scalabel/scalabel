@@ -63,6 +63,10 @@ export abstract class Label2D {
   protected _labelList: Label2DList
   /** whether the label is temporary */
   protected _temporary: boolean
+  /** whether the label only exists in single frame at initialization
+   * (that means this label will not propagate at tracking mode)
+   */
+  protected _singleAtInitial: boolean
 
   /**
    * Constructor
@@ -88,6 +92,7 @@ export abstract class Label2D {
     this._config = makeTaskConfig()
     this._labelList = labelList
     this._temporary = true
+    this._singleAtInitial = false
   }
 
   /**
@@ -193,6 +198,16 @@ export abstract class Label2D {
   /** set the editing of this label */
   public set editing(e: boolean) {
     this._editing = e
+  }
+
+  /** get single */
+  public get single(): boolean {
+    return this._singleAtInitial
+  }
+
+  /** Set single*/
+  public set single(s: boolean) {
+    this._singleAtInitial = s
   }
 
   /** Parent drawable */

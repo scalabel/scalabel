@@ -50,6 +50,8 @@ export abstract class Label3D {
   protected _temporary: boolean
   /** label list this belongs to */
   protected _labelList: Label3DList
+  /** this field now has no meaning for label3d */
+  protected _singleAtInitial: boolean
 
   /**
    * Constructor
@@ -65,6 +67,7 @@ export abstract class Label3D {
     this._children = []
     this._temporary = true
     this._labelList = labelList
+    this._singleAtInitial = false
   }
 
   /** Get label list */
@@ -151,6 +154,16 @@ export abstract class Label3D {
   /** Return whether this label is temporary (not committed to state) */
   public get temporary(): boolean {
     return this._temporary
+  }
+
+  /** get single */
+  public get single(): boolean {
+    return this._singleAtInitial
+  }
+
+  /** Set single*/
+  public set single(s: boolean) {
+    this._singleAtInitial = s
   }
 
   /** Get shape id's and shapes for updating */
