@@ -52,5 +52,7 @@ Available arguments:
                             IoU threshold for mot evaluation.
     --ignore-iof-thr IGNORE_IOF_THRESH
                             Ignore iof threshold for mot evaluation.
+    --ignore-unknown-cats IGNORE_UNKNOWN_CATS
+                            Ignore unknown categories for mot evaluation.
     --nproc NUM_PROCS, -p NUM_PROCS
                             Number of processes for mot evaluation.
