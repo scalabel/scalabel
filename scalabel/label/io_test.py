@@ -69,20 +69,31 @@ def test_load() -> None:
 
 def test_group_and_sort() -> None:
     """Check the group and sort results."""
+    # frames = [
+    #     Frame(name="bbb-1", video_name="bbb", frame_index=1, labels=[]),
+    #     Frame(name="aaa-2", video_name="aaa", frame_index=2, labels=[]),
+    #     Frame(name="aaa-2", video_name="aaa", frame_index=1, labels=[]),
+    # ]
     frames = [
         Frame(name="bbb-1", video_name="bbb", frame_index=1, labels=[]),
         Frame(name="aaa-2", video_name="aaa", frame_index=2, labels=[]),
+        Frame(name="bbb-2", video_name="bbb", frame_index=2, labels=[]),
         Frame(name="aaa-2", video_name="aaa", frame_index=1, labels=[]),
+        Frame(name="bbb-3", video_name="bbb", frame_index=3, labels=[]),
     ]
     frames_list = group_and_sort(frames)
 
     assert len(frames_list) == 2
     assert len(frames_list[0]) == 2
-    assert len(frames_list[1]) == 1
+    assert len(frames_list[1]) == 3
 
     assert str(frames_list[0][0].video_name) == "aaa"
     assert frames_list[0][1].name == "aaa-2"
     assert frames_list[0][1].frame_index == 2
+
+    assert str(frames_list[1][0].video_name) == "bbb"
+    assert frames_list[1][1].frame_index == 2
+    assert frames_list[1][1].name == "bbb-2"
 
 
 def test_dump() -> None:
