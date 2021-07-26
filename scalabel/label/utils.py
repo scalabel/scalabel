@@ -5,8 +5,6 @@ from typing import Dict, List
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from scalabel.common.typing import NDArrayF64
-
 from ..common.typing import NDArrayF64
 from .typing import Category, Extrinsics, Intrinsics, Label
 
@@ -95,6 +93,24 @@ def check_ignored(label: Label) -> bool:
     else:
         ignored = False
     return ignored
+
+
+def check_occluded(label: Label) -> bool:
+    """Check occluded attribute."""
+    if label.attributes is not None:
+        occluded = bool(label.attributes.get("occluded", False))
+    else:
+        occluded = False
+    return occluded
+
+
+def check_truncated(label: Label) -> bool:
+    """Check truncated attribute."""
+    if label.attributes is not None:
+        truncated = bool(label.attributes.get("truncated", False))
+    else:
+        truncated = False
+    return truncated
 
 
 def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:

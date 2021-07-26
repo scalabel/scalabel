@@ -17,9 +17,9 @@ Available arguments:
 
 .. code-block:: bash
 
-    --gt, GT_PATH -g GT_PATH
+    --gt GT_PATH, -g GT_PATH
                             path to ground truth annotations.
-    --result, RESULT_PATH -r RESULT_PATH
+    --result RESULT_PATH, -r RESULT_PATH
                             path to results to be evaluated.
     --config CFG_PATH, -c CFG_PATH
                             Config path. Contains metadata like available categories.
@@ -40,9 +40,9 @@ Available arguments:
 
 .. code-block:: bash
 
-    --gt, GT_PATH -g GT_PATH
+    --gt GT_PATH, -g GT_PATH
                             path to ground truth annotations.
-    --result, RESULT_PATH -r RESULT_PATH
+    --result RESULT_PATH, -r RESULT_PATH
                             path to results to be evaluated.
     --config CFG_PATH, -c CFG_PATH
                             Config path. Contains metadata like available categories.
