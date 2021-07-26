@@ -89,6 +89,8 @@ def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
         assert frame.video_name is not None
         assert frame.frame_index is not None
     frames_list: List[List[Frame]] = []
+
+    inputs = sorted(inputs, key=lambda frame: str(frame.video_name))
     for _, frame_iter in groupby(inputs, lambda frame: frame.video_name):
         frames = sorted(
             list(frame_iter),
