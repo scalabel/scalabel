@@ -2,7 +2,7 @@
 import argparse
 import os
 import os.path as osp
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 from PIL import Image
@@ -40,10 +40,6 @@ kitti_cats = {
     "DontCare": "dontcare",
 }
 
-# 396, 1333
-val_sets = ["0001", "0004", "0011", "0012", "0013", "0014", "0015", "0018"]
-mini_sets = ["0001"]
-
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
@@ -59,10 +55,10 @@ def parse_arguments() -> argparse.Namespace:
         help="path to save scalabel format label file",
     )
     parser.add_argument(
-        "--mode",
-        default="mini",
-        choices=["mini", "subtrain", "subval", "train", "test"],
-        help="mode for kitti dataset",
+        "--split",
+        default="training",
+        choices=["training", "testing"],
+        help="split for kitti dataset",
     )
     parser.add_argument(
         "--data_type",
@@ -79,12 +75,90 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def parse_label(
+    data_type: str,
+    label_file: str,
+    trackid_maps: Dict[str, int],
+    global_track_id: int,
+) -> Tuple[Dict[int, List[Label]], Dict[str, int], int]:
+    """Function parsing tracking / detection labels."""
+    if data_type == "tracking":
+        offset = 2
+    else:
+        offset = 0
+
+    labels_dict: Dict[int, List[Label]] = dict()
+
+    labels = list_from_file(label_file)
+    track_id = -1
+
+    for label_line in labels:
+        label = label_line.split()
+
+        if data_type == "tracking":
+            seq_id = int(label[0])
+        else:
+            seq_id = 0
+
+        if seq_id not in labels_dict.keys():
+            labels_dict[seq_id] = []
+
+        cat = label[0 + offset]
+        if cat in ["DontCare"]:
+            continue
+        class_name = kitti_cats[cat]
+
+        if data_type == "tracking":
+            if label[1] in trackid_maps.keys():
+                track_id = trackid_maps[label[1]]
+            else:
+                track_id = global_track_id
+                trackid_maps[label[1]] = track_id
+                global_track_id += 1
+        else:
+            track_id += 1
+
+        x1, y1, x2, y2 = (
+            float(label[4 + offset]),
+            float(label[5 + offset]),
+            float(label[6 + offset]),
+            float(label[7 + offset]),
+        )
+
+        y_cen_adjust = float(label[8 + offset]) / 2.0
+
+        box3d = Box3D(
+            orientation=(0.0, float(label[14 + offset]), 0.0),
+            location=(
+                float(label[11 + offset]),
+                float(label[12 + offset]) - y_cen_adjust,
+                float(label[13 + offset]),
+            ),
+            dimension=(
+                float(label[8 + offset]),
+                float(label[9 + offset]),
+                float(label[10 + offset]),
+            ),
+            alpha=float(label[3 + offset]),
+        )
+
+        box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+
+        labels_dict[seq_id].append(
+            Label(
+                category=class_name,
+                box2d=box2d,
+                box3d=box3d,
+                id=str(track_id),
+            )
+        )
+
+    return labels_dict, trackid_maps, global_track_id
+
+
 def from_kitti_det(
     data_dir: str,
-    mode: str,
     data_type: str,
-    det_val_sets: List[str],
-    adjust_center: bool = True,
 ) -> List[Frame]:
     """Function converting kitti detection data to Scalabel format."""
     frames = []
@@ -97,19 +171,17 @@ def from_kitti_det(
 
     img_names = sorted(os.listdir(img_dir))
 
+    global_track_id = 0
+
     rotation = (0, 0, 0)
     position = (0, 0, 0)
 
     cam2global = Extrinsics(location=position, rotation=rotation)
 
     for img_id, img_name in enumerate(img_names):
-        if mode == "subtrain":
-            if osp.splitext(img_name)[0] in det_val_sets:
-                continue
-        elif mode == "subval":
-            if osp.splitext(img_name)[0] not in det_val_sets:
-                continue
         print(f"DET: {img_name.split('.')[0]}")
+
+        trackid_maps: Dict[str, int] = dict()
 
         with Image.open(osp.join(img_dir, img_name)) as img:
             width, height = img.size
@@ -122,62 +194,15 @@ def from_kitti_det(
             center=(projection[0][2], projection[1][2]),
         )
 
-        labels = []
         if osp.exists(label_dir):
-            track_id = 0
             label_file = osp.join(
                 label_dir, "{}.txt".format(img_name.split(".")[0])
             )
-            label_dets = list_from_file(label_file)
-            for label_det in label_dets:
-                label = label_det.split()
-                cat = label[0]
-                if cat in ["DontCare"]:
-                    continue
+            labels_dict, _, _ = parse_label(
+                data_type, label_file, trackid_maps, global_track_id
+            )
 
-                class_name = kitti_cats[cat]
-
-                x1, y1, x2, y2 = (
-                    float(label[4]),
-                    float(label[5]),
-                    float(label[6]),
-                    float(label[7]),
-                )
-
-                if adjust_center:
-                    # KITTI GT uses the bottom of the car as center (x, 0, z).
-                    # Prediction uses center of the bbox as center (x, y, z).
-                    # So we align them to the bottom center as GT does
-                    y_cen_adjust = float(label[8]) / 2.0
-                else:
-                    y_cen_adjust = 0.0
-
-                box3d = Box3D(
-                    orientation=(0.0, float(label[14]), 0.0),
-                    location=(
-                        float(label[11]),
-                        float(label[12]) - y_cen_adjust,
-                        float(label[13]),
-                    ),
-                    dimension=(
-                        float(label[8]),
-                        float(label[9]),
-                        float(label[10]),
-                    ),
-                    alpha=float(label[3]),
-                )
-
-                box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-
-                labels.append(
-                    Label(
-                        category=class_name,
-                        box2d=box2d,
-                        box3d=box3d,
-                        id=str(track_id),
-                    )
-                )
-                track_id += 1
+            labels = labels_dict[0]
 
         image_name = osp.join(img_dir, img_name)
         image_name = data_type + image_name.split(data_type)[-1]
@@ -201,13 +226,10 @@ def from_kitti_det(
 def from_kitti(
     data_dir: str,
     data_type: str,
-    mode: str,
-    det_val_sets: List[str],
-    adjust_center: bool = True,
 ) -> List[Frame]:
     """Function converting kitti data to Scalabel format."""
     if data_type == "detection":
-        return from_kitti_det(data_dir, mode, data_type, det_val_sets)
+        return from_kitti_det(data_dir, data_type)
 
     frames = []
 
@@ -223,15 +245,6 @@ def from_kitti(
     global_track_id = 0
 
     for vid_name in vid_names:
-        if mode == "subtrain":
-            if vid_name in val_sets:
-                continue
-        elif mode == "subval":
-            if vid_name not in val_sets:
-                continue
-        elif mode == "mini":
-            if vid_name not in mini_sets:
-                continue
         print(f"VID: {vid_name}")
 
         trackid_maps: Dict[str, int] = dict()
@@ -248,72 +261,11 @@ def from_kitti(
 
         if osp.exists(label_dir):
             label_file = osp.join(label_dir, "{}.txt".format(vid_name))
-            label_tracks = list_from_file(label_file)
-
-            labels_dict: Dict[int, List[Label]] = dict()
-
-            for label_track in label_tracks:
-                label = label_track.split()
-                if int(label[0]) not in labels_dict.keys():
-                    labels_dict[int(label[0])] = []
-                cat = label[2]
-                if cat in ["DontCare"]:
-                    continue
-
-                class_name = kitti_cats[cat]
-
-                if label[1] in trackid_maps.keys():
-                    track_id = trackid_maps[label[1]]
-                else:
-                    track_id = global_track_id
-                    trackid_maps[label[1]] = track_id
-                    global_track_id += 1
-
-                x1, y1, x2, y2 = (
-                    float(label[6]),
-                    float(label[7]),
-                    float(label[8]),
-                    float(label[9]),
-                )
-
-                if adjust_center:
-                    # KITTI GT uses the bottom of the car as center (x, 0, z).
-                    # Prediction uses center of the bbox as center (x, y, z).
-                    # So we align them to the bottom center as GT does
-                    y_cen_adjust = float(label[10]) / 2.0
-                else:
-                    y_cen_adjust = 0.0
-
-                box3d = Box3D(
-                    orientation=(0.0, float(label[16]), 0.0),
-                    location=(
-                        float(label[13]),
-                        float(label[14]) - y_cen_adjust,
-                        float(label[15]),
-                    ),
-                    dimension=(
-                        float(label[10]),
-                        float(label[11]),
-                        float(label[12]),
-                    ),
-                    alpha=float(label[5]),
-                )
-
-                box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
-
-                labels_dict[int(label[0])].append(
-                    Label(
-                        category=class_name,
-                        box2d=box2d,
-                        box3d=box3d,
-                        id=str(track_id),
-                    )
-                )
+            labels_dict, trackid_maps, global_track_id = parse_label(
+                data_type, label_file, trackid_maps, global_track_id
+            )
 
         for fr, img_name in enumerate(sorted(img_names)):
-            if mode == "mini" and fr == 2:
-                break
-
             with Image.open(img_name) as img:
                 width, height = img.size
                 image_size = ImageSize(height=height, width=width)
@@ -366,28 +318,13 @@ def run(args: argparse.Namespace) -> None:
     if not osp.exists(args.output_dir):
         os.mkdir(args.output_dir)
 
-    if args.mode == "test":
-        subset = "testing"
-    else:
-        subset = "training"
+    output_name = f"{args.data_type}_{args.split}.json"
 
-    output_name = f"{args.data_type}_{args.mode}.json"
-
-    if args.data_type == "detection":
-        with open(
-            osp.join(args.input_dir, "detection/detection_val.txt"), "r"
-        ) as f:
-            det_val_sets = f.read().splitlines()
-    else:
-        det_val_sets = []
-
-    data_dir = osp.join(args.input_dir, args.data_type, subset)
+    data_dir = osp.join(args.input_dir, args.data_type, args.split)
 
     scalabel = from_kitti(
         data_dir,
         data_type=args.data_type,
-        mode=args.mode,
-        det_val_sets=det_val_sets,
     )
 
     save(
