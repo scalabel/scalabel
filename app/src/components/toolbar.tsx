@@ -17,7 +17,12 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName } from "../const/common"
+import {
+  AttributeToolType,
+  AvailableHotKeys,
+  Key,
+  LabelTypeName
+} from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
@@ -35,6 +40,7 @@ interface Props {
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
   labelType: string
 }
+
 /**
  * This is ToolBar component that displays
  * all the attributes and categories for the 2D bounding box labeling tool
@@ -46,6 +52,25 @@ export class ToolBar extends Component<Props> {
   private readonly _keyDownHandler: (e: KeyboardEvent) => void
   /** key up handler */
   private readonly _keyUpHandler: (e: KeyboardEvent) => void
+
+  /**
+   * Return array of hotkey tip chars
+   *
+   * @param {number} index - index of current attribute element in categories list
+   * @param {Attribute} element - attribute element
+   */
+  private hotKeys(index: number, element: Attribute): string[] | null {
+    const state = this.state
+    if (
+      element.toolType !== AttributeToolType.LIST ||
+      state.task.config.labelTypes[state.user.select.labelType] !==
+        LabelTypeName.TAG ||
+      index > 3
+    ) {
+      return null
+    }
+    return AvailableHotKeys[index].slice(0, element.values.length)
+  }
 
   /**
    * Constructor
@@ -126,7 +151,7 @@ export class ToolBar extends Component<Props> {
           <Category categories={categories} headerText={"Category"} />
         ) : null}
         <List>
-          {attributes.map((element: Attribute) => (
+          {attributes.map((element: Attribute, index: number) => (
             <React.Fragment key={element.name}>
               {renderTemplate(
                 element.toolType,
@@ -134,7 +159,8 @@ export class ToolBar extends Component<Props> {
                 this.handleAttributeToggle,
                 this.getAlignmentIndex,
                 element.name,
-                element.values
+                element.values,
+                this.hotKeys(index, element)
               )}
             </React.Fragment>
           ))}

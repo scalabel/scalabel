@@ -20,8 +20,8 @@ import { Component } from "./component"
  * @param _event
  * @param categoryIndex
  */
-function handleChange(
-  _event: React.MouseEvent<HTMLElement>,
+export function handleChange(
+  _event: React.MouseEvent<HTMLElement> | null,
   categoryIndex: number | null
 ): void {
   const state = getState()
@@ -99,7 +99,7 @@ class MultipleSelect extends Component<Props> {
                 value={index}
                 disableRipple={true}
               >
-                {name}
+                {name} {index < 9 ? `[${index + 1}]` : ""}
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
