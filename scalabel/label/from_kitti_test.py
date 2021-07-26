@@ -6,8 +6,8 @@ from argparse import Namespace
 from ..common.parallel import NPROC
 from ..unittest.util import get_test_file
 from .from_kitti import run
-from .from_waymo_test import compare_results
 from .io import load
+from .utils import compare_results
 
 
 def test_run() -> None:
