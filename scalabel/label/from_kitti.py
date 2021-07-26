@@ -203,6 +203,8 @@ def from_kitti_det(
             )
 
             labels = labels_dict[0]
+        else:
+            labels = []
 
         image_name = osp.join(img_dir, img_name)
         image_name = data_type + image_name.split(data_type)[-1]
