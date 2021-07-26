@@ -108,8 +108,8 @@ Available arguments:
                             path to KITTI data (images + annotations).
     --output_dir OUTPUT, -o OUTPUT
                             Output path for Scalabel format annotations.
-    --mode, MODE
-                            one of [mini, subtrain, subval, train, test]
+    --split, SPLIT
+                            one of [training, testing]
     --data_type DATA_TYPE
                             one of [tracking, detection]
     --nproc NPROC

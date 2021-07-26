@@ -179,8 +179,6 @@ def from_kitti_det(
     cam2global = Extrinsics(location=position, rotation=rotation)
 
     for img_id, img_name in enumerate(img_names):
-        print(f"DET: {img_name.split('.')[0]}")
-
         trackid_maps: Dict[str, int] = dict()
 
         with Image.open(osp.join(img_dir, img_name)) as img:
@@ -247,8 +245,6 @@ def from_kitti(
     global_track_id = 0
 
     for vid_name in vid_names:
-        print(f"VID: {vid_name}")
-
         trackid_maps: Dict[str, int] = dict()
 
         img_names = sorted(

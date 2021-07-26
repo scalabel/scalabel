@@ -19,13 +19,13 @@ def test_run() -> None:
     args = Namespace(
         input_dir=filepath,
         output_dir=output_dir,
-        mode="mini",
+        split="training",
         data_type="tracking",
         nproc=NPROC,
     )
     run(args)
 
-    result = load(os.path.join(output_dir, "tracking_mini.json")).frames
+    result = load(os.path.join(output_dir, "tracking_training.json")).frames
     result_compare = load(result_filepath).frames
 
     compare_results(result, result_compare)
