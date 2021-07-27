@@ -98,6 +98,13 @@ export interface MergeTrackAction extends BaseAction {
   trackIds: IdType[]
 }
 
+export interface SplitTrackAction extends BaseAction {
+  /** item of the added label */
+  trackId: IdType
+  newTrackId: IdType
+  splitIndex: number
+}
+
 export interface ChangeShapesAction extends BaseAction {
   /** item of the shape */
   itemIndices: number[]

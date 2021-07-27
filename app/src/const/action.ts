@@ -20,6 +20,7 @@ export const DELETE_LABELS = "DELETE_LABELS"
 
 export const ADD_TRACK = "ADD_TRACK"
 export const MERGE_TRACKS = "MERGE_TRACKS"
+export const SPLIT_TRACK = "SPLIT_TRACK"
 
 // View Level
 export const ADD_VIEWER_CONFIG = "ADD_VIEWER_CONFIG"
@@ -50,6 +51,7 @@ const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   ADD_TRACK,
   MERGE_TRACKS,
+  SPLIT_TRACK,
   SUBMIT
 ]
 

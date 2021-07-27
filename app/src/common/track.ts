@@ -238,6 +238,7 @@ export class Track {
         this._shapes[index] = []
         for (const shape of shapeStates) {
           const newShape = makeShape(shape.shapeType, shape)
+          newShape.label = [cloned.id]
           this._shapes[index].push(newShape)
           cloned.shapes.push(newShape.id)
         }
