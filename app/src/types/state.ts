@@ -45,6 +45,8 @@ export interface LabelType {
   order: number
   /** whether the label is created manually */
   manual: boolean
+  /** Has shape changed? e.g. vertex is added/deleted. */
+  changed: boolean
 }
 
 export interface TrackType {

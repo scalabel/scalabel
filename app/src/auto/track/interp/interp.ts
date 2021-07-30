@@ -64,6 +64,10 @@ export function getAutoLabelRange(
   let prevIndex = -1
   for (let i = labelIndex - 1; i >= 0; i -= 1) {
     const label = labels[i]
+    if (label.changed) {
+      prevIndex = -2
+      break
+    }
     if (label.manual) {
       prevIndex = i
       break
@@ -72,6 +76,10 @@ export function getAutoLabelRange(
   let nextIndex = -1
   for (let i = labelIndex + 1; i < labels.length; i += 1) {
     const label = labels[i]
+    if (label.changed) {
+      nextIndex = -2
+      break
+    }
     if (label.manual) {
       nextIndex = i
       break
@@ -113,7 +121,7 @@ export class TrackInterp {
     newShapes[labelIndex] = newShape
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
-    } else {
+    } else if (manual0 > 0) {
       newShapes = assignShapesInRange(
         manual0 + 1,
         labelIndex,
@@ -128,7 +136,7 @@ export class TrackInterp {
         newShape,
         newShapes
       )
-    } else {
+    } else if (manual1 > 0) {
       newShapes = assignShapesInRange(
         labelIndex + 1,
         manual1,

@@ -568,7 +568,8 @@ export const sampleTasksVideo: TaskType[] = [
             shapes: ["0"],
             track: "0",
             order: 0,
-            manual: true
+            manual: true,
+            changed: false
           }
         },
         shapes: {
@@ -618,7 +619,8 @@ export const sampleTasksVideo: TaskType[] = [
             shapes: ["1"],
             track: "0",
             order: 0,
-            manual: true
+            manual: true,
+            changed: false
           }
         },
         shapes: {
