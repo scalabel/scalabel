@@ -98,7 +98,7 @@ export class Box2DLinearInterp extends TrackInterp {
     newShapes[labelIndex] = _.cloneDeep(newShape)
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
-    } else if (manual0 > 0) {
+    } else if (manual0 >= 0) {
       newShapes = linearInterpBoxesInRange(
         manual0,
         labelIndex,
@@ -113,7 +113,7 @@ export class Box2DLinearInterp extends TrackInterp {
         newShape,
         newShapes
       )
-    } else if (manual1 > 0) {
+    } else if (manual1 >= 0) {
       newShapes = linearInterpBoxesInRange(
         labelIndex,
         manual1,

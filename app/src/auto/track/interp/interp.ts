@@ -121,7 +121,7 @@ export class TrackInterp {
     newShapes[labelIndex] = newShape
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
-    } else if (manual0 > 0) {
+    } else if (manual0 >= 0) {
       newShapes = assignShapesInRange(
         manual0 + 1,
         labelIndex,
@@ -136,7 +136,7 @@ export class TrackInterp {
         newShape,
         newShapes
       )
-    } else if (manual1 > 0) {
+    } else if (manual1 >= 0) {
       newShapes = assignShapesInRange(
         labelIndex + 1,
         manual1,

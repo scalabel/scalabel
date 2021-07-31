@@ -117,7 +117,7 @@ export class Points2DLinearInterp extends TrackInterp {
     }
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
-    } else if (manual0 > 0) {
+    } else if (manual0 >= 0) {
       newShapes = linearInterpPointsInRange(
         manual0,
         labelIndex,
@@ -132,7 +132,7 @@ export class Points2DLinearInterp extends TrackInterp {
         newShape,
         newShapes
       )
-    } else if (manual1 > 0) {
+    } else if (manual1 >= 0) {
       newShapes = linearInterpPointsInRange(
         labelIndex,
         manual1,
