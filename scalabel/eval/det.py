@@ -223,7 +223,10 @@ class COCOevalV2(COCOeval):  # type: ignore
         for metric, score in zip(METRICS, cat_scores):
             res_dict["{}".format(metric)] = score
         data_frame.loc["OVERALL"] = cat_scores
-        return EvalResult(res_dict=res_dict, data_frame=data_frame)
+        row_breaks = [1, 2 + len(self.params.catIds)]
+        return EvalResult(
+            res_dict=res_dict, data_frame=data_frame, row_breaks=row_breaks
+        )
 
 
 def evaluate_det(

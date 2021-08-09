@@ -235,6 +235,7 @@ def render_results(
     items: List[str],
     metrics: List[str],
     classes: List[Category],
+    super_classes: Dict[str, List[Category]],
 ) -> EvalResult:
     """Render the evaluation results."""
     data_frame = pd.DataFrame(columns=metrics)
@@ -267,10 +268,12 @@ def render_results(
     metric_host = mm.metrics.create()
     metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
 
+    row_breaks = [1, 2 + len(classes), 3 + len(classes) + len(super_classes)]
     return EvalResult(
         res_dict=res_dict,
         data_frame=data_frame,
         formatters=metric_host.formatters,
+        row_breaks=row_breaks,
     )
 
 
@@ -347,7 +350,9 @@ def evaluate_track(
 
     logger.info("rendering...")
     metrics = list(METRIC_MAPS.values())
-    eval_results = render_results(summaries, items, metrics, classes)
+    eval_results = render_results(
+        summaries, items, metrics, classes, super_classes
+    )
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return eval_results
