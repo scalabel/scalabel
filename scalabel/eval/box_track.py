@@ -22,8 +22,8 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
+from .result import EvalResult
 
-EvalResults = Dict[str, Dict[str, float]]
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
     [Video, Video, List[str], float, float, bool],
@@ -235,16 +235,16 @@ def render_results(
     items: List[str],
     metrics: List[str],
     classes: List[Category],
-    super_classes: Dict[str, List[Category]],
-) -> EvalResults:
+) -> EvalResult:
     """Render the evaluation results."""
-    eval_results = pd.DataFrame(columns=metrics)
+    data_frame = pd.DataFrame(columns=metrics)
     # category, super-category and overall results
     for i, item in enumerate(items):
-        eval_results.loc[item] = summaries[i]
+        data_frame.loc[item] = summaries[i]
     dtypes = {m: type(d) for m, d in zip(metrics, summaries[0])}
     # average results
     avg_results: List[Union[int, float]] = []
+    print(classes)
     for i, m in enumerate(metrics):
         v = np.array([s[i] for s in summaries[: len(classes)]])
         v = np.nan_to_num(v, nan=0)
@@ -254,39 +254,24 @@ def render_results(
             avg_results.append(float(v.mean()))
         else:
             raise TypeError()
-    eval_results.loc["AVERAGE"] = avg_results
-    eval_results = eval_results.astype(dtypes)
+    data_frame.loc["AVERAGE"] = avg_results
+    data_frame = data_frame.astype(dtypes)
+
+    res_dict: Dict[str, float] = dict()
+    for metric, score in zip(metrics, data_frame.loc["OVERALL"]):
+        res_dict[metric] = score
+    res_dict["mIDF1"] = data_frame.loc["AVERAGE"]["IDF1"]
+    res_dict["mMOTA"] = data_frame.loc["AVERAGE"]["MOTA"]
+    res_dict["mMOTP"] = data_frame.loc["AVERAGE"]["MOTP"]
 
     metric_host = mm.metrics.create()
     metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
-    strsummary = mm.io.render_summary(
-        eval_results,
+
+    return EvalResult(
+        res_dict=res_dict,
+        data_frame=data_frame,
         formatters=metric_host.formatters,
-        namemap=METRIC_MAPS,
     )
-    strsummary = strsummary.split("\n")
-    len_all = len(classes) + 3
-    if super_classes is not None:
-        len_all += len(super_classes)
-    assert len(strsummary) == len_all
-    split_line = "-" * len(strsummary[0])
-    strsummary.insert(1, split_line)
-    strsummary.insert(2 + len(classes), split_line)
-    strsummary.insert(len_all, split_line)
-    strsummary = "".join([f"{s}\n" for s in strsummary])
-    strsummary = "\n" + strsummary
-    logger.info(strsummary)
-
-    outputs: EvalResults = dict()
-    for i, item in enumerate(items):
-        outputs[item] = dict()
-        for j, metric in enumerate(METRIC_MAPS.values()):
-            outputs[item][metric] = summaries[i][j]
-    outputs["OVERALL"]["mIDF1"] = eval_results.loc["AVERAGE"]["idf1"]
-    outputs["OVERALL"]["mMOTA"] = eval_results.loc["AVERAGE"]["mota"]
-    outputs["OVERALL"]["mMOTP"] = eval_results.loc["AVERAGE"]["motp"]
-
-    return outputs
 
 
 def evaluate_track(
@@ -298,7 +283,7 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-) -> EvalResults:
+) -> EvalResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
     Args:
@@ -318,7 +303,6 @@ def evaluate_track(
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     assert len(gts) == len(results)
-    metrics = list(METRIC_MAPS.keys())
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)
@@ -362,9 +346,8 @@ def evaluate_track(
         ]
 
     logger.info("rendering...")
-    eval_results = render_results(
-        summaries, items, metrics, classes, super_classes
-    )
+    metrics = list(METRIC_MAPS.values())
+    eval_results = render_results(summaries, items, metrics, classes)
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return eval_results
@@ -427,7 +410,7 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    scores = evaluate_track(
+    result = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
         group_and_sort(load(args.result).frames),
@@ -437,6 +420,7 @@ if __name__ == "__main__":
         args.ignore_unknown_cats,
         args.nproc,
     )
-    if args.out_dir:
+    print(result)
+    if args.out_file:
         with open(args.out_file, "w") as fp:
-            json.dump(scores, fp)
+            json.dump(result.res_dict, fp)
