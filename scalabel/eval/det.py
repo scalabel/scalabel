@@ -7,22 +7,22 @@ import argparse
 import copy
 import json
 import time
+from functools import partial
 from multiprocessing import Pool
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
-import pandas as pd
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
-from scalabel.eval.result import EvalResult
-
+from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
+from .result import BaseResult, result_to_flatten_dict
 
 METRICS = [
     "AP",
@@ -38,6 +38,30 @@ METRICS = [
     "ARm",
     "ARl",
 ]
+
+
+class DetResult(BaseResult):
+    """The class for bounding box detection evaluation results."""
+
+    AP: List[float]
+    AP50: List[float]
+    AP75: List[float]
+    APs: List[float]
+    APm: List[float]
+    APl: List[float]
+    AR1: List[float]
+    AR10: List[float]
+    AR100: List[float]
+    ARs: List[float]
+    ARm: List[float]
+    ARl: List[float]
+
+    def __init__(  # pylint: disable=redefined-outer-name, type: ignore
+        self, *args, **kwargs
+    ) -> None:
+        """Set extram parameters."""
+        super().__init__(*args, **kwargs)
+        self._formatters = {metric: "{:.1f}".format for metric in METRICS}
 
 
 class COCOV2(COCO):  # type: ignore
@@ -78,6 +102,66 @@ class COCOevalV2(COCOeval):  # type: ignore
         super().__init__(cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType)
         self.cat_names = cat_names
         self.nproc = nproc
+
+        max_dets = self.params.maxDets  # type: ignore
+        self.get_score_funcs: Dict[str, Callable[[int], float]] = dict(
+            AP=self.get_score,
+            AP50=partial(
+                self.get_score,
+                metric="precision",
+                iou_thr=0.5,
+                max_dets=max_dets[2],
+            ),
+            AP75=partial(
+                self.get_score,
+                metric="precision",
+                iou_thr=0.75,
+                max_dets=max_dets[2],
+            ),
+            APs=partial(
+                self.get_score,
+                metric="precision",
+                area_rng="small",
+                max_dets=max_dets[2],
+            ),
+            APm=partial(
+                self.get_score,
+                metric="precision",
+                area_rng="medium",
+                max_dets=max_dets[2],
+            ),
+            APl=partial(
+                self.get_score,
+                metric="precision",
+                area_rng="large",
+                max_dets=max_dets[2],
+            ),
+            AR1=partial(self.get_score, metric="recall", max_dets=max_dets[0]),
+            AR10=partial(
+                self.get_score, metric="recall", max_dets=max_dets[1]
+            ),
+            AR100=partial(
+                self.get_score, metric="recall", max_dets=max_dets[2]
+            ),
+            ARs=partial(
+                self.get_score,
+                metric="recall",
+                area_rng="small",
+                max_dets=max_dets[2],
+            ),
+            ARm=partial(
+                self.get_score,
+                metric="recall",
+                area_rng="medium",
+                max_dets=max_dets[2],
+            ),
+            ARl=partial(
+                self.get_score,
+                metric="recall",
+                area_rng="large",
+                max_dets=max_dets[2],
+            ),
+        )
 
     def evaluate(self) -> None:
         """Run per image evaluation on given images."""
@@ -139,9 +223,9 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def get_score(
         self,
+        cat_id: Optional[int],
         metric: str = "precision",
         iou_thr: Optional[float] = None,
-        cat_id: Optional[int] = None,
         area_rng: str = "all",
         max_dets: int = 100,
     ) -> float:
@@ -173,65 +257,27 @@ class COCOevalV2(COCOeval):  # type: ignore
             mean_s = -1
         else:
             mean_s = np.mean(s[s > -1])
-        return mean_s
+        return mean_s * 100
 
-    def summarize_category(  # pylint: disable=arguments-differ
-        self, cat_id: Optional[int] = None
-    ) -> List[float]:
-        """Extract the results according the category."""
-        max_dets = self.params.maxDets
-        metric_scores = [
-            self.get_score(cat_id=cat_id),
-            self.get_score(iou_thr=0.5, cat_id=cat_id, max_dets=max_dets[2]),
-            self.get_score(iou_thr=0.75, cat_id=cat_id, max_dets=max_dets[2]),
-            self.get_score(
-                area_rng="small", cat_id=cat_id, max_dets=max_dets[2]
-            ),
-            self.get_score(
-                area_rng="medium", cat_id=cat_id, max_dets=max_dets[2]
-            ),
-            self.get_score(
-                area_rng="large", cat_id=cat_id, max_dets=max_dets[2]
-            ),
-            self.get_score("recall", cat_id=cat_id, max_dets=max_dets[0]),
-            self.get_score("recall", cat_id=cat_id, max_dets=max_dets[1]),
-            self.get_score("recall", cat_id=cat_id, max_dets=max_dets[2]),
-            self.get_score(
-                "recall", cat_id=cat_id, area_rng="small", max_dets=max_dets[2]
-            ),
-            self.get_score(
-                "recall",
-                cat_id=cat_id,
-                area_rng="medium",
-                max_dets=max_dets[2],
-            ),
-            self.get_score(
-                "recall", cat_id=cat_id, area_rng="large", max_dets=max_dets[2]
-            ),
-        ]
-        return metric_scores
-
-    def summarize(self) -> EvalResult:
+    def summarize(self) -> DetResult:
         """Compute summary metrics for evaluation results."""
-        data_frame = pd.DataFrame(columns=METRICS)
-        for cat_id, cat_name in zip(self.params.catIds, self.cat_names):
-            cat_scores = self.summarize_category(cat_id)
-            data_frame.loc[cat_name] = cat_scores
-
-        res_dict: Dict[str, float] = dict()
-        cat_scores = self.summarize_category()
-        for metric, score in zip(METRICS, cat_scores):
-            res_dict["{}".format(metric)] = score
-        data_frame.loc["OVERALL"] = cat_scores
-        row_breaks = [1, 2 + len(self.params.catIds)]
-        return EvalResult(
-            res_dict=res_dict, data_frame=data_frame, row_breaks=row_breaks
+        cat_ids = self.params.catIds + [None]
+        res_dict = {
+            metric: [
+                self.get_score_funcs[metric](cat_id) for cat_id in cat_ids
+            ]
+            for metric in METRICS
+        }
+        all_classes = self.cat_names + ["OVERALL"]
+        row_breaks = [1, 1 + len(all_classes)]
+        return DetResult(
+            all_classes=all_classes, row_breaks=row_breaks, **res_dict
         )
 
 
 def evaluate_det(
     ann_frames: List[Frame], pred_frames: List[Frame], config: Config
-) -> EvalResult:
+) -> DetResult:
     """Load the ground truth and prediction results.
 
     Args:
@@ -240,7 +286,7 @@ def evaluate_det(
         config: Metadata config.
 
     Returns:
-        dict: detection metric scores
+        DetResult: rendered eval results.
 
     Example usage:
         evaluate_det(
@@ -270,7 +316,8 @@ def evaluate_det(
 
     coco_eval.evaluate()
     coco_eval.accumulate()
-    return coco_eval.summarize()
+    result = coco_eval.summarize()
+    return result
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -313,8 +360,8 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    result = evaluate_det(gts, preds, cfg)
-    print(result)
+    eval_result = evaluate_det(gts, preds, cfg)
+    logger.info(eval_result)
     if args.out_file:
         with open(args.out_file, "w") as fp:
-            json.dump(result.res_dict, fp)
+            json.dump(result_to_flatten_dict(eval_result), fp)

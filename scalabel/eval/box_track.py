@@ -8,11 +8,10 @@ from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
-import pandas as pd
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayF64, NDArrayI32
+from ..common.typing import DictStrAny, NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -22,7 +21,7 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
-from .result import EvalResult
+from .result import BaseResult, result_to_flatten_dict
 
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
@@ -42,6 +41,38 @@ METRIC_MAPS = {
     "mostly_lost": "ML",
     "num_fragmentations": "FM",
 }
+METRIC_TO_AVERAGE = ["IDF1", "MOTA", "MOTP"]
+
+
+class BoxTrackResult(BaseResult):
+    """The class for bounding box tracking evaluation results."""
+
+    mMOTA: float
+    mMOTP: float
+    mIDF1: float
+    MOTA: List[float]
+    MOTP: List[float]
+    IDF1: List[float]
+    FP: List[int]
+    FN: List[int]
+    IDSw: List[int]
+    MT: List[int]
+    PT: List[int]
+    ML: List[int]
+    FM: List[int]
+
+    def __init__(  # pylint: disable=redefined-outer-name, type: ignore
+        self, *args, **kwargs
+    ) -> None:
+        """Set extram parameters."""
+        super().__init__(*args, **kwargs)
+        metric_host = mm.metrics.create()
+        metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
+        self._formatters = {
+            METRIC_MAPS[metric]: format
+            for metric, format in metric_host.formatters.items()
+            if metric in METRIC_MAPS
+        }
 
 
 def parse_objects(
@@ -175,7 +206,6 @@ def aggregate_accs(
     """Aggregate the results of the entire dataset."""
     # accs for each class
     items = [c.name for c in classes]
-
     names: List[List[str]] = [[] for _ in items]
     accs: List[List[str]] = [[] for _ in items]
     for video_ind, _accs in enumerate(accumulators):
@@ -205,15 +235,16 @@ def aggregate_accs(
 
 def evaluate_single_class(
     names: List[str], accs: List[mm.MOTAccumulator]
-) -> List[float]:
+) -> Dict[str, Union[int, float]]:
     """Evaluate results for one class."""
     mh = mm.metrics.create()
     summary = mh.compute_many(
         accs, names=names, metrics=METRIC_MAPS.keys(), generate_overall=True
     )
-    results = [v["OVERALL"] for k, v in summary.to_dict().items()]
-    motp_ind = list(METRIC_MAPS).index("motp")
-    if np.isnan(results[motp_ind]):
+    flat_dict = {
+        METRIC_MAPS[k]: v["OVERALL"] for k, v in summary.to_dict().items()
+    }
+    if np.isnan(flat_dict["MOTP"]):
         num_dets = mh.compute_many(
             accs,
             names=names,
@@ -224,56 +255,50 @@ def evaluate_single_class(
         motp = mm.math_util.quiet_divide(
             sum_motp, num_dets["num_detections"]["OVERALL"]
         )
-        results[motp_ind] = float(1 - motp)
+        flat_dict["MOTP"] = float(1 - motp)
     else:
-        results[motp_ind] = 1 - results[motp_ind]
-    return results
+        flat_dict["MOTP"] = 1 - flat_dict["MOTP"]
+
+    return flat_dict
 
 
 def render_results(
-    summaries: List[List[float]],
+    res_dicts: List[Dict[str, Union[int, float]]],
     items: List[str],
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> EvalResult:
+) -> BoxTrackResult:
     """Render the evaluation results."""
-    data_frame = pd.DataFrame(columns=metrics)
-    # category, super-category and overall results
-    for i, item in enumerate(items):
-        data_frame.loc[item] = summaries[i]
-    dtypes = {m: type(d) for m, d in zip(metrics, summaries[0])}
-    # average results
-    avg_results: List[Union[int, float]] = []
-    print(classes)
-    for i, m in enumerate(metrics):
-        v = np.array([s[i] for s in summaries[: len(classes)]])
+    ave_dict: Dict[str, Union[int, float]] = dict()
+    for metric in metrics:
+        dtype = type(res_dicts[-1][metric])
+        v = np.array([res_dicts[i][metric] for i in range(len(classes))])
         v = np.nan_to_num(v, nan=0)
-        if dtypes[m] == int:
-            avg_results.append(int(v.sum()))
-        elif dtypes[m] == float:
-            avg_results.append(float(v.mean()))
+        if dtype == int:
+            value = dtype(v.sum())
+        elif dtype == float:
+            value = dtype(v.mean())
         else:
             raise TypeError()
-    data_frame.loc["AVERAGE"] = avg_results
-    data_frame = data_frame.astype(dtypes)
-
-    res_dict: Dict[str, float] = dict()
-    for metric, score in zip(metrics, data_frame.loc["OVERALL"]):
-        res_dict[metric] = score
-    res_dict["mIDF1"] = data_frame.loc["AVERAGE"]["IDF1"]
-    res_dict["mMOTA"] = data_frame.loc["AVERAGE"]["MOTA"]
-    res_dict["mMOTP"] = data_frame.loc["AVERAGE"]["MOTP"]
-
-    metric_host = mm.metrics.create()
-    metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
-
-    row_breaks = [1, 2 + len(classes), 3 + len(classes) + len(super_classes)]
-    return EvalResult(
-        res_dict=res_dict,
-        data_frame=data_frame,
-        formatters=metric_host.formatters,
-        row_breaks=row_breaks,
+        ave_dict[metric] = value
+    items.insert(len(res_dicts) - 1, "AVERAGE")
+    res_dicts.insert(len(res_dicts) - 1, ave_dict)
+    res_dict: DictStrAny = {
+        metric: [res_dict[metric] for res_dict in res_dicts]
+        for metric in res_dicts[-1].keys()
+    }
+    res_dict.update(
+        {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
+    )
+    return BoxTrackResult(
+        all_classes=items,
+        row_breaks=[
+            1,
+            2 + len(classes),
+            3 + len(classes) + len(super_classes),
+        ],
+        **res_dict,
     )
 
 
@@ -286,7 +311,7 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-) -> EvalResult:
+) -> BoxTrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
     Args:
@@ -301,7 +326,7 @@ def evaluate_track(
         nproc: processes number for loading files
 
     Returns:
-        dict: CLEAR MOT metric scores
+        BoxTrackResult: rendered eval results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
@@ -342,20 +367,18 @@ def evaluate_track(
     logger.info("evaluating...")
     if nproc > 1:
         with Pool(nproc) as pool:
-            summaries = pool.starmap(evaluate_single_class, zip(names, accs))
+            res_dicts = pool.starmap(evaluate_single_class, zip(names, accs))
     else:
-        summaries = [
+        res_dicts = [
             evaluate_single_class(name, acc) for name, acc in zip(names, accs)
         ]
 
     logger.info("rendering...")
     metrics = list(METRIC_MAPS.values())
-    eval_results = render_results(
-        summaries, items, metrics, classes, super_classes
-    )
+    result = render_results(res_dicts, items, metrics, classes, super_classes)
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
-    return eval_results
+    return result
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -415,7 +438,7 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    result = evaluate_track(
+    eval_result = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
         group_and_sort(load(args.result).frames),
@@ -425,7 +448,7 @@ if __name__ == "__main__":
         args.ignore_unknown_cats,
         args.nproc,
     )
-    print(result)
+    logger.info(eval_result)
     if args.out_file:
         with open(args.out_file, "w") as fp:
-            json.dump(result.res_dict, fp)
+            json.dump(result_to_flatten_dict(eval_result), fp)

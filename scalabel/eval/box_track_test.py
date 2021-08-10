@@ -5,6 +5,11 @@ import unittest
 from ..label.io import group_and_sort, load, load_label_config
 from ..unittest.util import get_test_file
 from .box_track import METRIC_MAPS, acc_single_video_mot, evaluate_track
+from .result import (
+    nested_dict_to_data_frame,
+    result_to_flatten_dict,
+    result_to_nested_dict,
+)
 
 
 class TestBDD100KMotEval(unittest.TestCase):
@@ -19,8 +24,12 @@ class TestBDD100KMotEval(unittest.TestCase):
     )
     config = load_label_config(get_test_file("box_track_configs.toml"))
     result = evaluate_track(acc_single_video_mot, gts, preds, config)
-    res_dict = result.res_dict
-    data_frame = result.data_frame
+    res_dict = result_to_flatten_dict(result)
+    data_frame = nested_dict_to_data_frame(
+        result_to_nested_dict(
+            result, result._all_classes  # pylint: disable=protected-access
+        )
+    )
 
     def test_result_value(self) -> None:
         """Check evaluation scores' correctness."""
