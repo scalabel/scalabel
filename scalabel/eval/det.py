@@ -220,20 +220,22 @@ class COCOevalV2(COCOeval):  # type: ignore
         aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == area_rng]
         mind = [i for i, mDet in enumerate(p.maxDets) if mDet == max_dets]
         s = self.eval[metric]
+        cat_ids = np.array(p.catIds)
         if iou_thr is not None:
             t = np.where(iou_thr == p.iouThrs)[0]
             s = s[t]
         if metric == "precision":
             # dimension of precision: [TxRxKxAxM]
             if cat_id is not None:
-                k = np.where(cat_id == p.catIds)[0]
+                k = np.where(cat_id == cat_ids)[0]
+                print(k, p.catIds)
                 s = s[:, :, k, aind, mind]
             else:
                 s = s[:, :, :, aind, mind]
         elif metric == "recall":
             # dimension of recall: [TxKxAxM]
             if cat_id is not None:
-                k = np.where(cat_id == p.catIds)[0]
+                k = np.where(cat_id == cat_ids)[0]
                 s = s[:, k, aind, mind]
             else:
                 s = s[:, :, aind, mind]

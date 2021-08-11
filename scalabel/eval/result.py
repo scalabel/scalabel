@@ -100,7 +100,17 @@ class BaseResult(BaseModel):
         super_classes: Optional[List[str]] = None,
         **data: Any,
     ) -> None:
-        """Set extram parameters."""
+        """Set extram parameters.
+
+        Args:
+            self: class itself
+            classes (list[str]): names of basic classes
+            hyper_classes (list[str]):
+                names of hyper classes, like "OVERALL" or "AVERAGE"
+            super_classes (list[str]):
+                names of super classes, useful for two-level class hierarchy
+            data: other parameters
+        """
         if super_classes is None:
             super_classes = []
         all_classes = classes + super_classes + hyper_classes
