@@ -21,7 +21,7 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
-from .result import BaseResult, result_to_flatten_dict
+from .result import AVERAGE, OVERALL, BaseResult, result_to_flatten_dict
 
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
@@ -61,6 +61,7 @@ class BoxTrackResult(BaseResult):
     ML: List[int]
     FM: List[int]
 
+    # pylint: disable=redefined-outer-name
     def __init__(self, *args_, **kwargs) -> None:  # type: ignore
         """Set extra parameters."""
         super().__init__(*args_, **kwargs)
@@ -202,12 +203,11 @@ def aggregate_accs(
     accumulators: List[List[mm.MOTAccumulator]],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> Tuple[List[List[str]], List[List[mm.MOTAccumulator]], List[str]]:
+) -> Tuple[List[List[str]], List[List[mm.MOTAccumulator]]]:
     """Aggregate the results of the entire dataset."""
     # accs for each class
-    items = [c.name for c in classes]
-    names: List[List[str]] = [[] for _ in items]
-    accs: List[List[str]] = [[] for _ in items]
+    names: List[List[str]] = [[] for _ in classes]
+    accs: List[List[str]] = [[] for _ in classes]
     for video_ind, _accs in enumerate(accumulators):
         for cls_ind, acc in enumerate(_accs):
             if (
@@ -220,17 +220,15 @@ def aggregate_accs(
             accs[cls_ind].append(acc)
 
     # super categories (if any)
-    for super_cls, cls in super_classes.items():
-        items.append(super_cls)
+    for cls in super_classes.values():
         names.append([n for c in cls for n in names[classes.index(c)]])
         accs.append([a for c in cls for a in accs[classes.index(c)]])
 
     # overall
-    items.append("OVERALL")
     names.append([n for name in names[: len(classes)] for n in name])
     accs.append([a for acc in accs[: len(classes)] for a in acc])
 
-    return names, accs, items
+    return names, accs
 
 
 def evaluate_single_class(
@@ -267,7 +265,6 @@ def evaluate_single_class(
 
 def render_results(
     res_dicts: List[Dict[str, Union[int, float]]],
-    items: List[str],
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
@@ -285,7 +282,6 @@ def render_results(
         else:
             raise TypeError()
         ave_dict[metric] = value
-    items.insert(len(res_dicts) - 1, "AVERAGE")
     res_dicts.insert(len(res_dicts) - 1, ave_dict)
     res_dict: DictStrAny = {
         metric: [res_dict[metric] for res_dict in res_dicts]
@@ -295,12 +291,9 @@ def render_results(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
     return BoxTrackResult(
-        all_classes=items,
-        row_breaks=[
-            1,
-            2 + len(classes),
-            3 + len(classes) + len(super_classes),
-        ],
+        classes=[class_.name for class_ in classes],
+        super_classes=[class_name for class_name in super_classes],
+        hyper_classes=[AVERAGE, OVERALL],
         **res_dict,
     )
 
@@ -365,7 +358,7 @@ def evaluate_track(
             for gt, result in zip(gts, results)
         ]
 
-    names, accs, items = aggregate_accs(accs, classes, super_classes)
+    names, accs = aggregate_accs(accs, classes, super_classes)
 
     logger.info("evaluating...")
     if nproc > 1:
@@ -378,7 +371,7 @@ def evaluate_track(
 
     logger.info("rendering...")
     metrics = list(METRIC_MAPS.values())
-    result = render_results(res_dicts, items, metrics, classes, super_classes)
+    result = render_results(res_dicts, metrics, classes, super_classes)
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return result

@@ -22,7 +22,7 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import BaseResult, result_to_flatten_dict
+from .result import OVERALL, BaseResult, result_to_flatten_dict
 
 
 class DetResult(BaseResult):
@@ -41,9 +41,10 @@ class DetResult(BaseResult):
     ARm: List[float]
     ARl: List[float]
 
-    def __init__(self, *args_, **kwargs) -> None:  # type: ignore
+    # pylint: disable=redefined-outer-name
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
         """Set extra parameters."""
-        super().__init__(*args_, **kwargs)
+        super().__init__(*args, **kwargs)
         self._formatters = {
             metric: "{:.1f}".format for metric in self.__fields__
         }
@@ -251,11 +252,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             metric: [get_score_func(cat_id) for cat_id in cat_ids]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        all_classes = self.cat_names + ["OVERALL"]
-        row_breaks = [1, 1 + len(all_classes)]
-        return DetResult(
-            all_classes=all_classes, row_breaks=row_breaks, **res_dict
-        )
+        return DetResult(self.cat_names, [OVERALL], **res_dict)
 
 
 def evaluate_det(
