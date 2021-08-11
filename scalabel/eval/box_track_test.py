@@ -33,10 +33,14 @@ class TestBDD100KMotEval(unittest.TestCase):
 
     def test_result_value(self) -> None:
         """Check evaluation scores' correctness."""
+        print(self.result)
         overall_reference = {
-            "IDF1": 0.7101073676416142,
-            "MOTA": 0.6420070762302992,
-            "MOTP": 0.871614396957838,
+            "mMOTA": 24.324204637536685,
+            "mMOTP": 50.01285067174096,
+            "mIDF1": 32.24781943655838,
+            "MOTA": 64.20070762302992,
+            "MOTP": 87.16143945073146,
+            "IDF1": 71.01073676416142,
             "FP": 126,
             "FN": 942,
             "IDSw": 45,
@@ -44,13 +48,8 @@ class TestBDD100KMotEval(unittest.TestCase):
             "PT": 47,
             "ML": 33,
             "FM": 66,
-            "mIDF1": 0.32247819436558384,
-            "mMOTA": 0.24324204637536687,
-            "mMOTP": 0.5001285135514636,
         }
-        for key, val in overall_reference.items():
-            self.assertAlmostEqual(self.res_dict[key], val)
-        self.assertEqual(len(self.res_dict), len(overall_reference))
+        self.assertDictEqual(self.res_dict, overall_reference)
 
     def test_data_frame(self) -> None:
         """Check evaluation scores' correctness."""

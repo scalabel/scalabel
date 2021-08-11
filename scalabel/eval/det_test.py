@@ -32,22 +32,20 @@ class TestBDD100KDetectEval(unittest.TestCase):
     def test_result_value(self) -> None:
         """Check evaluation scores' correctness."""
         overall_reference = {
-            "AP": 34.02939266840102,
-            "AP50": 55.3239004090397,
-            "AP75": 34.938733599978766,
+            "AP": 34.029392668401016,
+            "AP50": 55.323900409039695,
+            "AP75": 34.93873359997877,
             "APs": 20.91624813537171,
-            "APm": 48.436465249988514,
+            "APm": 48.4364652499885,
             "APl": 64.28530466767323,
-            "AR1": 23.877338403079265,
-            "AR10": 38.05003678186741,
-            "AR100": 40.951604502247774,
-            "ARs": 25.55304932799571,
-            "ARm": 58.38594871794872,
-            "ARl": 66.04261954261954,
+            "AR1": 23.877338403079264,
+            "AR10": 38.050036781867405,
+            "AR100": 40.95160450224777,
+            "ARs": 25.5530493279957,
+            "ARm": 58.38594871794871,
+            "ARl": 66.04261954261955,
         }
-        for key, val in self.res_dict.items():
-            self.assertAlmostEqual(val, overall_reference[key])
-        self.assertEqual(len(self.res_dict), len(overall_reference))
+        self.assertDictEqual(self.res_dict, overall_reference)
 
     def test_data_frame(self) -> None:
         """Check evaluation scores' correctness."""

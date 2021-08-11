@@ -65,7 +65,9 @@ class BoxTrackResult(BaseResult):
         """Set extra parameters."""
         super().__init__(*args_, **kwargs)
         metric_host = mm.metrics.create()
-        metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
+        metric_host.register(mm.metrics.mota, formatter="{:.1f}".format)
+        metric_host.register(mm.metrics.motp, formatter="{:.1f}".format)
+        metric_host.register(mm.metrics.idf1, formatter="{:.1f}".format)
         self._formatters = {
             METRIC_MAPS[metric]: format
             for metric, format in metric_host.formatters.items()
@@ -257,6 +259,9 @@ def evaluate_single_class(
     else:
         flat_dict["MOTP"] = 1 - flat_dict["MOTP"]
 
+    for metric, score in flat_dict.items():
+        if isinstance(score, float):
+            flat_dict[metric] = 100 * score
     return flat_dict
 
 
