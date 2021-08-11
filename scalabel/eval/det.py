@@ -24,21 +24,6 @@ from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
 from .result import BaseResult, result_to_flatten_dict
 
-METRICS = [
-    "AP",
-    "AP50",
-    "AP75",
-    "APs",
-    "APm",
-    "APl",
-    "AR1",
-    "AR10",
-    "AR100",
-    "ARs",
-    "ARm",
-    "ARl",
-]
-
 
 class DetResult(BaseResult):
     """The class for bounding box detection evaluation results."""
@@ -56,12 +41,12 @@ class DetResult(BaseResult):
     ARm: List[float]
     ARl: List[float]
 
-    def __init__(  # pylint: disable=redefined-outer-name, type: ignore
-        self, *args, **kwargs
-    ) -> None:
-        """Set extram parameters."""
-        super().__init__(*args, **kwargs)
-        self._formatters = {metric: "{:.1f}".format for metric in METRICS}
+    def __init__(self, *args_, **kwargs) -> None:  # type: ignore
+        """Set extra parameters."""
+        super().__init__(*args_, **kwargs)
+        self._formatters = {
+            metric: "{:.1f}".format for metric in self.__fields__
+        }
 
 
 class COCOV2(COCO):  # type: ignore
@@ -263,10 +248,8 @@ class COCOevalV2(COCOeval):  # type: ignore
         """Compute summary metrics for evaluation results."""
         cat_ids = self.params.catIds + [None]
         res_dict = {
-            metric: [
-                self.get_score_funcs[metric](cat_id) for cat_id in cat_ids
-            ]
-            for metric in METRICS
+            metric: [get_score_func(cat_id) for cat_id in cat_ids]
+            for metric, get_score_func in self.get_score_funcs.items()
         }
         all_classes = self.cat_names + ["OVERALL"]
         row_breaks = [1, 1 + len(all_classes)]

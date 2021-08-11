@@ -4,7 +4,7 @@ import unittest
 
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
-from .det import METRICS, evaluate_det
+from .det import evaluate_det
 from .result import (
     nested_dict_to_data_frame,
     result_to_flatten_dict,
@@ -52,7 +52,6 @@ class TestBDD100KDetectEval(unittest.TestCase):
     def test_data_frame(self) -> None:
         """Check evaluation scores' correctness."""
         self.assertTupleEqual(self.data_frame.shape, (11, 12))
-        self.assertSetEqual(set(METRICS), set(self.data_frame.columns.values))
 
         categories = set(
             [

@@ -61,11 +61,9 @@ class BoxTrackResult(BaseResult):
     ML: List[int]
     FM: List[int]
 
-    def __init__(  # pylint: disable=redefined-outer-name, type: ignore
-        self, *args, **kwargs
-    ) -> None:
-        """Set extram parameters."""
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args_, **kwargs) -> None:  # type: ignore
+        """Set extra parameters."""
+        super().__init__(*args_, **kwargs)
         metric_host = mm.metrics.create()
         metric_host.register(mm.metrics.motp, formatter="{:.1%}".format)
         self._formatters = {

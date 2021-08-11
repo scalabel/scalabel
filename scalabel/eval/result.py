@@ -90,12 +90,31 @@ class BaseResult(BaseModel):
     _formatters: Dict[str, FORMATTER] = PrivateAttr()
 
     def __init__(  # type: ignore
-        self, all_classes: List[str], row_breaks: List[int], **data: Any
+        self,
+        all_classes: List[str],
+        row_breaks: Optional[List[int]] = None,
+        **data: Any,
     ) -> None:
         """Set extram parameters."""
+        for scores in data.values():
+            if isinstance(scores, list):
+                assert len(scores) == len(all_classes)
         super().__init__(**data)
         self._all_classes = all_classes
-        self._row_breaks = row_breaks
+        if row_breaks is not None:
+            self._row_breaks = row_breaks
+        else:
+            self._row_breaks = []
+
+    def __eq__(self, other: "BaseResult") -> bool:  # type: ignore
+        """Check whether two instances are equal."""
+        if self._all_classes != other._all_classes:
+            return False
+        if self._row_breaks != other._row_breaks:
+            return False
+        if self._formatters != other._formatters:
+            return False
+        return super().__eq__(other)
 
     def __str__(self) -> str:
         """Convert data model into a structures string."""
