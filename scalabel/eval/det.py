@@ -77,10 +77,10 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def __init__(
         self,
-        cocoGt: COCO,
-        cocoDt: COCO,
-        iouType: str,
         cat_names: List[str],
+        cocoGt: Optional[COCO] = None,
+        cocoDt: Optional[COCO] = None,
+        iouType: str = "segm",
         nproc: int = NPROC,
     ):
         """Init."""
