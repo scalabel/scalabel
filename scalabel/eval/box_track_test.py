@@ -77,5 +77,3 @@ class TestBDD100KMotEval(unittest.TestCase):
             ]
         )
         self.assertSetEqual(categories, set(self.data_frame.index.values))
-        # for cat_name in self.data_frame.index:
-        #     self.assertIn(cat_name, categories)

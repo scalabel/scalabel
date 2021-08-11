@@ -173,8 +173,8 @@ class COCOevalV2(COCOeval):  # type: ignore
 
         if self.nproc > 1:
             with Pool(self.nproc) as pool:
-                to_updates: List[Dict[int, DictStrAny]] = pool.starmap(
-                    self.compute_match, [*range(len(p.imgIds))]
+                to_updates: List[Dict[int, DictStrAny]] = pool.map(
+                    self.compute_match, range(len(p.imgIds))
                 )
         else:
             to_updates = list(map(self.compute_match, range(len(p.imgIds))))
@@ -259,7 +259,10 @@ class COCOevalV2(COCOeval):  # type: ignore
 
 
 def evaluate_det(
-    ann_frames: List[Frame], pred_frames: List[Frame], config: Config
+    ann_frames: List[Frame],
+    pred_frames: List[Frame],
+    config: Config,
+    nproc: int = NPROC,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -267,6 +270,7 @@ def evaluate_det(
         ann_frames: the ground truth annotations in Scalabel format
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
+        nproc: the number of process.
 
     Returns:
         DetResult: rendered eval results.
@@ -294,7 +298,7 @@ def evaluate_det(
 
     img_ids = sorted(coco_gt.getImgIds())
     ann_type = "bbox"
-    coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc=1)
+    coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
     coco_eval.evaluate()
@@ -343,7 +347,7 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_det(gts, preds, cfg)
+    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
     if args.out_file:
         with open(args.out_file, "w") as fp:

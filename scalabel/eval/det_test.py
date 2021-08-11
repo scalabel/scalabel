@@ -21,7 +21,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
     gts = load(gts_path).frames
     preds = load(preds_path).frames
     config = load_label_config(get_test_file("det_configs.toml"))
-    result = evaluate_det(gts, preds, config)
+    result = evaluate_det(gts, preds, config, nproc=1)
     res_dict = result_to_flatten_dict(result)
     data_frame = nested_dict_to_data_frame(
         result_to_nested_dict(
