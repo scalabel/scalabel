@@ -294,7 +294,7 @@ def evaluate_det(
 
     img_ids = sorted(coco_gt.getImgIds())
     ann_type = "bbox"
-    coco_eval = COCOevalV2(coco_gt, coco_dt, ann_type, cat_names, nproc=1)
+    coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc=1)
     coco_eval.params.imgIds = img_ids
 
     coco_eval.evaluate()
