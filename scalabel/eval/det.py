@@ -254,7 +254,10 @@ class COCOevalV2(COCOeval):  # type: ignore
             metric: [get_score_func(cat_id) for cat_id in cat_ids]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(self.cat_names, [OVERALL], **res_dict)
+        row_breaks = [1, 2 + len(self.cat_names)]
+        return DetResult(
+            self.cat_names + [OVERALL], row_breaks=row_breaks, **res_dict
+        )
 
 
 def evaluate_det(

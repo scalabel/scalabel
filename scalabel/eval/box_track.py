@@ -290,10 +290,15 @@ def render_results(
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
+    all_classes = (
+        [cls_.name for cls_ in classes]
+        + list(super_classes.keys())
+        + [AVERAGE, OVERALL]
+    )
+    row_breaks = [1, 2 + len(classes), 3 + len(classes) + len(super_classes)]
     return BoxTrackResult(
-        classes=[class_.name for class_ in classes],
-        super_classes=[class_name for class_name in super_classes],
-        hyper_classes=[AVERAGE, OVERALL],
+        all_classes=all_classes,
+        row_breaks=row_breaks,
         **res_dict,
     )
 

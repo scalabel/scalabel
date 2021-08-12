@@ -31,6 +31,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
 
     def test_result_value(self) -> None:
         """Check evaluation scores' correctness."""
+        print(self.result)
         overall_reference = {
             "AP": 34.029392668401016,
             "AP50": 55.323900409039695,

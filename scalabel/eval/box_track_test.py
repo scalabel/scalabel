@@ -33,7 +33,6 @@ class TestBDD100KMotEval(unittest.TestCase):
 
     def test_result_value(self) -> None:
         """Check evaluation scores' correctness."""
-        print(self.result)
         overall_reference = {
             "mMOTA": 24.324204637536685,
             "mMOTP": 50.01285067174096,
