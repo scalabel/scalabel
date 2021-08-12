@@ -75,6 +75,14 @@ class BoxTrackResult(BaseResult):
             if metric in METRIC_MAPS
         }
 
+    def __eq__(self, other: "BoxTrackResult") -> bool:  # type: ignore
+        """Check whether two instances are equal."""
+        other_dict = dict(other)
+        for key, val in dict(self).items():
+            if val != other_dict[key]:
+                return False
+        return super().__eq__(other)
+
 
 def parse_objects(
     objects: List[Label], classes: List[str], ignore_unknown_cats: bool = False

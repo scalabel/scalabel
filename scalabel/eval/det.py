@@ -49,6 +49,14 @@ class DetResult(BaseResult):
             metric: "{:.1f}".format for metric in self.__fields__
         }
 
+    def __eq__(self, other: "DetResult") -> bool:  # type: ignore
+        """Check whether two instances are equal."""
+        other_dict = dict(other)
+        for key, val in dict(self).items():
+            if val != other_dict[key]:
+                return False
+        return super().__eq__(other)
+
 
 class COCOV2(COCO):  # type: ignore
     """Modify the COCO API to support annotations dictionary as input."""
