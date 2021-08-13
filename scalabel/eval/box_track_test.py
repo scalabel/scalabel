@@ -2,14 +2,11 @@
 import os
 import unittest
 
+import numpy as np
+
 from ..label.io import group_and_sort, load, load_label_config
 from ..unittest.util import get_test_file
-from .box_track import METRIC_MAPS, acc_single_video_mot, evaluate_track
-from .result import (
-    nested_dict_to_data_frame,
-    result_to_flatten_dict,
-    result_to_nested_dict,
-)
+from .box_track import acc_single_video_mot, evaluate_track
 
 
 class TestBDD100KMotEval(unittest.TestCase):
@@ -24,22 +21,74 @@ class TestBDD100KMotEval(unittest.TestCase):
     )
     config = load_label_config(get_test_file("box_track_configs.toml"))
     result = evaluate_track(acc_single_video_mot, gts, preds, config)
-    res_dict = result_to_flatten_dict(result)
-    data_frame = nested_dict_to_data_frame(
-        result_to_nested_dict(
-            result, result._all_classes  # pylint: disable=protected-access
-        )
-    )
 
-    def test_result_value(self) -> None:
+    def test_frame(self) -> None:
+        """Test case for the function frame()."""
+        data_frame = self.result.frame()
+        categories = set(
+            [
+                "human",
+                "vehicle",
+                "bike",
+                "pedestrian",
+                "rider",
+                "car",
+                "truck",
+                "bus",
+                "train",
+                "motorcycle",
+                "bicycle",
+                "AVERAGE",
+                "OVERALL",
+            ]
+        )
+        self.assertSetEqual(categories, set(data_frame.index.values))
+
+        data_arr = data_frame.to_numpy()
+        APs = np.array(  # pylint: disable=invalid-name
+            [
+                36.12565445,
+                43.69747899,
+                71.27987664,
+                47.69230769,
+                0.0,
+                -1.0,
+                -4.20168067,
+                -1.0,
+                39.03225806,
+                70.14925373,
+                -4.20168067,
+                24.32420464,
+                64.20070762,
+            ]
+        )
+        self.assertTrue(
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+        )
+
+        overall_scores = np.array(
+            [
+                64.20070762,
+                87.16143945,
+                71.01073676,
+                126.0,
+                942.0,
+                45.0,
+                62.0,
+                47.0,
+                33.0,
+                66.0,
+            ]
+        )
+        self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
+
+    def test_summary(self) -> None:
         """Check evaluation scores' correctness."""
+        summary = self.result.summary()
         overall_reference = {
-            "mMOTA": 24.324204637536685,
-            "mMOTP": 50.01285067174096,
-            "mIDF1": 32.24781943655838,
-            "MOTA": 64.20070762302992,
-            "MOTP": 87.16143945073146,
             "IDF1": 71.01073676416142,
+            "MOTA": 64.20070762302991,
+            "MOTP": 87.16143945073146,
             "FP": 126,
             "FN": 942,
             "IDSw": 45,
@@ -47,31 +96,10 @@ class TestBDD100KMotEval(unittest.TestCase):
             "PT": 47,
             "ML": 33,
             "FM": 66,
+            "mIDF1": 32.24781943655838,
+            "mMOTA": 24.324204637536685,
+            "mMOTP": 50.01285067174096,
         }
-        self.assertDictEqual(self.res_dict, overall_reference)
-
-    def test_data_frame(self) -> None:
-        """Check evaluation scores' correctness."""
-        self.assertTupleEqual(self.data_frame.shape, (13, 10))
-
-        metrics = set(METRIC_MAPS.values())
-        self.assertSetEqual(metrics, set(self.data_frame.columns.values))
-
-        categories = set(
-            [
-                "human",
-                "pedestrian",
-                "rider",
-                "vehicle",
-                "car",
-                "truck",
-                "bus",
-                "train",
-                "bike",
-                "motorcycle",
-                "bicycle",
-                "OVERALL",
-                "AVERAGE",
-            ]
-        )
-        self.assertSetEqual(categories, set(self.data_frame.index.values))
+        self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
+        for name, score in overall_reference.items():
+            self.assertAlmostEqual(score, summary[name])

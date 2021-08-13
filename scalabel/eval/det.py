@@ -9,7 +9,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
 from pycocotools.coco import COCO
@@ -22,40 +22,63 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, BaseResult, result_to_flatten_dict
+from .result import OVERALL, BaseResult
 
 
 class DetResult(BaseResult):
     """The class for bounding box detection evaluation results."""
 
-    AP: List[float]
-    AP50: List[float]
-    AP75: List[float]
-    APs: List[float]
-    APm: List[float]
-    APl: List[float]
-    AR1: List[float]
-    AR10: List[float]
-    AR100: List[float]
-    ARs: List[float]
-    ARm: List[float]
-    ARl: List[float]
+    AP: Dict[str, float]
+    AP50: Dict[str, float]
+    AP75: Dict[str, float]
+    APs: Dict[str, float]
+    APm: Dict[str, float]
+    APl: Dict[str, float]
+    AR1: Dict[str, float]
+    AR10: Dict[str, float]
+    AR100: Dict[str, float]
+    ARs: Dict[str, float]
+    ARm: Dict[str, float]
+    ARl: Dict[str, float]
 
-    # pylint: disable=redefined-outer-name
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+    def __init__(  # type: ignore
+        self, basic_classes: List[str], **data: Any
+    ) -> None:
         """Set extra parameters."""
-        super().__init__(*args, **kwargs)
+        category_set = set()
+        for scores in data.values():
+            category_set.update(scores.keys())
+        for scores in data.values():
+            assert set(scores.keys()) == category_set
+        super().__init__(**data)
         self._formatters = {
             metric: "{:.1f}".format for metric in self.__fields__
         }
+        self._row_breaks = [1, 2 + len(basic_classes)]
 
     def __eq__(self, other: "DetResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         other_dict = dict(other)
-        for key, val in dict(self).items():
-            if val != other_dict[key]:
+        for metric, scores in self:
+            other_scores = other_dict[metric]
+            if set(scores.keys()) != set(other_scores.keys()):
                 return False
+            for category, score in scores:
+                if not np.isclose(other_scores[category], score):
+                    return False
         return super().__eq__(other)
+
+    def summary(self) -> Dict[str, Union[int, float]]:
+        """Convert the data into a flattened dict as the summary."""
+        summary_dict: Dict[str, float] = dict()
+        for metric, scores in self:
+            if metric == "AP":
+                for category, score in scores.items():
+                    if category == OVERALL:
+                        continue
+                    summary_dict["{}_{}".format(metric, category)] = score
+            summary_dict[metric] = scores[OVERALL]
+        return summary_dict
 
 
 class COCOV2(COCO):  # type: ignore
@@ -236,7 +259,6 @@ class COCOevalV2(COCOeval):  # type: ignore
             # dimension of precision: [TxRxKxAxM]
             if cat_id is not None:
                 k = np.where(cat_id == cat_ids)[0]
-                print(k, p.catIds)
                 s = s[:, :, k, aind, mind]
             else:
                 s = s[:, :, :, aind, mind]
@@ -259,13 +281,15 @@ class COCOevalV2(COCOeval):  # type: ignore
         """Compute summary metrics for evaluation results."""
         cat_ids = self.params.catIds + [None]
         res_dict = {
-            metric: [get_score_func(cat_id) for cat_id in cat_ids]
+            metric: {
+                cat_name: get_score_func(cat_id)
+                for cat_name, cat_id in zip(
+                    self.cat_names + [OVERALL], cat_ids + [None]
+                )
+            }
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        row_breaks = [1, 2 + len(self.cat_names)]
-        return DetResult(
-            self.cat_names + [OVERALL], row_breaks=row_breaks, **res_dict
-        )
+        return DetResult(self.cat_names, **res_dict)
 
 
 def evaluate_det(
@@ -361,4 +385,4 @@ if __name__ == "__main__":
     logger.info(eval_result)
     if args.out_file:
         with open(args.out_file, "w") as fp:
-            json.dump(result_to_flatten_dict(eval_result), fp)
+            json.dump(eval_result.json(), fp)
