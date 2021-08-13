@@ -21,7 +21,7 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
-from .result import AVERAGE, OVERALL, BaseResult
+from .result import AVERAGE, OVERALL, Result
 
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
@@ -44,7 +44,7 @@ METRIC_MAPS = {
 METRIC_TO_AVERAGE = set(["IDF1", "MOTA", "MOTP"])
 
 
-class BoxTrackResult(BaseResult):
+class BoxTrackResult(Result):
     """The class for bounding box tracking evaluation results."""
 
     mMOTA: float

@@ -5,10 +5,10 @@ from typing import Any, Dict
 
 import numpy as np
 
-from .result import BaseResult
+from .result import Result
 
 
-class TestModel(BaseResult):
+class TestModel(Result):
     """A subclass of BaseModel for build up test cases."""
 
     list_str: Dict[str, float]
@@ -30,7 +30,7 @@ class TestBaseResult(unittest.TestCase):
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
-        data_frame = self.test_model.frame()
+        data_frame = self.test_model.pd_frame()
         self.assertTrue(
             np.isclose(
                 data_frame.to_numpy()[:, 0], np.array([1.0, 2.0, 3.0])

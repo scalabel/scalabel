@@ -6,7 +6,7 @@ import numpy as np
 
 from ..label.io import group_and_sort, load, load_label_config
 from ..unittest.util import get_test_file
-from .box_track import acc_single_video_mot, evaluate_track
+from .mot import acc_single_video_mot, evaluate_track
 
 
 class TestBDD100KMotEval(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestBDD100KMotEval(unittest.TestCase):
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
-        data_frame = self.result.frame()
+        data_frame = self.result.pd_frame()
         categories = set(
             [
                 "human",

@@ -14,7 +14,7 @@ AVERAGE = "AVERAGE"
 OVERALL = "OVERALL"
 
 
-class BaseResult(BaseModel):
+class Result(BaseModel):
     """The base class for bdd100k evaluation results.
 
     Each data field corresponds to a evluation metric. The value for each
@@ -22,14 +22,14 @@ class BaseResult(BaseModel):
 
     Functions:
         dict() -> dict[str, dict[str, int | float]]:
-            export all data fields to a nested dict.
+            export all data to a nested dict.
         json() -> str:
             export the nested dict of `dict()` into a JSON string.
-        frame() -> pandas.DataFrame:
+        pd_frame() -> pandas.DataFrame:
             export data fields to a formatted DataFrame.
         table() -> str:
             export data fields to a formatted table string.
-        summary() -> str:
+        summary() -> dict[str, int | float]:
             export most important fields to a flattened dict.
         __str__() -> str:
             the same as `table()`.
@@ -38,13 +38,13 @@ class BaseResult(BaseModel):
     _formatters: Dict[str, FORMATTER] = PrivateAttr(dict())
     _row_breaks: List[int] = PrivateAttr([])
 
-    def __eq__(self, other: "BaseResult") -> bool:  # type: ignore
+    def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         if self._row_breaks != other._row_breaks:
             return False
         return super().__eq__(other)
 
-    def frame(
+    def pd_frame(
         self,
         include: Optional[AbstractSet[str]] = None,
         exclude: Optional[AbstractSet[str]] = None,
@@ -80,7 +80,7 @@ class BaseResult(BaseModel):
         Returns:
             table (str): the exported table string
         """
-        data_frame = self.frame(include, exclude)
+        data_frame = self.pd_frame(include, exclude)
         if not self._formatters:
             formatters = {
                 metric: "{:.1f}".format for metric in data_frame.columns

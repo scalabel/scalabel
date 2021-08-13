@@ -22,10 +22,10 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, BaseResult
+from .result import OVERALL, Result
 
 
-class DetResult(BaseResult):
+class DetResult(Result):
     """The class for bounding box detection evaluation results."""
 
     AP: Dict[str, float]
@@ -76,7 +76,7 @@ class DetResult(BaseResult):
                 for category, score in scores.items():
                     if category == OVERALL:
                         continue
-                    summary_dict["{}_{}".format(metric, category)] = score
+                    summary_dict["{}/{}".format(metric, category)] = score
             summary_dict[metric] = scores[OVERALL]
         return summary_dict
 
@@ -383,6 +383,7 @@ if __name__ == "__main__":
     assert cfg is not None
     eval_result = evaluate_det(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
+    logger.info(eval_result.summary())
     if args.out_file:
         with open(args.out_file, "w") as fp:
             json.dump(eval_result.json(), fp)

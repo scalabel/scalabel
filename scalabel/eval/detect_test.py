@@ -6,7 +6,7 @@ import numpy as np
 
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
-from .det import evaluate_det
+from .detect import evaluate_det
 
 
 class TestBDD100KDetectEval(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
-        data_frame = self.result.frame()
+        data_frame = self.result.pd_frame()
         categories = set(
             [
                 "pedestrian",
@@ -80,16 +80,16 @@ class TestBDD100KDetectEval(unittest.TestCase):
         """Check evaluation scores' correctness."""
         summary = self.result.summary()
         overall_reference = {
-            "AP_pedestrian": 41.37670388442971,
-            "AP_rider": 41.70985553789942,
-            "AP_car": 66.14185518719762,
-            "AP_truck": 50.07078219289907,
-            "AP_bus": 0.3025302530253025,
-            "AP_train": -100.0,
-            "AP_motorcycle": 4.574628954954978,
-            "AP_bicycle": -100.0,
-            "AP_traffic light": -100.0,
-            "AP_traffic sign": -100.0,
+            "AP/pedestrian": 41.37670388442971,
+            "AP/rider": 41.70985553789942,
+            "AP/car": 66.14185518719762,
+            "AP/truck": 50.07078219289907,
+            "AP/bus": 0.3025302530253025,
+            "AP/train": -100.0,
+            "AP/motorcycle": 4.574628954954978,
+            "AP/bicycle": -100.0,
+            "AP/traffic light": -100.0,
+            "AP/traffic sign": -100.0,
             "AP": 34.029392668401016,
             "AP50": 55.323900409039695,
             "AP75": 34.93873359997877,
