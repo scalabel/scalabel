@@ -17,7 +17,7 @@ OVERALL = "OVERALL"
 class Result(BaseModel):
     """The base class for bdd100k evaluation results.
 
-    Each data field corresponds to a evluation metric. The value for each
+    Each data field corresponds to an evluation metric. The value for each
     metric is a dict that maps the category names to scores.
 
     Functions:
