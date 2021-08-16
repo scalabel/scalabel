@@ -306,14 +306,14 @@ def evaluate_single_class(
     return flat_dict
 
 
-def render_results(
+def generate_results(
     res_dicts: List[Dict[str, Union[int, float]]],
     items: List[str],
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
 ) -> BoxTrackResult:
-    """Render the evaluation results."""
+    """Compute summary metrics for evaluation results."""
     ave_dict: DictStrAny = dict()
     for metric in metrics:
         dtype = type(res_dicts[-1][metric])
@@ -338,11 +338,9 @@ def render_results(
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
-    row_breaks = [1, 2 + len(classes), 3 + len(classes) + len(super_classes)]
     return BoxTrackResult(
         basic_classes=[cls_.name for cls_ in classes],
         super_classes=list(super_classes.keys()),
-        row_breaks=row_breaks,
         **res_dict,
     )
 
@@ -420,7 +418,7 @@ def evaluate_track(
 
     logger.info("rendering...")
     metrics = list(METRIC_MAPS.values())
-    result = render_results(res_dicts, items, metrics, classes, super_classes)
+    result = generate_results(res_dicts, items, metrics, classes, super_classes)
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return result
