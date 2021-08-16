@@ -22,26 +22,26 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, FloatScoresList, Result, Scores, ScoresList
+from .result import OVERALL, Result, Scores, ScoresList
 
 
 class DetResult(Result):
     """The class for bounding box detection evaluation results."""
 
-    AP: FloatScoresList
-    AP50: FloatScoresList
-    AP75: FloatScoresList
-    APs: FloatScoresList
-    APm: FloatScoresList
-    APl: FloatScoresList
-    AR1: FloatScoresList
-    AR10: FloatScoresList
-    AR100: FloatScoresList
-    ARs: FloatScoresList
-    ARm: FloatScoresList
-    ARl: FloatScoresList
+    AP: List[Dict[str, float]]
+    AP50: List[Dict[str, float]]
+    AP75: List[Dict[str, float]]
+    APs: List[Dict[str, float]]
+    APm: List[Dict[str, float]]
+    APl: List[Dict[str, float]]
+    AR1: List[Dict[str, float]]
+    AR10: List[Dict[str, float]]
+    AR100: List[Dict[str, float]]
+    ARs: List[Dict[str, float]]
+    ARm: List[Dict[str, float]]
+    ARl: List[Dict[str, float]]
 
-    def __init__(self, **data: ScoresList) -> None:  # type: ignore
+    def __init__(self, **data: ScoresList) -> None:
         """Set extra parameters."""
         super().__init__(**data)
         self._formatters = {

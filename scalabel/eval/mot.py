@@ -21,15 +21,7 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
-from .result import (
-    AVERAGE,
-    OVERALL,
-    FloatScoresList,
-    IntScoresList,
-    Result,
-    Scores,
-    ScoresList,
-)
+from .result import AVERAGE, OVERALL, Result, Scores, ScoresList
 
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
@@ -58,16 +50,16 @@ class BoxTrackResult(Result):
     mMOTA: float
     mMOTP: float
     mIDF1: float
-    MOTA: FloatScoresList
-    MOTP: FloatScoresList
-    IDF1: FloatScoresList
-    FP: IntScoresList
-    FN: IntScoresList
-    IDSw: IntScoresList
-    MT: IntScoresList
-    PT: IntScoresList
-    ML: IntScoresList
-    FM: IntScoresList
+    MOTA: List[Dict[str, float]]
+    MOTP: List[Dict[str, float]]
+    IDF1: List[Dict[str, float]]
+    FP: List[Dict[str, int]]
+    FN: List[Dict[str, int]]
+    IDSw: List[Dict[str, int]]
+    MT: List[Dict[str, int]]
+    PT: List[Dict[str, int]]
+    ML: List[Dict[str, int]]
+    FM: List[Dict[str, int]]
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Check the input structure and initiliaze the model."""
@@ -254,7 +246,7 @@ def evaluate_single_class(
     """Evaluate results for one class.
 
     Args:
-        name (list[str]): list of metric names
+        names (list[str]): list of metric names
         accs (list[pymotmetrics.MOTAAccumulator]): list of accumulators
     Return:
         flat_dict (dict[str, int | float]):

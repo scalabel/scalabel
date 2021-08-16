@@ -11,8 +11,6 @@ from pydantic import BaseModel, PrivateAttr
 FORMATTER = Callable[[VarArg(object), KwArg(object)], str]
 Scores = Dict[str, Union[int, float]]
 ScoresList = List[Scores]
-IntScoresList = List[Dict[str, int]]
-FloatScoresList = List[Dict[str, float]]
 AVERAGE = "AVERAGE"
 OVERALL = "OVERALL"
 
