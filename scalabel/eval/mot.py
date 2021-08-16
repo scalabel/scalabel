@@ -75,6 +75,11 @@ class BoxTrackResult(Result):
             if metric in METRIC_MAPS
         }
 
+    # pylint: disable=useless-super-delegation
+    def __eq__(self, other: "Result") -> bool:
+        """Check whether two instances are equal."""
+        return super().__eq__(other)
+
 
 def parse_objects(
     objects: List[Label], classes: List[str], ignore_unknown_cats: bool = False

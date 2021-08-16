@@ -48,6 +48,11 @@ class DetResult(Result):
             metric: "{:.1f}".format for metric in self.__fields__
         }
 
+    # pylint: disable=useless-super-delegation
+    def __eq__(self, other: "Result") -> bool:
+        """Check whether two instances are equal."""
+        return super().__eq__(other)
+
     def summary(
         self,
         include: Optional[AbstractSet[str]] = None,
