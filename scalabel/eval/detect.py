@@ -49,7 +49,7 @@ class DetResult(Result):
         }
 
     # pylint: disable=useless-super-delegation
-    def __eq__(self, other: "Result") -> bool:
+    def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
 
