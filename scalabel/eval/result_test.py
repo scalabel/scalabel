@@ -1,7 +1,7 @@
 """Test cases for mot.py."""
 
 import unittest
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from .result import Result
 class TestModel(Result):
     """A subclass of BaseModel for build up test cases."""
 
-    list_str: Dict[str, float]
+    list_str: List[Dict[str, float]]
     one_int: int
     one_float: float
 
@@ -25,7 +25,7 @@ class TestBaseResult(unittest.TestCase):
     """Test cases for the base result class."""
 
     test_model = TestModel(
-        list_str={"a": 1.0, "b": 2.0, "c": 3.0}, one_int=1, one_float=0.0
+        list_str=[{"a": 1.0, "b": 2.0}, {"c": 3.0}], one_int=1, one_float=0.0
     )
 
     def test_frame(self) -> None:

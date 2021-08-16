@@ -4,7 +4,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
@@ -21,7 +21,15 @@ from ..label.utils import (
     get_leaf_categories,
     get_parent_categories,
 )
-from .result import AVERAGE, OVERALL, Result
+from .result import (
+    AVERAGE,
+    OVERALL,
+    FloatScoresList,
+    IntScoresList,
+    Result,
+    Scores,
+    ScoresList,
+)
 
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
@@ -50,28 +58,19 @@ class BoxTrackResult(Result):
     mMOTA: float
     mMOTP: float
     mIDF1: float
-    MOTA: Dict[str, float]
-    MOTP: Dict[str, float]
-    IDF1: Dict[str, float]
-    FP: Dict[str, int]
-    FN: Dict[str, int]
-    IDSw: Dict[str, int]
-    MT: Dict[str, int]
-    PT: Dict[str, int]
-    ML: Dict[str, int]
-    FM: Dict[str, int]
+    MOTA: FloatScoresList
+    MOTP: FloatScoresList
+    IDF1: FloatScoresList
+    FP: IntScoresList
+    FN: IntScoresList
+    IDSw: IntScoresList
+    MT: IntScoresList
+    PT: IntScoresList
+    ML: IntScoresList
+    FM: IntScoresList
 
-    def __init__(  # type: ignore
-        self, basic_classes: List[str], super_classes: List[str], **data: Any
-    ) -> None:
-        """Set extra parameters."""
-        category_set: Set[str] = set()
-        for scores in data.values():
-            if isinstance(scores, dict):
-                category_set.update(scores.keys())
-        for scores in data.values():
-            if isinstance(scores, dict):
-                assert set(scores.keys()) == category_set
+    def __init__(self, **data: Any) -> None:  # type: ignore
+        """Check the input structure and initiliaze the model."""
         super().__init__(**data)
 
         metric_host = mm.metrics.create()
@@ -83,37 +82,6 @@ class BoxTrackResult(Result):
             for metric, format in metric_host.formatters.items()
             if metric in METRIC_MAPS
         }
-        self._row_breaks = [
-            1,
-            2 + len(basic_classes),
-            3 + len(basic_classes) + len(super_classes),
-        ]
-
-    def __eq__(self, other: "BoxTrackResult") -> bool:  # type: ignore
-        """Check whether two instances are equal."""
-        other_dict = dict(other)
-        for metric, scores in self:
-            other_scores = other_dict[metric]
-            if not isinstance(scores, dict):
-                if scores != other_scores:
-                    return False
-            else:
-                if set(scores.keys()) != set(other_scores.keys()):
-                    return False
-                for category, score in scores:
-                    if not np.isclose(score, other_scores[category]):
-                        return False
-        return super().__eq__(other)
-
-    def summary(self) -> Dict[str, Union[int, float]]:
-        """Convert the data into a flattened dict as the summary."""
-        summary_dict: Dict[str, float] = dict()
-        for metric, scores in self:
-            if isinstance(scores, dict):
-                summary_dict[metric] = scores[OVERALL]
-            else:
-                summary_dict[metric] = scores
-        return summary_dict
 
 
 def parse_objects(
@@ -240,16 +208,16 @@ def acc_single_video_mot(
 
 
 def aggregate_accs(
-    accumulators: List[List[mm.MOTAccumulator]],
+    video_accs: List[List[mm.MOTAccumulator]],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> Tuple[List[List[str]], List[List[mm.MOTAccumulator]], List[str]]:
+) -> Tuple[List[str], List[List[str]], List[List[mm.MOTAccumulator]]]:
     """Aggregate the results of the entire dataset."""
     # accs for each class
-    items: List[str] = [c.name for c in classes]
-    names: List[List[str]] = [[] for _ in classes]
-    accs: List[List[str]] = [[] for _ in classes]
-    for video_ind, _accs in enumerate(accumulators):
+    class_names: List[str] = [c.name for c in classes]
+    metric_names: List[List[str]] = [[] for _ in classes]
+    class_accs: List[List[mm.MOTAccumulator]] = [[] for _ in classes]
+    for video_ind, _accs in enumerate(video_accs):
         for cls_ind, acc in enumerate(_accs):
             if (
                 len(acc._events["Type"])  # pylint: disable=protected-access
@@ -257,27 +225,41 @@ def aggregate_accs(
             ):
                 continue
             name = f"{classes[cls_ind].name}_{video_ind}"
-            names[cls_ind].append(name)
-            accs[cls_ind].append(acc)
+            class_accs[cls_ind].append(acc)
+            metric_names[cls_ind].append(name)
 
     # super categories (if any)
     for super_cls, cls in super_classes.items():
-        items.append(super_cls)
-        names.append([n for c in cls for n in names[classes.index(c)]])
-        accs.append([a for c in cls for a in accs[classes.index(c)]])
+        class_names.append(super_cls)
+        metric_names.append(
+            [n for c in cls for n in metric_names[classes.index(c)]]
+        )
+        class_accs.append(
+            [a for c in cls for a in class_accs[classes.index(c)]]
+        )
 
     # overall
-    items.append(OVERALL)
-    names.append([n for name in names[: len(classes)] for n in name])
-    accs.append([a for acc in accs[: len(classes)] for a in acc])
+    class_names.append(OVERALL)
+    metric_names.append(
+        [n for name in metric_names[: len(classes)] for n in name]
+    )
+    class_accs.append([a for acc in class_accs[: len(classes)] for a in acc])
 
-    return names, accs, items
+    return class_names, metric_names, class_accs
 
 
 def evaluate_single_class(
     names: List[str], accs: List[mm.MOTAccumulator]
 ) -> Dict[str, Union[int, float]]:
-    """Evaluate results for one class."""
+    """Evaluate results for one class.
+
+    Args:
+        name (list[str]): list of metric names
+        accs (list[pymotmetrics.MOTAAccumulator]): list of accumulators
+    Return:
+        flat_dict (dict[str, int | float]):
+            the dict that maps metric to score for the given class
+    """
     mh = mm.metrics.create()
     summary = mh.compute_many(
         accs, names=names, metrics=METRIC_MAPS.keys(), generate_overall=True
@@ -307,8 +289,8 @@ def evaluate_single_class(
 
 
 def generate_results(
-    res_dicts: List[Dict[str, Union[int, float]]],
-    items: List[str],
+    flat_dicts: List[Dict[str, Union[int, float]]],
+    class_names: List[str],
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
@@ -316,8 +298,8 @@ def generate_results(
     """Compute summary metrics for evaluation results."""
     ave_dict: DictStrAny = dict()
     for metric in metrics:
-        dtype = type(res_dicts[-1][metric])
-        v = np.array([res_dicts[i][metric] for i in range(len(classes))])
+        dtype = type(flat_dicts[-1][metric])
+        v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
         v = np.nan_to_num(v, nan=0)
         if dtype == int:
             value = dtype(v.sum())
@@ -326,23 +308,39 @@ def generate_results(
         else:
             raise TypeError()
         ave_dict[metric] = value
-    items.insert(len(res_dicts) - 1, AVERAGE)
-    res_dicts.insert(len(res_dicts) - 1, ave_dict)
-    res_dict: Dict[str, Dict[str, Union[int, float]]] = {
+    class_names.insert(len(flat_dicts) - 1, AVERAGE)
+    flat_dicts.insert(len(flat_dicts) - 1, ave_dict)
+
+    nested_dict: Dict[str, Scores] = {
         metric: {
-            item: res_dict_[metric]
-            for item, res_dict_ in zip(items, res_dicts)
+            class_name: res_dict_[metric]
+            for class_name, res_dict_ in zip(class_names, flat_dicts)
         }
-        for metric in res_dicts[-1].keys()
+        for metric in metrics
+    }
+
+    basic_set = [c.name for c in classes]
+    super_set = list(super_classes.keys())
+    hyper_set = [AVERAGE, OVERALL]
+    class_name_sets = [basic_set, hyper_set]
+    if [name for name in class_names if name in super_classes]:
+        class_name_sets.insert(1, super_set)
+
+    res_dict: Dict[str, ScoresList] = {
+        metric: [
+            {
+                class_name: score
+                for class_name, score in scores.items()
+                if class_name in class_name_set
+            }
+            for class_name_set in class_name_sets
+        ]
+        for metric, scores in nested_dict.items()
     }
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
-    return BoxTrackResult(
-        basic_classes=[cls_.name for cls_ in classes],
-        super_classes=list(super_classes.keys()),
-        **res_dict,
-    )
+    return BoxTrackResult(**res_dict)
 
 
 def evaluate_track(
@@ -382,18 +380,17 @@ def evaluate_track(
     class_names = [c.name for c in classes]
     if nproc > 1:
         with Pool(nproc) as pool:
-            accs = pool.starmap(
+            video_accs = pool.starmap(
                 partial(
                     acc_single_video,
                     classes=class_names,
-                    iou_thr=iou_thr,
                     ignore_iof_thr=ignore_iof_thr,
                     ignore_unknown_cats=ignore_unknown_cats,
                 ),
                 zip(gts, results),
             )
     else:
-        accs = [
+        video_accs = [
             acc_single_video(
                 gt,
                 result,
@@ -405,20 +402,27 @@ def evaluate_track(
             for gt, result in zip(gts, results)
         ]
 
-    names, accs, items = aggregate_accs(accs, classes, super_classes)
+    class_names, metric_names, class_accs = aggregate_accs(
+        video_accs, classes, super_classes
+    )
 
     logger.info("evaluating...")
     if nproc > 1:
         with Pool(nproc) as pool:
-            res_dicts = pool.starmap(evaluate_single_class, zip(names, accs))
+            flat_dicts = pool.starmap(
+                evaluate_single_class, zip(metric_names, class_accs)
+            )
     else:
-        res_dicts = [
-            evaluate_single_class(name, acc) for name, acc in zip(names, accs)
+        flat_dicts = [
+            evaluate_single_class(names, accs)
+            for names, accs in zip(metric_names, class_accs)
         ]
 
     logger.info("rendering...")
     metrics = list(METRIC_MAPS.values())
-    result = generate_results(res_dicts, items, metrics, classes, super_classes)
+    result = generate_results(
+        flat_dicts, class_names, metrics, classes, super_classes
+    )
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return result

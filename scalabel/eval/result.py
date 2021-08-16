@@ -3,13 +3,16 @@
 from collections import defaultdict
 from typing import AbstractSet, Callable, Dict, List, Optional, Union
 
+import numpy as np
 from mypy_extensions import KwArg, VarArg
 from pandas import DataFrame
 from pydantic import BaseModel, PrivateAttr
 
 FORMATTER = Callable[[VarArg(object), KwArg(object)], str]
-FlattenDict = Dict[str, Union[int, float]]
-NestedDict = Dict[str, Dict[str, Union[int, float]]]
+Scores = Dict[str, Union[int, float]]
+ScoresList = List[Scores]
+IntScoresList = List[Dict[str, int]]
+FloatScoresList = List[Dict[str, float]]
 AVERAGE = "AVERAGE"
 OVERALL = "OVERALL"
 
@@ -17,7 +20,7 @@ OVERALL = "OVERALL"
 class Result(BaseModel):
     """The base class for bdd100k evaluation results.
 
-    Each data field corresponds to an evluation metric. The value for each
+    Each data field corresponds to a evluation metric. The value for each
     metric is a dict that maps the category names to scores.
 
     Functions:
@@ -38,10 +41,42 @@ class Result(BaseModel):
     _formatters: Dict[str, FORMATTER] = PrivateAttr(dict())
     _row_breaks: List[int] = PrivateAttr([])
 
+    def __init__(self, **data: Union[int, float, ScoresList]) -> None:
+        """Check the input structure and initiliaze the model."""
+        data_check: Dict[str, ScoresList] = {
+            metric: cont
+            for metric, cont in data.items()
+            if isinstance(cont, list)
+        }
+        ref_scores_list = data_check[list(data_check.keys())[0]]
+        for scores_list in data_check.values():
+            assert len(scores_list) == len(ref_scores_list)
+            for scores, ref_scores in zip(scores_list, ref_scores_list):
+                assert scores.keys() == ref_scores.keys()
+        self._row_breaks = [1] + [
+            2 + i + len(scores) for i, scores in enumerate(ref_scores_list)
+        ]
+        super().__init__(**data)
+
     def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         if self._row_breaks != other._row_breaks:
             return False
+        other_dict = dict(other)
+        for metric, scores_list in self:
+            other_scores_list = other_dict[metric]
+            if not isinstance(scores_list, list):
+                if scores_list != other_scores_list:
+                    return False
+                continue
+            if len(scores_list) != len(other_scores_list):
+                return False
+            for scores, other_scores in zip(scores_list, other_scores_list):
+                if set(scores.keys()) != set(other_scores.keys()):
+                    return False
+                for category, score in scores.items():
+                    if not np.isclose(score, other_scores[category]):
+                        return False
         return super().__eq__(other)
 
     def pd_frame(
@@ -57,14 +92,15 @@ class Result(BaseModel):
         Returns:
             data_frame (pandas.DataFrmae): the exported DataFrame
         """
-        frame_dict: Dict[str, Dict[str, Union[int, float]]] = defaultdict(dict)
-        for metric, scores in self.dict(
+        frame_dict: Dict[str, Scores] = defaultdict(dict)
+        for metric, scores_list in self.dict(
             include=include, exclude=exclude  # type: ignore
         ).items():
-            if not isinstance(scores, dict):
+            if not isinstance(scores_list, list):
                 continue
-            for cls_, score in scores.items():
-                frame_dict[metric][cls_] = score
+            for scores in scores_list:
+                for cls_, score in scores.items():
+                    frame_dict[metric][cls_] = score
         return DataFrame.from_dict(frame_dict)
 
     def table(
@@ -102,12 +138,32 @@ class Result(BaseModel):
         """Convert the data into a printable string."""
         return self.table()
 
-    def summary(self) -> Dict[str, Union[int, float]]:
+    def summary(
+        self,
+        include: Optional[AbstractSet[str]] = None,
+        exclude: Optional[AbstractSet[str]] = None,
+    ) -> Scores:
         """Convert the data into a flattened dict as the summary.
 
         This function is different to the `.dict()` function.
         As a comparison, `.dict()` will export all data fields as a nested
         dict, While `.summary()` only exports most important information,
         like the overall scores, as a flattened compact dict.
+
+        Args:
+            include (set[str]): Optional, the metrics to convert
+            exclude (set[str]): Optional, the metrics not to convert
+        Returns:
+            dict[str, int | float]: returned summary of the result
         """
-        return dict(self)
+        summary_dict: Dict[str, Union[int, float]] = dict()
+        for metric, scores_list in self.dict(
+            include=include, exclude=exclude  # type: ignore
+        ).items():
+            if not isinstance(scores_list, list):
+                summary_dict[metric] = scores_list
+            else:
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL, scores_list[-1].get(AVERAGE)
+                )
+        return summary_dict

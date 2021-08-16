@@ -9,7 +9,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import AbstractSet, Callable, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
@@ -22,62 +22,44 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result
+from .result import OVERALL, FloatScoresList, Result, Scores, ScoresList
 
 
 class DetResult(Result):
     """The class for bounding box detection evaluation results."""
 
-    AP: Dict[str, float]
-    AP50: Dict[str, float]
-    AP75: Dict[str, float]
-    APs: Dict[str, float]
-    APm: Dict[str, float]
-    APl: Dict[str, float]
-    AR1: Dict[str, float]
-    AR10: Dict[str, float]
-    AR100: Dict[str, float]
-    ARs: Dict[str, float]
-    ARm: Dict[str, float]
-    ARl: Dict[str, float]
+    AP: FloatScoresList
+    AP50: FloatScoresList
+    AP75: FloatScoresList
+    APs: FloatScoresList
+    APm: FloatScoresList
+    APl: FloatScoresList
+    AR1: FloatScoresList
+    AR10: FloatScoresList
+    AR100: FloatScoresList
+    ARs: FloatScoresList
+    ARm: FloatScoresList
+    ARl: FloatScoresList
 
-    def __init__(  # type: ignore
-        self, basic_classes: List[str], **data: Any
-    ) -> None:
+    def __init__(self, **data: ScoresList) -> None:  # type: ignore
         """Set extra parameters."""
-        category_set = set()
-        for scores in data.values():
-            category_set.update(scores.keys())
-        for scores in data.values():
-            assert set(scores.keys()) == category_set
         super().__init__(**data)
         self._formatters = {
             metric: "{:.1f}".format for metric in self.__fields__
         }
-        self._row_breaks = [1, 2 + len(basic_classes)]
 
-    def __eq__(self, other: "DetResult") -> bool:  # type: ignore
-        """Check whether two instances are equal."""
-        other_dict = dict(other)
-        for metric, scores in self:
-            other_scores = other_dict[metric]
-            if set(scores.keys()) != set(other_scores.keys()):
-                return False
-            for category, score in scores:
-                if not np.isclose(other_scores[category], score):
-                    return False
-        return super().__eq__(other)
-
-    def summary(self) -> Dict[str, Union[int, float]]:
+    def summary(
+        self,
+        include: Optional[AbstractSet[str]] = None,
+        exclude: Optional[AbstractSet[str]] = None,
+    ) -> Scores:
         """Convert the data into a flattened dict as the summary."""
-        summary_dict: Dict[str, float] = dict()
-        for metric, scores in self:
-            if metric == "AP":
-                for category, score in scores.items():
-                    if category == OVERALL:
-                        continue
-                    summary_dict["{}/{}".format(metric, category)] = score
-            summary_dict[metric] = scores[OVERALL]
+        summary_dict = super().summary(include, exclude)
+        for scores in self.AP:
+            for category, score in scores.items():
+                if category == OVERALL:
+                    continue
+                summary_dict["{}/{}".format("AP", category)] = score
         return summary_dict
 
 
@@ -121,7 +103,9 @@ class COCOevalV2(COCOeval):  # type: ignore
         self.nproc = nproc
 
         max_dets = self.params.maxDets  # type: ignore
-        self.get_score_funcs: Dict[str, Callable[[int], float]] = dict(
+        self.get_score_funcs: Dict[
+            str, Callable[[Optional[int]], float]
+        ] = dict(
             AP=self.get_score,
             AP50=partial(
                 self.get_score,
@@ -281,15 +265,16 @@ class COCOevalV2(COCOeval):  # type: ignore
         """Compute summary metrics for evaluation results."""
         cat_ids = self.params.catIds + [None]
         res_dict = {
-            metric: {
-                cat_name: get_score_func(cat_id)
-                for cat_name, cat_id in zip(
-                    self.cat_names + [OVERALL], cat_ids + [None]
-                )
-            }
+            metric: [
+                {
+                    cat_name: get_score_func(cat_id)
+                    for cat_name, cat_id in zip(self.cat_names, cat_ids)
+                },
+                {OVERALL: get_score_func(None)},
+            ]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(self.cat_names, **res_dict)
+        return DetResult(**res_dict)
 
 
 def evaluate_det(
