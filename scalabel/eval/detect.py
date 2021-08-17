@@ -6,7 +6,6 @@ results are from the COCO toolkit.
 import argparse
 import copy
 import json
-import time
 from functools import partial
 from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
