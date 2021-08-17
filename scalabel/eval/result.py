@@ -19,7 +19,11 @@ class Result(BaseModel):
     """The base class for bdd100k evaluation results.
 
     Each data field corresponds to a evluation metric. The value for each
-    metric is a dict that maps the category names to scores.
+    metric is a list of dicts, each dict maps the category names to scores.
+    There used to be two or three dicts in the list. The first one contains
+    keys of basic categories, and the last one contains conclusion categories
+    like 'OVERALL' and 'AVERAGE'. The middle one (optional), contains super
+    classes for the two-level class hierarchy case.
 
     Functions:
         dict() -> dict[str, dict[str, int | float]]:
@@ -40,7 +44,11 @@ class Result(BaseModel):
     _row_breaks: List[int] = PrivateAttr([])
 
     def __init__(self, **data: Union[int, float, ScoresList]) -> None:
-        """Check the input structure and initiliaze the model."""
+        """Check the input structure and initiliaze the model.
+
+        All keys in the Scoreslist need to be the same set for the different
+        evaluation metrics.
+        """
         data_check: Dict[str, ScoresList] = {
             metric: cont
             for metric, cont in data.items()
@@ -51,10 +59,12 @@ class Result(BaseModel):
             assert len(scores_list) == len(ref_scores_list)
             for scores, ref_scores in zip(scores_list, ref_scores_list):
                 assert scores.keys() == ref_scores.keys()
-        self._row_breaks = [1] + [
-            2 + i + len(scores) for i, scores in enumerate(ref_scores_list)
-        ]
         super().__init__(**data)
+        cur_index = 1
+        self._row_breaks = [1]
+        for scores in ref_scores_list[:-1]:
+            cur_index += 1 + len(scores)
+            self._row_breaks.append(cur_index)
 
     def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
@@ -123,6 +133,7 @@ class Result(BaseModel):
             formatters = self._formatters
 
         summary = data_frame.to_string(formatters=formatters)
+        summary = summary.replace("NaN", " - ")
         strs = summary.split("\n")
         split_line = "-" * len(strs[0])
 

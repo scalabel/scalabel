@@ -48,15 +48,17 @@ class TestBDD100KDetectEval(unittest.TestCase):
                 66.14185519,
                 50.07078219,
                 0.30253025,
-                -100.0,
+                -1.0,
                 4.57462895,
-                -100.0,
-                -100.0,
-                -100,
+                -1.0,
+                -1.0,
+                -1.0,
                 34.02939267,
             ]
         )
-        self.assertTrue(np.isclose(data_arr[:, 0], APs).all())
+        self.assertTrue(
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+        )
 
         overall_scores = np.array(
             [
@@ -74,7 +76,11 @@ class TestBDD100KDetectEval(unittest.TestCase):
                 66.04261954,
             ]
         )
-        self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
+        self.assertTrue(
+            np.isclose(
+                np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
+            ).all()
+        )
 
     def test_summary(self) -> None:
         """Check evaluation scores' correctness."""
@@ -85,11 +91,11 @@ class TestBDD100KDetectEval(unittest.TestCase):
             "AP/car": 66.14185518719762,
             "AP/truck": 50.07078219289907,
             "AP/bus": 0.3025302530253025,
-            "AP/train": -100.0,
+            "AP/train": -1.0,
             "AP/motorcycle": 4.574628954954978,
-            "AP/bicycle": -100.0,
-            "AP/traffic light": -100.0,
-            "AP/traffic sign": -100.0,
+            "AP/bicycle": -1.0,
+            "AP/traffic light": -1.0,
+            "AP/traffic sign": -1.0,
             "AP": 34.029392668401016,
             "AP50": 55.323900409039695,
             "AP75": 34.93873359997877,
@@ -104,5 +110,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
             "ARl": 66.04261954261955,
         }
         self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
-        for name, score in overall_reference.items():
-            self.assertAlmostEqual(score, summary[name])
+        for name, score in summary.items():
+            if np.isnan(score):
+                score = np.nan_to_num(score, nan=-1.0)
+            self.assertAlmostEqual(score, overall_reference[name])

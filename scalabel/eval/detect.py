@@ -261,7 +261,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         else:
             raise NotImplementedError
         if len(s[s > -1]) == 0:
-            mean_s = -1
+            mean_s = float("nan")
         else:
             mean_s = np.mean(s[s > -1])
         return mean_s * 100
@@ -287,6 +287,7 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
+    with_logs: bool = True,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -295,6 +296,7 @@ def evaluate_det(
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
         nproc: the number of process.
+        with_logs: whether to print logs
 
     Returns:
         DetResult: rendered eval results.
@@ -325,7 +327,11 @@ def evaluate_det(
     coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
+    if with_logs:
+        logger.info("evaluating...")
     coco_eval.evaluate()
+    if with_logs:
+        logger.info("accumulating...")
     coco_eval.accumulate()
     result = coco_eval.summarize()
     return result
@@ -360,6 +366,12 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for detection evaluation",
     )
+    parser.add_argument(
+        "--quite",
+        "-q",
+        action="store_true",
+        help="without logging",
+    )
     return parser.parse_args()
 
 
@@ -371,7 +383,7 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
+    eval_result = evaluate_det(gts, preds, cfg, args.nproc, not args.quite)
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
