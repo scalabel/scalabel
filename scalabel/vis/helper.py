@@ -34,8 +34,8 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
             image_data = req.read()
         im = np.asarray(Image.open(io.BytesIO(image_data)), dtype=np.uint8)
     else:
-        if frame.video_name is not None:
-            image_path = os.path.join(image_dir, frame.video_name, frame.name)
+        if frame.videoName is not None:
+            image_path = os.path.join(image_dir, frame.videoName, frame.name)
         else:
             image_path = os.path.join(image_dir, frame.name)
         print("Local path:", image_path)

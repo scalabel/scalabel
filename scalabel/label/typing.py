@@ -37,8 +37,8 @@ class Label(BaseModel):
 
     id: str
     index: Optional[int] = None
-    manual_shape: Optional[bool] = None
-    manual_attributes: Optional[bool] = None
+    manualShape: Optional[bool] = None
+    manualAttributes: Optional[bool] = None
     score: Optional[float] = None
     attributes: Optional[Dict[str, Union[bool, int, float, str]]] = None
     category: Optional[str] = None
@@ -88,12 +88,12 @@ class Frame(BaseModel):
 
     name: str
     url: Optional[str]
-    video_name: Optional[str] = None
+    videoName: Optional[str] = None
     intrinsics: Optional[Intrinsics] = None
     extrinsics: Optional[Extrinsics] = None
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None
-    frame_index: Optional[int] = None
+    frameIndex: Optional[int] = None
     size: Optional[ImageSize] = None
     labels: Optional[List[Label]] = None
 
@@ -127,7 +127,7 @@ class Config(BaseModel):
     """Define metadata of the dataset."""
 
     # optional image size info to make memory pre-allocation possible
-    image_size: Optional[ImageSize]
+    imageSize: Optional[ImageSize]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
 

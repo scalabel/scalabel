@@ -111,9 +111,10 @@ def acc_single_video_mot(
 ) -> List[mm.MOTAccumulator]:
     """Accumulate results for one video."""
     assert len(gts) == len(results)
-    get_frame_index = (
-        lambda x: x.frame_index if x.frame_index is not None else 0
-    )
+
+    def get_frame_index(frame: Frame) -> int:
+        return frame.frameIndex if frame.frameIndex is not None else 0
+
     num_classes = len(classes)
     gts = sorted(gts, key=get_frame_index)
     results = sorted(results, key=get_frame_index)
@@ -122,7 +123,7 @@ def acc_single_video_mot(
     label_ids_to_int(gts)
 
     for gt, result in zip(gts, results):
-        assert gt.frame_index == result.frame_index
+        assert gt.frameIndex == result.frameIndex
         gt_bboxes, gt_labels, gt_ids, gt_ignores = parse_objects(
             gt.labels if gt.labels is not None else [],
             classes,
