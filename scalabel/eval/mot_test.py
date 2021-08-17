@@ -85,7 +85,6 @@ class TestBDD100KMotEval(unittest.TestCase):
     def test_summary(self) -> None:
         """Check evaluation scores' correctness."""
         summary = self.result.summary()
-        print(summary)
         overall_reference = {
             "IDF1": 71.01073676416142,
             "MOTA": 64.20070762302991,

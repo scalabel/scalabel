@@ -81,7 +81,6 @@ class COCOV2(COCO):  # type: ignore
         # initialize the annotations in COCO format without saving as json.
 
         if annotation_file is None:
-            print("using the loaded annotations")
             assert isinstance(
                 annotations, dict
             ), "annotation file format {} not supported".format(
@@ -171,11 +170,8 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def evaluate(self) -> None:
         """Run per image evaluation on given images."""
-        tic = time.time()
-        print("Running per image evaluation...")
         p = self.params  # type: ignore
         # add backward compatibility if useSegm is specified in params
-        print("Evaluate annotation type *{}*".format(p.iouType))
         p.imgIds = list(np.unique(p.imgIds))
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
@@ -207,8 +203,6 @@ class COCOevalV2(COCOeval):  # type: ignore
                 self.evalImgs[ind] = item
 
         self._paramsEval = copy.deepcopy(self.params)
-        toc = time.time()
-        print("DONE (t={:0.2f}s).".format(toc - tic))
 
     def compute_match(self, img_ind: int) -> Dict[int, DictStrAny]:
         """Compute matching results for each image."""
