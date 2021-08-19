@@ -23,15 +23,17 @@ import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, State } from "../types/state"
+import { Attribute, Category, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
-import { Category } from "./toolbar_category"
+import { ToolbarCategory } from "./toolbar_category"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
   /** categories of ToolBar */
   categories: string[] | null
+  /** treeCategories of Toolbar */
+  treeCategories: Category[] | null
   /** attributes of ToolBar */
   attributes: Attribute[]
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
@@ -131,11 +133,15 @@ export class ToolBar extends Component<Props> {
    * @return component
    */
   public render(): React.ReactNode {
-    const { categories, attributes } = this.props
+    const { categories, treeCategories, attributes } = this.props
     return (
       <div>
         {categories !== null ? (
-          <Category categories={categories} headerText={"Category"} />
+          <ToolbarCategory
+            categories={categories}
+            treeCategories={treeCategories}
+            headerText={"Category"}
+          />
         ) : null}
         <List>
           {attributes.map((element: Attribute) => (

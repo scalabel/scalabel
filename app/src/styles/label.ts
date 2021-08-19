@@ -5,7 +5,17 @@ import { createStyles, StyleRules } from "@material-ui/core/styles"
  * Category style
  */
 export const categoryStyle = (): // theme: Theme
-StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
+StyleRules<
+  | "root"
+  | "button"
+  | "formControl"
+  | "primary"
+  | "buttonGroup"
+  | "treeView"
+  | "treeItem"
+  | "treeText",
+  {}
+> =>
   createStyles({
     root: {
       display: "flex",
@@ -31,6 +41,18 @@ StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
     },
     buttonGroup: {
       width: "100%"
+    },
+    treeView: {
+      width: "100%"
+    },
+    treeItem: {
+      border: "solid",
+      borderRadius: 0,
+      borderWidth: "0.1px",
+      borderColor: "gray"
+    },
+    treeText: {
+      fontSize: "small"
     }
   })
 

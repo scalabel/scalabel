@@ -3,7 +3,12 @@ import FormControl from "@material-ui/core/FormControl"
 import { withStyles } from "@material-ui/core/styles"
 import ToggleButton from "@material-ui/lab/ToggleButton"
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup"
-// import Typography from "@material-ui/core/Typography"
+import TreeView from "@material-ui/lab/TreeView"
+import TreeItem from "@material-ui/lab/TreeItem"
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
+import ChevronRightIcon from "@material-ui/icons/ChevronRight"
+import RemoveIcon from "@material-ui/icons/Remove"
+import Typography from "@material-ui/core/Typography"
 import * as React from "react"
 
 import { changeSelect, makeSequential } from "../action/common"
@@ -12,6 +17,7 @@ import { dispatch, getState } from "../common/session"
 import { categoryStyle } from "../styles/label"
 import { BaseAction } from "../types/action"
 import { Component } from "./component"
+import { Category } from "../types/state"
 
 /**
  * This is the handleChange function of MultipleSelect
@@ -36,6 +42,46 @@ function handleChange(
   }
 }
 
+/**
+ * This is the nodeSelect function of TreeView
+ * that change the set the state of TreeView.
+ *
+ * @param _event
+ * @param categoryIndex
+ */
+function handleTreeSelect(
+  _event: React.ChangeEvent<{}>,
+  categoryIndex: string[]
+): void {
+  if (categoryIndex.includes("NotLeaf")) {
+    return
+  }
+  const state = getState()
+  const actions: BaseAction[] = []
+  actions.push(changeSelect({ category: Number(categoryIndex) }))
+  // Update categories if any labels are selected
+  if (Object.keys(state.user.select.labels).length > 0) {
+    actions.push(changeSelectedLabelsCategories(state, [Number(categoryIndex)]))
+  }
+  dispatch(makeSequential(actions))
+}
+
+/**
+ * Create a map for quick lookup of category data
+ *
+ * @param categories the categories from config file
+ * returns a map from category value to its index
+ */
+function getCategoryMap(categories: string[]): { [key: string]: number } {
+  const categoryNameMap: { [key: string]: number } = {}
+  for (let catInd = 0; catInd < categories.length; catInd++) {
+    // Map category names to their indices
+    const category = categories[catInd]
+    categoryNameMap[category] = catInd
+  }
+  return categoryNameMap
+}
+
 interface ClassType {
   /** root of the category selector */
   root: string
@@ -47,15 +93,68 @@ interface ClassType {
   button: string
   /** button group style */
   buttonGroup: string
+  /** tree view style */
+  treeView: string
+  /** tree item style */
+  treeItem: string
+  /** tree text style */
+  treeText: string
 }
 
 interface Props {
   /** categories of MultipleSelect */
   categories: string[] | null
+  /** tree categories of MultipleSelect */
+  treeCategories: Category[] | null
   /** styles of MultipleSelect */
   classes: ClassType
   /** header text of MultipleSelect */
   headerText: string
+}
+
+/**
+ * Function to create a tree-level category select menu
+ *
+ * @param treeCategory
+ * @param categoryNameMap
+ * @param treeLevel
+ * @param classes
+ */
+function renderTreeCategory(
+  treeCategory: Category,
+  categoryNameMap: { [key: string]: number },
+  treeLevel: number,
+  classes: ClassType
+): JSX.Element {
+  const isLeaf: boolean = !Array.isArray(treeCategory.subcategories)
+  const nodeId = isLeaf
+    ? categoryNameMap[treeCategory.name].toString()
+    : treeCategory.name + "-" + treeLevel.toString() + "-NotLeaf"
+  return (
+    <TreeItem
+      key={treeCategory.name}
+      nodeId={nodeId}
+      label={
+        <div>
+          <Typography className={classes.treeText}>
+            {treeCategory.name}
+          </Typography>
+        </div>
+      }
+      className={treeLevel === 0 ? classes.treeItem : undefined}
+    >
+      {Array.isArray(treeCategory.subcategories)
+        ? treeCategory.subcategories.map((category) =>
+            renderTreeCategory(
+              category,
+              categoryNameMap,
+              treeLevel + 1,
+              classes
+            )
+          )
+        : null}
+    </TreeItem>
+  )
 }
 
 /**
@@ -67,14 +166,17 @@ class MultipleSelect extends Component<Props> {
    * Render the category in a list
    *
    * @param categories
+   * @param treeCategories
    * @param classes
    * @param headerText
    */
   public renderCategory(
     categories: string[],
+    treeCategories: Category[] | null,
     classes: ClassType,
     headerText: string
   ): JSX.Element {
+    const categoryNameMap = getCategoryMap(categories)
     return (
       <>
         <FormControl className={classes.formControl}>
@@ -84,25 +186,39 @@ class MultipleSelect extends Component<Props> {
               primary={headerText}
             />
           </ListItem>
-          <ToggleButtonGroup
-            className={classes.buttonGroup}
-            orientation="vertical"
-            exclusive
-            onChange={handleChange}
-            value={getState().user.select.category}
-            aria-label="vertical outlined primary button group"
-          >
-            {categories.map((name: string, index: number) => (
-              <ToggleButton
-                className={classes.button}
-                key={`category-${name}`}
-                value={index}
-                disableRipple={true}
-              >
-                {name}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+          {treeCategories !== null ? (
+            <TreeView
+              onNodeSelect={handleTreeSelect}
+              defaultCollapseIcon={<ExpandMoreIcon />}
+              defaultExpandIcon={<ChevronRightIcon />}
+              defaultEndIcon={<RemoveIcon />}
+              className={classes.treeView}
+            >
+              {treeCategories.map((category) =>
+                renderTreeCategory(category, categoryNameMap, 0, classes)
+              )}
+            </TreeView>
+          ) : (
+            <ToggleButtonGroup
+              className={classes.buttonGroup}
+              orientation="vertical"
+              exclusive
+              onChange={handleChange}
+              value={getState().user.select.category}
+              aria-label="vertical outlined primary button group"
+            >
+              {categories.map((name: string, index: number) => (
+                <ToggleButton
+                  className={classes.button}
+                  key={`category-${name}`}
+                  value={index}
+                  disableRipple={true}
+                >
+                  {name}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          )}
         </FormControl>
       </>
     )
@@ -113,17 +229,23 @@ class MultipleSelect extends Component<Props> {
    */
   public render(): React.ReactNode {
     const { categories } = this.props
+    const { treeCategories } = this.props
     const { classes } = this.props
     const { headerText } = this.props
     if (categories === null) {
       return null
     } else {
-      return this.renderCategory(categories, classes, headerText)
+      return this.renderCategory(
+        categories,
+        treeCategories,
+        classes,
+        headerText
+      )
     }
   }
 }
 
-export const Category = withStyles(categoryStyle, { withTheme: true })(
+export const ToolbarCategory = withStyles(categoryStyle, { withTheme: true })(
   MultipleSelect
 )
-export default Category
+export default ToolbarCategory
