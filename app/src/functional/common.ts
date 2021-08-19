@@ -413,6 +413,78 @@ export function mergeTracks(
 }
 
 /**
+ * Split tracks and items
+ *
+ * @param track
+ * @param splitIndex
+ * @param newTrackId
+ * @param items
+ */
+function splitTrackInItems(
+  track: TrackType,
+  splitIndex: number,
+  newTrackId: IdType,
+  items: ItemType[]
+): [TrackType[], ItemType[]] {
+  const splitedTrack0 = makeTrack({ type: track.type, id: track.id }, false)
+  const splitedTrack1 = makeTrack({ type: track.type, id: newTrackId }, false)
+
+  const labelIds: IdType[][] = _.range(items.length).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(
+    items.length
+  ).map(() => [])
+
+  const prop: Partial<LabelType> = {
+    track: splitedTrack1.id
+  }
+
+  _.forEach(track.labels, (labelId, itemIndex) => {
+    if (Number(itemIndex) < splitIndex) {
+      splitedTrack0.labels[Number(itemIndex)] = labelId
+    } else {
+      splitedTrack1.labels[Number(itemIndex)] = labelId
+      labelIds[Number(itemIndex)].push(labelId)
+      if (Number(itemIndex) === splitIndex) {
+        props[Number(itemIndex)].push({ ...prop, manual: true })
+      } else {
+        props[Number(itemIndex)].push(prop)
+      }
+    }
+  })
+
+  items = changeLabelsInItems(items, labelIds, props)
+  return [[splitedTrack0, splitedTrack1], items]
+}
+
+/**
+ * Split track action
+ *
+ * @param state
+ * @param action
+ */
+export function splitTrack(
+  state: State,
+  action: actionTypes.SplitTrackAction
+): State {
+  let task = state.task
+  const trackToBeSplited = task.tracks[action.trackId]
+  const tracks = removeObjectFields(task.tracks, [action.trackId])
+  const [splitedTracks, items] = splitTrackInItems(
+    trackToBeSplited,
+    action.splitIndex,
+    action.newTrackId,
+    task.items
+  )
+  splitedTracks.forEach((track) => {
+    if (Object.keys(track.labels).length > 0) {
+      tracks[track.id] = track
+    }
+  })
+  task = updateObject(task, { items, tracks })
+  return { ...state, task }
+}
+
+/**
  * update shapes in an item
  *
  * @param item

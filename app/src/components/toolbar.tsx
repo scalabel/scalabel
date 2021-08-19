@@ -7,11 +7,13 @@ import {
   changeSelect,
   changeViewerConfig,
   mergeTracks,
+  splitTrack,
   startLinkTrack
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
+  deleteSelectedLabelsfromTracks,
   terminateSelectedTracks
 } from "../action/select"
 import { addLabelTag } from "../action/tag"
@@ -19,7 +21,7 @@ import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
-import { isValidId } from "../functional/states"
+import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, State } from "../types/state"
 import { makeButton } from "./button"
@@ -96,6 +98,16 @@ export class ToolBar extends Component<Props> {
   }
 
   /**
+   * Whether a specific key is pressed down
+   *
+   * @param {string} key - the key to check
+   * @return {boolean}
+   */
+  protected isKeyDown(key: string): boolean {
+    return this._keyDownMap[key]
+  }
+
+  /**
    * Add keyDown Event Listener
    */
   public componentDidMount(): void {
@@ -156,6 +168,13 @@ export class ToolBar extends Component<Props> {
                   })}
             </div>
           )}
+          {this.state.task.config.tracking && (
+            <div>
+              {makeButton("Unlink Track", () => {
+                this.unlinkSelectedTrack(this.state)
+              })}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -164,14 +183,19 @@ export class ToolBar extends Component<Props> {
   /**
    * handler for the delete button/key
    *
-   * @param {string} alignment
    */
   private deletePressed(): void {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
       if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
-        Session.dispatch(terminateSelectedTracks(this.state, select.item))
+        if (!this.isKeyDown(Key.S_LOW)) {
+          Session.dispatch(terminateSelectedTracks(this.state, select.item))
+        } else {
+          Session.dispatch(
+            deleteSelectedLabelsfromTracks(this.state, select.item)
+          )
+        }
       } else {
         Session.dispatch(deleteSelectedLabels(this.state))
       }
@@ -328,7 +352,22 @@ export class ToolBar extends Component<Props> {
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+    } else {
+      window.alert("Selected tracks have overlapping frames.")
     }
+  }
+
+  /**
+   * Unlink selected track
+   *
+   * @param state
+   */
+  private unlinkSelectedTrack(state: State): void {
+    const select = this.state.user.select
+    const track = getSelectedTracks(state)[0]
+    const newTrackId = makeTrack().id
+
+    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
   }
 
   /**

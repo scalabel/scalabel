@@ -132,3 +132,29 @@ export function terminateTracks(
 
   return deleteLabels(itemIndices, labelIds)
 }
+
+/**
+ * Deleting labels in a single frame from tracks
+ *
+ * @param tracks
+ * @param indexToDelete
+ */
+export function deleteLabelsFromTracks(
+  tracks: TrackType[],
+  indexToDelete: number
+): DeleteLabelsAction {
+  // TODO: This function could be integrated into the above one.
+  const itemIndices = []
+  const labelIds = []
+
+  const toDelete: IdType[] = []
+  for (const track of tracks) {
+    if (indexToDelete in track.labels) {
+      toDelete.push(track.labels[indexToDelete])
+    }
+  }
+  itemIndices.push(indexToDelete)
+  labelIds.push(toDelete)
+
+  return deleteLabels(itemIndices, labelIds)
+}

@@ -54,7 +54,7 @@ enable=use-symbolic-message-instead,useless-supression,fixme
 
 # This is a bug in detecting bad continuation. Since black is handling the code
 # formatting, we can disable C0330 safely.
-disable=C0330
+disable=C0330, R0801
 
 
 [REPORTS]

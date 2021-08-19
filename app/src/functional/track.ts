@@ -10,7 +10,7 @@ export function tracksOverlapping(tracks: TrackType[]): boolean {
   for (const track of tracks) {
     for (const key of Object.keys(track.labels)) {
       const index = Number(key)
-      if (index in itemIndices) {
+      if (itemIndices.has(index)) {
         return true
       }
       itemIndices.add(index)

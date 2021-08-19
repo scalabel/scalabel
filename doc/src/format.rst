@@ -14,6 +14,36 @@ project, you only need ``url``. ``videoName`` is used to group frames for each
 tracking task. If you are annotating bounding boxes, you can ignore `poly2d` and
 other label types.
 
+``Item List``, ``Categories``, ``Attributes`` can be uploaded with separate
+files. Or they could be contained in a single file, following the exporting format.
+
+Exporting Format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The exporting format has the following fields.
+
+.. code-block:: yaml
+
+    - frames [ ]:
+        - item001
+        - item002
+        ...
+    - config:
+        - image_size: (optional, valid when all images have the same size)
+            - width: int
+            - height: int
+        - attributes [ ]:
+            - name: string
+            - toolType: string (can be 'switch' or 'list')
+            - tagText: string (acronym when showing)
+            - values: string[]
+            - tagPrefix: string
+        - categories: string[]
+
+Each item in the ``frame`` field is an image with several fields.
+``attributes``, ``categories`` are are the list of tags giving
+to each label in images. Fields of item is given below.
+
 .. code-block:: yaml
     
     - name: string
@@ -65,13 +95,11 @@ More details about the fields
     * manualAttributes: whether the attribute of the label is created or
       modified manually
     * score: the confidence or some other ways of measuring the quality of the label.
-    * box3d
-
+    * box3d - follows the convention in the KITTI dataset.
         * alpha: observation angle if there is a 2D view
-        * orientation: 3D orientation of the bounding box, used for 3D point
-          cloud annotation
-        * locatoin: 3D point, x, y, z, center of the box
-        * dimension: 3D box size
+        * location: 3D center of the box, stored as 3D point in camera coordinates, meaning the axes (x,y,z) point right, down, and forward.
+        * orientation: 3D orientation of the bounding box, stored as axis angles in the same coordinate frame as the location.
+        * dimension: 3D box size, with length in x direction, height in y direction and width in z direction
     
     * poly2d
 

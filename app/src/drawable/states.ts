@@ -160,7 +160,9 @@ function addNewTrack(
   if (drawable.parent !== null && drawable.parent.trackId in Session.tracks) {
     parentTrack = Session.tracks[drawable.parent.trackId]
   }
-  track.init(drawable.item, drawable, numItems - drawable.item + 1, parentTrack)
+
+  const itemsToPropagate = drawable.single ? 1 : numItems - drawable.item + 1
+  track.init(drawable.item, drawable, itemsToPropagate, parentTrack)
   const indices = []
   const labels = []
   const types = []

@@ -375,6 +375,26 @@ export function mergeTracks(trackIds: IdType[]): actionTypes.MergeTrackAction {
 }
 
 /**
+ * Split track
+ *
+ * @param trackId
+ * @param splitIndex
+ * @param newTrackId
+ */
+export function splitTrack(
+  trackId: IdType,
+  newTrackId: IdType,
+  splitIndex: number
+): actionTypes.SplitTrackAction {
+  return {
+    ...makeBaseAction(actionConsts.SPLIT_TRACK),
+    trackId,
+    newTrackId,
+    splitIndex
+  }
+}
+
+/**
  * Delete given label
  *
  * @param {number} itemIndex

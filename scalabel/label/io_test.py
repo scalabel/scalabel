@@ -16,7 +16,7 @@ def test_parse() -> None:
     )
     frame = parse(raw)
     assert frame.name == "1"
-    assert frame.video_name == "a"
+    assert frame.videoName == "a"
     assert isinstance(frame.labels, list)
     labels = frame.labels
     assert isinstance(labels, list)
@@ -24,7 +24,7 @@ def test_parse() -> None:
     label = labels[0]  # pylint: disable=unsubscriptable-object
     assert label.id == "1"
     assert label.attributes is not None
-    assert label.attributes["traffic_light_color"] == "G"
+    assert label.attributes["trafficLightColor"] == "G"
     assert label.attributes["speed"] == 10.0
     b = label.box2d
     assert b is not None
@@ -42,8 +42,8 @@ def test_load() -> None:
             frames[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
             "bdd100k/frames-20000/val/c1ba5ee6-b2cb1e51.jpg"
         )
-        assert frames[0].frame_index == 0
-        assert frames[-1].frame_index == 9
+        assert frames[0].frameIndex == 0
+        assert frames[-1].frameIndex == 9
         assert frames[0].labels is not None
         assert frames[-1].labels is not None
         assert frames[0].labels[0].id == "0"
@@ -69,29 +69,40 @@ def test_load() -> None:
 
 def test_group_and_sort() -> None:
     """Check the group and sort results."""
+    # frames = [
+    #     Frame(name="bbb-1", videoName="bbb", frameIndex=1, labels=[]),
+    #     Frame(name="aaa-2", videoName="aaa", frameIndex=2, labels=[]),
+    #     Frame(name="aaa-2", videoName="aaa", frameIndex=1, labels=[]),
+    # ]
     frames = [
-        Frame(name="bbb-1", video_name="bbb", frame_index=1, labels=[]),
-        Frame(name="aaa-2", video_name="aaa", frame_index=2, labels=[]),
-        Frame(name="aaa-2", video_name="aaa", frame_index=1, labels=[]),
+        Frame(name="bbb-1", videoName="bbb", frameIndex=1, labels=[]),
+        Frame(name="aaa-2", videoName="aaa", frameIndex=2, labels=[]),
+        Frame(name="bbb-2", videoName="bbb", frameIndex=2, labels=[]),
+        Frame(name="aaa-2", videoName="aaa", frameIndex=1, labels=[]),
+        Frame(name="bbb-3", videoName="bbb", frameIndex=3, labels=[]),
     ]
     frames_list = group_and_sort(frames)
 
     assert len(frames_list) == 2
     assert len(frames_list[0]) == 2
-    assert len(frames_list[1]) == 1
+    assert len(frames_list[1]) == 3
 
-    assert str(frames_list[0][0].video_name) == "aaa"
+    assert str(frames_list[0][0].videoName) == "aaa"
     assert frames_list[0][1].name == "aaa-2"
-    assert frames_list[0][1].frame_index == 2
+    assert frames_list[0][1].frameIndex == 2
+
+    assert str(frames_list[1][0].videoName) == "bbb"
+    assert frames_list[1][1].frameIndex == 2
+    assert frames_list[1][1].name == "bbb-2"
 
 
 def test_dump() -> None:
     """Test dump labels."""
     filepath = get_test_file("image_list_with_auto_labels.json")
     labels = load(filepath).frames
-    labels_dict = [dump(label) for label in labels]
-    assert labels_dict[0]["frameIndex"] == labels[0].frame_index
-    assert labels_dict[-1]["frameIndex"] == labels[-1].frame_index
+    labels_dict = [dump(label.dict()) for label in labels]
+    assert labels_dict[0]["frameIndex"] == labels[0].frameIndex
+    assert labels_dict[-1]["frameIndex"] == labels[-1].frameIndex
     assert "box3d" not in labels_dict[0]["labels"][0]
     assert "box2d" in labels_dict[0]["labels"][0]
     assert labels[0].labels is not None

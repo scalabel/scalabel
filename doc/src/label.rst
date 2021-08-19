@@ -1,7 +1,7 @@
 Label Conversion
 ===================
 
-Currently, we provide conversion scripts between scalabel and coco formats as well as MOTChallenge to Scalabel format.
+Currently, we provide conversion scripts between scalabel and coco formats as well as MOTChallenge to Scalabel format and Waymo Open to Scalabel format.
 They are in the ``label`` module of the  `Scalabel python package
 <https://github.com/scalabel/scalabel/tree/master/scalabel>`_. We recommend
 using the tools through python module invoke convention. For example,
@@ -74,3 +74,43 @@ Available arguments:
                             path to MOTChallenge data (images + annotations).
     --output OUTPUT, -o OUTPUT
                             Output path for Scalabel format annotations.
+
+from_waymo
+-----------------
+
+``from_waymo`` converts Waymo Open tfrecord files into Scalabel format.
+
+Available arguments:
+
+.. code-block:: bash
+
+    --input INPUT, -i INPUT
+                            path to MOTChallenge data (images + annotations).
+    --output OUTPUT, -o OUTPUT
+                            Output path for Scalabel format annotations.
+    --save_images, -s SAVE
+                            If the images should be extracted from .tfrecords and saved (necessary for using Waymo Open data with Scalabel format annotations).
+    --use_lidar_labels USE_LIDAR
+                            If the conversion script should use the LiDAR labels as GT for conversion (3D + 2D projected). Default is Camera labels (2D only).
+    --nproc NPROC
+                            Number of processes for conversion. Default is 4.
+
+from_kitti
+-----------------
+
+``from_kitti`` converts KITTI annotations into Scalabel format.
+
+Available arguments:
+
+.. code-block:: bash
+
+    --input_dir INPUT, -i INPUT
+                            path to KITTI data (images + annotations).
+    --output_dir OUTPUT, -o OUTPUT
+                            Output path for Scalabel format annotations.
+    --split, SPLIT
+                            one of [training, testing]
+    --data_type DATA_TYPE
+                            one of [tracking, detection]
+    --nproc NPROC
+                            Number of processes for conversion. Default is 4.

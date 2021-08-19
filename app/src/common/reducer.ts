@@ -52,6 +52,8 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       )
     case actionConsts.MERGE_TRACKS:
       return common.mergeTracks(state, action as actionTypes.MergeTrackAction)
+    case actionConsts.SPLIT_TRACK:
+      return common.splitTrack(state, action as actionTypes.SplitTrackAction)
     case actionConsts.DELETE_LABELS:
       return common.deleteLabels(
         state,

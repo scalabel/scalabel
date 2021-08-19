@@ -6,8 +6,8 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
-from skimage import measure
 
+from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType
 from .typing import Box2D, Config, ImageSize, Poly2D
 from .utils import get_leaf_categories
@@ -17,11 +17,12 @@ __all__ = [
     "bbox_to_box2d",
     "box2d_to_bbox",
     "mask_to_box2d",
-    "mask_to_polygon",
     "poly_to_patch",
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
 ]
+
+TOLERANCE = 1.0
 
 
 def get_coco_categories(config: Config) -> List[CatType]:
@@ -41,7 +42,7 @@ def box2d_to_bbox(box2d: Box2D) -> List[float]:
     return [box2d.x1, box2d.y1, width, height]
 
 
-def mask_to_box2d(mask: np.ndarray) -> Box2D:
+def mask_to_box2d(mask: NDArrayU8) -> Box2D:
     """Convert mask into Box2D."""
     x_inds = np.nonzero(np.sum(mask, axis=0))[0]
     y_inds = np.nonzero(np.sum(mask, axis=1))[0]
@@ -51,7 +52,7 @@ def mask_to_box2d(mask: np.ndarray) -> Box2D:
     return box2d
 
 
-def mask_to_bbox(mask: np.ndarray) -> List[float]:
+def mask_to_bbox(mask: NDArrayU8) -> List[float]:
     """Convert mask into bbox."""
     box2d = mask_to_box2d(mask)
     bbox = box2d_to_bbox(box2d)
@@ -105,7 +106,7 @@ def poly_to_patch(
     )
 
 
-def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
+def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     """Converting Poly2D to mask."""
     fig = plt.figure(facecolor="0")
     fig.set_size_inches(
@@ -129,43 +130,7 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> np.ndarray:
         )
 
     fig.canvas.draw()
-    mask: np.ndarray = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
+    mask: NDArrayU8 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
     mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
     plt.close()
     return mask
-
-
-def close_contour(contour: np.ndarray) -> np.ndarray:
-    """Explicitly close the contour."""
-    if not np.array_equal(contour[0], contour[-1]):
-        contour = np.vstack((contour, contour[0]))
-    return contour
-
-
-def mask_to_polygon(
-    binary_mask: np.ndarray, x_1: int, y_1: int, tolerance: float = 0.5
-) -> List[List[float]]:
-    """Convert BitMask to polygon."""
-    polygons = []
-    padded_binary_mask = np.pad(
-        binary_mask, pad_width=1, mode="constant", constant_values=0
-    )
-    contours = measure.find_contours(padded_binary_mask, 0.5)
-    contours = np.subtract(contours, 1)
-    for contour in contours:
-        contour = close_contour(contour)
-        contour = measure.approximate_polygon(contour, tolerance)
-        if len(contour) < 3:
-            continue
-        contour = np.flip(contour, axis=1)
-        segmentation = contour.ravel().tolist()
-        segmentation = [0 if i < 0 else i for i in segmentation]
-        for i, _ in enumerate(segmentation):
-            if i % 2 == 0:
-                segmentation[i] = float(segmentation[i] + x_1)
-            else:
-                segmentation[i] = float(segmentation[i] + y_1)
-
-        polygons.append(segmentation)
-
-    return polygons
