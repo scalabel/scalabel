@@ -21,7 +21,7 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result, Scores, ScoresList
+from .result import OVERALL, Result, Scores
 
 
 class DetResult(Result):
@@ -39,13 +39,6 @@ class DetResult(Result):
     ARs: List[Dict[str, float]]
     ARm: List[Dict[str, float]]
     ARl: List[Dict[str, float]]
-
-    def __init__(self, **data: ScoresList) -> None:
-        """Set extra parameters."""
-        super().__init__(**data)
-        self._formatters = {
-            metric: "{:.1f}".format for metric in self.__fields__
-        }
 
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "Result") -> bool:  # type: ignore

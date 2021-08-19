@@ -4,14 +4,14 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Any, Callable, Dict, List, Tuple, TypeVar, Union
+from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import DictStrAny, NDArrayF64, NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -60,20 +60,6 @@ class BoxTrackResult(Result):
     PT: List[Dict[str, int]]
     ML: List[Dict[str, int]]
     FM: List[Dict[str, int]]
-
-    def __init__(self, **data: Any) -> None:  # type: ignore
-        """Check the input structure and initiliaze the model."""
-        super().__init__(**data)
-
-        metric_host = mm.metrics.create()
-        metric_host.register(mm.metrics.mota, formatter="{:.1f}".format)
-        metric_host.register(mm.metrics.motp, formatter="{:.1f}".format)
-        metric_host.register(mm.metrics.idf1, formatter="{:.1f}".format)
-        self._formatters = {
-            METRIC_MAPS[metric]: format
-            for metric, format in metric_host.formatters.items()
-            if metric in METRIC_MAPS
-        }
 
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "Result") -> bool:  # type: ignore
@@ -294,7 +280,7 @@ def generate_results(
     super_classes: Dict[str, List[Category]],
 ) -> BoxTrackResult:
     """Compute summary metrics for evaluation results."""
-    ave_dict: DictStrAny = dict()
+    ave_dict: Dict[str, Union[int, float]] = dict()
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
         v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
@@ -324,7 +310,7 @@ def generate_results(
     if [name for name in class_names if name in super_classes]:
         class_name_sets.insert(1, super_set)
 
-    res_dict: Dict[str, ScoresList] = {
+    res_dict: Dict[str, Union[int, float, ScoresList]] = {
         metric: [
             {
                 class_name: score
