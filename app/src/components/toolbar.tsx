@@ -176,7 +176,7 @@ export class ToolBar extends Component<Props> {
           )}
           {this.state.task.config.tracking && (
             <div>
-              {makeButton("Unlink Track", () => {
+              {makeButton("Break Track", () => {
                 this.unlinkSelectedTrack(this.state)
               })}
             </div>
