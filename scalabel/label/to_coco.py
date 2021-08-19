@@ -129,7 +129,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
 
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.image_size
+        img_shape = config.imageSize
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = image_anns.size
@@ -192,7 +192,7 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.image_size
+        img_shape = config.imageSize
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = image_anns.size
@@ -271,13 +271,13 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
         instance_id_maps: Dict[str, int] = dict()
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in video_anns:
             image_id += 1
-            img_shape = config.image_size
+            img_shape = config.imageSize
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = image_anns.size
@@ -286,7 +286,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frame_index,
+                frame_id=image_anns.frameIndex,
                 file_name=osp.join(video_name, image_anns.name),
                 height=img_shape.height,
                 width=img_shape.width,
@@ -351,13 +351,13 @@ def scalabel2coco_seg_track(
         instance_id_maps: Dict[str, int] = dict()
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in frames:
             image_id += 1
-            img_shape = config.image_size
+            img_shape = config.imageSize
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = image_anns.size
@@ -366,7 +366,7 @@ def scalabel2coco_seg_track(
 
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frame_index,
+                frame_id=image_anns.frameIndex,
                 file_name=image_anns.name,
                 height=img_shape.height,
                 width=img_shape.width,
