@@ -211,8 +211,8 @@ def from_kitti_det(
 
         f = Frame(
             name=img_name,
-            videoName=video_name,
-            frameIndex=img_id,
+            video_name=video_name,
+            frame_index=img_id,
             size=image_size,
             extrinsics=cam2global,
             intrinsics=intrinsics,
@@ -299,8 +299,8 @@ def from_kitti(
 
             f = Frame(
                 name=img_name.split("/")[-1],
-                videoName=video_name,
-                frameIndex=fr,
+                video_name=video_name,
+                frame_index=fr,
                 size=image_size,
                 extrinsics=cam2global,
                 intrinsics=intrinsics,

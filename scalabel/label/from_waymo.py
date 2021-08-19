@@ -293,8 +293,8 @@ def parse_frame(
 
         f = Frame(
             name=frame_name,
-            videoName=seq_dir,
-            frameIndex=frame_id,
+            video_name=seq_dir,
+            frame_index=frame_id,
             size=image_size,
             extrinsics=cam2global,
             intrinsics=intrinsics,

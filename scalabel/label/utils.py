@@ -146,8 +146,8 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
     """Compare two list of frames."""
     for frame, frame_ref in zip(result, result_compare):
         assert frame.name == frame_ref.name
-        assert frame.videoName == frame_ref.videoName
-        assert frame.frameIndex == frame_ref.frameIndex
+        assert frame.video_name == frame_ref.video_name
+        assert frame.frame_index == frame_ref.frame_index
         if frame.intrinsics is not None:
             assert frame_ref.intrinsics is not None
             assert frame.intrinsics.focal == pytest.approx(
