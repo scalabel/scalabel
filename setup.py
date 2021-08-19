@@ -34,6 +34,7 @@ setuptools.setup(
         "joblib",
         "matplotlib",
         "motmetrics",
+        "mypy_extensions",
         "numpy",
         "pandas",
         "Pillow",
