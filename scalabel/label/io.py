@@ -10,25 +10,41 @@ from typing import Any, List, Optional, Union
 from ..common.io import load_config
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Box2D, Box3D, Config, Dataset, Frame, Label, Poly2D
+from .typing import (
+    Box2D,
+    Box3D,
+    Config,
+    Dataset,
+    Extrinsics,
+    Frame,
+    ImageSize,
+    Intrinsics,
+    Label,
+    Poly2D,
+)
 
 
 def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
     """Parse a single frame."""
     if not validate_frames:
         frame = Frame.construct(**raw_frame)
+        if frame.intrinsics is not None:
+            frame.intrinsics = Intrinsics.construct(**frame.intrinsics.dict())
+        if frame.extrinsics is not None:
+            frame.extrinsics = Extrinsics.construct(**frame.extrinsics.dict())
+        if frame.size is not None:
+            frame.size = ImageSize.construct(**frame.size.dict())
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
-                # ignore the construct arguments in mypy
-                label = Label.construct(**l)  # type: ignore
+                label = Label.construct(**l.dict())
                 if label.box2d is not None:
-                    label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
+                    label.box2d = Box2D.construct(**label.box2d.dict())
                 if label.box3d is not None:
-                    label.box3d = Box3D.construct(**label.box3d)  # type: ignore # pylint: disable=line-too-long
+                    label.box3d = Box3D.construct(**label.box3d.dict())
                 if label.poly2d is not None:
                     label.poly2d = [
-                        Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
+                        Poly2D.construct(**p.dict()) for p in label.poly2d
                     ]
                 labels.append(label)
             frame.labels = labels
