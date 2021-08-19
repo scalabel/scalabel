@@ -271,7 +271,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
         instance_id_maps: Dict[str, int] = dict()
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
@@ -286,7 +286,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frame_index,
+                frame_id=image_anns.frameIndex,
                 file_name=osp.join(video_name, image_anns.name),
                 height=img_shape.height,
                 width=img_shape.width,
@@ -351,7 +351,7 @@ def scalabel2coco_seg_track(
         instance_id_maps: Dict[str, int] = dict()
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
