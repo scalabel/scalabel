@@ -6,7 +6,6 @@ isort
 joblib
 motmetrics
 mypy
-mypy_extensions
 numpy
 pandas
 Pillow

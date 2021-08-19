@@ -1,14 +1,14 @@
 """Definition of the base evaluation result class."""
 
 from collections import defaultdict
-from typing import AbstractSet, Callable, Dict, List, Optional, Union
+from typing import AbstractSet, Dict, List, Optional, Union
 
 import numpy as np
-from mypy_extensions import KwArg, VarArg
 from pandas import DataFrame
 from pydantic import BaseModel, PrivateAttr
 
-FORMATTER = Callable[[VarArg(object), KwArg(object)], str]
+from scalabel.common.typing import DictStrAny
+
 Scores = Dict[str, Union[int, float]]
 ScoresList = List[Scores]
 AVERAGE = "AVERAGE"
@@ -40,7 +40,7 @@ class Result(BaseModel):
             the same as `table()`.
     """
 
-    _formatters: Dict[str, FORMATTER] = PrivateAttr(dict())
+    _formatters: DictStrAny = PrivateAttr(dict())
     _row_breaks: List[int] = PrivateAttr([])
 
     def __init__(self, **data: Union[int, float, ScoresList]) -> None:
