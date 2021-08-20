@@ -12,8 +12,13 @@ StyleRules<
   | "primary"
   | "buttonGroup"
   | "treeView"
-  | "treeItem"
-  | "treeText",
+  | "treeItemRoot"
+  | "treeItemIconContainer"
+  | "treeItemContent"
+  | "treeItemGroup"
+  | "treeItemLabel"
+  | "treeItemLabelText"
+  | "treeItemOutline",
   {}
 > =>
   createStyles({
@@ -45,14 +50,42 @@ StyleRules<
     treeView: {
       width: "100%"
     },
-    treeItem: {
-      border: "solid",
-      borderRadius: 0,
-      borderWidth: "0.1px",
-      borderColor: "gray"
+    // below are properties related to treeItem
+    treeItemRoot: {
+      marginTop: "1px",
+      color: "rgba(255, 255, 255, 0.7)",
+      "&.Mui-selected": {
+        color: "rgba(255, 255, 255, 1)"
+      },
+      "&.Mui-selected > $treeItemContent $treeItemLabel": {
+        backgroundColor: "rgba(25, 118, 210, 0.32)"
+      },
+      "&:hover > $treeItemContent": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)"
+      }
     },
-    treeText: {
-      fontSize: "small"
+    treeItemIconContainer: {
+      width: "0px",
+      marginRight: "0px",
+      justifyContent: "unset"
+    },
+    treeItemContent: {},
+    treeItemGroup: {
+      marginLeft: "0px"
+    },
+    treeItemLabel: {
+      height: "22px",
+      paddingLeft: "0px",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.05)"
+      }
+    },
+    treeItemLabelText: {
+      fontSize: "0.875rem",
+      textAlign: "center"
+    },
+    treeItemOutline: {
+      outline: "1px solid rgba(255, 255, 255, 0.12)"
     }
   })
 

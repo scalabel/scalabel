@@ -7,8 +7,6 @@ import TreeView from "@material-ui/lab/TreeView"
 import TreeItem from "@material-ui/lab/TreeItem"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import ChevronRightIcon from "@material-ui/icons/ChevronRight"
-import RemoveIcon from "@material-ui/icons/Remove"
-import Typography from "@material-ui/core/Typography"
 import * as React from "react"
 
 import { changeSelect, makeSequential } from "../action/common"
@@ -95,10 +93,20 @@ interface ClassType {
   buttonGroup: string
   /** tree view style */
   treeView: string
-  /** tree item style */
-  treeItem: string
-  /** tree text style */
-  treeText: string
+  /** tree item root style */
+  treeItemRoot: string
+  /** tree item iconcontainer style */
+  treeItemIconContainer: string
+  /** tree item content style */
+  treeItemContent: string
+  /** tree item group style */
+  treeItemGroup: string
+  /** tree item label style */
+  treeItemLabel: string
+  /** tree item label text style */
+  treeItemLabelText: string
+  /** tree item first-level outline */
+  treeItemOutline: string
 }
 
 interface Props {
@@ -135,13 +143,16 @@ function renderTreeCategory(
       key={treeCategory.name}
       nodeId={nodeId}
       label={
-        <div>
-          <Typography className={classes.treeText}>
-            {treeCategory.name}
-          </Typography>
-        </div>
+        <div className={classes.treeItemLabelText}>{treeCategory.name}</div>
       }
-      className={treeLevel === 0 ? classes.treeItem : undefined}
+      classes={{
+        root: classes.treeItemRoot,
+        iconContainer: classes.treeItemIconContainer,
+        content: classes.treeItemContent,
+        group: classes.treeItemGroup,
+        label: classes.treeItemLabel
+      }}
+      className={treeLevel === 0 ? classes.treeItemOutline : undefined}
     >
       {Array.isArray(treeCategory.subcategories)
         ? treeCategory.subcategories.map((category) =>
@@ -191,7 +202,6 @@ class MultipleSelect extends Component<Props> {
               onNodeSelect={handleTreeSelect}
               defaultCollapseIcon={<ExpandMoreIcon />}
               defaultExpandIcon={<ChevronRightIcon />}
-              defaultEndIcon={<RemoveIcon />}
               className={classes.treeView}
             >
               {treeCategories.map((category) =>
