@@ -18,12 +18,12 @@ def load_config(filepath: str) -> DictStrAny:
     """
     ext = os.path.splitext(filepath)[1]
     if ext == ".yaml":
-        with open(filepath, "r") as fp:
+        with open(filepath, "r", encoding="utf-8") as fp:
             config_dict = yaml.load(fp.read(), Loader=yaml.Loader)
     elif ext == ".toml":
         config_dict = toml.load(filepath)
     elif ext == ".json":
-        with open(filepath, "r") as fp:
+        with open(filepath, "r", encoding="utf-8") as fp:
             config_dict = json.load(fp)
     else:
         raise NotImplementedError(f"Config extention {ext} not supported")
@@ -33,6 +33,6 @@ def load_config(filepath: str) -> DictStrAny:
 
 def load_file_as_list(filepath: str) -> List[str]:
     """Get contents of a text file as list."""
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         contents = f.readlines()
     return contents
