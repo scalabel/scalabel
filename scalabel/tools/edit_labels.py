@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List
 import yaml
 
 from ..common.logger import logger
+from ..common.io import open_read_text, open_write_text
 
 LabelObject = Dict[str, Any]  # type: ignore
 
@@ -72,7 +73,7 @@ def read_input(filename: str) -> List[LabelObject]:
     labels: List[LabelObject]
     ext = splitext(filename)[1]
     logger.info("Reading %s", filename)
-    with open(filename, "r") as fp:
+    with open_read_text(filename) as fp:
         if ext == ".json":
             labels = json.load(fp)
         elif ext in [".yml", ".yaml"]:
@@ -86,7 +87,7 @@ def write_output(filename: str, labels: List[LabelObject]) -> None:
     """Write output file."""
     ext = splitext(filename)[1]
     logger.info("Writing %s", filename)
-    with open(filename, "w") as fp:
+    with open_write_text(filename) as fp:
         if ext == ".json":
             json.dump(labels, fp)
         elif ext in [".yml", ".yaml"]:

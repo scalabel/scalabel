@@ -2,12 +2,22 @@
 
 import json
 import os
-from typing import List
+from typing import List, TextIO
 
 import toml
 import yaml
 
 from .typing import DictStrAny
+
+
+def open_read_text(filepath: str) -> TextIO:
+    """Open a text file for reading and return a file object."""
+    return open(filepath, mode="r", encoding="utf-8")
+
+
+def open_write_text(filepath: str) -> TextIO:
+    """Open a text file for writing and return a file object."""
+    return open(filepath, mode="w", encoding="utf-8")
 
 
 def load_config(filepath: str) -> DictStrAny:
@@ -18,12 +28,12 @@ def load_config(filepath: str) -> DictStrAny:
     """
     ext = os.path.splitext(filepath)[1]
     if ext == ".yaml":
-        with open(filepath, "r", encoding="utf-8") as fp:
+        with open_read_text(filepath) as fp:
             config_dict = yaml.load(fp.read(), Loader=yaml.Loader)
     elif ext == ".toml":
         config_dict = toml.load(filepath)
     elif ext == ".json":
-        with open(filepath, "r", encoding="utf-8") as fp:
+        with open_read_text(filepath) as fp:
             config_dict = json.load(fp)
     else:
         raise NotImplementedError(f"Config extention {ext} not supported")
