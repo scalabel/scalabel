@@ -5,8 +5,37 @@ import unittest
 import numpy as np
 
 from ..label.io import group_and_sort, load, load_label_config
+from ..label.typing import Category
 from ..unittest.util import get_test_file
-from .mot import acc_single_video_mot, evaluate_track
+from .mot import acc_single_video_mot, compute_average, evaluate_track
+
+
+class TestComputeAverage(unittest.TestCase):
+    """Test cases for the function compute_average."""
+
+    def test_nan_case(self) -> None:
+        """Test the case when there is a nan."""
+        flat_dicts = [
+            dict(a=1, b=2, c=np.nan),
+            dict(a=2, b=1, c=1.5),
+            dict(a=1, b=2, c=1.5),
+        ]
+        metrics = ["a", "b", "c"]
+        classes = [Category(name="class1"), Category(name="class2")]
+        ave_dict = compute_average(flat_dicts, metrics, classes)
+        self.assertDictEqual(ave_dict, dict(a=3, b=3, c=0.75))
+
+    def test_inf_case(self) -> None:
+        """Test the case when there is a inf."""
+        flat_dicts = [
+            dict(a=1, b=2, c=float("inf")),
+            dict(a=2, b=1, c=1.5),
+            dict(a=1, b=2, c=1.5),
+        ]
+        metrics = ["a", "b", "c"]
+        classes = [Category(name="class1"), Category(name="class2")]
+        ave_dict = compute_average(flat_dicts, metrics, classes)
+        self.assertDictEqual(ave_dict, dict(a=3, b=3, c=0.75))
 
 
 class TestBDD100KMotEval(unittest.TestCase):

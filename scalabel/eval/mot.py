@@ -272,6 +272,27 @@ def evaluate_single_class(
     return flat_dict
 
 
+def compute_average(
+    flat_dicts: List[Dict[str, Union[int, float]]],
+    metrics: List[str],
+    classes: List[Category],
+) -> Dict[str, Union[int, float]]:
+    """Calculate the AVERAGE scores."""
+    ave_dict: Dict[str, Union[int, float]] = dict()
+    for metric in metrics:
+        dtype = type(flat_dicts[-1][metric])
+        v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
+        v = np.nan_to_num(v, nan=0, posinf=0, neginf=0)
+        if dtype == int:
+            value = int(v.sum())  # type: Union[int, float]
+        elif dtype == float:
+            value = float(v.mean())
+        else:
+            raise TypeError()
+        ave_dict[metric] = value
+    return ave_dict
+
+
 def generate_results(
     flat_dicts: List[Dict[str, Union[int, float]]],
     class_names: List[str],
@@ -280,18 +301,7 @@ def generate_results(
     super_classes: Dict[str, List[Category]],
 ) -> BoxTrackResult:
     """Compute summary metrics for evaluation results."""
-    ave_dict: Dict[str, Union[int, float]] = dict()
-    for metric in metrics:
-        dtype = type(flat_dicts[-1][metric])
-        v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
-        v = np.nan_to_num(v, nan=0)
-        if dtype == int:
-            value = dtype(v.sum())
-        elif dtype == float:
-            value = dtype(v.mean())
-        else:
-            raise TypeError()
-        ave_dict[metric] = value
+    ave_dict = compute_average(flat_dicts, metrics, classes)
     class_names.insert(len(flat_dicts) - 1, AVERAGE)
     flat_dicts.insert(len(flat_dicts) - 1, ave_dict)
 
