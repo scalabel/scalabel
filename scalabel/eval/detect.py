@@ -196,7 +196,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             to_updates = list(map(self.compute_match, range(len(p.imgIds))))
 
         eval_num = len(p.catIds) * len(p.areaRng) * len(p.imgIds)
-        self.evalImgs: List[DictStrAny] = [dict() for _ in range(eval_num)]
+        self.evalImgs: List[DictStrAny] = [{} for _ in range(eval_num)]
         for to_update in to_updates:
             for ind, item in to_update.items():
                 self.evalImgs[ind] = item
@@ -209,7 +209,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         area_num = len(p.areaRng)
         img_num = len(p.imgIds)
 
-        to_updates: Dict[int, DictStrAny] = dict()
+        to_updates: Dict[int, DictStrAny] = {}
         for cat_ind, cat_id in enumerate(p.catIds):
             for area_ind, area_rng in enumerate(p.areaRng):
                 eval_ind: int = (

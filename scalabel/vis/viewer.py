@@ -89,7 +89,7 @@ class LabelViewer:
         self.display_cfg = display_cfg
 
         # animation
-        self._label_colors: Dict[str, NDArrayF64] = dict()
+        self._label_colors: Dict[str, NDArrayF64] = {}
 
         figsize = (
             int(self.ui_cfg.width * self.ui_cfg.scale // self.ui_cfg.dpi),

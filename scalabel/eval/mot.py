@@ -294,7 +294,7 @@ def generate_results(
     super_classes: Dict[str, List[Category]],
 ) -> BoxTrackResult:
     """Compute summary metrics for evaluation results."""
-    ave_dict: DictStrAny = dict()
+    ave_dict: DictStrAny = {}
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
         v = np.array([flat_dicts[i][metric] for i in range(len(classes))])

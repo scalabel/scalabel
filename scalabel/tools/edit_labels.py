@@ -7,8 +7,8 @@ from typing import Any, Callable, Dict, List
 
 import yaml
 
-from ..common.logger import logger
 from ..common.io import open_read_text, open_write_text
+from ..common.logger import logger
 
 LabelObject = Dict[str, Any]  # type: ignore
 

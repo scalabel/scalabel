@@ -268,7 +268,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
@@ -348,7 +348,7 @@ def scalabel2coco_seg_track(
     shapes = []
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
