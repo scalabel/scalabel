@@ -15,6 +15,8 @@ import { checkBox2D } from "../util/shape"
 import {
   drag,
   drawBox2DTracks,
+  keyDown,
+  keyUp,
   mouseMoveClick,
   setUpLabel2dCanvas
 } from "./canvas_util"
@@ -256,6 +258,51 @@ test("Linking tracks", () => {
   expect(_.size(state.task.tracks)).toEqual(3)
 })
 
+test("Breaking track", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const toolbarRef: React.Ref<ToolBar> = React.createRef()
+  const { getAllByText } = render(
+    <ToolBar
+      ref={toolbarRef}
+      categories={null}
+      attributes={[]}
+      labelType={"labelType"}
+    />
+  )
+  expect(toolbarRef.current).not.toBeNull()
+  expect(toolbarRef.current).not.toBeUndefined()
+  if (toolbarRef.current !== null) {
+    toolbarRef.current.componentDidMount()
+  }
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+
+  // Terminate the track by button
+  dispatch(action.goToItem(2))
+  let state = getState()
+  Session.dispatch(
+    selectLabel(
+      state.user.select.labels,
+      2,
+      state.task.tracks[trackIds[0]].labels[2]
+    )
+  )
+  fireEvent(
+    getAllByText("Break Track")[0],
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+
+  state = getState()
+  expect(_.size(state.task.tracks)).toEqual(2)
+})
+
 test("Changing attributes and categories of tracks", () => {
   const label2d = canvasRef.current as Label2dCanvas
 
@@ -380,4 +427,67 @@ test("Changing shapes and locations of tracks", () => {
       i
     )
   }
+})
+
+test("Single frame addtion", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  keyDown(label2d, "s")
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+  keyUp(label2d, "s")
+
+  const state = getState()
+  expect(_.size(state.task.tracks)).toEqual(1)
+  expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(1)
+})
+
+test("Single frame deletion", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const toolbarRef: React.Ref<ToolBar> = React.createRef()
+  const { getByText } = render(
+    <ToolBar
+      ref={toolbarRef}
+      categories={null}
+      attributes={[]}
+      labelType={"labelType"}
+    />
+  )
+  expect(toolbarRef.current).not.toBeNull()
+  expect(toolbarRef.current).not.toBeUndefined()
+  if (toolbarRef.current !== null) {
+    toolbarRef.current.componentDidMount()
+  }
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+
+  dispatch(action.goToItem(1))
+  mouseMoveClick(label2d, 1, 30)
+  fireEvent.keyDown(document, { key: "s" })
+  fireEvent(
+    getByText("Delete"),
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+
+  const state = getState()
+  expect(_.size(state.task.tracks)).toEqual(1)
+  expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(7)
+  expect(_.keys(state.task.tracks[trackIds[0]].labels)).toMatchObject([
+    "0",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+  ])
 })

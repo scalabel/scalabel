@@ -666,7 +666,7 @@ export const emptyTrackingTask: DeepPartialState = {
     config: {
       projectName: "Test3",
       itemType: "image",
-      labelTypes: ["box2d"],
+      labelTypes: ["box2d", "polygon2d"],
       label2DTemplates: {},
       taskSize: 8,
       handlerUrl: "label",
