@@ -3,7 +3,7 @@ import _ from "lodash"
 import React from "react"
 
 import * as action from "../../src/action/common"
-import { selectLabel, unselectLabels } from "../../src/action/select"
+import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState, getStore } from "../../src/common/session"
 import { updateTracks } from "../../src/common/session_setup"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"
@@ -94,10 +94,10 @@ test("Adding and deleting tracks", () => {
     expect(_.size(state.task.tracks[trackIds[i]].labels)).toEqual(
       numItems - itemIndex
     )
-    state.task.items.forEach((item, index) => {
-      expect(_.size(item.labels)).toEqual(numLabels[index])
-      expect(_.size(item.shapes)).toEqual(numLabels[index])
-    })
+  })
+  state.task.items.forEach((item, index) => {
+    expect(_.size(item.labels)).toEqual(numLabels[index])
+    expect(_.size(item.shapes)).toEqual(numLabels[index])
   })
   // Check all the shapes have unique IDs
   state.task.items.forEach((item) => {
@@ -202,16 +202,8 @@ test("Linking tracks", () => {
   const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
   // Terminate the track by button
-  let state = getState()
   dispatch(action.goToItem(2))
-  Session.dispatch(
-    unselectLabels(
-      state.user.select.labels,
-      state.user.select.item,
-      state.user.select.labels[state.user.select.item]
-    )
-  )
-  state = getState()
+  let state = getState()
   Session.dispatch(
     selectLabel(
       state.user.select.labels,
