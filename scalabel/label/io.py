@@ -7,7 +7,7 @@ from functools import partial
 from itertools import groupby
 from typing import Any, List, Optional, Union
 
-from ..common.io import load_config
+from ..common.io import load_config, open_read_text, open_write_text
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import (
@@ -62,7 +62,7 @@ def load(
 
     def process_file(filepath: str) -> Optional[DictStrAny]:
         raw_cfg = None
-        with open(filepath, "r") as fp:
+        with open_read_text(filepath) as fp:
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
@@ -131,11 +131,8 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
             for v in (remove_empty_elements(v) for v in frame)
             if not empty(v)
         ]
-    return {
-        k: v
-        for k, v in ((k, remove_empty_elements(v)) for k, v in frame.items())
-        if not empty(v)
-    }
+    result = ((k, remove_empty_elements(v)) for k, v in frame.items())
+    return {k: v for k, v in result if not empty(v)}
 
 
 def save(
@@ -151,7 +148,7 @@ def save(
     else:
         dataset_dict["frames"] = list(map(dump, dataset_dict["frames"]))
 
-    with open(filepath, "w") as fp:
+    with open_write_text(filepath) as fp:
         json.dump(dataset_dict, fp, indent=2)
 
 
