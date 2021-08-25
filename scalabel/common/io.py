@@ -43,6 +43,6 @@ def load_config(filepath: str) -> DictStrAny:
 
 def load_file_as_list(filepath: str) -> List[str]:
     """Get contents of a text file as list."""
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open_read_text(filepath) as f:
         contents = f.readlines()
     return contents
