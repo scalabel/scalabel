@@ -11,6 +11,7 @@ import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayU8
@@ -268,7 +269,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
@@ -348,7 +349,7 @@ def scalabel2coco_seg_track(
     shapes = []
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
@@ -440,7 +441,7 @@ def run(args: argparse.Namespace) -> None:
     coco = convert_func(frames, config)
 
     logger.info("Saving converted annotations...")
-    with open(args.output, "w") as f:
+    with open_write_text(args.output) as f:
         json.dump(coco, f)
 
 

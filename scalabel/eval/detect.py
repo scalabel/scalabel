@@ -15,6 +15,7 @@ import numpy as np
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
+from ..common.io import open_write_text
 from ..common.logger import logger as scalabel_logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
@@ -190,7 +191,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             to_updates = list(map(self.compute_match, range(len(p.imgIds))))
 
         eval_num = len(p.catIds) * len(p.areaRng) * len(p.imgIds)
-        self.evalImgs: List[DictStrAny] = [dict() for _ in range(eval_num)]
+        self.evalImgs: List[DictStrAny] = [{} for _ in range(eval_num)]
         for to_update in to_updates:
             for ind, item in to_update.items():
                 self.evalImgs[ind] = item
@@ -203,7 +204,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         area_num = len(p.areaRng)
         img_num = len(p.imgIds)
 
-        to_updates: Dict[int, DictStrAny] = dict()
+        to_updates: Dict[int, DictStrAny] = {}
         for cat_ind, cat_id in enumerate(p.catIds):
             for area_ind, area_rng in enumerate(p.areaRng):
                 eval_ind: int = (
@@ -372,5 +373,5 @@ if __name__ == "__main__":
     scalabel_logger.info(eval_result)
     scalabel_logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)

@@ -20,6 +20,7 @@ import yaml
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
+from ..common.io import open_read_text, open_write_text
 from ..common.logger import logger
 
 
@@ -185,7 +186,7 @@ def create_image_list(out_dir: str, url_root: str) -> str:
     ]
 
     list_path = join(out_dir, "image_list.yml")
-    with open(list_path, "w") as f:
+    with open_write_text(list_path) as f:
         yaml.dump(yaml_items, f)
     logger.info(
         "The configuration file saved at %s with %d items",
@@ -239,7 +240,7 @@ def parse_input_list(args: argparse.Namespace) -> List[str]:
     inputs = []
     inputs.extend(args.input)
     for l in args.input_list:
-        with open(l, "r") as fp:
+        with open_read_text(l) as fp:
             inputs.extend([l.strip() for l in fp.readlines()])
     return inputs
 

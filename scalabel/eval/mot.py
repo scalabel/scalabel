@@ -10,6 +10,7 @@ from typing import Callable, Dict, List, Tuple, TypeVar, Union
 import motmetrics as mm
 import numpy as np
 
+from ..common.io import open_write_text
 from ..common.logger import logger as scalabel_logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayI32
@@ -279,7 +280,7 @@ def compute_average(
     classes: List[Category],
 ) -> Dict[str, Union[int, float]]:
     """Calculate the AVERAGE scores."""
-    ave_dict: Dict[str, Union[int, float]] = dict()
+    ave_dict: Dict[str, Union[int, float]] = {}
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
         v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
@@ -500,5 +501,5 @@ if __name__ == "__main__":
     scalabel_logger.info(eval_result)
     scalabel_logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump((eval_result.json()), fp)
