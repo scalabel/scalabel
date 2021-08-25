@@ -131,11 +131,8 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
             for v in (remove_empty_elements(v) for v in frame)
             if not empty(v)
         ]
-    return {
-        k: v
-        for k, v in ((k, remove_empty_elements(v)) for k, v in frame.items())
-        if not empty(v)
-    }
+    result = ((k, remove_empty_elements(v)) for k, v in frame.items())
+    return {k: v for k, v in result if not empty(v)}
 
 
 def save(
