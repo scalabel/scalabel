@@ -6,6 +6,7 @@ import numpy as np
 import utm  # type: ignore
 from scipy.spatial.transform import Rotation as R
 
+from ..common.io import open_read_text
 from ..common.typing import NDArrayF64
 
 
@@ -60,7 +61,7 @@ def read_oxts(oxts_dir: str, seq_idx: int) -> List[List[str]]:
         fields: list of oxts information
     """
     oxts_path = os.path.join(oxts_dir, f"{seq_idx:04d}.txt")
-    with open(oxts_path, "r") as f:
+    with open_read_text(oxts_path) as f:
         fields = [line.strip().split() for line in f]
     return fields
 
@@ -71,7 +72,7 @@ def read_calib(calib_dir: str, seq_idx: int, cam: int = 2) -> NDArrayF64:
     e.g.,
         projection = read_calib(cali_dir, vid_id)
     """
-    with open(os.path.join(calib_dir, f"{seq_idx:04d}.txt")) as f:
+    with open_read_text(os.path.join(calib_dir, f"{seq_idx:04d}.txt")) as f:
         fields = [line.split() for line in f]
     return np.asarray(fields[cam][1:], dtype=np.float32).reshape(3, 4)
 
@@ -82,7 +83,7 @@ def read_calib_det(calib_dir: str, img_idx: int, cam: int = 2) -> NDArrayF64:
     e.g.,
         projection = read_calib(cali_dir, img_id)
     """
-    with open(os.path.join(calib_dir, f"{img_idx:06d}.txt")) as f:
+    with open_read_text(os.path.join(calib_dir, f"{img_idx:06d}.txt")) as f:
         fields = [line.split() for line in f]
     return np.asarray(fields[cam][1:], dtype=np.float64).reshape(3, 4)
 
@@ -104,7 +105,7 @@ def list_from_file(
     """
     cnt = 0
     item_list = []
-    with open(filename, "r") as f:
+    with open_read_text(filename) as f:
         for _ in range(offset):
             f.readline()
         for line in f:

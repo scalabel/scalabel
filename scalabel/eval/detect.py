@@ -14,6 +14,7 @@ import numpy as np
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
@@ -380,5 +381,5 @@ if __name__ == "__main__":
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)

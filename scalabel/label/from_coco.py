@@ -9,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from tqdm import tqdm
 
+from ..common.io import open_read_text
 from ..common.parallel import NPROC
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
@@ -116,7 +117,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    with open(args.input) as fp:
+    with open_read_text(args.input) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
 

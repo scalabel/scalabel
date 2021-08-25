@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple, TypeVar, Union
 import motmetrics as mm
 import numpy as np
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny, NDArrayF64, NDArrayI32
@@ -508,5 +509,5 @@ if __name__ == "__main__":
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump((eval_result.json()), fp)
