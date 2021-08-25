@@ -5,6 +5,7 @@ import unittest
 import matplotlib
 import numpy as np
 
+from ..common.io import open_read_text
 from ..unittest.util import get_test_file
 from .transforms import (
     bbox_to_box2d,
@@ -70,7 +71,7 @@ class TestScalabel2COCOFuncs(unittest.TestCase):
         json_file = get_test_file("poly2ds.json")
         npy_file = get_test_file("mask.npy")
 
-        with open(json_file) as fp:
+        with open_read_text(json_file) as fp:
             polys = json.load(fp)
         gt_mask = np.load(npy_file).tolist()
 

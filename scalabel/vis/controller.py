@@ -115,7 +115,7 @@ class ViewController:
         # animation
         self._run_animation: bool = False
         self._timer: Timer = Timer(0.4, self.tick)
-        self._label_colors: Dict[str, NDArrayF64] = dict()
+        self._label_colors: Dict[str, NDArrayF64] = {}
 
         # load label file
         print("Label file:", config.label_path)
@@ -124,7 +124,7 @@ class ViewController:
         self.frames = load(config.label_path, config.nproc).frames[:10]
         logger.info("Load images: %d", len(self.frames))
 
-        self.images: Dict[str, "concurrent.futures.Future[NDArrayU8]"] = dict()
+        self.images: Dict[str, "concurrent.futures.Future[NDArrayU8]"] = {}
         # Cache the images in separate threads.
         for frame in self.frames:
             self.images[frame.name] = executor.submit(

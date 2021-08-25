@@ -1,4 +1,5 @@
 """Convert coco to Scalabel format."""
+
 import argparse
 import json
 import os
@@ -8,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from tqdm import tqdm
 
+from ..common.io import open_read_text
 from ..common.parallel import NPROC
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
@@ -47,12 +49,12 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
-    cats = [None for _ in range(len(coco["categories"]))]
+    cats = [Category() for _ in range(len(coco["categories"]))]
     cat_id2name = {}
     for category in coco["categories"]:
         assert 0 < int(category["id"]) <= len(coco["categories"])
         cat_id2name[category["id"]] = category["name"]
-        cats[int(category["id"]) - 1] = Category(name=category["name"])  # type: ignore # pylint: disable=line-too-long
+        cats[int(category["id"]) - 1] = Category(name=category["name"])
     assert None not in cats
     config = Config(categories=cats)
 
@@ -73,10 +75,16 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
 
         if "coco_url" in img:
             frame.url = img["coco_url"]
-        if vid_id2name is not None and "video_id" in img:
-            frame.video_name = vid_id2name[img["video_id"]]  # type: ignore
+        if (
+            vid_id2name is not None
+            and "video_id" in img
+            and img["video_id"] is not None
+        ):
+            frame.videoName = vid_id2name[  # pylint: disable=invalid-name
+                img["video_id"]
+            ]
         if "frame_id" in img:
-            frame.frame_index = img["frame_id"]
+            frame.frameIndex = img["frame_id"]  # pylint: disable=invalid-name
 
         if img_id not in img_id2anns:
             continue
@@ -96,8 +104,8 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
             )
             if "score" in ann:
                 label.score = ann["score"]
-            if "bbox" in ann:
-                label.box2d = bbox_to_box2d(ann["bbox"])  # type: ignore
+            if "bbox" in ann and ann["bbox"] is not None:
+                label.box2d = bbox_to_box2d(ann["bbox"])
             if "segmentation" in ann:
                 # Currently only support conversion from polygon.
                 assert isinstance(ann["segmentation"], list)
@@ -109,7 +117,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
 
 def run(args: argparse.Namespace) -> None:
     """Run."""
-    with open(args.input) as fp:
+    with open_read_text(args.input) as fp:
         coco: GtType = json.load(fp)
     scalabel, vid_id2name = coco_to_scalabel(coco)
 
@@ -121,7 +129,7 @@ def run(args: argparse.Namespace) -> None:
         if not os.path.isdir(args.output):
             os.makedirs(args.output)
         save_paths = [
-            os.path.join(args.output, str(video_anns[0].video_name) + ".json")
+            os.path.join(args.output, str(video_anns[0].videoName) + ".json")
             for video_anns in scalabels
         ]
         with Pool(args.nproc) as pool:

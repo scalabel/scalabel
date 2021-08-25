@@ -7,6 +7,8 @@ import subprocess
 import psutil
 import yaml
 
+from ..common.io import open_read_text
+
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -27,7 +29,7 @@ def launch() -> None:
     )
     args = parser.parse_args()
 
-    with open(args.config, "r") as fp:
+    with open_read_text(args.config) as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
     # launch the python server if bot option is true

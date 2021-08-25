@@ -87,7 +87,7 @@ def parse_label(
     else:
         offset = 0
 
-    labels_dict: Dict[int, List[Label]] = dict()
+    labels_dict: Dict[int, List[Label]] = {}
 
     labels = list_from_file(label_file)
     track_id = -1
@@ -179,7 +179,7 @@ def from_kitti_det(
     cam2global = Extrinsics(location=position, rotation=rotation)
 
     for img_id, img_name in enumerate(img_names):
-        trackid_maps: Dict[str, int] = dict()
+        trackid_maps: Dict[str, int] = {}
 
         with Image.open(osp.join(img_dir, img_name)) as img:
             width, height = img.size
@@ -211,8 +211,8 @@ def from_kitti_det(
 
         f = Frame(
             name=img_name,
-            video_name=video_name,
-            frame_index=img_id,
+            videoName=video_name,
+            frameIndex=img_id,
             size=image_size,
             extrinsics=cam2global,
             intrinsics=intrinsics,
@@ -245,7 +245,7 @@ def from_kitti(
     global_track_id = 0
 
     for vid_name in vid_names:
-        trackid_maps: Dict[str, int] = dict()
+        trackid_maps: Dict[str, int] = {}
 
         img_names = sorted(
             [
@@ -299,8 +299,8 @@ def from_kitti(
 
             f = Frame(
                 name=img_name.split("/")[-1],
-                video_name=video_name,
-                frame_index=fr,
+                videoName=video_name,
+                frameIndex=fr,
                 size=image_size,
                 extrinsics=cam2global,
                 intrinsics=intrinsics,
