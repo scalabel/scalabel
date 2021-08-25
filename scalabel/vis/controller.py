@@ -3,7 +3,6 @@
 import concurrent.futures
 import os
 from dataclasses import dataclass
-from functools import partial
 from queue import Queue
 from threading import Timer
 from typing import Dict, Optional
