@@ -17,6 +17,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.font_manager import FontProperties
 
+from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.typing import Frame, Intrinsics, Label
@@ -93,11 +94,9 @@ class LabelViewer:
     def __init__(
         self,
         ui_cfg: UIConfig = UIConfig(),
-        display_cfg: DisplayConfig = DisplayConfig(),
     ) -> None:
         """Initialize the label viewer."""
         self.ui_cfg = ui_cfg
-        self.display_cfg = display_cfg
 
         # animation
         self._label_colors: Dict[str, NDArrayF64] = {}
@@ -113,7 +112,7 @@ class LabelViewer:
     def run_with_controller(self, controller: ViewController) -> None:
         """Start running with the controller."""
         threading.Thread(target=self._worker, args=(controller.queue,)).start()
-        controller.run(self.display_cfg)
+        controller.run()
 
     def _worker(self, queue: Queue[DisplayData]) -> None:
         """Worker to collaborate with the controller."""
@@ -133,24 +132,39 @@ class LabelViewer:
         """Save the visualization."""
         plt.savefig(out_path, dpi=self.ui_cfg.dpi)
 
-    def draw(self, image: NDArrayU8, frame: Frame) -> None:
+    def draw(
+        self,
+        image: NDArrayU8,
+        frame: Frame,
+        with_attr: bool = True,
+        with_box2d: bool = True,
+        with_box3d: bool = False,
+        with_poly2d: bool = True,
+        with_ctrl_points: bool = False,
+        with_tags: bool = True,
+        ctrl_point_size: float = 2.0,
+    ) -> None:
         """Display the image and corresponding labels."""
         plt.cla()
         self.draw_image(image, frame.name)
         if frame.labels is None or len(frame.labels) == 0:
-            print("No labels found")
+            logger.info("No labels found")
             return
 
         labels = frame.labels
-        display_cfg = self.display_cfg
-        if display_cfg.with_attr:
+        if with_attr:
             self.draw_attributes(frame)
-        if display_cfg.with_box2d:
-            self.draw_box2ds(labels)
-        if display_cfg.with_box3d and frame.intrinsics is not None:
-            self.draw_box3ds(labels, frame.intrinsics)
-        if display_cfg.with_poly2d:
-            self.draw_poly2ds(labels)
+        if with_box2d:
+            self.draw_box2ds(labels, with_tags=with_tags)
+        if with_box3d and frame.intrinsics is not None:
+            self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
+        if with_poly2d:
+            self.draw_poly2ds(
+                labels,
+                with_tags=with_tags,
+                with_ctrl_points=with_ctrl_points,
+                ctrl_point_size=ctrl_point_size,
+            )
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
@@ -219,7 +233,7 @@ class LabelViewer:
             },
         )
 
-    def draw_box2ds(self, labels: List[Label]) -> None:
+    def draw_box2ds(self, labels: List[Label], with_tags: bool = True) -> None:
         """Draw Box2d on the axes."""
         for label in labels:
             if label.box2d is not None:
@@ -229,14 +243,19 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if self.display_cfg.with_tags:
+                if with_tags:
                     self._draw_label_attributes(
                         label,
                         label.box2d.x1,
                         (label.box2d.y1 - 4),
                     )
 
-    def draw_box3ds(self, labels: List[Label], intrinsics: Intrinsics) -> None:
+    def draw_box3ds(
+        self,
+        labels: List[Label],
+        intrinsics: Intrinsics,
+        with_tags: bool = True,
+    ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
@@ -248,14 +267,21 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if self.display_cfg.with_tags and label.box2d is not None:
+                if with_tags and label.box2d is not None:
                     self._draw_label_attributes(
                         label,
                         label.box2d.x1,
                         (label.box2d.y1 - 4),
                     )
 
-    def draw_poly2ds(self, labels: List[Label], alpha: float = 0.5) -> None:
+    def draw_poly2ds(
+        self,
+        labels: List[Label],
+        alpha: float = 0.5,
+        with_tags: bool = True,
+        with_ctrl_points: bool = False,
+        ctrl_point_size: float = 2.0,
+    ) -> None:
         """Draw poly2d labels not in 'lane' and 'drivable' categories."""
         for label in labels:
             if label.poly2d is None:
@@ -275,9 +301,13 @@ class LabelViewer:
                 )
                 self.ax.add_patch(patch)
 
-                if self.display_cfg.with_ctrl_points:
+                if with_ctrl_points:
                     self._draw_ctrl_points(
-                        poly.vertices, poly.types, color, alpha
+                        poly.vertices,
+                        poly.types,
+                        color,
+                        alpha,
+                        ctrl_point_size,
                     )
 
                 patch_vertices = np.array(poly.vertices)
@@ -287,7 +317,7 @@ class LabelViewer:
                 y2 = max(np.max(patch_vertices[:, 1]), y2)
 
             # Show attributes
-            if self.display_cfg.with_tags:
+            if with_tags:
                 self._draw_label_attributes(
                     label,
                     x1 + (x2 - x1) * 0.4,
@@ -300,6 +330,7 @@ class LabelViewer:
         types: str,
         color: NDArrayF64,
         alpha: float,
+        ctrl_point_size: float = 2.0,
     ) -> None:
         """Draw the polygon vertices / control points."""
         for idx, vert_data in enumerate(zip(vertices, types)):
@@ -310,7 +341,7 @@ class LabelViewer:
             self.ax.add_patch(
                 mpatches.Circle(
                     vert,
-                    self.display_cfg.ctrl_point_size,
+                    ctrl_point_size,
                     alpha=alpha,
                     color=color,
                 )
@@ -479,7 +510,7 @@ def main() -> None:
             with_ctrl_points=not args.no_vertices,
             with_tags=not args.no_tags,
         )
-        viewer = LabelViewer(ui_cfg, display_cfg)
+        viewer = LabelViewer(ui_cfg)
 
         ctrl_cfg = ControllerConfig(
             image_dir=args.image_dir,
@@ -487,7 +518,7 @@ def main() -> None:
             out_dir=args.output_dir,
             nproc=args.nproc,
         )
-        controller = ViewController(ctrl_cfg, executor)
+        controller = ViewController(ctrl_cfg, display_cfg, executor)
         viewer.run_with_controller(controller)
 
 

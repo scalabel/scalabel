@@ -23,23 +23,6 @@ from .helper import fetch_image
 
 
 @dataclass
-class DisplayData:
-    """The data to be displayed."""
-
-    image: NDArrayU8
-    frame: Frame
-    out_path: Optional[str]
-
-    def __init__(
-        self, image: NDArrayU8, frame: Frame, out_path: Optional[str] = None
-    ) -> None:
-        """Initialize with default values."""
-        self.image = image
-        self.frame = frame
-        self.out_path = out_path
-
-
-@dataclass
 class DisplayConfig:
     """Visualizer display's config class."""
 
@@ -69,6 +52,29 @@ class DisplayConfig:
         self.with_ctrl_points = with_ctrl_points
         self.with_tags = with_tags
         self.ctrl_point_size = ctrl_point_size
+
+
+@dataclass
+class DisplayData:
+    """The data to be displayed."""
+
+    image: NDArrayU8
+    frame: Frame
+    display_cfg: DisplayConfig
+    out_path: Optional[str]
+
+    def __init__(
+        self,
+        image: NDArrayU8,
+        frame: Frame,
+        display_cfg: DisplayConfig,
+        out_path: Optional[str] = None,
+    ) -> None:
+        """Initialize with default values."""
+        self.image = image
+        self.frame = frame
+        self.out_path = out_path
+        self.display_cfg = display_cfg
 
 
 @dataclass
@@ -106,10 +112,12 @@ class ViewController:
     def __init__(
         self,
         config: ControllerConfig,
+        display_cfg: DisplayConfig,
         executor: concurrent.futures.ThreadPoolExecutor,
     ) -> None:
         """Initializer."""
         self.config = config
+        self.display_cfg = display_cfg
         self.frame_index: int = 0
 
         # animation
@@ -118,7 +126,6 @@ class ViewController:
         self._label_colors: Dict[str, NDArrayF64] = {}
 
         # load label file
-        print("Label file:", config.label_path)
         if not os.path.exists(config.label_path):
             logger.error("Label file not found!")
         self.frames = load(config.label_path, config.nproc).frames[:10]
@@ -132,13 +139,10 @@ class ViewController:
             )
         self.queue: Queue[DisplayData] = Queue()
 
-    def run(self, display_cfg: DisplayConfig) -> None:
+    def run(self) -> None:
         """Start the visualization."""
         if self.config.out_dir is None:
-            plt.connect(
-                "key_release_event",
-                partial(self.key_press, display_cfg=display_cfg),
-            )
+            plt.connect("key_release_event", self.key_press)
             self.update()
             plt.show()
         else:
@@ -152,7 +156,7 @@ class ViewController:
         frame = self.frames[self.frame_index % len(self.frames)]
         image = self.images[frame.name].result()
         if not output:
-            self.queue.put(DisplayData(image=image, frame=frame))
+            self.queue.put(DisplayData(image, frame, self.display_cfg))
             return
         assert self.config.out_dir is not None
         out_path = os.path.join(
@@ -160,10 +164,10 @@ class ViewController:
         )
         plt.cla()
         self.queue.put(
-            DisplayData(image=image, frame=frame, out_path=out_path)
+            DisplayData(image, frame, self.display_cfg, out_path=out_path)
         )
 
-    def key_press(self, event: Event, display_cfg: DisplayConfig) -> None:
+    def key_press(self, event: Event) -> None:
         """Handel control keys."""
         if event.key == "n":
             self.frame_index = (self.frame_index + 1) % len(self.frames)
@@ -173,8 +177,8 @@ class ViewController:
             else:
                 self.frame_index -= 1
         elif event.key == "t":
-            display_cfg.with_box2d = not display_cfg.with_box2d
-            display_cfg.with_box3d = not display_cfg.with_box3d
+            self.display_cfg.with_box2d = not self.display_cfg.with_box2d
+            self.display_cfg.with_box3d = not self.display_cfg.with_box3d
         elif event.key == "space":
             if not self._run_animation:
                 self.start_animation()
@@ -182,17 +186,19 @@ class ViewController:
                 self.stop_animation()
             return
         elif event.key == "a":
-            display_cfg.with_tags = not display_cfg.with_tags
+            self.display_cfg.with_tags = not self.display_cfg.with_tags
         # Control event.keys for polygon mode
         elif event.key == "c":
-            display_cfg.with_ctrl_points = not display_cfg.with_ctrl_points
+            self.display_cfg.with_ctrl_points = (
+                not self.display_cfg.with_ctrl_points
+            )
         elif event.key == "up":
-            display_cfg.ctrl_point_size = min(
-                15.0, display_cfg.ctrl_point_size + 0.5
+            self.display_cfg.ctrl_point_size = min(
+                15.0, self.display_cfg.ctrl_point_size + 0.5
             )
         elif event.key == "down":
-            display_cfg.ctrl_point_size = max(
-                0.0, display_cfg.ctrl_point_size - 0.5
+            self.display_cfg.ctrl_point_size = max(
+                0.0, self.display_cfg.ctrl_point_size - 0.5
             )
         else:
             return
