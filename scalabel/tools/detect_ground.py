@@ -15,6 +15,7 @@ import plyfile
 import yaml
 from tqdm import tqdm
 
+from ..common.io import open_read_text, open_write_text
 from ..common.typing import NDArrayF64
 
 # Define the ground return type
@@ -196,7 +197,7 @@ def main() -> None:
             + " a json or a yaml file."
         )
 
-    with open(args.bdd_items, "r") as bdd_file:
+    with open_read_text(args.bdd_items) as bdd_file:
         if os.path.splitext(args.bdd_items)[-1] == ".json":
             bdd_data = json.load(bdd_file)
         else:
@@ -267,7 +268,7 @@ def main() -> None:
         if not args.tracking:
             max_label_id += 1
 
-    with open(args.output, "w") as output_file:
+    with open_write_text(args.output) as output_file:
         if os.path.splitext(args.output)[-1] == ".json":
             json.dump(bdd_data, output_file)
         else:
