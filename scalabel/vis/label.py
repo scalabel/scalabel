@@ -3,15 +3,22 @@
 Works for 2D / 3D bounding box, segmentation masks, etc.
 """
 
+import argparse
+import concurrent.futures
 import io
+import threading
 from dataclasses import dataclass
+from queue import Queue
 from typing import Dict, List, Optional, Tuple
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.axes import Axes
 from matplotlib.font_manager import FontProperties
 
+from ..common.logger import logger
+from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.typing import Frame, Intrinsics, Label
 from ..label.utils import (
@@ -20,6 +27,12 @@ from ..label.utils import (
     check_occluded,
     check_truncated,
 )
+from .controller import (
+    ControllerConfig,
+    DisplayConfig,
+    DisplayData,
+    ViewController,
+)
 from .helper import gen_2d_rect, gen_3d_cube, poly2patch, random_color
 
 
@@ -27,66 +40,63 @@ from .helper import gen_2d_rect, gen_3d_cube, poly2patch, random_color
 class UIConfig:
     """Visualizer UI's config class."""
 
-    # Parameters for UI.
     height: int
     width: int
     scale: float
-    dpi: int
-    font: FontProperties
-    default_category: str
+    dpi: int = 80
+    font: FontProperties = FontProperties(
+        family=["sans-serif", "monospace"], weight="bold", size=18
+    )
+    default_category: str = "car"
 
+    # pylint: disable=dangerous-default-value
     def __init__(
         self,
         height: int = 720,
         width: int = 1280,
         scale: float = 1.0,
         dpi: int = 80,
-        default_category: str = "Car",
+        weight: str = "bold",
+        family: List[str] = ["sans-serif", "monospace"],
     ) -> None:
         """Initialize with default values."""
-        self.dpi = dpi
-        self.scale = scale
         self.height = height
         self.width = width
-        self.default_category = default_category
-        self.font = FontProperties()
-        self.font.set_family(["sans-serif", "monospace"])
-        self.font.set_weight("bold")
-        self.font.set_size(int(18 * self.scale))
-
-
-@dataclass
-class DisplayConfig:
-    """Visualizer display's config class."""
-
-    # Parameters for the display.
-    show_ctrl_points: bool
-    show_tags: bool
-    ctrl_point_size: float
-
-    def __init__(
-        self,
-        show_ctrl_points: bool = False,
-        show_tags: bool = True,
-        ctrl_points_size: float = 2.0,
-    ) -> None:
-        """Initialize with default values."""
-        self.show_ctrl_points = show_ctrl_points
-        self.show_tags = show_tags
-        self.ctrl_point_size = ctrl_points_size
+        self.scale = scale
+        self.dpi = dpi
+        self.font.set_size(int(18 * scale))
+        self.font.set_weight(weight)
+        self.font.set_family(family)
 
 
 class LabelViewer:
-    """Visualize 2D and 3D bounding boxes and polygons."""
+    """Visualize 2D, 3D bounding boxes and 2D polygons.
+
+    The class provides both high-level APIs and middle-level APIs to visualize
+    the image and the corresponding Scalabel-format labels.
+
+    High-level APIs:
+        draw(image: np.array, frame: scalabel.label.typing.Frame):
+            Draw the image with the labels stored in the 'frame'.
+        show(): display the visualization of the current image.
+        save(out_path: str): save the visualization of the current image.
+
+    Middle-level APIs:
+        draw_image(image: np.array): plot the current image
+        draw_attributes(frame: Frame): plot the frame attributes
+        draw_box2ds(labels: list[Label]): plot 2D bounding boxes
+        draw_box3ds(labels: list[Label], intrinsics: Intrisics):
+            plot 3D bounding boxes
+        draw_poly2ds(labels: list[Label], alpha: float):
+            plot 2D polygons with the given alpha value
+    """
 
     def __init__(
         self,
         ui_cfg: UIConfig = UIConfig(),
-        display_cfg: DisplayConfig = DisplayConfig(),
     ) -> None:
-        """Initializer."""
+        """Initialize the label viewer."""
         self.ui_cfg = ui_cfg
-        self.display_cfg = display_cfg
 
         # animation
         self._label_colors: Dict[str, NDArrayF64] = {}
@@ -96,22 +106,71 @@ class LabelViewer:
             int(self.ui_cfg.height * self.ui_cfg.scale // self.ui_cfg.dpi),
         )
         self.fig = plt.figure(figsize=figsize, dpi=self.ui_cfg.dpi)
-        self.ax = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
+        self.ax: Axes = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
         self.ax.axis("off")
 
+    def run_with_controller(self, controller: ViewController) -> None:
+        """Start running with the controller."""
+        threading.Thread(target=self._worker, args=(controller.queue,)).start()
+        controller.run()
+
+    def _worker(self, queue: Queue[DisplayData]) -> None:
+        """Worker to collaborate with the controller."""
+        while True:
+            data: DisplayData = queue.get()
+            self.draw(data.image, data.frame)
+            if data.out_path:
+                self.save(data.out_path)
+            else:
+                plt.draw()
+
     def show(self) -> None:  # pylint: disable=no-self-use
-        """Display image."""
+        """Show the visualization."""
         plt.show()
 
-    def write(self, out_path: str) -> None:
-        """Write image."""
-        self.fig.savefig(out_path, self.ui_cfg.dpi)
+    def save(self, out_path: str) -> None:  # pylint: disable=no-self-use
+        """Save the visualization."""
+        plt.savefig(out_path, dpi=self.ui_cfg.dpi)
+
+    def draw(
+        self,
+        image: NDArrayU8,
+        frame: Frame,
+        with_attr: bool = True,
+        with_box2d: bool = True,
+        with_box3d: bool = False,
+        with_poly2d: bool = True,
+        with_ctrl_points: bool = False,
+        with_tags: bool = True,
+        ctrl_point_size: float = 2.0,
+    ) -> None:
+        """Display the image and corresponding labels."""
+        plt.cla()
+        self.draw_image(image, frame.name)
+        if frame.labels is None or len(frame.labels) == 0:
+            logger.info("No labels found")
+            return
+
+        labels = frame.labels
+        if with_attr:
+            self.draw_attributes(frame)
+        if with_box2d:
+            self.draw_box2ds(labels, with_tags=with_tags)
+        if with_box3d and frame.intrinsics is not None:
+            self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
+        if with_poly2d:
+            self.draw_poly2ds(
+                labels,
+                with_tags=with_tags,
+                with_ctrl_points=with_ctrl_points,
+                ctrl_point_size=ctrl_point_size,
+            )
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
         if title is not None:
             self.fig.canvas.manager.set_window_title(title)
-        self.ax.imshow(img, interpolation="nearest", aspect="auto")
+        self.ax.imshow(img, interpolation="bilinear", aspect="auto")
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
@@ -174,7 +233,7 @@ class LabelViewer:
             },
         )
 
-    def draw_box2ds(self, labels: List[Label]) -> None:
+    def draw_box2ds(self, labels: List[Label], with_tags: bool = True) -> None:
         """Draw Box2d on the axes."""
         for label in labels:
             if label.box2d is not None:
@@ -184,14 +243,19 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if self.display_cfg.show_tags:
+                if with_tags:
                     self._draw_label_attributes(
                         label,
                         label.box2d.x1,
                         (label.box2d.y1 - 4),
                     )
 
-    def draw_box3ds(self, labels: List[Label], intrinsics: Intrinsics) -> None:
+    def draw_box3ds(
+        self,
+        labels: List[Label],
+        intrinsics: Intrinsics,
+        with_tags: bool = True,
+    ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
@@ -203,14 +267,21 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if self.display_cfg.show_tags and label.box2d is not None:
+                if with_tags and label.box2d is not None:
                     self._draw_label_attributes(
                         label,
                         label.box2d.x1,
                         (label.box2d.y1 - 4),
                     )
 
-    def draw_poly2ds(self, labels: List[Label], alpha: float = 0.5) -> None:
+    def draw_poly2ds(
+        self,
+        labels: List[Label],
+        alpha: float = 0.5,
+        with_tags: bool = True,
+        with_ctrl_points: bool = False,
+        ctrl_point_size: float = 2.0,
+    ) -> None:
         """Draw poly2d labels not in 'lane' and 'drivable' categories."""
         for label in labels:
             if label.poly2d is None:
@@ -230,9 +301,13 @@ class LabelViewer:
                 )
                 self.ax.add_patch(patch)
 
-                if self.display_cfg.show_ctrl_points:
+                if with_ctrl_points:
                     self._draw_ctrl_points(
-                        poly.vertices, poly.types, color, alpha
+                        poly.vertices,
+                        poly.types,
+                        color,
+                        alpha,
+                        ctrl_point_size,
                     )
 
                 patch_vertices = np.array(poly.vertices)
@@ -242,7 +317,7 @@ class LabelViewer:
                 y2 = max(np.max(patch_vertices[:, 1]), y2)
 
             # Show attributes
-            if self.display_cfg.show_tags:
+            if with_tags:
                 self._draw_label_attributes(
                     label,
                     x1 + (x2 - x1) * 0.4,
@@ -255,6 +330,7 @@ class LabelViewer:
         types: str,
         color: NDArrayF64,
         alpha: float,
+        ctrl_point_size: float = 2.0,
     ) -> None:
         """Draw the polygon vertices / control points."""
         for idx, vert_data in enumerate(zip(vertices, types)):
@@ -265,7 +341,7 @@ class LabelViewer:
             self.ax.add_patch(
                 mpatches.Circle(
                     vert,
-                    self.display_cfg.ctrl_point_size,
+                    ctrl_point_size,
                     alpha=alpha,
                     color=color,
                 )
@@ -322,3 +398,129 @@ class LabelViewer:
                             alpha=alpha,
                         )
                     )
+
+
+def parse_args() -> argparse.Namespace:
+    """Use argparse to get command line arguments."""
+    parser = argparse.ArgumentParser(
+        """
+Interface keymap:
+    -  n / p: Show next or previous image
+    -  Space: Start / stop animation
+    -  t: Toggle 2D / 3D bounding box (if avaliable)
+    -  a: Toggle the display of the attribute tags on boxes or polygons.
+    -  c: Toggle the display of polygon vertices.
+    -  Up: Increase the size of polygon vertices.
+    -  Down: Decrease the size of polygon vertices.
+
+Export images:
+    - add `-o {dir}` tag when runing.
+    """
+    )
+    parser.add_argument("-i", "--image-dir", help="image directory")
+    parser.add_argument(
+        "-l",
+        "--labels",
+        required=False,
+        default="labels.json",
+        help="Path to the json file",
+        type=str,
+    )
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=720,
+        help="Height of the image (px)",
+    )
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=1280,
+        help="Width of the image (px)",
+    )
+    parser.add_argument(
+        "-s",
+        "--scale",
+        type=float,
+        default=1.0,
+        help="Scale up factor for annotation factor. "
+        "Useful when producing visualization as thumbnails.",
+    )
+    parser.add_argument(
+        "--no-attr",
+        action="store_true",
+        default=False,
+        help="Do not show attributes",
+    )
+    parser.add_argument(
+        "--no-box3d",
+        action="store_true",
+        default=True,
+        help="Do not show 3D bounding boxes",
+    )
+    parser.add_argument(
+        "--no-tags",
+        action="store_true",
+        default=False,
+        help="Do not show tags on boxes or polygons",
+    )
+    parser.add_argument(
+        "--no-vertices",
+        action="store_true",
+        default=False,
+        help="Do not show vertices",
+    )
+    parser.add_argument(
+        "-o",
+        "--output_dir",
+        required=False,
+        default=None,
+        type=str,
+        help="output image directory with label visualization. "
+        "If it is set, the images will be written to the "
+        "output folder instead of being displayed "
+        "interactively.",
+    )
+    parser.add_argument(
+        "--nproc",
+        type=int,
+        default=NPROC,
+        help="number of processes for json loading",
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+
+def main() -> None:
+    """Main function."""
+    args = parse_args()
+    # Initialize the thread executor.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+        ui_cfg = UIConfig(
+            height=args.height,
+            width=args.width,
+            scale=args.scale,
+        )
+        display_cfg = DisplayConfig(
+            with_attr=not args.no_attr,
+            with_box2d=args.no_box3d,
+            with_box3d=not args.no_box3d,
+            with_ctrl_points=not args.no_vertices,
+            with_tags=not args.no_tags,
+        )
+        viewer = LabelViewer(ui_cfg)
+
+        ctrl_cfg = ControllerConfig(
+            image_dir=args.image_dir,
+            label_path=args.labels,
+            out_dir=args.output_dir,
+            nproc=args.nproc,
+        )
+        controller = ViewController(ctrl_cfg, display_cfg, executor)
+        viewer.run_with_controller(controller)
+
+
+if __name__ == "__main__":
+    main()
