@@ -14,7 +14,7 @@ psutil
 pycocotools
 pydantic
 pydocstyle
-pylint==2.9.6
+pylint
 pyparsing
 pytest
 python-dateutil
