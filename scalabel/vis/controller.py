@@ -12,7 +12,7 @@ from matplotlib.backend_bases import Event
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import (  # pylint: disable=unused-import
+from ..common.typing import (
     NDArrayF64,
     NDArrayU8,
 )
