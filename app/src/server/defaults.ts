@@ -49,7 +49,8 @@ const boxCategoriesList = [
   "traffic light"
 ]
 export const boxCategories = boxCategoriesList.map((category) => ({
-  name: category
+  name: category,
+  color: ""
 }))
 
 /* default categories when file is missing and label is polyline2d */
@@ -64,7 +65,7 @@ export const polyline2DCategoriesList = [
   "crosswalk"
 ]
 export const polyline2DCategories = polyline2DCategoriesList.map(
-  (category) => ({ name: category })
+  (category) => ({ name: category, color: "" })
 )
 
 // TODO: add default seg2d categories once nested categories are supported

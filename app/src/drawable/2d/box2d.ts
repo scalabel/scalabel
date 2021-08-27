@@ -5,7 +5,13 @@ import { makeLabel, makeRect } from "../../functional/states"
 import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import { LabelType, RectType, ShapeType, State } from "../../types/state"
-import { blendColor, Context2D, encodeControlColor } from "../util"
+import {
+  blendColor,
+  Context2D,
+  encodeControlColor,
+  isHexColor,
+  toNumColor
+} from "../util"
 import { DrawMode, Label2D } from "./label2d"
 import { Label2DList } from "./label2d_list"
 import { makePoint2DStyle, Point2D } from "./point2d"
@@ -100,6 +106,9 @@ export class Box2D extends Label2D {
     let highPointStyle = makePoint2DStyle()
     let rectStyle = makeRect2DStyle()
     let assignColor: (i: number) => number[] = () => [0]
+
+    const categoryColor: string = this._config.categoryColors[this.category[0]]
+
     switch (mode) {
       case DrawMode.VIEW:
         pointStyle = _.assign(pointStyle, DEFAULT_VIEW_POINT_STYLE)
@@ -127,10 +136,18 @@ export class Box2D extends Label2D {
 
     // Draw!!!
     const rect = this._rect
-    rectStyle.color = assignColor(0)
+    rectStyle.color =
+      isHexColor(categoryColor) && mode !== DrawMode.CONTROL
+        ? toNumColor(categoryColor)
+        : assignColor(0)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
-      this.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), this._color)
+      this.drawTag(
+        context,
+        ratio,
+        new Vector2D(rect.x1, rect.y1),
+        rectStyle.color
+      )
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       for (let i = 1; i <= 8; i += 1) {
