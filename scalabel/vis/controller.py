@@ -5,7 +5,7 @@ import os
 from dataclasses import dataclass
 from queue import Queue
 from threading import Timer
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import matplotlib.pyplot as plt
 from matplotlib.backend_bases import Event
@@ -73,6 +73,16 @@ class DisplayData:
         self.display_cfg = display_cfg
 
 
+# Necessary due to Queue being generic in stubs but not at runtime
+# https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
+if TYPE_CHECKING:
+    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
+        DisplayData
+    ]
+else:
+    DisplayDataQueue = Queue
+
+
 @dataclass
 class ControllerConfig:
     """Visulizer's config class."""
@@ -133,7 +143,7 @@ class ViewController:
             self.images[frame.name] = executor.submit(
                 fetch_image, (frame, self.config.image_dir)
             )
-        self.queue: Queue[DisplayData] = Queue()
+        self.queue: DisplayDataQueue = Queue()
 
     def run(self) -> None:
         """Start the visualization."""

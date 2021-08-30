@@ -27,24 +27,25 @@ from .typing import (
 def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
     """Parse a single frame."""
     if not validate_frames:
+        # ignore the construct arguments in mypy, add type ignores
         frame = Frame.construct(**raw_frame)
         if frame.intrinsics is not None:
-            frame.intrinsics = Intrinsics.construct(**frame.intrinsics.dict())
+            frame.intrinsics = Intrinsics.construct(**frame.intrinsics)  # type: ignore # pylint: disable=line-too-long
         if frame.extrinsics is not None:
-            frame.extrinsics = Extrinsics.construct(**frame.extrinsics.dict())
+            frame.extrinsics = Extrinsics.construct(**frame.extrinsics)  # type: ignore # pylint: disable=line-too-long
         if frame.size is not None:
-            frame.size = ImageSize.construct(**frame.size.dict())
+            frame.size = ImageSize.construct(**frame.size)  # type: ignore # pylint: disable=line-too-long
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
-                label = Label.construct(**l.dict())
+                label = Label.construct(**l)  # type: ignore
                 if label.box2d is not None:
-                    label.box2d = Box2D.construct(**label.box2d.dict())
+                    label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
                 if label.box3d is not None:
-                    label.box3d = Box3D.construct(**label.box3d.dict())
+                    label.box3d = Box3D.construct(**label.box3d)  # type: ignore # pylint: disable=line-too-long
                 if label.poly2d is not None:
                     label.poly2d = [
-                        Poly2D.construct(**p.dict()) for p in label.poly2d
+                        Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
                     ]
                 labels.append(label)
             frame.labels = labels

@@ -9,7 +9,7 @@ import io
 import threading
 from dataclasses import dataclass
 from queue import Queue
-from typing import Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -34,6 +34,15 @@ from .controller import (
     ViewController,
 )
 from .helper import gen_2d_rect, gen_3d_cube, poly2patch, random_color
+
+# Necessary due to Queue being generic in stubs but not at runtime
+# https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
+if TYPE_CHECKING:
+    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
+        DisplayData
+    ]
+else:
+    DisplayDataQueue = Queue
 
 
 @dataclass
@@ -114,7 +123,7 @@ class LabelViewer:
         threading.Thread(target=self._worker, args=(controller.queue,)).start()
         controller.run()
 
-    def _worker(self, queue: Queue[DisplayData]) -> None:
+    def _worker(self, queue: DisplayDataQueue) -> None:
         """Worker to collaborate with the controller."""
         while True:
             data: DisplayData = queue.get()
