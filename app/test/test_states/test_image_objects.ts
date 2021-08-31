@@ -63,6 +63,7 @@ export const testJson: DeepPartialState = {
       demoMode: false,
       autosave: false,
       categories: ["1", "2", "3"],
+      treeCategories: [{ name: "1" }, { name: "2" }, { name: "3" }],
       attributes: [
         {
           name: "Weather",
