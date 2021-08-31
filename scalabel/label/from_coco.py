@@ -49,7 +49,9 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
-    cats = [Category() for _ in range(len(coco["categories"]))]
+    cats = [
+        None for _ in range(len(coco["categories"]))
+    ]  # type: List[Optional[Category]]
     cat_id2name = {}
     for category in coco["categories"]:
         assert 0 < int(category["id"]) <= len(coco["categories"])
