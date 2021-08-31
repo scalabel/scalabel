@@ -491,6 +491,18 @@ Export images:
         "interactively.",
     )
     parser.add_argument(
+        "--range_begin",
+        type=int,
+        default=0,
+        help="from which frame to visualize",
+    )
+    parser.add_argument(
+        "--range_end",
+        type=int,
+        default=10,
+        help="up to which frame to visualize",
+    )
+    parser.add_argument(
         "--nproc",
         type=int,
         default=NPROC,
@@ -526,6 +538,8 @@ def main() -> None:
             label_path=args.labels,
             out_dir=args.output_dir,
             nproc=args.nproc,
+            range_begin=args.range_begin,
+            range_end=args.range_end,
         )
         controller = ViewController(ctrl_cfg, display_cfg, executor)
         viewer.run_with_controller(controller)
