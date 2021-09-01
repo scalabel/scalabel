@@ -31,10 +31,14 @@ Available arguments:
                             do not show tags on boxes or polygons
     --no-vertices
                             do not show vertices
-    --output_dir OUTPUT_DIR, -o OUTPUT_DIR
+    --output-dir OUTPUT_DIR, -o OUTPUT_DIR
                             output image directory with label visualization. If
                             it is set, the images will be written to the output
                             folder instead of being displayed interactively.
+    --range-begin RANGE_BEGIN
+                            from which frame to visualize
+    --range-end RANGE_END
+                            up to which frame to visualize
     --nproc NUM_PROCESS
                             number of processes for json loading and parsing
 

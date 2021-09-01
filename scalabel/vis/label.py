@@ -481,7 +481,7 @@ Export images:
     )
     parser.add_argument(
         "-o",
-        "--output_dir",
+        "--output-dir",
         required=False,
         default=None,
         type=str,
@@ -491,13 +491,13 @@ Export images:
         "interactively.",
     )
     parser.add_argument(
-        "--range_begin",
+        "--range-begin",
         type=int,
         default=0,
         help="from which frame to visualize",
     )
     parser.add_argument(
-        "--range_end",
+        "--range-end",
         type=int,
         default=10,
         help="up to which frame to visualize",

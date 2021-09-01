@@ -88,9 +88,9 @@ Available arguments:
                             path to MOTChallenge data (images + annotations).
     --output OUTPUT, -o OUTPUT
                             Output path for Scalabel format annotations.
-    --save_images, -s SAVE
+    --save-images, -s SAVE
                             If the images should be extracted from .tfrecords and saved (necessary for using Waymo Open data with Scalabel format annotations).
-    --use_lidar_labels USE_LIDAR
+    --use-lidar-labels USE_LIDAR
                             If the conversion script should use the LiDAR labels as GT for conversion (3D + 2D projected). Default is Camera labels (2D only).
     --nproc NPROC
                             Number of processes for conversion. Default is 4.
@@ -104,13 +104,13 @@ Available arguments:
 
 .. code-block:: bash
 
-    --input_dir INPUT, -i INPUT
+    --input-dir INPUT, -i INPUT
                             path to KITTI data (images + annotations).
-    --output_dir OUTPUT, -o OUTPUT
+    --output-dir OUTPUT, -o OUTPUT
                             Output path for Scalabel format annotations.
     --split, SPLIT
                             one of [training, testing]
-    --data_type DATA_TYPE
+    --data-type DATA_TYPE
                             one of [tracking, detection]
     --nproc NPROC
                             Number of processes for conversion. Default is 4.

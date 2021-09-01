@@ -76,7 +76,7 @@ def parse_arguments() -> argparse.Namespace:
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
-        "--save_images",
+        "--save-images",
         "-s",
         action="store_true",
         help="If the images should be extracted from .tfrecords and saved."
@@ -84,7 +84,7 @@ def parse_arguments() -> argparse.Namespace:
         "annotations)",
     )
     parser.add_argument(
-        "--use_lidar_labels",
+        "--use-lidar-labels",
         action="store_true",
         help="If the conversion script should use the LiDAR labels as GT for "
         "conversion.",
