@@ -268,6 +268,7 @@ test("Breaking track", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
@@ -455,6 +456,7 @@ test("Single frame deletion", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
