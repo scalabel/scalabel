@@ -494,13 +494,14 @@ Export images:
         "--range-begin",
         type=int,
         default=0,
-        help="from which frame to visualize",
+        help="from which frame to visualize. Default is 0.",
     )
     parser.add_argument(
         "--range-end",
         type=int,
-        default=10,
-        help="up to which frame to visualize",
+        default=-1,
+        help="up to which frame to visualize. Default is -1, "
+        "indicating loading all frames for visualizatoin.",
     )
     parser.add_argument(
         "--nproc",

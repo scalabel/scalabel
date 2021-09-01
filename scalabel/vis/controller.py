@@ -144,9 +144,11 @@ class ViewController:
         # load label file
         if not os.path.exists(config.label_path):
             logger.error("Label file not found!")
-        self.frames = load(config.label_path, config.nproc).frames[
-            self.config.range_begin : self.config.range_end
-        ]
+        self.frames = load(config.label_path, config.nproc).frames
+        range_end = self.config.range_end
+        if range_end < 0:
+            range_end = len(self.frames)
+        self.frames = self.frames[self.config.range_begin : range_end]
         logger.info("Load images: %d", len(self.frames))
 
         self.images: Dict[str, "concurrent.futures.Future[NDArrayU8]"] = {}
