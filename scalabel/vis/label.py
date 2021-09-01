@@ -481,7 +481,7 @@ Export images:
     )
     parser.add_argument(
         "-o",
-        "--output_dir",
+        "--output-dir",
         required=False,
         default=None,
         type=str,
@@ -489,6 +489,19 @@ Export images:
         "If it is set, the images will be written to the "
         "output folder instead of being displayed "
         "interactively.",
+    )
+    parser.add_argument(
+        "--range-begin",
+        type=int,
+        default=0,
+        help="from which frame to visualize. Default is 0.",
+    )
+    parser.add_argument(
+        "--range-end",
+        type=int,
+        default=-1,
+        help="up to which frame to visualize. Default is -1, "
+        "indicating loading all frames for visualizatoin.",
     )
     parser.add_argument(
         "--nproc",
@@ -526,6 +539,8 @@ def main() -> None:
             label_path=args.labels,
             out_dir=args.output_dir,
             nproc=args.nproc,
+            range_begin=args.range_begin,
+            range_end=args.range_end,
         )
         controller = ViewController(ctrl_cfg, display_cfg, executor)
         viewer.run_with_controller(controller)

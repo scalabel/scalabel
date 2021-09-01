@@ -91,15 +91,25 @@ class ControllerConfig:
     label_path: str
     out_dir: str
     nproc: int
+    range_begin: int
+    range_end: int
 
     def __init__(
-        self, image_dir: str, label_path: str, out_dir: str, nproc: int = NPROC
+        self,
+        image_dir: str,
+        label_path: str,
+        out_dir: str,
+        nproc: int = NPROC,
+        range_begin: int = 0,
+        range_end: int = 10,
     ) -> None:
         """Initialize with default values."""
         self.image_dir = image_dir
         self.label_path = label_path
         self.out_dir = out_dir
         self.nproc = nproc
+        self.range_begin = range_begin
+        self.range_end = range_end
 
 
 class ViewController:
@@ -134,7 +144,11 @@ class ViewController:
         # load label file
         if not os.path.exists(config.label_path):
             logger.error("Label file not found!")
-        self.frames = load(config.label_path, config.nproc).frames[:10]
+        self.frames = load(config.label_path, config.nproc).frames
+        range_end = self.config.range_end
+        if range_end < 0:
+            range_end = len(self.frames)
+        self.frames = self.frames[self.config.range_begin : range_end]
         logger.info("Load images: %d", len(self.frames))
 
         self.images: Dict[str, "concurrent.futures.Future[NDArrayU8]"] = {}
