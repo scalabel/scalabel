@@ -7,22 +7,37 @@ from functools import partial
 from itertools import groupby
 from typing import Any, List, Optional, Union
 
-import humps
-
-from ..common.io import load_config
+from ..common.io import load_config, open_read_text, open_write_text
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Box2D, Box3D, Config, Dataset, Frame, Label, Poly2D
+from .typing import (
+    Box2D,
+    Box3D,
+    Config,
+    Dataset,
+    Extrinsics,
+    Frame,
+    ImageSize,
+    Intrinsics,
+    Label,
+    Poly2D,
+)
 
 
 def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
     """Parse a single frame."""
     if not validate_frames:
-        frame = Frame.construct(**humps.decamelize(raw_frame))
+        # ignore the construct arguments in mypy, add type ignores
+        frame = Frame.construct(**raw_frame)
+        if frame.intrinsics is not None:
+            frame.intrinsics = Intrinsics.construct(**frame.intrinsics)  # type: ignore # pylint: disable=line-too-long
+        if frame.extrinsics is not None:
+            frame.extrinsics = Extrinsics.construct(**frame.extrinsics)  # type: ignore # pylint: disable=line-too-long
+        if frame.size is not None:
+            frame.size = ImageSize.construct(**frame.size)  # type: ignore # pylint: disable=line-too-long
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
-                # ignore the construct arguments in mypy
                 label = Label.construct(**l)  # type: ignore
                 if label.box2d is not None:
                     label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
@@ -35,7 +50,7 @@ def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
                 labels.append(label)
             frame.labels = labels
         return frame
-    return Frame(**humps.decamelize(raw_frame))
+    return Frame(**raw_frame)
 
 
 def load(
@@ -48,7 +63,7 @@ def load(
 
     def process_file(filepath: str) -> Optional[DictStrAny]:
         raw_cfg = None
-        with open(filepath, "r") as fp:
+        with open_read_text(filepath) as fp:
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
@@ -86,19 +101,19 @@ def load(
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
     """Group frames by video_name and sort."""
     for frame in inputs:
-        assert frame.video_name is not None
-        assert frame.frame_index is not None
+        assert frame.videoName is not None
+        assert frame.frameIndex is not None
     frames_list: List[List[Frame]] = []
 
-    inputs = sorted(inputs, key=lambda frame: str(frame.video_name))
-    for _, frame_iter in groupby(inputs, lambda frame: frame.video_name):
+    inputs = sorted(inputs, key=lambda frame: str(frame.videoName))
+    for _, frame_iter in groupby(inputs, lambda frame: frame.videoName):
         frames = sorted(
             list(frame_iter),
-            key=lambda frame: frame.frame_index if frame.frame_index else 0,
+            key=lambda frame: frame.frameIndex if frame.frameIndex else 0,
         )
         frames_list.append(frames)
     frames_list = sorted(
-        frames_list, key=lambda frames: str(frames[0].video_name)
+        frames_list, key=lambda frames: str(frames[0].videoName)
     )
     return frames_list
 
@@ -117,11 +132,8 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
             for v in (remove_empty_elements(v) for v in frame)
             if not empty(v)
         ]
-    return {
-        k: v
-        for k, v in ((k, remove_empty_elements(v)) for k, v in frame.items())
-        if not empty(v)
-    }
+    result = ((k, remove_empty_elements(v)) for k, v in frame.items())
+    return {k: v for k, v in result if not empty(v)}
 
 
 def save(
@@ -137,13 +149,13 @@ def save(
     else:
         dataset_dict["frames"] = list(map(dump, dataset_dict["frames"]))
 
-    with open(filepath, "w") as fp:
+    with open_write_text(filepath) as fp:
         json.dump(dataset_dict, fp, indent=2)
 
 
 def dump(frame: DictStrAny) -> DictStrAny:
     """Dump labels into dictionaries."""
-    frame_str: DictStrAny = humps.camelize(remove_empty_elements(frame))
+    frame_str: DictStrAny = remove_empty_elements(frame)
     return frame_str
 
 

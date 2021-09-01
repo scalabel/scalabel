@@ -11,6 +11,7 @@ import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
 from tqdm import tqdm
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayU8
@@ -129,7 +130,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
 
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.image_size
+        img_shape = config.imageSize
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = image_anns.size
@@ -192,7 +193,7 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.image_size
+        img_shape = config.imageSize
         if img_shape is None:
             if image_anns.size is not None:
                 img_shape = image_anns.size
@@ -268,16 +269,16 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in video_anns:
             image_id += 1
-            img_shape = config.image_size
+            img_shape = config.imageSize
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = image_anns.size
@@ -286,7 +287,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frame_index,
+                frame_id=image_anns.frameIndex,
                 file_name=osp.join(video_name, image_anns.name),
                 height=img_shape.height,
                 width=img_shape.width,
@@ -348,16 +349,16 @@ def scalabel2coco_seg_track(
     shapes = []
     for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
-        instance_id_maps: Dict[str, int] = dict()
+        instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
-        video_name = video_anns[0].video_name
+        video_name = video_anns[0].videoName
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in frames:
             image_id += 1
-            img_shape = config.image_size
+            img_shape = config.imageSize
             if img_shape is None:
                 if image_anns.size is not None:
                     img_shape = image_anns.size
@@ -366,7 +367,7 @@ def scalabel2coco_seg_track(
 
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frame_index,
+                frame_id=image_anns.frameIndex,
                 file_name=image_anns.name,
                 height=img_shape.height,
                 width=img_shape.width,
@@ -440,7 +441,7 @@ def run(args: argparse.Namespace) -> None:
     coco = convert_func(frames, config)
 
     logger.info("Saving converted annotations...")
-    with open(args.output, "w") as f:
+    with open_write_text(args.output) as f:
         json.dump(coco, f)
 
 

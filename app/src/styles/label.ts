@@ -5,7 +5,22 @@ import { createStyles, StyleRules } from "@material-ui/core/styles"
  * Category style
  */
 export const categoryStyle = (): // theme: Theme
-StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
+StyleRules<
+  | "root"
+  | "button"
+  | "formControl"
+  | "primary"
+  | "buttonGroup"
+  | "treeView"
+  | "treeItemRoot"
+  | "treeItemIconContainer"
+  | "treeItemContent"
+  | "treeItemGroup"
+  | "treeItemLabel"
+  | "treeItemLabelText"
+  | "treeItemOutline",
+  {}
+> =>
   createStyles({
     root: {
       display: "flex",
@@ -31,6 +46,46 @@ StyleRules<"root" | "button" | "formControl" | "primary" | "buttonGroup", {}> =>
     },
     buttonGroup: {
       width: "100%"
+    },
+    treeView: {
+      width: "100%"
+    },
+    // below are properties related to treeItem
+    treeItemRoot: {
+      marginTop: "1px",
+      color: "rgba(255, 255, 255, 0.7)",
+      "&.Mui-selected": {
+        color: "rgba(255, 255, 255, 1)"
+      },
+      "&.Mui-selected > $treeItemContent $treeItemLabel": {
+        backgroundColor: "rgba(25, 118, 210, 0.32)"
+      },
+      "&:hover > $treeItemContent": {
+        backgroundColor: "rgba(255, 255, 255, 0.1)"
+      }
+    },
+    treeItemIconContainer: {
+      width: "0px",
+      marginRight: "0px",
+      justifyContent: "unset"
+    },
+    treeItemContent: {},
+    treeItemGroup: {
+      marginLeft: "0px"
+    },
+    treeItemLabel: {
+      height: "22px",
+      paddingLeft: "0px",
+      "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.05)"
+      }
+    },
+    treeItemLabelText: {
+      fontSize: "0.875rem",
+      textAlign: "center"
+    },
+    treeItemOutline: {
+      outline: "1px solid rgba(255, 255, 255, 0.12)"
     }
   })
 

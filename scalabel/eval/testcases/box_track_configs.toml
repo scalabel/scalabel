@@ -36,9 +36,3 @@ name = "bike"
 
     [[categories.subcategories]]
     name = "bicycle"
-
-[[categories]]
-name = "traffic light"
-
-[[categories]]
-name = "traffic sign"

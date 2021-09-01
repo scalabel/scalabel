@@ -68,6 +68,7 @@ test("Adding and deleting tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
@@ -183,6 +184,7 @@ test("Linking tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
@@ -311,6 +313,7 @@ test("Changing attributes and categories of tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={(emptyTrackingTask as State).task.config.categories}
+      treeCategories={null}
       attributes={(emptyTrackingTask as State).task.config.attributes}
       labelType={"labelType"}
     />

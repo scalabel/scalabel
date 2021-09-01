@@ -1,5 +1,11 @@
 import { ItemExport } from "./export"
-import { Attribute, ConfigType, Label2DTemplateType, SensorType } from "./state"
+import {
+  Attribute,
+  Category,
+  ConfigType,
+  Label2DTemplateType,
+  SensorType
+} from "./state"
 
 /**
  * Stores specifications of project
@@ -36,7 +42,7 @@ export interface CreationForm {
 /* file data parsed from form */
 export interface FormFileData {
   /** categories parsed from form file */
-  categories: string[]
+  categories: Category[]
   /** sensors */
   sensors: SensorType[]
   /** custom label template */

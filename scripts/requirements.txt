@@ -14,7 +14,6 @@ psutil
 pycocotools
 pydantic
 pydocstyle
-pyhumps
 pylint
 pyparsing
 pytest

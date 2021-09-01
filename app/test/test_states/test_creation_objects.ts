@@ -10,7 +10,7 @@ import {
 } from "../../src/const/common"
 import { ItemExport } from "../../src/types/export"
 import { CreationForm, FormFileData, Project } from "../../src/types/project"
-import { Attribute, TaskType } from "../../src/types/state"
+import { Attribute, Category, TaskType } from "../../src/types/state"
 import {
   sampleStateExportImage,
   sampleStateExportImagePolygon
@@ -27,6 +27,19 @@ const sampleCategories: string[] = [
   "bike",
   "traffic sign",
   "traffic light"
+]
+
+const sampleTreeCategories: Category[] = [
+  { name: "person" },
+  { name: "rider" },
+  { name: "car" },
+  { name: "truck" },
+  { name: "bus" },
+  { name: "train" },
+  { name: "motorcycle" },
+  { name: "bike" },
+  { name: "traffic sign" },
+  { name: "traffic light" }
 ]
 
 const sampleAttributes: Array<Partial<Attribute>> = [
@@ -169,7 +182,7 @@ export const sampleFormVideo: CreationForm = {
 }
 
 export const sampleFormFileData: FormFileData = {
-  categories: sampleCategories,
+  categories: sampleTreeCategories,
   attributes: sampleAttributes as Attribute[],
   sensors: [],
   items: sampleItems,
@@ -191,6 +204,7 @@ export const sampleProjectImage: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -249,7 +263,7 @@ sampleItemsVideo[1].labels = [
 ]
 
 export const sampleVideoFormFileData: FormFileData = {
-  categories: sampleCategories,
+  categories: sampleTreeCategories,
   attributes: sampleAttributes as Attribute[],
   items: sampleItemsVideo,
   sensors: [],
@@ -271,6 +285,7 @@ export const sampleProjectVideo: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V1,
     categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: true,
@@ -295,6 +310,7 @@ export const sampleProjectAutolabel: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -319,6 +335,7 @@ export const sampleProjectAutolabelPolygon: Project = {
     instructionPage: sampleInstructions,
     bundleFile: BundleFile.V2,
     categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
     attributes: sampleAttributes as Attribute[],
     taskId: "",
     demoMode: false,
@@ -343,6 +360,7 @@ export const sampleTasksImage: TaskType[] = [
       instructionPage: sampleInstructions,
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
+      treeCategories: sampleTreeCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: "000000",
       demoMode: false,
@@ -437,6 +455,7 @@ export const sampleTasksImage: TaskType[] = [
       instructionPage: sampleInstructions,
       bundleFile: BundleFile.V2,
       categories: sampleCategories,
+      treeCategories: sampleTreeCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: "000001",
       demoMode: false,
@@ -534,6 +553,7 @@ export const sampleTasksVideo: TaskType[] = [
       instructionPage: "instructions.com",
       bundleFile: "image.js",
       categories: sampleCategories,
+      treeCategories: sampleTreeCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: "000000",
       demoMode: true,
@@ -696,6 +716,7 @@ export const sampleTasksVideo: TaskType[] = [
       instructionPage: "instructions.com",
       bundleFile: "image.js",
       categories: sampleCategories,
+      treeCategories: sampleTreeCategories,
       attributes: sampleAttributes as Attribute[],
       taskId: "000001",
       demoMode: true,
