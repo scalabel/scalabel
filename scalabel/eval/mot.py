@@ -26,7 +26,7 @@ from ..label.utils import (
 EvalResults = Dict[str, Dict[str, float]]
 Video = TypeVar("Video", List[Frame], List[str])
 VidFunc = Callable[
-    [Video, Video, List[str], float, float],
+    [Video, Video, List[str], float, float, bool],
     List[mm.MOTAccumulator],
 ]
 
@@ -339,7 +339,14 @@ def evaluate_track(
             )
     else:
         accs = [
-            acc_single_video(gt, result, class_names, iou_thr, ignore_iof_thr)
+            acc_single_video(
+                gt,
+                result,
+                class_names,
+                iou_thr,
+                ignore_iof_thr,
+                ignore_unknown_cats,
+            )
             for gt, result in zip(gts, results)
         ]
 
