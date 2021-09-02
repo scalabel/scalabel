@@ -6,6 +6,8 @@ import React from "react"
 import {
   changeSelect,
   changeViewerConfig,
+  changeModeToSelecting,
+  changeModeToAnnotating,
   mergeTracks,
   splitTrack,
   startLinkTrack
@@ -84,6 +86,10 @@ export class ToolBar extends Component<Props> {
         }
         config.hideLabels = !config.hideLabels
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
+        break
+      }
+      case Key.Z_LOW: {
+        Session.dispatch(changeModeToSelecting())
       }
     }
     this._keyDownMap[e.key] = true
@@ -95,6 +101,10 @@ export class ToolBar extends Component<Props> {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
+    switch (e.key) {
+      case Key.Z_LOW:
+        Session.dispatch(changeModeToAnnotating())
+    }
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
   }

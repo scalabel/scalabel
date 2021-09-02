@@ -9,7 +9,7 @@ import {
   ConfigType,
   IdType,
   INVALID_ID,
-  LabelType,
+  LabelType, ModeStatus,
   ShapeType,
   State
 } from "../../types/state"
@@ -272,8 +272,14 @@ export abstract class Label2D {
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
+   * @param {ModeStatus} sessionMode
    */
-  public abstract draw(canvas: Context2D, ratio: number, mode: DrawMode): void
+  public abstract draw(
+    canvas: Context2D,
+    ratio: number,
+    mode: DrawMode,
+    sessionMode: ModeStatus | undefined
+  ): void
 
   /**
    * Draw the label tag on viewing or control canvas
