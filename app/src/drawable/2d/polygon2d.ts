@@ -6,6 +6,7 @@ import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import {
   LabelType,
+  ModeStatus,
   PathPoint2DType,
   PathPointType,
   ShapeType,
@@ -21,6 +22,7 @@ import {
   makePathPoint2DStyle,
   PathPoint2D
 } from "./path_point2d"
+
 const DEFAULT_VIEW_EDGE_STYLE = makeEdge2DStyle({ lineWidth: 4 })
 const DEFAULT_VIEW_POINT_STYLE = makePathPoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePathPoint2DStyle({ radius: 12 })
@@ -100,8 +102,14 @@ export class Polygon2D extends Label2D {
    * @param context
    * @param ratio
    * @param mode
+   * @param sessionMode
    */
-  public draw(context: Context2D, ratio: number, mode: DrawMode): void {
+  public draw(
+    context: Context2D,
+    ratio: number,
+    mode: DrawMode,
+    sessionMode: ModeStatus | undefined
+  ): void {
     const numPoints = this._points.length
 
     if (numPoints === 0) return
@@ -183,6 +191,9 @@ export class Polygon2D extends Label2D {
       if (mode === DrawMode.VIEW) {
         const fillStyle = this._color.concat(OPACITY)
         context.fillStyle = toCssColor(fillStyle)
+        context.fill()
+      } else if (sessionMode === ModeStatus.SELECTING) {
+        context.fillStyle = toCssColor(edgeStyle.color)
         context.fill()
       }
     }
