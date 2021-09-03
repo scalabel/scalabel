@@ -17,6 +17,7 @@ from .typing import (
     Dataset,
     Extrinsics,
     Frame,
+    Graph,
     ImageSize,
     Intrinsics,
     Label,
@@ -46,6 +47,8 @@ def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
                     label.poly2d = [
                         Poly2D.construct(**p.dict()) for p in label.poly2d
                     ]
+                if label.graph is not None:
+                    label.graph = Graph.construct(**label.graph.dict())
                 labels.append(label)
             frame.labels = labels
         return frame
