@@ -15,6 +15,7 @@ import plyfile
 import yaml
 from tqdm import tqdm
 
+from ..common.io import open_read_text, open_write_text
 from ..common.typing import NDArrayF64
 
 # Define the ground return type
@@ -110,7 +111,7 @@ def main() -> None:
         description="Find ground plane and write it to PLY file"
     )
     parser.add_argument(
-        "--bdd_items", help="Input BDD Data json / yaml file", required=True
+        "--bdd-items", help="Input BDD Data json / yaml file", required=True
     )
     parser.add_argument(
         "--output", help="Output BDD Data json / yaml file", required=True
@@ -122,48 +123,48 @@ def main() -> None:
         type=int,
     )
     parser.add_argument(
-        "--sample_size",
+        "--sample-size",
         help="Fraction of points to use as sample",
         default=0.1,
         type=float,
     )
     parser.add_argument(
-        "--min_dist",
+        "--min-dist",
         help="Minimum distance of points from "
         "origin to be considered valid",
         default=3.0,
         type=float,
     )
     parser.add_argument(
-        "--max_dist",
+        "--max-dist",
         help="Maximum distance of points from "
         "origin to be considered valid",
         default=25.0,
         type=float,
     )
     parser.add_argument(
-        "--min_height",
+        "--min-height",
         help="Minimum height of points, value "
         "on z-axis to be considered valid",
         default=-2.0,
         type=float,
     )
     parser.add_argument(
-        "--max_height",
+        "--max-height",
         help="Maximum height of points, value "
         "on z-axis to be considered valid",
         default=-1.0,
         type=float,
     )
     parser.add_argument(
-        "--expected_normal",
+        "--expected-normal",
         help="Expected normal of the ground plane",
         nargs="+",
         default=[0, 0, 1],
         type=float,
     )
     parser.add_argument(
-        "--max_normal_deviation",
+        "--max-normal-deviation",
         help="Maximum deviation from expected normal " "in radians",
         default=0.15,
         type=float,
@@ -196,7 +197,7 @@ def main() -> None:
             + " a json or a yaml file."
         )
 
-    with open(args.bdd_items, "r") as bdd_file:
+    with open_read_text(args.bdd_items) as bdd_file:
         if os.path.splitext(args.bdd_items)[-1] == ".json":
             bdd_data = json.load(bdd_file)
         else:
@@ -267,7 +268,7 @@ def main() -> None:
         if not args.tracking:
             max_label_id += 1
 
-    with open(args.output, "w") as output_file:
+    with open_write_text(args.output) as output_file:
         if os.path.splitext(args.output)[-1] == ".json":
             json.dump(bdd_data, output_file)
         else:

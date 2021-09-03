@@ -1,7 +1,7 @@
 import ListItem from "@material-ui/core/ListItem/ListItem"
 import React from "react"
 
-import { Category } from "../components/toolbar_category"
+import { ToolbarCategory } from "../components/toolbar_category"
 import { ListButton } from "../components/toolbar_list_button"
 import { SwitchButton } from "../components/toolbar_switch"
 import { AttributeToolType } from "../const/common"
@@ -46,7 +46,11 @@ export function renderTemplate(
   } else if (toolType === AttributeToolType.LONG_LIST) {
     return (
       <ListItem dense={true} style={{ textAlign: "center" }}>
-        <Category categories={options} headerText={name} />
+        <ToolbarCategory
+          categories={options}
+          treeCategories={null}
+          headerText={name}
+        />
       </ListItem>
     )
   }

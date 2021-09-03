@@ -26,7 +26,7 @@ class Result(BaseModel):
     classes for the two-level class hierarchy case.
 
     Functions:
-        dict() -> dict[str, dict[str, int | float]]:
+        {} -> dict[str, dict[str, int | float]]:
             export all data to a nested dict.
         json() -> str:
             export the nested dict of `dict()` into a JSON string.
@@ -40,7 +40,7 @@ class Result(BaseModel):
             the same as `table()`.
     """
 
-    _formatters: Dict[str, FORMATTER] = PrivateAttr(dict())
+    _formatters: Dict[str, FORMATTER] = PrivateAttr({})
     _row_breaks: List[int] = PrivateAttr([])
 
     def __init__(self, **data: Union[int, float, ScoresList]) -> None:
@@ -165,7 +165,7 @@ class Result(BaseModel):
         Returns:
             dict[str, int | float]: returned summary of the result
         """
-        summary_dict: Dict[str, Union[int, float]] = dict()
+        summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
             include=include, exclude=exclude  # type: ignore
         ).items():

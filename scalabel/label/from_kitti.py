@@ -45,12 +45,12 @@ def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--input_dir",
+        "--input-dir",
         "-i",
         help="path to the input coco label file",
     )
     parser.add_argument(
-        "--output_dir",
+        "--output-dir",
         "-o",
         help="path to save scalabel format label file",
     )
@@ -61,7 +61,7 @@ def parse_arguments() -> argparse.Namespace:
         help="split for kitti dataset",
     )
     parser.add_argument(
-        "--data_type",
+        "--data-type",
         default="tracking",
         choices=["tracking", "detection"],
         help="type of kitti dataset",
@@ -87,7 +87,7 @@ def parse_label(
     else:
         offset = 0
 
-    labels_dict: Dict[int, List[Label]] = dict()
+    labels_dict: Dict[int, List[Label]] = {}
 
     labels = list_from_file(label_file)
     track_id = -1
@@ -179,7 +179,7 @@ def from_kitti_det(
     cam2global = Extrinsics(location=position, rotation=rotation)
 
     for img_id, img_name in enumerate(img_names):
-        trackid_maps: Dict[str, int] = dict()
+        trackid_maps: Dict[str, int] = {}
 
         with Image.open(osp.join(img_dir, img_name)) as img:
             width, height = img.size
@@ -245,7 +245,7 @@ def from_kitti(
     global_track_id = 0
 
     for vid_name in vid_names:
-        trackid_maps: Dict[str, int] = dict()
+        trackid_maps: Dict[str, int] = {}
 
         img_names = sorted(
             [

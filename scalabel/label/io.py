@@ -7,7 +7,7 @@ from functools import partial
 from itertools import groupby
 from typing import Any, List, Optional, Union
 
-from ..common.io import load_config
+from ..common.io import load_config, open_read_text, open_write_text
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import (
@@ -28,24 +28,25 @@ from .typing import (
 def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
     """Parse a single frame."""
     if not validate_frames:
+        # ignore the construct arguments in mypy, add type ignores
         frame = Frame.construct(**raw_frame)
         if frame.intrinsics is not None:
-            frame.intrinsics = Intrinsics.construct(**frame.intrinsics.dict())
+            frame.intrinsics = Intrinsics.construct(**frame.intrinsics)  # type: ignore # pylint: disable=line-too-long
         if frame.extrinsics is not None:
-            frame.extrinsics = Extrinsics.construct(**frame.extrinsics.dict())
+            frame.extrinsics = Extrinsics.construct(**frame.extrinsics)  # type: ignore # pylint: disable=line-too-long
         if frame.size is not None:
-            frame.size = ImageSize.construct(**frame.size.dict())
+            frame.size = ImageSize.construct(**frame.size)  # type: ignore # pylint: disable=line-too-long
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
-                label = Label.construct(**l.dict())
+                label = Label.construct(**l)  # type: ignore
                 if label.box2d is not None:
-                    label.box2d = Box2D.construct(**label.box2d.dict())
+                    label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
                 if label.box3d is not None:
-                    label.box3d = Box3D.construct(**label.box3d.dict())
+                    label.box3d = Box3D.construct(**label.box3d)  # type: ignore # pylint: disable=line-too-long
                 if label.poly2d is not None:
                     label.poly2d = [
-                        Poly2D.construct(**p.dict()) for p in label.poly2d
+                        Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
                     ]
                 if label.graph is not None:
                     label.graph = Graph.construct(**label.graph.dict())
@@ -65,7 +66,7 @@ def load(
 
     def process_file(filepath: str) -> Optional[DictStrAny]:
         raw_cfg = None
-        with open(filepath, "r") as fp:
+        with open_read_text(filepath) as fp:
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
@@ -134,11 +135,8 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
             for v in (remove_empty_elements(v) for v in frame)
             if not empty(v)
         ]
-    return {
-        k: v
-        for k, v in ((k, remove_empty_elements(v)) for k, v in frame.items())
-        if not empty(v)
-    }
+    result = ((k, remove_empty_elements(v)) for k, v in frame.items())
+    return {k: v for k, v in result if not empty(v)}
 
 
 def save(
@@ -154,7 +152,7 @@ def save(
     else:
         dataset_dict["frames"] = list(map(dump, dataset_dict["frames"]))
 
-    with open(filepath, "w") as fp:
+    with open_write_text(filepath) as fp:
         json.dump(dataset_dict, fp, indent=2)
 
 

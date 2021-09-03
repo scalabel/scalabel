@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Tuple, TypeVar, Union
 import motmetrics as mm
 import numpy as np
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny, NDArrayF64, NDArrayI32
@@ -294,7 +295,7 @@ def generate_results(
     super_classes: Dict[str, List[Category]],
 ) -> BoxTrackResult:
     """Compute summary metrics for evaluation results."""
-    ave_dict: DictStrAny = dict()
+    ave_dict: DictStrAny = {}
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
         v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
@@ -479,7 +480,7 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for mot evaluation",
     )
     parser.add_argument(
-        "--quite",
+        "--quiet",
         "-q",
         action="store_true",
         help="without logging",
@@ -508,5 +509,5 @@ if __name__ == "__main__":
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump((eval_result.json()), fp)
