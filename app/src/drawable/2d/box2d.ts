@@ -4,7 +4,13 @@ import { Cursor, LabelTypeName } from "../../const/common"
 import { makeLabel, makeRect } from "../../functional/states"
 import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
-import { LabelType, RectType, ShapeType, State, ModeStatus } from "../../types/state"
+import {
+  LabelType,
+  RectType,
+  ShapeType,
+  State,
+  ModeStatus
+} from "../../types/state"
 import { blendColor, Context2D, encodeControlColor } from "../util"
 import { DrawMode, Label2D } from "./label2d"
 import { Label2DList } from "./label2d_list"

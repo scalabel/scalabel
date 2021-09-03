@@ -9,7 +9,8 @@ import {
   ConfigType,
   IdType,
   INVALID_ID,
-  LabelType, ModeStatus,
+  LabelType,
+  ModeStatus,
   ShapeType,
   State
 } from "../../types/state"
