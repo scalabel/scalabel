@@ -67,6 +67,57 @@ def test_load() -> None:
     assert_correctness(filepath, nprocs=2)
 
 
+def test_load_graph() -> None:
+    """Test loading labels."""
+    filepath = get_test_file("image_list_with_auto_labels_graph.json")
+
+    def assert_correctness(inputs: str, nprocs: int) -> None:
+        frames = load(inputs, nprocs).frames
+        assert len(frames) == 10
+        assert (
+            frames[0].url == "https://s3-us-west-2.amazonaws.com/bdd-label/"
+            "bdd100k/frames-20000/val/c1ba5ee6-b2cb1e51.jpg"
+        )
+        assert frames[2].frameIndex == 2
+        assert frames[4].frameIndex == 4
+        assert frames[2].labels is not None
+        assert frames[4].labels is not None
+        assert frames[2].labels[0].id == "0"
+        assert frames[2].labels[0].box2d is not None
+        assert frames[4].labels[1].box2d is not None
+        box = frames[4].labels[1].box2d
+        assert box.x1 == 1181.4259033203125
+        assert box.x2 == 1241.681396484375
+        assert box.y1 == 101.82328796386719
+        assert box.y2 == 155.20513916015625
+        assert frames[0].labels is not None
+        assert frames[0].labels[0].poly2d is not None
+        polys = frames[0].labels[0].poly2d
+        assert isinstance(polys, list)
+        poly = polys[0]
+        assert len(poly.vertices) == len(poly.types)
+        assert len(poly.vertices[0]) == 2
+        for char in poly.types:
+            assert char in ["C", "L"]
+        assert frames[0].labels[0].graph is not None
+        assert frames[0].labels[0].graph.nodes is not None
+        assert frames[0].labels[0].graph.edges is not None
+        nodes = frames[0].labels[0].graph.nodes
+        edges = frames[0].labels[0].graph.edges
+        assert isinstance(nodes, list)
+        assert isinstance(edges, list)
+        assert len(nodes) == 9
+        assert len(edges) == 9
+        assert nodes[1].location[0] == 205.20687963549207
+        assert nodes[1].location[1] == 278.4950509338821
+        assert nodes[1].category == "polygon"
+        assert edges[2].source == "5vowGRmRHjolm1-G"
+        assert edges[2].target == "MqOQsu8Tqn6sLoLM"
+
+    assert_correctness(filepath, nprocs=0)
+    assert_correctness(filepath, nprocs=2)
+
+
 def test_group_and_sort() -> None:
     """Check the group and sort results."""
     # frames = [
