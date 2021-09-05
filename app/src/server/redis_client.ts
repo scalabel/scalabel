@@ -171,6 +171,17 @@ export class RedisClient {
   }
 
   /**
+   * This function is used to get keys with a given prefix.
+   * This is useful when deleting project.
+   *
+   * @param prefix
+   */
+  public async getKeysWithPrefix(prefix: string): Promise<string[]> {
+    const redisGetKeysWithPrefix = promisify(this.client.keys).bind(this.client)
+    return await redisGetKeysWithPrefix(prefix + "*")
+  }
+
+  /**
    * Wrapper for redis config
    *
    * @param type
