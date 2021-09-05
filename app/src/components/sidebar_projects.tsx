@@ -34,8 +34,6 @@ interface ProjectListState {
  * @param props
  */
 class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
-  /** receive data from backend */
-  // private projectsToExpress = getProjects()
   /**
    * Constructor
    *
@@ -48,20 +46,6 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
       projectsToExpress: getProjects()
     }
   }
-
-  /**
-   * method to process changes in props, which gets project from backend
-   * and then changes state to force a reload of this component
-   *
-   * @param props
-   */
-  // public UNSAFE_componentWillReceiveProps(props: ProjectListProps): void {
-  //   const { refresh } = this.props
-  //   if (props.refresh !== refresh) {
-  //     this.projectsToExpress = getProjects()
-  //     this.setState({ reloadProjects: !this.state.reloadProjects })
-  //   }
-  // }
 
   /**
    * renders project list
