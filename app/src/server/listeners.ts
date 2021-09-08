@@ -403,6 +403,27 @@ export class Listeners {
   }
 
   /**
+   * Delete a project
+   *
+   * @param req
+   * @param res
+   */
+  public async deleteProjectHandler(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    if (this.checkInvalidGet(req, res)) {
+      return
+    }
+
+    await this.projectStore.deleteProject(
+      req.query[FormField.PROJECT_NAME] as string
+    )
+
+    res.sendStatus(200)
+  }
+
+  /**
    * Finishes project creation using processed dicts
    *
    * @param storage
