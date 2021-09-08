@@ -56,6 +56,7 @@ export class Window extends React.Component<Props> {
     const leftSidebar1 = (
       <ToolBar
         categories={config.categories}
+        treeCategories={config.treeCategories}
         attributes={config.attributes}
         labelType={config.labelTypes[0]}
       />

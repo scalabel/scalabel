@@ -11,6 +11,11 @@ let expectedLabelStats: stats.LabelStats
 beforeAll(() => {
   const config = makers.makeTaskConfig({
     categories: ["car", "person", "traffic light"],
+    treeCategories: [
+      { name: "car" },
+      { name: "person" },
+      { name: "traffic light" }
+    ],
     attributes: [
       makers.makeAttribute({
         name: "Occluded"

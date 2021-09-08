@@ -298,6 +298,13 @@ export interface Label2DTemplateType {
   edges: Array<[number, number]>
 }
 
+export interface Category {
+  /** Category name */
+  name: string
+  /** Children categories if tree structure */
+  subcategories?: Category[]
+}
+
 export interface Attribute {
   /** Attribute tool type */
   toolType: AttributeToolType
@@ -345,6 +352,8 @@ export interface ConfigType {
   bundleFile: string
   /** Categories */
   categories: string[]
+  /** Categories in tree structure*/
+  treeCategories: Category[]
   /** Attributes */
   attributes: Attribute[]
   /** task id */

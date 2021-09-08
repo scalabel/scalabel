@@ -9,7 +9,7 @@ import * as action from "../../src/action/common"
 import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState } from "../../src/common/session"
 import { ToolBar } from "../../src/components/toolbar"
-import { Category } from "../../src/components/toolbar_category"
+import { ToolbarCategory } from "../../src/components/toolbar_category"
 import { ListButton } from "../../src/components/toolbar_list_button"
 import { makeLabel } from "../../src/functional/states"
 import { testJson } from "../test_states/test_image_objects"
@@ -48,7 +48,11 @@ describe("Toolbar category setting", () => {
   test("Category selection", () => {
     setupTestStore(testJson)
     const { getByText } = render(
-      <Category categories={["A", "B", "C"]} headerText={"Category"} />
+      <ToolbarCategory
+        categories={["A", "B", "C"]}
+        treeCategories={null}
+        headerText={"Category"}
+      />
     )
     let button = getByText("B")
     expect(button).toBeInTheDocument()
@@ -62,7 +66,11 @@ describe("Toolbar category setting", () => {
 
   test("Test elements in Category", () => {
     const category = create(
-      <Category categories={["A", "B"]} headerText={"Category"} />
+      <ToolbarCategory
+        categories={["A", "B"]}
+        treeCategories={null}
+        headerText={"Category"}
+      />
     )
     const root = category.root
     expect(root.props.categories[0].toString()).toBe("A")
@@ -72,7 +80,11 @@ describe("Toolbar category setting", () => {
 
   test("Category by type", () => {
     const category = create(
-      <Category categories={["OnlyCategory"]} headerText={"Category"} />
+      <ToolbarCategory
+        categories={["OnlyCategory"]}
+        treeCategories={null}
+        headerText={"Category"}
+      />
     )
     const root = category.root
     expect(root.findByType(ToggleButton).props.children).toBe("OnlyCategory")
@@ -80,7 +92,11 @@ describe("Toolbar category setting", () => {
 
   test("Null category", () => {
     const category = create(
-      <Category categories={null} headerText={"Category"} />
+      <ToolbarCategory
+        categories={null}
+        treeCategories={null}
+        headerText={"Category"}
+      />
     )
     const root = category.getInstance()
     expect(root).toBe(null)
@@ -96,6 +112,7 @@ describe("test Delete", () => {
       <ToolBar
         ref={toolbarRef}
         categories={null}
+        treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
       />
@@ -179,6 +196,7 @@ describe("test track", () => {
       <ToolBar
         ref={toolbarRef}
         categories={null}
+        treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
       />
@@ -222,6 +240,7 @@ describe("test track", () => {
       <ToolBar
         ref={toolbarRef}
         categories={null}
+        treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
       />

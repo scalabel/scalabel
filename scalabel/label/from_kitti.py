@@ -45,12 +45,12 @@ def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="coco to scalabel")
     parser.add_argument(
-        "--input_dir",
+        "--input-dir",
         "-i",
         help="path to the input coco label file",
     )
     parser.add_argument(
-        "--output_dir",
+        "--output-dir",
         "-o",
         help="path to save scalabel format label file",
     )
@@ -61,7 +61,7 @@ def parse_arguments() -> argparse.Namespace:
         help="split for kitti dataset",
     )
     parser.add_argument(
-        "--data_type",
+        "--data-type",
         default="tracking",
         choices=["tracking", "detection"],
         help="type of kitti dataset",

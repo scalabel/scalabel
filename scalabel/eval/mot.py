@@ -473,7 +473,7 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for mot evaluation",
     )
     parser.add_argument(
-        "--quite",
+        "--quiet",
         "-q",
         action="store_true",
         help="without logging",
