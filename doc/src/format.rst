@@ -41,8 +41,8 @@ The exporting format has the following fields.
         - categories: string[]
 
 Each item in the ``frame`` field is an image with several fields.
-``attributes``, ``categories`` are are the list of tags giving
-to each label in images. Fields of item is given below.
+``attributes``, ``categories`` are the list of tags given
+to each label in images. Fields of item are given below.
 
 .. code-block:: yaml
     
@@ -84,6 +84,18 @@ to each label in images. Fields of item is given below.
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean
+        - graph: (optional)
+            - nodes [ ]:
+                - location: [x, y] or [x, y, z]
+                - category: string
+                - visibility: string (optional)
+                - type: string (optional)
+                - id: string (optional)
+            - edges [ ]:
+                - source: string
+                - target: string
+                - type: string (optional)
+            - type: string (optional)
 
 
 More details about the fields
@@ -107,3 +119,19 @@ More details about the fields
           same index in vertices. ‘L’ for vertex and ‘C’ for control point of a
           bezier curve.
         * closed: true for polygon and otherwise for path
+
+    * graph
+
+        * nodes
+            * location: 2D or 3D coordinates.
+            * category: Either joint name or type of segmentation (see closed in `poly2d`).
+            * visibility: Visibility of joint for pose.
+            * type: Type of vertex for segmentation (see type in `poly2d`).
+            * id: Unique ID.
+
+        * edges
+            * source: Source node of the edge.
+            * target: Target node of the edge.
+            * type: Type of edge.
+
+        * type: Specification of graph.

@@ -57,6 +57,7 @@ class Graph(BaseModel):
 
     nodes: List[Node]
     edges: List[Edge]
+    type: Optional[str] = None
 
 
 class Label(BaseModel):
