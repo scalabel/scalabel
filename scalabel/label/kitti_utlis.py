@@ -38,8 +38,10 @@ class KittiPoseParser:
         """
         fields = [float(f) for f in fields_str]
         self.latlon = fields[:2]
-        assert utm is not None, "KITTI conversion requires utm to be " \
-                                "installed, see scripts/optional.txt"
+        assert utm is not None, (
+            "KITTI conversion requires utm to be "
+            "installed, see scripts/optional.txt"
+        )
         location = utm.from_latlon(*self.latlon)
         self.position = np.array([location[0], location[1], fields[2]])
 
