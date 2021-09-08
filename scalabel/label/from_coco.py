@@ -82,11 +82,11 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
             and "video_id" in img
             and img["video_id"] is not None
         ):
-            frame.videoName = vid_id2name[  # pylint: disable=invalid-name
+            frame.videoName = vid_id2name[
                 img["video_id"]
             ]
         if "frame_id" in img:
-            frame.frameIndex = img["frame_id"]  # pylint: disable=invalid-name
+            frame.frameIndex = img["frame_id"]
 
         if img_id not in img_id2anns:
             continue
