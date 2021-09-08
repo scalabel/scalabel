@@ -22,8 +22,6 @@ interface ProjectListProps {
 }
 
 interface ProjectListState {
-  /** boolean which when changed forces a refresh */
-  reloadProjects: boolean
   /** projects */
   projectsToExpress: string[]
 }
@@ -42,7 +40,6 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
   public constructor(props: ProjectListProps) {
     super(props)
     this.state = {
-      reloadProjects: props.refresh,
       projectsToExpress: getProjects()
     }
   }
