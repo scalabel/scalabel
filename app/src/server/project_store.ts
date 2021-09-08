@@ -320,6 +320,22 @@ export class ProjectStore {
   }
 
   /**
+   * Delete project according to the project name.
+   *
+   * @param projectName
+   */
+  public async deleteProject(projectName: string): Promise<void> {
+    const projectDir = path.getProjectDir(projectName)
+    const toDeleteRedisKeys = await this.redisStore.getKeysWithPrefix(
+      projectDir
+    )
+    await Promise.all(
+      toDeleteRedisKeys.map(async (key) => await this.redisStore.del(key))
+    )
+    await this.storage.delete(projectDir)
+  }
+
+  /**
    * Loads the most recent state for the given task. If no such submission throw
    * an error.
    *
