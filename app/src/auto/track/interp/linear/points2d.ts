@@ -110,9 +110,14 @@ export class Points2DLinearInterp extends TrackInterp {
     // Copy the input array
     let newShapes = [...allShapes]
     newShapes[labelIndex] = newShape
+    // If the current label has changed the number of vertexs,
+    // do not do any interpolation
+    if (newLabel.changed) {
+      return newShapes
+    }
     if (manual0 === -1) {
       newShapes = assignShapesInRange(0, labelIndex, newShape, newShapes)
-    } else {
+    } else if (manual0 >= 0) {
       newShapes = linearInterpPointsInRange(
         manual0,
         labelIndex,
@@ -127,7 +132,7 @@ export class Points2DLinearInterp extends TrackInterp {
         newShape,
         newShapes
       )
-    } else {
+    } else if (manual1 >= 0) {
       newShapes = linearInterpPointsInRange(
         labelIndex,
         manual1,

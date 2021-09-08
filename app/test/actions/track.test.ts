@@ -16,7 +16,7 @@ import {
   getSelectedLabels,
   getTrack
 } from "../../src/functional/state_util"
-import { makeLabel, makeShape } from "../../src/functional/states"
+import { makeLabel, makeShape, makeTrack } from "../../src/functional/states"
 import { IdType } from "../../src/types/state"
 import { setupTestStore } from "../components/util"
 import { testJson } from "../test_states/test_track_objects"
@@ -244,5 +244,50 @@ describe("Test tracking operations", () => {
     const state = getState()
     checkNumTracks(originalNumTracks + 1)
     expect(getNumLabelsForTrackId(state, newTrackIds[0])).toBe(5)
+  })
+
+  test("Track breaking", () => {
+    // Check initial state
+    const toBreakTrack = "1" // Has labels at items 0-5
+    const breakItemIdx = 3
+    let state = getState()
+    checkNumTracks(originalNumTracks)
+    const labelId = getLabelInTrack(state, toBreakTrack, breakItemIdx)
+
+    const newTrackId = makeTrack().id
+    dispatch(action.splitTrack(toBreakTrack, newTrackId, breakItemIdx))
+
+    // Check that the track was breaked
+    state = getState()
+    checkNumTracks(originalNumTracks + 1)
+    expect(getLabelInTrack(state, newTrackId, breakItemIdx)).toBe(labelId)
+    let trackBreaked = getTrack(state, toBreakTrack)
+    expect(getNumLabelsForTrack(trackBreaked)).toBe(3) // Should have label at items 0-2
+    trackBreaked = getTrack(state, newTrackId)
+    expect(getNumLabelsForTrack(trackBreaked)).toBe(3) // Should have label at items 3-5
+  })
+
+  test("Single frame track deletion", () => {
+    // Check the initial state
+    const itemIndex = 1
+    dispatch(action.goToItem(itemIndex))
+    let state = getState()
+    expect(getNumLabels(state, 2)).toBe(3)
+    expect(getNumShapes(state, 2)).toBe(3)
+
+    // Delete single frame from a track
+    const trackId = "3"
+    let track3 = getTrack(state, trackId)
+    expect(getNumLabelsForTrack(track3)).toBe(6)
+    dispatch(track.deleteLabelsFromTracks([track3], itemIndex))
+
+    // Check that the track was terminated
+    state = getState()
+    track3 = getTrack(state, trackId)
+    expect(getNumLabelsForTrack(track3)).toBe(5)
+    expect(getNumLabels(state, 1)).toBe(2)
+    expect(getNumShapes(state, 1)).toBe(2)
+    expect(getNumLabels(state, 0)).toBe(3)
+    expect(getNumShapes(state, 0)).toBe(3)
   })
 })

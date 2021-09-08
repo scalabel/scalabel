@@ -233,6 +233,31 @@ export function drawBox2DTracks(
 }
 
 /**
+ * Draw a sequences of polygon 2D tracks
+ *
+ * @param label2d 2d canvas
+ * @param store
+ * @param itemIndices the item indices of those boses
+ * @param polygons point coordinates for each polygon
+ */
+export function drawPolygon2DTracks(
+  label2d: Label2dCanvas,
+  store: SimpleStore,
+  itemIndices: number[],
+  polygons: number[][][]
+): TrackCollector {
+  const trackIds = new TrackCollector(store.getter())
+  itemIndices.forEach((itemIndex, pointsIndex) => {
+    store.dispatch(action.goToItem(itemIndex))
+    const points = polygons[pointsIndex]
+    drawPolygon(label2d, points)
+    trackIds.collect()
+  })
+  expect(trackIds.length).toEqual(itemIndices.length)
+  return trackIds
+}
+
+/**
  * Set up component for testing
  *
  * @param dispatch

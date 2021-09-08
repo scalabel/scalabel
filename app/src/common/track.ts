@@ -257,11 +257,11 @@ export class Track {
    */
   public update(itemIndex: number, label: Readonly<Label>): void {
     const newShapes = label.shapes()
-    if (
-      itemIndex in this._shapes &&
-      newShapes.length === this._shapes[itemIndex].length
-    ) {
+    if (itemIndex in this._shapes) {
       this._updatedIndices.add(itemIndex)
+      const isShapeChanged: boolean = !(
+        this._shapes[itemIndex].length === newShapes.length
+      )
       this._shapes[itemIndex].length = newShapes.length
       for (let i = 0; i < newShapes.length; i++) {
         this._shapes[itemIndex][i] = newShapes[i]
@@ -271,6 +271,9 @@ export class Track {
         ...this._labels[itemIndex],
         ...label.label
       }
+
+      this._labels[itemIndex].changed =
+        this._labels[itemIndex].changed || isShapeChanged
 
       const itemIndices = _.keys(this._labels).map((k) => Number(k))
       const labels = itemIndices.map((i) => this._labels[i])
