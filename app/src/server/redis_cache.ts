@@ -117,6 +117,16 @@ export class RedisCache {
   }
 
   /**
+   * This function is used to get keys with a given prefix.
+   * This is useful when deleting project.
+   *
+   * @param prefix
+   */
+  public async getKeysWithPrefix(prefix: string): Promise<string[]> {
+    return await this.client.getKeysWithPrefix(prefix)
+  }
+
+  /**
    * Writes back task submission to storage
    * Task key in redis is the directory, so add a date before writing
    *

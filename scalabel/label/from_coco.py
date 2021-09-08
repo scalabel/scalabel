@@ -71,48 +71,61 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     img_ids = sorted(img_id2img.keys())
     for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
-        frame = Frame(name=os.path.split(img["file_name"])[-1])
-        frame.size = ImageSize(width=img["width"], height=img["height"])
-        scalabel.append(frame)
+        size = ImageSize(width=img["width"], height=img["height"])
 
         if "coco_url" in img:
-            frame.url = img["coco_url"]
+            url = img["coco_url"]
+        else:
+            url = None
+
         if (
             vid_id2name is not None
             and "video_id" in img
             and img["video_id"] is not None
         ):
-            frame.videoName = vid_id2name[  # pylint: disable=invalid-name
-                img["video_id"]
-            ]
+            video_name: Optional[str] = vid_id2name[img["video_id"]]
+        else:
+            video_name = None
         if "frame_id" in img:
-            frame.frameIndex = img["frame_id"]  # pylint: disable=invalid-name
+            frame_index = img["frame_id"]
+        else:
+            frame_index = None
 
-        if img_id not in img_id2anns:
-            continue
+        labels: Optional[List[Label]] = None
+        if img_id in img_id2anns:
+            labels = []
+            anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
+            for i, ann in enumerate(anns):
+                label = Label(
+                    id=ann.get(
+                        "scalabel_id", str(ann.get("instance_id", ann["id"]))
+                    ),
+                    index=i + 1,
+                    attributes=dict(
+                        crowd=bool(ann["iscrowd"]), ignored=bool(ann["ignore"])
+                    ),
+                    category=cat_id2name[ann["category_id"]],
+                )
+                if "score" in ann:
+                    label.score = ann["score"]
+                if "bbox" in ann and ann["bbox"] is not None:
+                    label.box2d = bbox_to_box2d(ann["bbox"])
+                if "segmentation" in ann:
+                    # Currently only support conversion from polygon.
+                    assert isinstance(ann["segmentation"], list)
+                    label.poly2d = polygon_to_poly2ds(ann["segmentation"])
+                labels.append(label)
 
-        frame.labels = []
-        anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
-        for i, ann in enumerate(anns):
-            label = Label(
-                id=ann.get(
-                    "scalabel_id", str(ann.get("instance_id", ann["id"]))
-                ),
-                index=i + 1,
-                attributes=dict(
-                    crowd=bool(ann["iscrowd"]), ignored=bool(ann["ignore"])
-                ),
-                category=cat_id2name[ann["category_id"]],
+        scalabel.append(
+            Frame(
+                name=os.path.split(img["file_name"])[-1],
+                url=url,
+                size=size,
+                videoName=video_name,
+                frameIndex=frame_index,
+                labels=labels,
             )
-            if "score" in ann:
-                label.score = ann["score"]
-            if "bbox" in ann and ann["bbox"] is not None:
-                label.box2d = bbox_to_box2d(ann["bbox"])
-            if "segmentation" in ann:
-                # Currently only support conversion from polygon.
-                assert isinstance(ann["segmentation"], list)
-                label.poly2d = polygon_to_poly2ds(ann["segmentation"])
-            frame.labels.append(label)
+        )
 
     return scalabel, config
 
