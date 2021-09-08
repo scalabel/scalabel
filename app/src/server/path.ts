@@ -159,6 +159,15 @@ export function getRedisBotSet(): string {
  *
  * @param projectName
  */
+export function getProjectDir(projectName: string): string {
+  return path.join(StorageStructure.PROJECT, projectName)
+}
+
+/**
+ * Gets key of file with project data
+ *
+ * @param projectName
+ */
 export function getProjectKey(projectName: string): string {
   return path.join(StorageStructure.PROJECT, projectName, "project")
 }
