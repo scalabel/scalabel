@@ -3,11 +3,15 @@ import os
 from typing import List
 
 import numpy as np
-import utm  # type: ignore
 from scipy.spatial.transform import Rotation as R
 
 from ..common.io import open_read_text
 from ..common.typing import NDArrayF64
+
+try:
+    import utm
+except ImportError:
+    utm = None
 
 
 # Functions from kio_slim
@@ -34,6 +38,10 @@ class KittiPoseParser:
         """
         fields = [float(f) for f in fields_str]
         self.latlon = fields[:2]
+        assert utm is not None, (
+            "KITTI conversion requires utm to be "
+            "installed, see scripts/optional.txt"
+        )
         location = utm.from_latlon(*self.latlon)
         self.position = np.array([location[0], location[1], fields[2]])
 

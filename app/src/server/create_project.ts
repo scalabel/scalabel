@@ -279,7 +279,15 @@ export async function parseItems(
   itemsRequired: boolean
 ): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
-    return await readConfig(storage, files[FormField.ITEMS], [])
+    let items = await readConfig<Array<Partial<ItemExport>> | DatasetExport>(
+      storage,
+      files[FormField.ITEMS],
+      []
+    )
+    if ("frames" in items) {
+      items = items.frames
+    }
+    return items
   } else {
     if (itemsRequired) {
       throw new Error("No item file.")
