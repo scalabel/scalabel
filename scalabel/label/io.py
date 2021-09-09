@@ -49,7 +49,7 @@ def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
                         Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
                     ]
                 if label.graph is not None:
-                    label.graph = Graph.construct(**label.graph.dict())
+                    label.graph = Graph.construct(**label.graph)
                 labels.append(label)
             frame.labels = labels
         return frame

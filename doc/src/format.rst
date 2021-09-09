@@ -90,7 +90,7 @@ to each label in images. Fields of item are given below.
                 - category: string
                 - visibility: string (optional)
                 - type: string (optional)
-                - id: string (optional)
+                - id: string
             - edges [ ]:
                 - source: string
                 - target: string
@@ -123,15 +123,15 @@ More details about the fields
     * graph
 
         * nodes
-            * location: 2D or 3D coordinates.
+            * location: 2D or 3D coordinates. In 2D: (x, y), x horizontal, y vertical, (0, 0) top left corner.
             * category: Either joint name or type of segmentation (see closed in `poly2d`).
             * visibility: Visibility of joint for pose.
             * type: Type of vertex for segmentation (see type in `poly2d`).
             * id: Unique ID.
 
         * edges
-            * source: Source node of the edge.
-            * target: Target node of the edge.
+            * source: Unique ID of the source node of the edge.
+            * target: Unique ID of the target node of the edge.
             * type: Type of edge.
 
         * type: Specification of graph.

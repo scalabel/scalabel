@@ -41,7 +41,7 @@ class Node(BaseModel):
     category: str
     visibility: Optional[str] = None
     type: Optional[str] = None
-    id: Optional[str] = None
+    id: str
 
 
 class Edge(BaseModel):

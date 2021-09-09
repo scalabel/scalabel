@@ -114,6 +114,8 @@ def test_load_graph() -> None:
         assert edges[2].source == "5vowGRmRHjolm1-G"
         assert edges[2].target == "MqOQsu8Tqn6sLoLM"
 
+        _ = load(inputs, nprocs, False)
+
     assert_correctness(filepath, nprocs=0)
     assert_correctness(filepath, nprocs=2)
 
