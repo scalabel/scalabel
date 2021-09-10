@@ -1,5 +1,6 @@
 import { uid } from "../common/uid"
-import { BotConfig } from "../types/config"
+import { RedisChannel } from "../const/connection"
+import { ServerConfig } from "../types/config"
 import { BotData, RegisterMessageType } from "../types/message"
 import { Bot } from "./bot"
 import Logger from "./logger"
@@ -12,7 +13,7 @@ import { RedisPubSub } from "./redis_pub_sub"
  */
 export class BotManager {
   /** env variables */
-  protected config: BotConfig
+  protected config: ServerConfig
   /** the redis message broker */
   protected subscriber: RedisPubSub
   /** the redis client for storage */
@@ -29,7 +30,7 @@ export class BotManager {
    * @param pollTime
    */
   constructor(
-    config: BotConfig,
+    config: ServerConfig,
     subscriber: RedisPubSub,
     redisClient: RedisClient,
     pollTime?: number
@@ -49,8 +50,11 @@ export class BotManager {
    */
   public async listen(): Promise<BotData[]> {
     // Listen for new sessions
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
+    await this.subscriber.subscribeEvent(
+      RedisChannel.REGISTER_EVENT,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this.handleRegister.bind(this)
+    )
     return await this.restoreBots()
   }
 
@@ -62,7 +66,9 @@ export class BotManager {
     const bots: Bot[] = []
     for (const botKey of botKeys) {
       const botData = await this.getBot(botKey)
-      bots.push(this.makeBot(botData))
+      const bot = this.makeBot(botData)
+      await bot.listen()
+      bots.push(bot)
     }
     return bots
   }
@@ -90,7 +96,8 @@ export class BotManager {
     }
     botData.botId = uid()
 
-    this.makeBot(botData)
+    const bot = this.makeBot(botData)
+    await bot.listen()
     await this.saveBot(botData)
     return botData
   }
@@ -159,7 +166,12 @@ export class BotManager {
     Logger.info(
       `Creating bot for project ${botData.projectName}, task ${botData.taskIndex}`
     )
-    const bot = new Bot(botData, this.config.host, this.config.port)
+    const bot = new Bot(
+      botData,
+      this.config.bot.host,
+      this.config.bot.port,
+      this.config.redis
+    )
 
     // Only use this disable if we are certain all the errors are handled
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

@@ -1,9 +1,10 @@
 import { ModelEndpoint } from "../const/connection"
 import { BaseAction } from "./action"
+import { ItemType } from "./state"
 import { ItemExport } from "./export"
 
 export interface RegisterMessageType {
-  /** Project name of the session */
+  /** Project name */
   projectName: string
   /** Task index of the session */
   taskIndex: number
@@ -29,6 +30,30 @@ export interface SyncActionMessageType {
   actions: ActionPacketType
   /** whether it came from a bot or not */
   bot: boolean
+}
+
+/** model register message type */
+export interface ModelRegisterMessageType {
+  /** Project name */
+  projectName: string
+  /** Task Id. It is supposed to be index2str(taskIndex) */
+  taskId: string
+  /** item list */
+  items: ItemType[]
+}
+
+/** model request message type */
+export interface ModelRequestMessageType {
+  /** Project name */
+  projectName: string
+  /** Task Id. It is supposed to be index2str(taskIndex) */
+  taskId: string
+  /** item list */
+  items: ItemExport[]
+  /** item indices list*/
+  itemIndices: number[]
+  /** which action triggers this prediction request */
+  actionPacketId: string
 }
 
 /** type for transmitted packet of actions */
@@ -59,6 +84,14 @@ export interface ModelQuery {
   data: ItemExport
   /** the endpoint for the query */
   endpoint: ModelEndpoint
+  /** the index of the item modified */
+  itemIndex: number
+}
+
+/** the form of request sent to bot session */
+export interface ModelRequestType {
+  /** the data in scalabel format */
+  data: ItemExport
   /** the index of the item modified */
   itemIndex: number
 }
