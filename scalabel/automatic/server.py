@@ -23,7 +23,7 @@ class ModelServerScheduler(object):
         self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
 
         self.inference_batch_size = 1
-        self.train_batch_size = 4
+        self.train_batch_size = 1
         self.inference_request_queue = []
         self.train_request_queue = []
 
@@ -34,6 +34,7 @@ class ModelServerScheduler(object):
         self.logger = logger
 
         self.verbose = False
+
     # restore when server restarts, connects to redis channels.
     def restore(self):
         pass
@@ -69,8 +70,8 @@ class ModelServerScheduler(object):
         items = request_message["items"]
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
-        request_type = request_message["type"]
-        if request_type == "0":
+        request_type = int(request_message["type"])
+        if request_type == 0:
             self.inference_request_queue.append({
                 "items": items,
                 "item_indices": item_indices,
@@ -86,7 +87,7 @@ class ModelServerScheduler(object):
                 items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
                 self.calc_time("pack data")
 
-                results = model(items, "0")  # 0 for inference, 1 for training
+                results = model(items, 0)  # 0 for inference, 1 for training
                 self.calc_time("model inference time")
 
                 pred_boxes: List[List[float]] = []
@@ -118,7 +119,7 @@ class ModelServerScheduler(object):
                 items = [self.train_request_queue[i]["items"][0] for i in range(self.train_batch_size)]
                 self.calc_time("pack data")
 
-                model(items, "1")
+                model(items, 1)
                 self.calc_time("model training time")
 
                 self.train_request_queue = []

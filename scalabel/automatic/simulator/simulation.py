@@ -39,6 +39,14 @@ class Simulator(object):
         state_path = "{}/../testcases/test_task_state.json".format(cur_dir)
         with open(state_path, "r") as fp:
             state = json.load(fp)
+        # {
+        #   items: List {[
+        #       url: string
+        #   ]}
+        #   itemIndices: List[int]
+        #   actionPacketId: str
+        #   "type": str, defines later to indicate whether it is inference or training
+        # }
         state["items"] = [state["items"][0]]
         state["items"][0]["url"] = state["items"][0]["urls"]["-1"]
         state["items"][0].pop("urls")
@@ -55,6 +63,16 @@ class Simulator(object):
 
     def send_inference_requests(self):
         self.start_time = time.time()
+        self.state["type"] = "0"
+        for i in range(1000):
+            model_request_message = json.dumps(self.state)
+            self.redis.publish(self.model_request_channel, model_request_message)
+
+    def send_inference_and_training_requests(self):
+        self.start_time = time.time()
+        # This means each image will both go through the inference and training step.
+        # But the training does not need to happen every step after a inference step.
+        # See the two queues in server for detail.
         for i in range(1000):
             if i % 2 != 1:
                 self.state["type"] = "0"
@@ -75,4 +93,5 @@ if __name__ == "__main__":
     simulator.get_message_and_channel()
     simulator.listen()
 
-    simulator.send_inference_requests()
+    # simulator.send_inference_requests()
+    simulator.send_inference_and_training_requests()
