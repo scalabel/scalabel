@@ -2,6 +2,7 @@ import { ModelEndpoint } from "../const/connection"
 import { BaseAction } from "./action"
 import { ItemType } from "./state"
 import { ItemExport } from "./export"
+import { ModelRequestType } from "../const/common"
 
 export interface RegisterMessageType {
   /** Project name */
@@ -44,6 +45,8 @@ export interface ModelRegisterMessageType {
 
 /** model request message type */
 export interface ModelRequestMessageType {
+  /** Request type */
+  type: ModelRequestType
   /** Project name */
   projectName: string
   /** Task Id. It is supposed to be index2str(taskIndex) */
@@ -89,7 +92,7 @@ export interface ModelQuery {
 }
 
 /** the form of request sent to bot session */
-export interface ModelRequestType {
+export interface ModelRequest {
   /** the data in scalabel format */
   data: ItemExport
   /** the index of the item modified */

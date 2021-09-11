@@ -4,9 +4,11 @@ import os
 import logging
 import redis
 import json
+import time
 import torch.multiprocessing as mp
 
 from scalabel.automatic.model import Predictor
+import scalabel.automatic.consts.redis_consts as RedisConsts
 
 
 class ModelServerScheduler(object):
@@ -16,9 +18,14 @@ class ModelServerScheduler(object):
 
         self.redis = redis.Redis(host=server_config["redis_host"], port=server_config["redis_port"])
 
-        self.model_register_channel = "modelRegister"
-        self.model_request_channel = "modelRequest_%s_%s"
-        self.model_response_channel = "modelResponse_%s_%s"
+        self.model_register_channel = RedisConsts.REDIS_CHANNELS["modelRegister"]
+        self.model_request_channel = RedisConsts.REDIS_CHANNELS["modelRequest"]
+        self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
+
+        self.inference_batch_size = 1
+        self.train_batch_size = 4
+        self.inference_request_queue = []
+        self.train_request_queue = []
 
         self.tasks = {}
 
@@ -26,6 +33,7 @@ class ModelServerScheduler(object):
 
         self.logger = logger
 
+        self.verbose = False
     # restore when server restarts, connects to redis channels.
     def restore(self):
         pass
@@ -52,24 +60,70 @@ class ModelServerScheduler(object):
         self.logger.info(f"Set up model inference for {project_name}: {task_id}.")
 
     def request_handler(self, request_message):
+        self.calc_time(init=True)
+
         request_message = json.loads(request_message["data"])
         project_name = request_message["projectName"]
         task_id = request_message["taskId"]
+
         items = request_message["items"]
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
+        request_type = request_message["type"]
+        if request_type == "0":
+            self.inference_request_queue.append({
+                "items": items,
+                "item_indices": item_indices,
+                "action_packet_id": action_packet_id,
+                "request_type": request_type
+            })
 
-        model = self.tasks[f'{project_name}_{task_id}']["model"]
+            self.calc_time("save data to query list")
 
-        results = model(items)
+            if len(self.inference_request_queue) == self.inference_batch_size:
+                model = self.tasks[f'{project_name}_{task_id}']["model"]
 
-        pred_boxes: List[List[float]] = []
-        for box in results[0]["instances"].pred_boxes:
-            box = box.cpu().numpy()
-            pred_boxes.append(box.tolist())
+                items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
+                self.calc_time("pack data")
 
-        model_response_channel = self.model_response_channel % (project_name, task_id)
-        self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+                results = model(items, "0")  # 0 for inference, 1 for training
+                self.calc_time("model inference time")
+
+                pred_boxes: List[List[float]] = []
+
+                model_response_channel = self.model_response_channel % (project_name, task_id)
+                for i in range(self.inference_batch_size):
+                    for box in results[i]["instances"].pred_boxes:
+                        box = box.cpu().numpy()
+                        pred_boxes.append(box.tolist())
+                    item_indices = self.inference_request_queue[i]["item_indices"]
+                    action_packet_id = self.inference_request_queue[i]["action_packet_id"]
+                    self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+                self.inference_request_queue = []
+
+                self.calc_time("response time")
+        else:
+            self.train_request_queue.append({
+                "items": items,
+                "item_indices": item_indices,
+                "action_packet_id": action_packet_id,
+                "request_type": request_type
+            })
+
+            self.calc_time("save data to query list")
+
+            if len(self.train_request_queue) == self.train_batch_size:
+                model = self.tasks[f'{project_name}_{task_id}']["model"]
+
+                items = [self.train_request_queue[i]["items"][0] for i in range(self.train_batch_size)]
+                self.calc_time("pack data")
+
+                model(items, "1")
+                self.calc_time("model training time")
+
+                self.train_request_queue = []
+
+        print()
 
     def register_task(self, project_name, task_id, item_list):
         model = self.get_model(self.model_config["model_name"], item_list)
@@ -98,6 +152,15 @@ class ModelServerScheduler(object):
         for thread_name, thread in self.threads.items():
             thread.stop()
 
+    def calc_time(self, message="", init=False):
+        if not self.verbose:
+            return
+        if init:
+            self.start_time = time.time()
+        else:
+            print(message + ": {}s".format(time.time() - self.start_time))
+            self.start_time = time.time()
+
 
 def launch() -> None:
     """Launch processes."""
@@ -108,8 +171,8 @@ def launch() -> None:
 
     # create scheduler
     server_config = {
-        "redis_host": "127.0.0.1",
-        "redis_port": 6379
+        "redis_host": RedisConsts.REDIS_HOST,
+        "redis_port": RedisConsts.REDIS_PORT
     }
     model_config = {
         "model_name": "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml"

@@ -4,13 +4,17 @@ import requests
 from io import BytesIO
 from PIL import Image
 import numpy as np
+import time
 
 import torch
 from torch.multiprocessing import Pool
 
 from detectron2 import model_zoo
+from detectron2.structures import Boxes, Instances
 from detectron2.modeling import build_model
+from detectron2.solver import build_optimizer
 from detectron2.config import get_cfg
+from detectron2.utils.events import EventStorage, get_event_storage
 import detectron2.data.transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
@@ -28,6 +32,10 @@ class Predictor:
 
         self.cfg = cfg.clone()
         self.model = build_model(cfg)
+
+        # These are for training
+        self.optimizer = build_optimizer(cfg, self.model)
+
         self.model.eval()
         checkpointer = DetectionCheckpointer(self.model)
         checkpointer.load(cfg.MODEL.WEIGHTS)
@@ -39,6 +47,8 @@ class Predictor:
         self.image_dict = {}
 
         self.load_inputs(item_list, num_workers)
+
+        self.verbose = True
 
     @staticmethod
     def url_to_img(url: str, aug: object, device: str) -> Dict:
@@ -67,8 +77,48 @@ class Predictor:
         for url, image in zip(urls, image_list):
             self.image_dict[url] = image
 
-    def __call__(self, items: Dict) -> List:
+    def __call__(self, items: Dict, request_type=0) -> List:
+        self.calc_time(init=True)
         inputs = [self.image_dict[item["url"]] for item in items]
-        with torch.no_grad():
-            predictions = self.model(inputs)
-            return predictions
+
+        # inference
+        if request_type == "0":
+            with torch.no_grad():
+                predictions = self.model(inputs)
+                self.calc_time("model inference time")
+                return predictions
+
+        # training
+        else:
+            instance_field = {"gt_boxes": Boxes(torch.tensor([1.0, 1.0, 100.0, 100.0]).unsqueeze(0)),
+                              "gt_classes": torch.tensor([0])}
+            for i in range(len(inputs)):
+                inputs[i]["instances"] = Instances((inputs[i]["height"], inputs[i]["width"]),
+                                                   **instance_field)
+            self.calc_time("pack training data time")
+
+            self.model.train()
+            self.calc_time("changing to training time")
+            with EventStorage(0) as self.storage:
+                loss_dict = self.model(inputs)
+                losses = sum(loss_dict.values())
+
+                self.calc_time("loss calculation time")
+
+                self.optimizer.zero_grad()
+                losses.backward()
+                self.optimizer.step()
+
+                self.calc_time("optimization time")
+            self.model.eval()
+            self.calc_time("changing back to eval time")
+            return []
+
+    def calc_time(self, message="", init=False):
+        if not self.verbose:
+            return
+        if init:
+            self.start_time = time.time()
+        else:
+            print(message + ": {}s".format(time.time() - self.start_time))
+            self.start_time = time.time()

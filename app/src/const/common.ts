@@ -160,3 +160,8 @@ export enum QueryArg {
   TASK_INDEX = "task_index",
   DEV_MODE = "dev"
 }
+
+export enum ModelRequestType {
+  INFERENCE = "inference",
+  TRAIN = "train"
+}

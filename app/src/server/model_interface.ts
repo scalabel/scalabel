@@ -7,7 +7,7 @@ import {
   makeSimplePathPoint2D
 } from "../functional/states"
 import { AddLabelsAction } from "../types/action"
-import { ModelQuery, ModelRequestType } from "../types/message"
+import { ModelQuery, ModelRequest } from "../types/message"
 import {
   PathPoint2DType,
   PathPointType,
@@ -118,7 +118,7 @@ export class ModelInterface {
    * @param url
    * @param itemIndex
    */
-  public makeImageRequest(url: string, itemIndex: number): ModelRequestType {
+  public makeImageRequest(url: string, itemIndex: number): ModelRequest {
     const item = makeItemExport({
       name: this.projectName,
       url

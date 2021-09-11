@@ -11,17 +11,18 @@ import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
   BotData,
-  ModelRequestType,
-  RegisterMessageType,
-  SyncActionMessageType,
+  ModelRegisterMessageType,
+  ModelRequest,
   ModelRequestMessageType,
-  ModelRegisterMessageType
+  RegisterMessageType,
+  SyncActionMessageType
 } from "../types/message"
 import { ReduxStore } from "../types/redux"
 import { State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
-import { RedisPubSub, makeRedisPubSub } from "./redis_pub_sub"
+import { makeRedisPubSub, RedisPubSub } from "./redis_pub_sub"
+import { ModelRequestType } from "../const/common"
 
 /**
  * Manages virtual sessions for a single bot
@@ -251,7 +252,7 @@ export class Bot {
    * @param actionPacketId
    */
   private executeRequests(
-    modelRequests: ModelRequestType[],
+    modelRequests: ModelRequest[],
     actionPacketId: string
   ): void {
     const sendData: ItemExport[] = []
@@ -264,6 +265,7 @@ export class Bot {
     try {
       if (sendData.length > 0) {
         const modelRequestMessage: ModelRequestMessageType = {
+          type: ModelRequestType.INFERENCE,
           projectName: this.projectName,
           taskId: index2str(this.taskIndex),
           items: sendData,
@@ -285,8 +287,8 @@ export class Bot {
    *
    * @param packet
    */
-  private packetToRequests(packet: ActionPacketType): ModelRequestType[] {
-    const modelRequests: ModelRequestType[] = []
+  private packetToRequests(packet: ActionPacketType): ModelRequest[] {
+    const modelRequests: ModelRequest[] = []
     for (const action of packet.actions) {
       if (action.sessionId !== this.sessionId) {
         this.actionCount += 1
@@ -320,7 +322,7 @@ export class Bot {
   private actionToRequest(
     state: State,
     action: PredictionAction
-  ): ModelRequestType | null {
+  ): ModelRequest | null {
     const itemIndex = action.itemIndices[0]
     const item = state.task.items[itemIndex]
     const url = Object.values(item.urls)[0]
