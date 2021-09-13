@@ -74,7 +74,11 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
               <CloseIcon
                 titleAccess="Delete project"
                 fontSize="small"
-                onClick={() => this.deleteProject(project)}
+                // onClick={() => this.deleteProject(project)}
+                onClick={() => {
+                  if (confirm("Confirm to delete the project?"))
+                    this.deleteProject(project)
+                }}
               />
             ) : null}
           </ListItem>
