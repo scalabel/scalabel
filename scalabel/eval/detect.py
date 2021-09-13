@@ -7,6 +7,7 @@ import argparse
 import copy
 import json
 from functools import partial
+from logging import Logger
 from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
 
@@ -15,14 +16,14 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
 from ..common.io import open_write_text
-from ..common.logger import logger
+from ..common.logger import logger as scalabel_logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result, Scores, ScoresList
+from .result import OVERALL, Result, Scores
 
 
 class DetResult(Result):
@@ -40,13 +41,6 @@ class DetResult(Result):
     ARs: List[Dict[str, float]]
     ARm: List[Dict[str, float]]
     ARl: List[Dict[str, float]]
-
-    def __init__(self, **data: ScoresList) -> None:
-        """Set extra parameters."""
-        super().__init__(**data)
-        self._formatters = {
-            metric: "{:.1f}".format for metric in self.__fields__
-        }
 
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "Result") -> bool:  # type: ignore
@@ -281,7 +275,7 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-    with_logs: bool = True,
+    logger: Logger = scalabel_logger,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -290,7 +284,7 @@ def evaluate_det(
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
         nproc: the number of process.
-        with_logs: whether to print logs
+        logger: the logger to be used. Default as the scalabel's logger
 
     Returns:
         DetResult: rendered eval results.
@@ -321,11 +315,9 @@ def evaluate_det(
     coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
-    if with_logs:
-        logger.info("evaluating...")
+    logger.info("evaluating...")
     coco_eval.evaluate()
-    if with_logs:
-        logger.info("accumulating...")
+    logger.info("accumulating...")
     coco_eval.accumulate()
     result = coco_eval.summarize()
     return result
@@ -377,9 +369,9 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_det(gts, preds, cfg, args.nproc, not args.quite)
-    logger.info(eval_result)
-    logger.info(eval_result.summary())
+    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
+    scalabel_logger.info(eval_result)
+    scalabel_logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)

@@ -1,14 +1,12 @@
 """Definition of the base evaluation result class."""
 
 from collections import defaultdict
-from typing import AbstractSet, Callable, Dict, List, Optional, Union
+from typing import AbstractSet, Dict, List, Optional, Union
 
 import numpy as np
-from mypy_extensions import KwArg, VarArg
 from pandas import DataFrame
 from pydantic import BaseModel, PrivateAttr
 
-FORMATTER = Callable[[VarArg(object), KwArg(object)], str]
 Scores = Dict[str, Union[int, float]]
 ScoresList = List[Scores]
 AVERAGE = "AVERAGE"
@@ -40,7 +38,6 @@ class Result(BaseModel):
             the same as `table()`.
     """
 
-    _formatters: Dict[str, FORMATTER] = PrivateAttr({})
     _row_breaks: List[int] = PrivateAttr([])
 
     def __init__(self, **data: Union[int, float, ScoresList]) -> None:
@@ -125,14 +122,7 @@ class Result(BaseModel):
             table (str): the exported table string
         """
         data_frame = self.pd_frame(include, exclude)
-        if not self._formatters:
-            formatters = {
-                metric: "{:.1f}".format for metric in data_frame.columns
-            }
-        else:
-            formatters = self._formatters
-
-        summary = data_frame.to_string(formatters=formatters)
+        summary = data_frame.to_string(float_format="{:.1f}".format)
         summary = summary.replace("NaN", " - ")
         strs = summary.split("\n")
         split_line = "-" * len(strs[0])
