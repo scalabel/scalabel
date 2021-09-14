@@ -1,7 +1,9 @@
+import "react-toastify/dist/ReactToastify.css"
 import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
+import { ToastContainer, toast, Slide } from "react-toastify"
 
 import {
   changeModeToAnnotating,
@@ -91,8 +93,16 @@ export class ToolBar extends Component<Props> {
       case Key.X_LOW: {
         if (this.state.session.mode === ModeStatus.ANNOTATING) {
           Session.dispatch(changeModeToSelecting())
+          toast("Change to SELECTING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
         } else {
           Session.dispatch(changeModeToAnnotating())
+          toast("Change to ANNOTATING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
         }
       }
     }
@@ -192,6 +202,7 @@ export class ToolBar extends Component<Props> {
             </div>
           )}
         </div>
+        <ToastContainer hideProgressBar transition={Slide} />
       </div>
     )
   }
