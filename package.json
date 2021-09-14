@@ -46,7 +46,10 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "testEnvironment": "jest-environment-jsdom-fourteen"
+    "testEnvironment": "jest-environment-jsdom-fourteen",
+    "moduleNameMapper": {
+      "\\.(css|less)$": "identity-obj-proxy"
+    }
   },
   "husky": {
     "hooks": {}
@@ -128,6 +131,7 @@
     "fs": "0.0.1-security",
     "fs-extra": "^9.1.0",
     "husky": "^6.0.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jquery": "^3.6.0",
