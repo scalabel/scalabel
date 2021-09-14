@@ -91,6 +91,11 @@ function startHTTPServer(
     authMiddleWare,
     listeners.dashboardHandler.bind(listeners)
   )
+  app.get(
+    Endpoint.DELETE_PROJECT,
+    authMiddleWare,
+    listeners.deleteProjectHandler.bind(listeners)
+  )
 
   app.post(
     Endpoint.POST_PROJECT,
