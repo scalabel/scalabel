@@ -4,10 +4,10 @@ import _ from "lodash"
 import React from "react"
 
 import {
+  changeModeToAnnotating,
+  changeModeToSelecting,
   changeSelect,
   changeViewerConfig,
-  changeModeToSelecting,
-  changeModeToAnnotating,
   mergeTracks,
   splitTrack,
   startLinkTrack
@@ -25,7 +25,7 @@ import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, Category, State } from "../types/state"
+import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
@@ -88,8 +88,12 @@ export class ToolBar extends Component<Props> {
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
         break
       }
-      case Key.Z_LOW: {
-        Session.dispatch(changeModeToSelecting())
+      case Key.X_LOW: {
+        if (this.state.session.mode === ModeStatus.ANNOTATING) {
+          Session.dispatch(changeModeToSelecting())
+        } else {
+          Session.dispatch(changeModeToAnnotating())
+        }
       }
     }
     this._keyDownMap[e.key] = true
@@ -101,10 +105,6 @@ export class ToolBar extends Component<Props> {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
-    switch (e.key) {
-      case Key.Z_LOW:
-        Session.dispatch(changeModeToAnnotating())
-    }
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete this._keyDownMap[e.key]
   }
