@@ -40,7 +40,6 @@ def vector_3d_to_2d(
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
     vec_2d = np.dot(calibration, vec_3d)
-    # print(calibration, vec_3d, vec_2d)
     return [vec_2d[0] / vec_2d[2], vec_2d[1] / vec_2d[2]]
 
 

@@ -5,7 +5,7 @@ import time
 from functools import partial
 from logging import Logger
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple, TypeVar, Union
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
@@ -348,7 +348,7 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-    logger: Logger = scalabel_logger,
+    logger: Optional[Logger] = None,
 ) -> BoxTrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
@@ -367,14 +367,19 @@ def evaluate_track(
     Returns:
         BoxTrackResult: rendered eval results.
     """
-    logger.info("Tracking evaluation with CLEAR MOT metrics.")
+    if logger is not None:
+        info = logger.info
+    else:
+        info = lambda *args, **kwargs: None
+
+    info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     assert len(gts) == len(results)
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)
 
-    logger.info("evaluating...")
+    info("evaluating...")
     class_names = [c.name for c in classes]
     if nproc > 1:
         with Pool(nproc) as pool:
@@ -404,7 +409,7 @@ def evaluate_track(
         video_accs, classes, super_classes
     )
 
-    logger.info("accumulating...")
+    info("accumulating...")
     if nproc > 1:
         with Pool(nproc) as pool:
             flat_dicts = pool.starmap(
@@ -421,7 +426,7 @@ def evaluate_track(
         flat_dicts, class_names, metrics, classes, super_classes
     )
     t = time.time() - t
-    logger.info("evaluation finishes with %.1f s.", t)
+    info("evaluation finishes with %.1f s.", t)
     return result
 
 
@@ -472,12 +477,6 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for mot evaluation",
     )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="without logging",
-    )
     return parser.parse_args()
 
 
@@ -497,6 +496,7 @@ if __name__ == "__main__":
         args.ignore_iof_thr,
         args.ignore_unknown_cats,
         args.nproc,
+        logger=scalabel_logger,
     )
     scalabel_logger.info(eval_result)
     scalabel_logger.info(eval_result.summary())

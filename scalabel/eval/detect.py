@@ -275,7 +275,7 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-    logger: Logger = scalabel_logger,
+    logger: Optional[Logger] = None,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -297,6 +297,11 @@ def evaluate_det(
             nproc=4,
         )
     """
+    if logger is not None:
+        info = logger.info
+    else:
+        info = lambda *args, **kwargs: None
+
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
     ann_coco = scalabel2coco_detection(ann_frames, config)
@@ -315,9 +320,9 @@ def evaluate_det(
     coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
-    logger.info("evaluating...")
+    info("evaluating...")
     coco_eval.evaluate()
-    logger.info("accumulating...")
+    info("accumulating...")
     coco_eval.accumulate()
     result = coco_eval.summarize()
     return result
@@ -352,12 +357,6 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for detection evaluation",
     )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="without logging",
-    )
     return parser.parse_args()
 
 
@@ -369,7 +368,9 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
+    eval_result = evaluate_det(
+        gts, preds, cfg, args.nproc, logger=scalabel_logger
+    )
     scalabel_logger.info(eval_result)
     scalabel_logger.info(eval_result.summary())
     if args.out_file:

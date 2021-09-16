@@ -9,7 +9,6 @@ from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
-from tqdm import tqdm
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -109,10 +108,7 @@ def poly2ds_list_to_coco(
     with Pool(nproc) as pool:
         annotations = pool.starmap(
             poly2ds_to_coco,
-            tqdm(
-                zip(annotations, poly2ds, shape),
-                total=len(annotations),
-            ),
+            zip(annotations, poly2ds, shape),
         )
 
     sorted(annotations, key=lambda ann: ann["id"])
@@ -128,7 +124,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
-    for image_anns in tqdm(frames):
+    for image_anns in frames:
         image_id += 1
         img_shape = config.imageSize
         if img_shape is None:
@@ -191,7 +187,7 @@ def scalabel2coco_ins_seg(
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
-    for image_anns in tqdm(frames):
+    for image_anns in frames:
         image_id += 1
         img_shape = config.imageSize
         if img_shape is None:
@@ -267,12 +263,13 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
-    for video_anns in tqdm(frames_list):
+    for video_anns in frames_list:
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
+        assert video_name is not None, "Tracking annotations have no videoName"
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
@@ -285,9 +282,13 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 else:
                     raise ValueError("Image shape not defined!")
 
+            frame_index = image_anns.frameIndex
+            assert (
+                frame_index is not None
+            ), "Tracking annotations have no frameIndex"
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frameIndex,
+                frame_id=frame_index,
                 file_name=osp.join(video_name, image_anns.name),
                 height=img_shape.height,
                 width=img_shape.width,
@@ -347,12 +348,13 @@ def scalabel2coco_seg_track(
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
-    for video_anns in tqdm(frames_list):
+    for video_anns in frames_list:
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = {}
 
         video_id += 1
         video_name = video_anns[0].videoName
+        assert video_name is not None, "Tracking annotations have no videoName"
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
