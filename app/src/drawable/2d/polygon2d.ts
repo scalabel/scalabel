@@ -1011,6 +1011,13 @@ export class Polygon2D extends Label2D {
     const q1 = a[1]
     const p2 = b[0]
     const q2 = b[1]
+    const length1 =
+      (q1.x - p1.x) * (q1.x - p1.x) + (q1.y - p1.y) * (q1.y - p1.y)
+    const length2 =
+      (q2.x - p2.x) * (q2.x - p2.x) + (q2.y - p2.y) * (q2.y - p2.y)
+    if (length1 < 1 || length2 < 1) {
+      return false
+    }
     const o1 = this.orientation(p1, q1, p2)
     const o2 = this.orientation(p1, q1, q2)
     const o3 = this.orientation(p2, q2, p1)
