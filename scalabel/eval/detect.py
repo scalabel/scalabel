@@ -7,7 +7,6 @@ import argparse
 import copy
 import json
 from functools import partial
-from logging import Logger
 from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
 
@@ -16,7 +15,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
 from ..common.io import open_write_text
-from ..common.logger import logger as scalabel_logger
+from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
@@ -275,7 +274,6 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-    logger: Optional[Logger] = None,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -284,7 +282,6 @@ def evaluate_det(
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
         nproc: the number of process.
-        logger: the logger to be used. Default as the scalabel's logger
 
     Returns:
         DetResult: rendered eval results.
@@ -297,11 +294,6 @@ def evaluate_det(
             nproc=4,
         )
     """
-    if logger is not None:
-        info = logger.info
-    else:
-        info = lambda *args, **kwargs: None
-
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
     ann_coco = scalabel2coco_detection(ann_frames, config)
@@ -320,9 +312,9 @@ def evaluate_det(
     coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
-    info("evaluating...")
+    logger.info("evaluating...")
     coco_eval.evaluate()
-    info("accumulating...")
+    logger.info("accumulating...")
     coco_eval.accumulate()
     result = coco_eval.summarize()
     return result
@@ -368,11 +360,9 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_det(
-        gts, preds, cfg, args.nproc, logger=scalabel_logger
-    )
-    scalabel_logger.info(eval_result)
-    scalabel_logger.info(eval_result.summary())
+    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
+    logger.info(eval_result)
+    logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)

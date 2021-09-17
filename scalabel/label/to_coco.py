@@ -13,6 +13,7 @@ from pycocotools import mask as mask_utils  # type: ignore
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
+from ..common.tqdm import tqdm
 from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
@@ -108,7 +109,7 @@ def poly2ds_list_to_coco(
     with Pool(nproc) as pool:
         annotations = pool.starmap(
             poly2ds_to_coco,
-            zip(annotations, poly2ds, shape),
+            tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
         )
 
     sorted(annotations, key=lambda ann: ann["id"])
@@ -124,7 +125,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
-    for image_anns in frames:
+    for image_anns in tqdm(frames):
         image_id += 1
         img_shape = config.imageSize
         if img_shape is None:
@@ -187,7 +188,7 @@ def scalabel2coco_ins_seg(
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
-    for image_anns in frames:
+    for image_anns in tqdm(frames):
         image_id += 1
         img_shape = config.imageSize
         if img_shape is None:
@@ -263,7 +264,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
-    for video_anns in frames_list:
+    for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = {}
 
@@ -348,7 +349,7 @@ def scalabel2coco_seg_track(
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
 
     shapes = []
-    for video_anns in frames_list:
+    for video_anns in tqdm(frames_list):
         global_instance_id: int = 1
         instance_id_maps: Dict[str, int] = {}
 

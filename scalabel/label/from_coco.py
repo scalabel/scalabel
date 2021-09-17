@@ -9,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from ..common.io import open_read_text
 from ..common.parallel import NPROC
+from ..common.tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
@@ -67,7 +68,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
 
     scalabel: List[Frame] = []
     img_ids = sorted(img_id2img.keys())
-    for img_id in img_ids:
+    for img_id in tqdm(img_ids):
         img = img_id2img[img_id]
         size = ImageSize(width=img["width"], height=img["height"])
 
@@ -148,7 +149,7 @@ def run(args: argparse.Namespace) -> None:
         with Pool(args.nproc) as pool:
             pool.starmap(
                 save,
-                zip(save_paths, scalabels),
+                tqdm(zip(save_paths, scalabels), total=len(scalabels)),
             )
 
 

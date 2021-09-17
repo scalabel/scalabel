@@ -3,15 +3,14 @@ import argparse
 import json
 import time
 from functools import partial
-from logging import Logger
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
 import motmetrics as mm
 import numpy as np
 
 from ..common.io import open_write_text
-from ..common.logger import logger as scalabel_logger
+from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import group_and_sort, load, load_label_config
@@ -348,7 +347,6 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-    logger: Optional[Logger] = None,
 ) -> BoxTrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
@@ -362,24 +360,18 @@ def evaluate_track(
         ignore_unknown_cats: if False, raise KeyError when trying to evaluate
             unknown categories.
         nproc: processes number for loading files
-        logger: the logger to be used. Default as the scalabel's logger
 
     Returns:
         BoxTrackResult: rendered eval results.
     """
-    if logger is not None:
-        info = logger.info
-    else:
-        info = lambda *args, **kwargs: None
-
-    info("Tracking evaluation with CLEAR MOT metrics.")
+    logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     assert len(gts) == len(results)
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)
 
-    info("evaluating...")
+    logger.info("evaluating...")
     class_names = [c.name for c in classes]
     if nproc > 1:
         with Pool(nproc) as pool:
@@ -409,7 +401,7 @@ def evaluate_track(
         video_accs, classes, super_classes
     )
 
-    info("accumulating...")
+    logger.info("accumulating...")
     if nproc > 1:
         with Pool(nproc) as pool:
             flat_dicts = pool.starmap(
@@ -426,7 +418,7 @@ def evaluate_track(
         flat_dicts, class_names, metrics, classes, super_classes
     )
     t = time.time() - t
-    info("evaluation finishes with %.1f s.", t)
+    logger.info("evaluation finishes with %.1f s.", t)
     return result
 
 
@@ -496,10 +488,9 @@ if __name__ == "__main__":
         args.ignore_iof_thr,
         args.ignore_unknown_cats,
         args.nproc,
-        logger=scalabel_logger,
     )
-    scalabel_logger.info(eval_result)
-    scalabel_logger.info(eval_result.summary())
+    logger.info(eval_result)
+    logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump((eval_result.json()), fp)
