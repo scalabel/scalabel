@@ -54,7 +54,7 @@ def launch() -> None:
             "polyrnn_scalabel",
         )
         if python_path in py_env:
-            model_path = "{}:{}".format(py_env[python_path], model_path)
+            model_path = f"{py_env[python_path]}:{model_path}"
         py_env[python_path] = model_path
 
         logger.info("Launching python server")
@@ -72,7 +72,7 @@ def launch() -> None:
         "app/dist/main.js",
         "--config",
         args.config,
-        "--max-old-space-size={}".format(max_memory),
+        f"--max-old-space-size={max_memory}",
     ]
     logger.info("Launching nodejs")
     logger.info(" ".join(node_cmd))

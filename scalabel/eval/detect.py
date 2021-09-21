@@ -57,7 +57,7 @@ class DetResult(Result):
             for category, score in scores.items():
                 if category == OVERALL:
                     continue
-                summary_dict["{}/{}".format("AP", category)] = score
+                summary_dict[f"AP/{category}"] = score
         return summary_dict
 
 
@@ -76,9 +76,7 @@ class COCOV2(COCO):  # type: ignore
         if annotation_file is None:
             assert isinstance(
                 annotations, dict
-            ), "annotation file format {} not supported".format(
-                type(annotations)
-            )
+            ), f"annotation file format {type(annotations)} not supported"
             self.dataset = annotations
             self.createIndex()
 

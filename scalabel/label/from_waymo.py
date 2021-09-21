@@ -267,7 +267,7 @@ def parse_frame(
     use_lidar_labels: bool = False,
 ) -> List[Frame]:
     """Parse information in single frame to Scalabel Frame per camera."""
-    frame_name = frame.context.name + "_{:07d}.jpg".format(frame_id)
+    frame_name = frame.context.name + f"_{frame_id:07d}.jpg"
     attributes = parse_frame_attributes(frame, use_lidar_labels)
     results = []
     for camera_id, camera in cameras_id2name.items():
