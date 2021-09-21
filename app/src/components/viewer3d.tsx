@@ -204,6 +204,7 @@ class Viewer3D extends DrawableViewer<Props> {
       const config = this._viewerConfig as PointCloudViewerConfigType
       const yLockButton = (
         <IconButton
+          key={`yLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.Y_LOCKED)}
           className={this.props.classes.viewer_button}
         >
@@ -217,6 +218,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const xLockButton = (
         <IconButton
+          key={`xLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.X_LOCKED)}
           className={this.props.classes.viewer_button}
           edge={"start"}
@@ -231,6 +233,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const xAxisButton = (
         <IconButton
+          key={`xAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 0))
@@ -245,6 +248,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const yAxisButton = (
         <IconButton
+          key={`yAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 1))
@@ -258,6 +262,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const zAxisButton = (
         <IconButton
+          key={`zAxis${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 2))
@@ -271,6 +276,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const flipButton = (
         <IconButton
+          key={`flipButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -285,6 +291,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const synchronizationButton = (
         <IconButton
+          key={`synchronizationButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleSynchronization(this._viewerId, config))
@@ -295,6 +302,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const selectionLockButton = (
         <IconButton
+          key={`selectionLockButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this._viewerId, config))
@@ -305,6 +313,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const originButton = (
         <IconButton
+          key={`originButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -321,6 +330,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
       const viewerConfigButton = (
         <IconButton
+          key={`viewerConfigButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this.props.id, config))
