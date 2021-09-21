@@ -25,6 +25,21 @@ class Quiet:
         return cls._is_quiet
 
 
+def enable_quiet() -> None:
+    """Enable quiet option."""
+    Quiet.set(True)
+
+
+def disable_quiet() -> None:
+    """Disable quiet option."""
+    Quiet.set(False)
+
+
+def is_quiet() -> bool:
+    """Get quiet state."""
+    return Quiet.get()
+
+
 if Quiet.get():
     logger.setLevel(logging.CRITICAL)
 else:
