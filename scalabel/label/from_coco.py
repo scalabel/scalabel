@@ -7,10 +7,9 @@ from itertools import groupby
 from multiprocessing import Pool
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from tqdm import tqdm
-
 from ..common.io import open_read_text
 from ..common.parallel import NPROC
+from ..common.tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds

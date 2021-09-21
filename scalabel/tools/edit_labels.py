@@ -79,7 +79,7 @@ def read_input(filename: str) -> List[LabelObject]:
         elif ext in [".yml", ".yaml"]:
             labels = yaml.load(fp)
         else:
-            raise ValueError("Unrecognized file extension {}".format(ext))
+            raise ValueError(f"Unrecognized file extension {ext}")
     return labels
 
 
@@ -93,7 +93,7 @@ def write_output(filename: str, labels: List[LabelObject]) -> None:
         elif ext in [".yml", ".yaml"]:
             yaml.dump(labels, fp)
         else:
-            raise ValueError("Unrecognized file extension {}".format(ext))
+            raise ValueError(f"Unrecognized file extension {ext}")
 
 
 def main() -> None:
