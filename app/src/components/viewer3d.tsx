@@ -728,7 +728,7 @@ class Viewer3D extends DrawableViewer<Props> {
     offset.setFromSpherical(spherical)
 
     // Rotate back to original coordinate space
-    const quatInverse = rotVertQuat.clone().inverse()
+    const quatInverse = rotVertQuat.clone().invert()
     offset.applyQuaternion(quatInverse)
     offset.add(target)
 
