@@ -1,6 +1,6 @@
 """Common python utilities."""
 
 from . import logger
-from .quiet import disable_quiet, enable_quiet, is_quiet
+from .quiet import mute, is_quiet
 
-__all__ = ["enable_quiet", "disable_quiet", "is_quiet"]
+__all__ = ["mute", "is_quiet"]

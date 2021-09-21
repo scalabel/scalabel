@@ -25,14 +25,9 @@ class Quiet:
         return cls._is_quiet
 
 
-def enable_quiet() -> None:
+def mute(yes_or_no: bool) -> None:
     """Enable quiet option."""
-    Quiet.set(True)
-
-
-def disable_quiet() -> None:
-    """Disable quiet option."""
-    Quiet.set(False)
+    Quiet.set(yes_or_no)
 
 
 def is_quiet() -> bool:
@@ -40,7 +35,7 @@ def is_quiet() -> bool:
     return Quiet.get()
 
 
-if Quiet.get():
+if is_quiet():
     logger.setLevel(logging.CRITICAL)
 else:
     logger.setLevel(logging.INFO)
