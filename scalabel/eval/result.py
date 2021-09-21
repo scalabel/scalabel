@@ -122,6 +122,7 @@ class Result(BaseModel):
             table (str): the exported table string
         """
         data_frame = self.pd_frame(include, exclude)
+        # pylint: disable-all
         summary = data_frame.to_string(float_format="{:.1f}".format)
         summary = summary.replace("NaN", " - ")
         strs = summary.split("\n")

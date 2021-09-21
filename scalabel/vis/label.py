@@ -199,7 +199,7 @@ class LabelViewer:
                 key_width = len(k)
         attr_tag = io.StringIO()
         for k, v in attributes.items():
-            attr_tag.write("{}: {}\n".format(k.rjust(key_width, " "), v))
+            attr_tag.write(f"{k.rjust(key_width, ' ')}: {v}\n")
         attr_tag.seek(0)
         self.ax.text(
             25,
@@ -228,7 +228,7 @@ class LabelViewer:
         if check_ignored(label):
             text += ",i"
         if label.score is not None:
-            text += "{:.2f}".format(label.score)
+            text += f"{label.score:.2f}"
         self.ax.text(
             x_coord,
             y_coord,

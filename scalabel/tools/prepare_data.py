@@ -162,7 +162,7 @@ def process_video(
     video_name = os.path.splitext(os.path.split(filepath)[1])[0]
     out_dir = join(out_dir, video_name)
     os.makedirs(out_dir, exist_ok=True)
-    cmd.append("{}/{}-%07d.jpg".format(out_dir, video_name))
+    cmd.append(f"{out_dir}/{video_name}-%07d.jpg")
     if not quiet:
         logger.info("RUNNING %s", cmd)
     pipe = DEVNULL if quiet else None
@@ -341,7 +341,7 @@ def s3_setup(s3_path: str) -> str:
     ]
 
     return join(
-        "https://s3-{}.amazonaws.com".format(region),
+        f"https://s3-{region}.amazonaws.com",
         s3_param.bucket,
         s3_param.folder,
     )
