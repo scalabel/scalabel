@@ -46,7 +46,10 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "testEnvironment": "jest-environment-jsdom-fourteen"
+    "testEnvironment": "jest-environment-jsdom-fourteen",
+    "moduleNameMapper": {
+      "\\.(css|less)$": "identity-obj-proxy"
+    }
   },
   "husky": {
     "hooks": {}
@@ -108,6 +111,7 @@
     "canvas": "^2.7.0",
     "circular-dependency-plugin": "^5.2.2",
     "copy-webpack-plugin": "^8.1.1",
+    "css-loader": "^6.2.0",
     "ejs": "^3.1.6",
     "eslint": "^7.25.0",
     "eslint-config-google": "^0.14.0",
@@ -127,6 +131,7 @@
     "fs": "0.0.1-security",
     "fs-extra": "^9.1.0",
     "husky": "^6.0.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
     "jest-environment-jsdom-fourteen": "^1.0.1",
     "jquery": "^3.6.0",
@@ -149,6 +154,7 @@
     "react-redux": "^7.2.4",
     "react-split-pane": "^0.1.92",
     "react-test-renderer": "^17.0.2",
+    "react-toastify": "^8.0.2",
     "redis": "^3.1.2",
     "redux": "^4.1.0",
     "redux-logger": "^3.0.6",
@@ -160,6 +166,7 @@
     "socket.io-client": "^4.0.1",
     "source-map-loader": "^2.0.1",
     "source-map-support": "^0.5.19",
+    "style-loader": "^3.2.1",
     "terser": "5.7.0",
     "three": "^0.128.0",
     "ts-jest": "^26.5.5",
