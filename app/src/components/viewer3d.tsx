@@ -32,6 +32,7 @@ import {
 import Label3dCanvas from "./label3d_canvas"
 import PointCloudCanvas from "./point_cloud_canvas"
 import Tag3dCanvas from "./tag_3d_canvas"
+import { isCurrentItemLoaded } from "../functional/state_util"
 
 interface ClassType extends ViewerClassTypes {
   /** camera z lock */
@@ -146,6 +147,10 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Called when component updates */
   public componentDidUpdate(): void {
+    const state = this.state
+    if (!isCurrentItemLoaded(state)) {
+      return
+    }
     if (this._viewerConfig !== undefined) {
       this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
 
@@ -368,6 +373,10 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected onMouseEnter(e: React.MouseEvent): void {
     super.onMouseEnter(e)
+    const state = this.state
+    if (!isCurrentItemLoaded(state)) {
+      return
+    }
     Session.label3dList.setActiveCamera(this._camera)
   }
 
