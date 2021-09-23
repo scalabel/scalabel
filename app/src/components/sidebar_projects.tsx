@@ -76,7 +76,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
                 fontSize="small"
                 // onClick={() => this.deleteProject(project)}
                 onClick={() => {
-                  if (confirm("Confirm to delete the project?"))
+                  if (confirm(`Confirm to delete project: ${project}?`))
                     this.deleteProject(project)
                 }}
               />
