@@ -1,9 +1,13 @@
+import "react-toastify/dist/ReactToastify.css"
 import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
+import { ToastContainer, toast, Slide } from "react-toastify"
 
 import {
+  changeModeToAnnotating,
+  changeModeToSelecting,
   changeSelect,
   changeViewerConfig,
   mergeTracks,
@@ -23,7 +27,7 @@ import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, Category, State } from "../types/state"
+import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
@@ -84,6 +88,22 @@ export class ToolBar extends Component<Props> {
         }
         config.hideLabels = !config.hideLabels
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
+        break
+      }
+      case Key.X_LOW: {
+        if (this.state.session.mode === ModeStatus.ANNOTATING) {
+          Session.dispatch(changeModeToSelecting())
+          toast("Change to SELECTING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
+        } else {
+          Session.dispatch(changeModeToAnnotating())
+          toast("Change to ANNOTATING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
+        }
       }
     }
     this._keyDownMap[e.key] = true
@@ -182,6 +202,7 @@ export class ToolBar extends Component<Props> {
             </div>
           )}
         </div>
+        <ToastContainer hideProgressBar transition={Slide} />
       </div>
     )
   }

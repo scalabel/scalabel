@@ -2,6 +2,7 @@ import { BaseAction as actionConsts } from "../types/action"
 
 export const INIT_SESSION = "INIT_SESSION"
 export const CHANGE_SELECT = "CHANGE_SELECT"
+export const CHANGE_SESSION_MODE = "CHANGE_SESSION_MODE"
 export const LOAD_ITEM = "LOAD_ITEM"
 export const UPDATE_ALL = "UPDATE_ALL"
 export const UPDATE_TASK = "UPDATE_TASK"
@@ -102,7 +103,11 @@ export function hasSubmitAction(actions: actionConsts[]): boolean {
 /**
  * These actions should not be broadcast outside the local session
  */
-const SESSION_ACTION_TYPES = [UPDATE_SESSION_STATUS, CHANGE_SELECT]
+const SESSION_ACTION_TYPES = [
+  UPDATE_SESSION_STATUS,
+  CHANGE_SESSION_MODE,
+  CHANGE_SELECT
+]
 
 /**
  * Checks if the action modifies session

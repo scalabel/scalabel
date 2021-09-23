@@ -193,9 +193,7 @@ def from_kitti_det(
         )
 
         if osp.exists(label_dir):
-            label_file = osp.join(
-                label_dir, "{}.txt".format(img_name.split(".")[0])
-            )
+            label_file = osp.join(label_dir, f"{img_name.split('.')[0]}.txt")
             labels_dict, _, _ = parse_label(
                 data_type, label_file, trackid_maps, global_track_id
             )
@@ -258,7 +256,7 @@ def from_kitti(
         projection = read_calib(cali_dir, int(vid_name))
 
         if osp.exists(label_dir):
-            label_file = osp.join(label_dir, "{}.txt".format(vid_name))
+            label_file = osp.join(label_dir, f"{vid_name}.txt")
             labels_dict, trackid_maps, global_track_id = parse_label(
                 data_type, label_file, trackid_maps, global_track_id
             )
@@ -286,7 +284,7 @@ def from_kitti(
             )
 
             if osp.exists(label_dir):
-                if not fr in labels_dict.keys():
+                if not fr in labels_dict:
                     labels = []
                 else:
                     labels = labels_dict[fr]

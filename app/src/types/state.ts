@@ -500,6 +500,11 @@ export const enum ConnectionStatus {
   NOTIFY_SUBMITTED
 }
 
+export const enum ModeStatus {
+  ANNOTATING,
+  SELECTING
+}
+
 /**
  * Information for this particular session
  */
@@ -518,6 +523,8 @@ export interface SessionType {
   trackLinking: boolean
   /** Current connection status */
   status: ConnectionStatus
+  /** Current mode */
+  mode: ModeStatus
   /** Number of time status has changed */
   numUpdates: number
 }
