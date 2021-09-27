@@ -149,7 +149,7 @@ class LabelViewer:
         """Save the visualization."""
         plt.savefig(out_path, dpi=self.ui_cfg.dpi)
 
-    def draw(
+    def draw(  # pylint: disable=too-many-arguments
         self,
         image: NDArrayU8,
         frame: Frame,
@@ -161,7 +161,7 @@ class LabelViewer:
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         """Display the image and corresponding labels."""
         plt.cla()
         self.draw_image(image, frame.name)
@@ -419,9 +419,9 @@ class LabelViewer:
                         )
                     )
 
-    def _get_node_color(
+    def _get_node_color(  # pylint: disable=no-self-use
         self, node: Node, graph_type: Optional[str] = ""
-    ) -> List[float]:  # pylint: disable=no-self-use
+    ) -> List[float]:
         """Get node color based on visibility."""
         if not graph_type:
             return [0.0, 0.0, 0.0]
@@ -435,9 +435,9 @@ class LabelViewer:
             return color
         return [1.0, 1.0, 0.0]
 
-    def _get_edge_color(
+    def _get_edge_color(  # pylint: disable=no-self-use
         self, edge: Edge, graph_type: Optional[str] = ""
-    ) -> List[float]:  # pylint: disable=no-self-use
+    ) -> List[float]:
         """Get edge color based on visibility."""
         if not graph_type:
             return [0.0, 0.0, 0.0]
