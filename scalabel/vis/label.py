@@ -85,6 +85,36 @@ class UIConfig:
         self.font.set_family(family)
 
 
+def _get_node_color(node: Node, graph_type: Optional[str] = "") -> List[float]:
+    """Get node color based on visibility."""
+    if not graph_type:
+        return [0.0, 0.0, 0.0]
+    if graph_type.startswith("Pose2D"):
+        if node.visibility == "V":  # visible keypoints
+            color = [1.0, 1.0, 0.0]
+        elif node.visibility == "N":  # not visible keypoints
+            color = [1.0, 0.0, 0.0]
+        else:  # cannot be estimated keypoints
+            color = [0.0, 0.0, 0.0]
+        return color
+    return [1.0, 1.0, 0.0]
+
+
+def _get_edge_color(edge: Edge, graph_type: Optional[str] = "") -> List[float]:
+    """Get edge color based on visibility."""
+    if not graph_type:
+        return [0.0, 0.0, 0.0]
+    if graph_type.startswith("Pose2D"):
+        if edge.type == "body":
+            color = [0.0, 1.0, 0.0]
+        elif edge.type == "left_side":
+            color = [0.0, 0.0, 1.0]
+        else:
+            color = [1.0, 0.0, 0.0]
+        return color
+    return [0.0, 0.0, 0.0]
+
+
 class LabelViewer:
     """Visualize 2D, 3D bounding boxes and 2D polygons.
 
@@ -419,44 +449,12 @@ class LabelViewer:
                         )
                     )
 
-    def _get_node_color(  # pylint: disable=no-self-use
-        self, node: Node, graph_type: Optional[str] = ""
-    ) -> List[float]:
-        """Get node color based on visibility."""
-        if not graph_type:
-            return [0.0, 0.0, 0.0]
-        if graph_type.startswith("Pose2D"):
-            if node.visibility == "V":  # visible keypoints
-                color = [1.0, 1.0, 0.0]
-            elif node.visibility == "N":  # not visible keypoints
-                color = [1.0, 0.0, 0.0]
-            else:  # cannot be estimated keypoints
-                color = [0.0, 0.0, 0.0]
-            return color
-        return [1.0, 1.0, 0.0]
-
-    def _get_edge_color(  # pylint: disable=no-self-use
-        self, edge: Edge, graph_type: Optional[str] = ""
-    ) -> List[float]:
-        """Get edge color based on visibility."""
-        if not graph_type:
-            return [0.0, 0.0, 0.0]
-        if graph_type.startswith("Pose2D"):
-            if edge.type == "body":
-                color = [0.0, 1.0, 0.0]
-            elif edge.type == "left_side":
-                color = [0.0, 0.0, 1.0]
-            else:
-                color = [1.0, 0.0, 0.0]
-            return color
-        return [0.0, 0.0, 0.0]
-
     def draw_graph(self, labels: List[Label]) -> None:
         """Draw Graph on the axes."""
         for label in labels:
             if label.graph is not None:
                 for edge in label.graph.edges:
-                    color = self._get_edge_color(edge, label.graph.type)
+                    color = _get_edge_color(edge, label.graph.type)
                     result = gen_graph_edge(
                         edge,
                         label,
@@ -465,7 +463,7 @@ class LabelViewer:
                     )
                     self.ax.add_patch(result[0])
                 for node in label.graph.nodes:
-                    color = self._get_node_color(node, label.graph.type)
+                    color = _get_node_color(node, label.graph.type)
                     result = gen_graph_point(
                         node,
                         color,
