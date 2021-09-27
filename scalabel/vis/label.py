@@ -20,7 +20,7 @@ from matplotlib.font_manager import FontProperties
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
-from ..label.typing import Frame, Intrinsics, Label
+from ..label.typing import Edge, Frame, Intrinsics, Label, Node
 from ..label.utils import (
     check_crowd,
     check_ignored,
@@ -33,7 +33,14 @@ from .controller import (
     DisplayData,
     ViewController,
 )
-from .helper import gen_2d_rect, gen_3d_cube, poly2patch, random_color
+from .helper import (
+    gen_2d_rect,
+    gen_3d_cube,
+    gen_graph_edge,
+    gen_graph_point,
+    poly2patch,
+    random_color,
+)
 
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
@@ -98,6 +105,7 @@ class LabelViewer:
             plot 3D bounding boxes
         draw_poly2ds(labels: list[Label], alpha: float):
             plot 2D polygons with the given alpha value
+        draw_graph(labels: list[Label]): plot graph
     """
 
     def __init__(
@@ -149,10 +157,11 @@ class LabelViewer:
         with_box2d: bool = True,
         with_box3d: bool = False,
         with_poly2d: bool = True,
+        with_graph: bool = True,
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
-    ) -> None:
+    ) -> None:  # pylint: disable=too-many-arguments
         """Display the image and corresponding labels."""
         plt.cla()
         self.draw_image(image, frame.name)
@@ -174,6 +183,8 @@ class LabelViewer:
                 with_ctrl_points=with_ctrl_points,
                 ctrl_point_size=ctrl_point_size,
             )
+        if with_graph:
+            self.draw_graph(labels)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
@@ -407,6 +418,60 @@ class LabelViewer:
                             alpha=alpha,
                         )
                     )
+
+    def _get_node_color(
+        self, node: Node, graph_type: Optional[str] = ""
+    ) -> List[float]:  # pylint: disable=no-self-use
+        """Get node color based on visibility."""
+        if not graph_type:
+            return [0.0, 0.0, 0.0]
+        if graph_type.startswith("Pose2D"):
+            if node.visibility == "V":  # visible keypoints
+                color = [1.0, 1.0, 0.0]
+            elif node.visibility == "N":  # not visible keypoints
+                color = [1.0, 0.0, 0.0]
+            else:  # cannot be estimated keypoints
+                color = [0.0, 0.0, 0.0]
+            return color
+        return [1.0, 1.0, 0.0]
+
+    def _get_edge_color(
+        self, edge: Edge, graph_type: Optional[str] = ""
+    ) -> List[float]:  # pylint: disable=no-self-use
+        """Get edge color based on visibility."""
+        if not graph_type:
+            return [0.0, 0.0, 0.0]
+        if graph_type.startswith("Pose2D"):
+            if edge.type == "body":
+                color = [0.0, 1.0, 0.0]
+            elif edge.type == "left_side":
+                color = [0.0, 0.0, 1.0]
+            else:
+                color = [1.0, 0.0, 0.0]
+            return color
+        return [0.0, 0.0, 0.0]
+
+    def draw_graph(self, labels: List[Label]) -> None:
+        """Draw Graph on the axes."""
+        for label in labels:
+            if label.graph is not None:
+                for edge in label.graph.edges:
+                    color = self._get_edge_color(edge, label.graph.type)
+                    result = gen_graph_edge(
+                        edge,
+                        label,
+                        color,
+                        int(2 * self.ui_cfg.scale),
+                    )
+                    self.ax.add_patch(result[0])
+                for node in label.graph.nodes:
+                    color = self._get_node_color(node, label.graph.type)
+                    result = gen_graph_point(
+                        node,
+                        color,
+                        int(2 * self.ui_cfg.scale),
+                    )
+                    self.ax.add_patch(result[0])
 
 
 def parse_args() -> argparse.Namespace:
