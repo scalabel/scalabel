@@ -18,7 +18,7 @@ from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
 from .transforms import box2d_to_bbox, get_coco_categories, poly2ds_to_mask
-from .typing import Config, Frame, ImageSize, Label, Poly2D
+from .typing import Config, Frame, Graph, ImageSize, Label, Poly2D
 from .utils import check_crowd, check_ignored, get_leaf_categories
 
 # 0 is for category that is not in the config.
@@ -45,8 +45,8 @@ def parse_arguments() -> argparse.Namespace:
         "-m",
         "--mode",
         default="det",
-        choices=["det", "ins_seg", "box_track", "seg_track"],
-        help="conversion mode: detection or tracking.",
+        choices=["det", "ins_seg", "box_track", "seg_track", "pose"],
+        help="conversion mode: detection, tracking, or pose.",
     )
     parser.add_argument(
         "--nproc",
@@ -90,6 +90,14 @@ def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
     return annotation
 
 
+def set_keypoints(annotation: AnnType, keypoints: List[float]) -> AnnType:
+    """Parsing keypoints from pose ann."""
+    annotation.update(
+        dict(keypoints=keypoints, num_keypoints=len(keypoints) // 3)
+    )
+    return annotation
+
+
 def poly2ds_to_coco(
     annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize
 ) -> AnnType:
@@ -114,6 +122,22 @@ def poly2ds_list_to_coco(
 
     sorted(annotations, key=lambda ann: ann["id"])
     return annotations
+
+
+def graph_to_coco(annotation: AnnType, graph: Graph) -> AnnType:
+    """Converting Graph to coco format."""
+    keypoints = []
+    for node in graph.nodes:
+        vis = 0
+        if graph.type:
+            if graph.type.startswith("Poyl2D"):
+                if node.visibility == "V":
+                    vis = 2
+                elif node.visibility == "N":
+                    vis = 1
+        keypoints.extend([node.location[0], node.location[1], vis])
+    set_keypoints(annotation, keypoints)
+    return annotation
 
 
 def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
@@ -417,6 +441,62 @@ def scalabel2coco_seg_track(
     )
 
 
+def scalabel2coco_pose(frames: List[Frame], config: Config) -> GtType:
+    """Convert Scalabel format to COCO pose."""
+    image_id, ann_id = 0, 0
+    images: List[ImgType] = []
+    annotations: List[AnnType] = []
+
+    for image_anns in tqdm(frames):
+        image_id += 1
+        img_shape = config.imageSize
+        if img_shape is None:
+            if image_anns.size is not None:
+                img_shape = image_anns.size
+            else:
+                raise ValueError("Image shape not defined!")
+
+        image = ImgType(
+            file_name=image_anns.name,
+            height=img_shape.height,
+            width=img_shape.width,
+            id=image_id,
+        )
+        if image_anns.url is not None:
+            image["coco_url"] = image_anns.url
+        images.append(image)
+
+        if image_anns.labels is None:
+            continue
+
+        for label in image_anns.labels:
+            if label.box2d is None:
+                continue
+            if label.graph is None:
+                continue
+
+            ann_id += 1
+            annotation = AnnType(
+                id=ann_id,
+                image_id=image_id,
+                category_id=1,
+                scalabel_id=label.id,
+                iscrowd=int(check_crowd(label) or check_ignored(label)),
+                ignore=0,
+            )
+            if label.score is not None:
+                annotation["score"] = label.score
+            annotation = set_box_object_geometry(annotation, label)
+            annotation = graph_to_coco(annotation, label.graph)
+            annotations.append(annotation)
+
+    return GtType(
+        categories=get_coco_categories(config),
+        images=images,
+        annotations=annotations,
+    )
+
+
 def run(args: argparse.Namespace) -> None:
     """Run."""
     logger.info("Loading Scalabel jsons...")
@@ -428,10 +508,11 @@ def run(args: argparse.Namespace) -> None:
     assert config is not None
 
     logger.info("Start format converting...")
-    if args.mode in ["det", "box_track"]:
+    if args.mode in ["det", "box_track", "pose"]:
         convert_func = dict(
             det=scalabel2coco_detection,
             box_track=scalabel2coco_box_track,
+            pose=scalabel2coco_pose,
         )[args.mode]
     else:
         convert_func = partial(
