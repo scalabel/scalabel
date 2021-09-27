@@ -130,7 +130,7 @@ def graph_to_coco(annotation: AnnType, graph: Graph) -> AnnType:
     for node in graph.nodes:
         vis = 0
         if graph.type:
-            if graph.type.startswith("Poyl2D"):
+            if graph.type.startswith("Pose2D"):
                 if node.visibility == "V":
                     vis = 2
                 elif node.visibility == "N":
