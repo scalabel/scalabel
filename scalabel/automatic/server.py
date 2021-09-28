@@ -9,6 +9,7 @@ import torch.multiprocessing as mp
 
 from scalabel.automatic.model import Predictor
 import scalabel.automatic.consts.redis_consts as RedisConsts
+import scalabel.automatic.consts.query_consts as QueryConsts
 
 
 class ModelServerScheduler(object):
@@ -32,7 +33,6 @@ class ModelServerScheduler(object):
         self.threads = {}
 
         self.logger = logger
-
         self.verbose = False
 
     # restore when server restarts, connects to redis channels.
@@ -70,8 +70,8 @@ class ModelServerScheduler(object):
         items = request_message["items"]
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
-        request_type = int(request_message["type"])
-        if request_type == 0:
+        request_type = request_message["type"]
+        if request_type == QueryConsts.QUERY_TYPES["inference"]:
             self.inference_request_queue.append({
                 "items": items,
                 "item_indices": item_indices,
@@ -87,13 +87,13 @@ class ModelServerScheduler(object):
                 items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
                 self.calc_time("pack data")
 
-                results = model(items, 0)  # 0 for inference, 1 for training
+                results = model(items, QueryConsts.QUERY_TYPES["inference"])  # 0 for inference, 1 for training
                 self.calc_time("model inference time")
-
-                pred_boxes: List[List[float]] = []
 
                 model_response_channel = self.model_response_channel % (project_name, task_id)
                 for i in range(self.inference_batch_size):
+                    pred_boxes: List[List[float]] = []
+                    # pred_boxes.append([1.0, 1.0, 100.0, 100.0])
                     for box in results[i]["instances"].pred_boxes:
                         box = box.cpu().numpy()
                         pred_boxes.append(box.tolist())
@@ -119,12 +119,14 @@ class ModelServerScheduler(object):
                 items = [self.train_request_queue[i]["items"][0] for i in range(self.train_batch_size)]
                 self.calc_time("pack data")
 
-                model(items, 1)
+                model(items, QueryConsts.QUERY_TYPES["training"])
                 self.calc_time("model training time")
 
                 self.train_request_queue = []
 
-        print()
+            if len(self.train_request_queue) == 0:
+                pass
+                # time.sleep(1)
 
     def register_task(self, project_name, task_id, item_list):
         model = self.get_model(self.model_config["model_name"], item_list)
@@ -159,7 +161,7 @@ class ModelServerScheduler(object):
         if init:
             self.start_time = time.time()
         else:
-            print(message + ": {}s".format(time.time() - self.start_time))
+            self.logger.info(message + ": {}s".format(time.time() - self.start_time))
             self.start_time = time.time()
 
 
@@ -169,6 +171,10 @@ def launch() -> None:
     logging.basicConfig(format=log_f)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler('latency_infer11_train11_no_sleep_2_step.txt')
+    fh.setLevel(logging.DEBUG)
+    logger.addHandler(fh)
 
     # create scheduler
     server_config = {

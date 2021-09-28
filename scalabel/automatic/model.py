@@ -18,6 +18,8 @@ from detectron2.utils.events import EventStorage, get_event_storage
 import detectron2.data.transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
+import scalabel.automatic.consts.query_consts as QueryConsts
+
 
 class Predictor:
     def __init__(self, cfg_path: str, item_list: List, num_workers: int, logger) -> None:
@@ -35,7 +37,7 @@ class Predictor:
 
         # These are for training
         self.optimizer = build_optimizer(cfg, self.model)
-        self.train_steps = 1
+        self.train_steps = 2
 
         self.model.eval()
         checkpointer = DetectionCheckpointer(self.model)
@@ -48,6 +50,7 @@ class Predictor:
         self.image_dict = {}
         self.load_inputs(item_list, num_workers)
 
+        self.logger = logger
         self.verbose = True
 
     @staticmethod
@@ -78,12 +81,12 @@ class Predictor:
             self.image_dict[url] = image
 
     # 0 for inference, 1 for training
-    def __call__(self, items: Dict, request_type: int = 0) -> List:
+    def __call__(self, items: Dict, request_type: str) -> List:
         self.calc_time(init=True)
         inputs = [self.image_dict[item["url"]] for item in items]
 
         # inference
-        if request_type == 0:
+        if request_type == QueryConsts.QUERY_TYPES["inference"]:
             with torch.no_grad():
                 predictions = self.model(inputs)
                 self.calc_time("model inference time")
@@ -123,5 +126,5 @@ class Predictor:
         if init:
             self.start_time = time.time()
         else:
-            print(message + ": {}s".format(time.time() - self.start_time))
+            self.logger.info(message + ": {}s".format(time.time() - self.start_time))
             self.start_time = time.time()

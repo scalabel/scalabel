@@ -5,6 +5,7 @@ import logging
 import time
 
 import scalabel.automatic.consts.redis_consts as RedisConsts
+import scalabel.automatic.consts.query_consts as QueryConsts
 
 
 class Simulator(object):
@@ -63,8 +64,8 @@ class Simulator(object):
 
     def send_inference_requests(self):
         self.start_time = time.time()
-        self.state["type"] = "0"
-        for i in range(1000):
+        self.state["type"] = QueryConsts.QUERY_TYPES["inference"]
+        for i in range(10000):
             model_request_message = json.dumps(self.state)
             self.redis.publish(self.model_request_channel, model_request_message)
 
@@ -74,10 +75,10 @@ class Simulator(object):
         # But the training does not need to happen every step after a inference step.
         # See the two queues in server for detail.
         for i in range(1000):
-            if i % 2 != 1:
-                self.state["type"] = "0"
+            if i % 2 in (0, ):
+                self.state["type"] = QueryConsts.QUERY_TYPES["inference"]
             else:
-                self.state["type"] = "1"
+                self.state["type"] = QueryConsts.QUERY_TYPES["training"]
             model_request_message = json.dumps(self.state)
             self.redis.publish(self.model_request_channel, model_request_message)
 
@@ -87,6 +88,10 @@ if __name__ == "__main__":
     logging.basicConfig(format=log_f)
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+
+    # fh = logging.FileHandler('throughput_1_1.txt')
+    # fh.setLevel(logging.DEBUG)
+    # logger.addHandler(fh)
 
     simulator = Simulator(logger)
 
