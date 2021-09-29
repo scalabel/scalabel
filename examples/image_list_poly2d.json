@@ -1,0 +1,62 @@
+[
+  {
+    "name": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    "videoName": "",
+    "attributes": null,
+    "timestamp": 10000,
+    "index": 0,
+    "labels": [
+      {
+        "id": 0,
+        "category": "car",
+        "attributes": {
+          "Occluded": false,
+          "Traffic Light Color": [0, "NA"],
+          "Truncated": false
+        },
+        "manualShape": false,
+        "box2d": null,
+        "poly2d": [
+          {
+            "vertices": [
+              [895.4950561523438, 418.41326904296875],
+              [981.058837890625, 474.0956115722656],
+              [895.4950561523438, 474.0956115722656],
+              [981.058837890625, 418.41326904296875],
+              [895.4950561523438, 418.41326904296875]
+            ],
+            "types": "LLLLL",
+            "closed": true
+          }
+        ],
+        "box3d": null
+      },
+      {
+        "id": 1,
+        "category": "car",
+        "attributes": {
+          "Occluded": false,
+          "Traffic Light Color": [0, "NA"],
+          "Truncated": false
+        },
+        "manualShape": false,
+        "box2d": null,
+        "poly2d": [
+          {
+            "vertices": [
+              [10, 10],
+              [20, 10],
+              [20, 20],
+              [10, 20],
+              [10, 10]
+            ],
+            "types": "LLLLL",
+            "closed": true
+          }
+        ],
+        "box3d": null
+      }
+    ]
+  }
+]
