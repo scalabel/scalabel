@@ -10,7 +10,7 @@ from nanoid import generate
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType
-from .typing import Box2D, Config, ImageSize, Poly2D, Node
+from .typing import Box2D, Config, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
 
 __all__ = [
