@@ -6,7 +6,7 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
-from nanoid import generate
+from nanoid import generate  # type: ignore
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType

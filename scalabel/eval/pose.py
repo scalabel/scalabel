@@ -11,11 +11,8 @@ from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
 
 import numpy as np
-
-# from pycocotools.coco import COCO
-# from pycocotools.cocoeval import COCOeval  # type: ignore
-from xtcocotools.coco import COCO
-from xtcocotools.cocoeval import COCOeval
+from xtcocotools.coco import COCO  # type: ignore
+from xtcocotools.cocoeval import COCOeval  # type: ignore
 
 from ..common.io import open_write_text
 from ..common.logger import logger

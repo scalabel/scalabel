@@ -34,6 +34,7 @@ setuptools.setup(
         "joblib",
         "matplotlib",
         "motmetrics",
+        "nanoid",
         "numpy",
         "pandas",
         "Pillow",
@@ -48,6 +49,7 @@ setuptools.setup(
         "tabulate",
         "tqdm",
         "toml",
+        "xtcocotools",
     ],
     include_package_data=True,
 )
