@@ -128,14 +128,17 @@ def graph_to_coco(annotation: AnnType, graph: Graph) -> AnnType:
     """Converting Graph to coco format."""
     keypoints = []
     for node in graph.nodes:
-        vis = 0
-        if graph.type:
-            if graph.type.startswith("Pose2D"):
-                if node.visibility == "V":
-                    vis = 2
-                elif node.visibility == "N":
-                    vis = 1
-        keypoints.extend([node.location[0], node.location[1], vis])
+        c3 = 0.0
+        if node.score is not None:
+            c3 = node.score
+        else:
+            if graph.type is not None:
+                if graph.type.startswith("Pose2D"):
+                    if node.visibility == "V":
+                        c3 = 2.0
+                    elif node.visibility == "N":
+                        c3 = 1.0
+        keypoints.extend([node.location[0], node.location[1], c3])
     set_keypoints(annotation, keypoints)
     return annotation
 
@@ -470,8 +473,6 @@ def scalabel2coco_pose(frames: List[Frame], config: Config) -> GtType:
             continue
 
         for label in image_anns.labels:
-            if label.box2d is None:
-                continue
             if label.graph is None:
                 continue
 
@@ -486,7 +487,8 @@ def scalabel2coco_pose(frames: List[Frame], config: Config) -> GtType:
             )
             if label.score is not None:
                 annotation["score"] = label.score
-            annotation = set_box_object_geometry(annotation, label)
+            if label.box2d is not None:
+                annotation = set_box_object_geometry(annotation, label)
             annotation = graph_to_coco(annotation, label.graph)
             annotations.append(annotation)
 

@@ -6,10 +6,11 @@ import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
+from nanoid import generate
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType
-from .typing import Box2D, Config, ImageSize, Poly2D
+from .typing import Box2D, Config, ImageSize, Poly2D, Node
 from .utils import get_leaf_categories
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "poly_to_patch",
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
+    "keypoints_to_nodes",
 ]
 
 TOLERANCE = 1.0
@@ -134,3 +136,17 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
     plt.close()
     return mask
+
+
+def keypoints_to_nodes(kpts: List[float]) -> List[Node]:
+    """Converting COCO keypoints to list of Nodes."""
+    assert len(kpts) % 3 == 0
+    return [
+        Node(
+            location=(kpts[i], kpts[i + 1]),
+            category="coco_kpt",
+            id=generate(size=16),
+            score=kpts[i + 2],
+        )
+        for i in range(0, len(kpts), 3)
+    ]

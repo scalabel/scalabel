@@ -41,6 +41,7 @@ class Node(BaseModel):
     category: str
     visibility: Optional[str] = None
     type: Optional[str] = None
+    score: Optional[float] = None
     id: str
 
 
