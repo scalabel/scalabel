@@ -8,7 +8,7 @@ import copy
 import json
 from functools import partial
 from multiprocessing import Pool
-from typing import AbstractSet, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
 from xtcocotools.coco import COCO  # type: ignore
@@ -22,7 +22,7 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_pose
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result, Scores
+from .result import OVERALL, Result
 
 
 class PoseResult(Result):
@@ -43,20 +43,6 @@ class PoseResult(Result):
     def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
-
-    def summary(
-        self,
-        include: Optional[AbstractSet[str]] = None,
-        exclude: Optional[AbstractSet[str]] = None,
-    ) -> Scores:
-        """Convert the data into a flattened dict as the summary."""
-        summary_dict = super().summary(include, exclude)
-        for scores in self.AP:
-            for category, score in scores.items():
-                if category == OVERALL:
-                    continue
-                summary_dict[f"AP/{category}"] = score
-        return summary_dict
 
 
 class COCOV2(COCO):  # type: ignore
@@ -212,15 +198,8 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def summarize(self) -> PoseResult:
         """Compute summary metrics for evaluation results."""
-        cat_ids = self.params.catIds + [None]
         res_dict = {
-            metric: [
-                {
-                    cat_name: get_score_func(cat_id)
-                    for cat_name, cat_id in zip(self.cat_names, cat_ids)
-                },
-                {OVERALL: get_score_func(None)},
-            ]
+            metric: [{OVERALL: get_score_func(None)}]
             for metric, get_score_func in self.get_score_funcs.items()
         }
         return PoseResult(**res_dict)
@@ -340,4 +319,4 @@ if __name__ == "__main__":
     logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
-            json.dump(eval_result.json(), fp)
+            json.dump(eval_result.dict(), fp, indent=2)
