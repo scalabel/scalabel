@@ -7,7 +7,7 @@ import json
 import time
 import torch.multiprocessing as mp
 
-from scalabel.automatic.model import Predictor
+from scalabel.automatic.models.model import Predictor
 import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
 
