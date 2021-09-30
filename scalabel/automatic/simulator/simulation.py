@@ -65,7 +65,7 @@ class Simulator(object):
     def send_inference_requests(self):
         self.start_time = time.time()
         self.state["type"] = QueryConsts.QUERY_TYPES["inference"]
-        for i in range(10000):
+        for i in range(1000):
             model_request_message = json.dumps(self.state)
             self.redis.publish(self.model_request_channel, model_request_message)
 
@@ -98,5 +98,5 @@ if __name__ == "__main__":
     simulator.get_message_and_channel()
     simulator.listen()
 
-    # simulator.send_inference_requests()
-    simulator.send_inference_and_training_requests()
+    simulator.send_inference_requests()
+    # simulator.send_inference_and_training_requests()

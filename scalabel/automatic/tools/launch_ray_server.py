@@ -32,7 +32,7 @@ def launch() -> None:
     subprocess.Popen(redis_command)
 
     logger.info("Launching model server")
-    py_command = ["python3.8", "-m", "scalabel.automatic.servers.server"]
+    py_command = ["python3.8", "-m", "scalabel.automatic.servers.ray_server"]
     subprocess.call(py_command)
 
 
