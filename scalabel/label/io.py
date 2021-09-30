@@ -17,6 +17,7 @@ from .typing import (
     Dataset,
     Extrinsics,
     Frame,
+    FrameGroup,
     Graph,
     ImageSize,
     Intrinsics,
@@ -61,6 +62,7 @@ def load(
 ) -> Dataset:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
+    raw_groups: List[DictStrAny] = []
     if not osp.exists(inputs):
         raise FileNotFoundError(f"{inputs} does not exist.")
 
@@ -70,7 +72,10 @@ def load(
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
-            raw_cfg = content["config"]
+            if content["groups"] is not None:
+                raw_groups.extend(content["groups"])
+            if content["config"] is not None:
+                raw_cfg = content["config"]
         elif isinstance(content, list):
             raw_frames.extend(content)
         else:
@@ -97,8 +102,16 @@ def load(
 
     parse_ = partial(parse, validate_frames=validate_frames)
     if nprocs > 1:
-        return Dataset(frames=pmap(parse_, raw_frames, nprocs), config=config)
-    return Dataset(frames=list(map(parse_, raw_frames)), config=config)
+        frames = pmap(parse_, raw_frames, nprocs)
+        groups = None
+        if len(raw_groups) > 0:
+            groups = pmap(lambda x: FrameGroup(**x), raw_groups, nprocs)
+    else:
+        frames = list(map(parse_, raw_frames))
+        groups = None
+        if len(raw_groups) > 0:
+            groups = list(map(lambda x: FrameGroup(**x), raw_groups))
+    return Dataset(frames=frames, groups=groups, config=config)
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
@@ -139,18 +152,11 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
     return {k: v for k, v in result if not empty(v)}
 
 
-def save(
-    filepath: str, dataset: Union[List[Frame], Dataset], nprocs: int = 0
-) -> None:
+def save(filepath: str, dataset: Union[List[Frame], Dataset]) -> None:
     """Save labels in Scalabel format."""
     if not isinstance(dataset, Dataset):
-        dataset = Dataset(frames=dataset, config=None)
+        dataset = Dataset(frames=dataset)
     dataset_dict = dataset.dict()
-
-    if nprocs > 1:
-        dataset_dict["frames"] = pmap(dump, dataset_dict["frames"], nprocs)
-    else:
-        dataset_dict["frames"] = list(map(dump, dataset_dict["frames"]))
 
     with open_write_text(filepath) as fp:
         json.dump(dataset_dict, fp, indent=2)

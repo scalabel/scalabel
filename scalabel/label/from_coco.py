@@ -137,7 +137,7 @@ def run(args: argparse.Namespace) -> None:
 
     if vid_id2name is None:
         assert args.output.endswith(".json"), "output should be a json file"
-        save(args.output, scalabel, args.nproc)
+        save(args.output, scalabel)
     else:
         scalabels = group_and_sort(scalabel)
         if not os.path.isdir(args.output):

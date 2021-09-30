@@ -323,11 +323,7 @@ def run(args: argparse.Namespace) -> None:
         data_type=args.data_type,
     )
 
-    save(
-        osp.join(args.output_dir, output_name),
-        scalabel,
-        args.nproc,
-    )
+    save(osp.join(args.output_dir, output_name), scalabel)
 
 
 if __name__ == "__main__":

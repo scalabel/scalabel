@@ -8,11 +8,7 @@ from typing import Dict, List, Tuple, Union
 
 import numpy as np
 
-from scalabel.label.utils import (
-    cart2hom,
-    project_points_to_image,
-    rotation_y_to_alpha,
-)
+from scalabel.label.utils import cart2hom, rotation_y_to_alpha
 
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
@@ -47,11 +43,7 @@ from .typing import (
     Intrinsics,
     Label,
 )
-from .utils import (
-    get_extrinsics_from_matrix,
-    get_matrix_from_extrinsics,
-    get_matrix_from_intrinsics,
-)
+from .utils import get_extrinsics_from_matrix, get_matrix_from_extrinsics
 
 cameras_id2name = {
     1: "FRONT",
@@ -128,7 +120,6 @@ def heading_transform(heading: float, calib: NDArrayF64) -> float:
 
 def parse_lidar_labels(
     frame: dataset_pb2.Frame,
-    intrinsics: Intrinsics,
     cam2car: Extrinsics,
     camera: str,
     camera_id: int,
@@ -161,21 +152,14 @@ def parse_lidar_labels(
             ]
         )
         cam2car_mat = get_matrix_from_extrinsics(cam2car)
-        intrinsics_mat = get_matrix_from_intrinsics(intrinsics)
-        center = points_transform(center, cam2car_mat)
-        center_proj = project_points_to_image(center, intrinsics_mat)[0]
+        center_cam = tuple(points_transform(center, cam2car_mat)[0].tolist())
         heading = heading_transform(laser_box3d.heading, cam2car_mat)
         dim = laser_box3d.height, laser_box3d.width, laser_box3d.length
         box3d = Box3D(
             orientation=(0.0, heading, 0.0),
-            location=tuple(center[0].tolist()),
+            location=center_cam,
             dimension=dim,
-            alpha=rotation_y_to_alpha(
-                heading,
-                center_proj[0],
-                intrinsics.focal[0],
-                intrinsics.center[0],
-            ),
+            alpha=rotation_y_to_alpha(heading, center_cam),  # type: ignore
         )
 
         box2d = Box2D(
@@ -285,9 +269,7 @@ def parse_frame(
                 fp.write(im_bytes)
 
         if use_lidar_labels:
-            labels = parse_lidar_labels(
-                frame, intrinsics, cam2car, camera, camera_id
-            )
+            labels = parse_lidar_labels(frame, cam2car, camera, camera_id)
         else:
             labels = parse_camera_labels(frame, camera_id)
 

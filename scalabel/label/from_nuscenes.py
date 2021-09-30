@@ -1,17 +1,61 @@
-"""Conversion script for nuscenes to scalabel."""
-import os
+"""Conversion script for NuScenes to Scalabel."""
 import argparse
-from .typing import Frame, Box2D, Box3D, Intrinsics, Extrinsics, ImageSize
+import os
+from datetime import datetime
+from functools import partial
+from typing import List, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+
+from ..common.parallel import NPROC, pmap
+from ..common.typing import DictStrAny
+from .io import save
+from .typing import (
+    Box2D,
+    Box3D,
+    Category,
+    Config,
+    Dataset,
+    Extrinsics,
+    Frame,
+    FrameGroup,
+    ImageSize,
+    Intrinsics,
+    Label,
+)
+from .utils import (
+    get_extrinsics_from_matrix,
+    get_intrinsics_from_matrix,
+    rotation_y_to_alpha,
+)
+
 try:
     import nuscenes as nu
+    from nuscenes.eval.detection.constants import DETECTION_NAMES
     from nuscenes.eval.detection.utils import category_to_detection_name
-    from nuscenes.utils.geometry_utils import box_in_image, view_points, transform_matrix
-    from nuscenes.scripts.export_2d_annotations_as_json import post_process_coords
-    from nuscenes.utils.data_classes import Quaternion, LidarPointCloud
+    from nuscenes.nuscenes import NuScenes
+    from nuscenes.scripts.export_2d_annotations_as_json import (
+        post_process_coords,
+    )
+    from nuscenes.utils.data_classes import Box, Quaternion
+    from nuscenes.utils.geometry_utils import (
+        box_in_image,
+        transform_matrix,
+        view_points,
+    )
+    from nuscenes.utils.splits import create_splits_scenes
 except ImportError:
     nu = None
 
-cams = ["CAM_FRONT", "CAM_FRONT_LEFT", "CAM_FRONT_RIGHT", "CAM_BACK", "CAM_BACK_LEFT", "CAM_BACK_RIGHT"]
+cams = [
+    "CAM_FRONT",
+    "CAM_FRONT_LEFT",
+    "CAM_FRONT_RIGHT",
+    "CAM_BACK",
+    "CAM_BACK_LEFT",
+    "CAM_BACK_RIGHT",
+]
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -33,14 +77,6 @@ def parse_arguments() -> argparse.Namespace:
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
-        "--save-images",
-        "-s",
-        action="store_true",
-        help="If the images should be extracted from .tfrecords and saved."
-        "(necessary for using Waymo Open data with Scalabel format "
-        "annotations)",
-    )
-    parser.add_argument(
         "--nproc",
         type=int,
         default=NPROC,
@@ -52,50 +88,69 @@ def parse_arguments() -> argparse.Namespace:
 def load_data(filepath: str, version: str) -> Tuple[nu.NuScenes, pd.DataFrame]:
     """Load nuscenes data and extract meta-information into dataframe."""
     data = NuScenes(version=version, dataroot=filepath, verbose=True)
-    records = [(data.get('sample', record['first_sample_token'])['timestamp'], record) for record in data.scene]
+    records = [
+        (data.get("sample", record["first_sample_token"])["timestamp"], record)
+        for record in data.scene
+    ]
     entries = []
 
     for start_time, record in sorted(records):
-        start_time = data.get('sample', record['first_sample_token'])['timestamp'] / 1000000
-        token = record['token']
-        name = record['name']
+        start_time = (
+            data.get("sample", record["first_sample_token"])["timestamp"]
+            / 1000000
+        )
+        token = record["token"]
+        name = record["name"]
         date = datetime.utcfromtimestamp(start_time)
-        host = "-".join(record['name'].split("-")[:2])
+        host = "-".join(record["name"].split("-")[:2])
         first_sample_token = record["first_sample_token"]
 
         entries.append((host, name, date, token, first_sample_token))
 
-    dataframe = pd.DataFrame(entries, columns=["host", "scene_name", "date", "scene_token", "first_sample_token"])
+    dataframe = pd.DataFrame(
+        entries,
+        columns=[
+            "host",
+            "scene_name",
+            "date",
+            "scene_token",
+            "first_sample_token",
+        ],
+    )
     return data, dataframe
 
 
-def quaternion_to_yaw(q: Quaternion, in_image_frame: bool = True) -> float:
+def quaternion_to_yaw(quat: Quaternion, in_image_frame: bool = True) -> float:
     """Convert quaternion angle representation to yaw."""
     if in_image_frame:
-        v = np.dot(q.rotation_matrix, np.array([1, 0, 0]))
+        v = np.dot(quat.rotation_matrix, np.array([1, 0, 0]))
         yaw = -np.arctan2(v[2], v[0])
     else:
-        v = np.dot(q.rotation_matrix, np.array([1, 0, 0]))
+        v = np.dot(quat.rotation_matrix, np.array([1, 0, 0]))
         yaw = np.arctan2(v[1], v[0])
 
-    return yaw
+    return yaw  # type: ignore
 
 
 def yaw_to_quaternion(yaw: float) -> Quaternion:
     """Convert yaw angle  to quaternion representation."""
-    return Quaternion(scalar=np.cos(yaw / 2), vector=[0, 0, np.sin(yaw / 2)]).elements
+    return Quaternion(
+        scalar=np.cos(yaw / 2), vector=[0, 0, np.sin(yaw / 2)]
+    ).elements
 
 
-def move_boxes_to_camera_space(boxes, ego_pose, cam_pose) -> None:
+def move_boxes_to_camera_space(
+    boxes: List[Box], ego_pose: DictStrAny, cam_pose: DictStrAny
+) -> None:
     """Move boxes from world space to car space to cam space.
 
     Note: mutates input boxes.
     """
-    translation_car = -np.array(ego_pose['translation'])
-    rotation_car = Quaternion(ego_pose['rotation']).inverse
+    translation_car = -np.array(ego_pose["translation"])
+    rotation_car = Quaternion(ego_pose["rotation"]).inverse
 
-    translation_cam = -np.array(cam_pose['translation'])
-    rotation_cam = Quaternion(cam_pose['rotation']).inverse
+    translation_cam = -np.array(cam_pose["translation"])
+    rotation_cam = Quaternion(cam_pose["rotation"]).inverse
 
     for box in boxes:
         # Bring box to car space
@@ -107,82 +162,174 @@ def move_boxes_to_camera_space(boxes, ego_pose, cam_pose) -> None:
         box.rotate(rotation_cam)
 
 
-def parse_labels(boxes, calibration_cam, ego_pose_ref, img_size: Tuple[int, int]) -> Optional[List[Labels]]:
+def parse_labels(
+    data: NuScenes,
+    boxes: List[Box],
+    calibration_cam: DictStrAny,
+    ego_pose_ref: DictStrAny,
+    img_size: Tuple[int, int],
+) -> Optional[List[Label]]:
     """Parse NuScenes LiDAR labels into single camera."""
     if len(boxes):
         labels = []
         # transform into the camera coord system
         move_boxes_to_camera_space(boxes, ego_pose_ref, calibration_cam)
-        intrinsics = np.asarray(calibration_cam["camera_intrinsic"])
-        for i in range(len(boxes)):
-            box_class = category_to_detection_name(boxes[i].name)
-            if box_in_image(boxes[i], intrinsics, img_size) and box_class is not None:
-                xyz = boxes[i].center
-                w, l, h = boxes[i].wlh
-                roty = quaternion_to_yaw(boxes[i].orientation)
+        intrinsic_matrix = np.array(calibration_cam["camera_intrinsic"])
+        for box in boxes:
+            box_class = category_to_detection_name(box.name)
+            in_image = box_in_image(box, intrinsic_matrix, img_size)
+            if in_image and box_class is not None:
+                xyz = tuple(box.center.tolist())
+                w, l, h = box.wlh
+                roty = quaternion_to_yaw(box.orientation)
                 # Project 3d box to 2d.
-                corners = boxes[i].corners()
-                corner_coords = view_points(corners, intrinsics, True).T[:, :2].tolist()
+                corners = box.corners()
+                corner_coords = (
+                    view_points(corners, intrinsic_matrix, True)
+                    .T[:, :2]
+                    .tolist()
+                )
                 # Keep only corners that fall within the image.
                 x1, y1, x2, y2 = post_process_coords(corner_coords)
-                instance_token = data.get('sample_annotation', boxes[i].token)['instance_token']
+                instance_data = data.get("sample_annotation", box.token)
+                # Attributes can be retrieved via instance_data and also the
+                # category is more fine-grained than box_class.
+                # This information could be stored in attributes if needed in
+                # the future
                 label = Label(
-                    id=instance_token,
+                    id=instance_data["instance_token"],
                     category=box_class,
                     box2d=Box2D(x1=x1, y1=y1, x2=x2, y2=y2),
-                    box3d=Box3D(location=xyz, dimension=(h, w, l), orientation=(0, roty, 0)),
+                    box3d=Box3D(
+                        location=xyz,
+                        dimension=(h, w, l),
+                        orientation=(0, roty, 0),
+                        alpha=rotation_y_to_alpha(roty, xyz),  # type: ignore
+                    ),
                 )
                 labels.append(label)
 
         return labels
-    else:
-        return None
+    return None
 
-def parse_sequence(first_sample_token: str, scene_name: str) -> List[Frame]:
-    """Parse a full nuscenes sequence and convert it into scalabel frames."""
+
+def ego_pose_to_extrinsics(ego_pose: DictStrAny) -> Extrinsics:
+    """Convert NuScenes ego pose to extrinsics."""
+    matrix = transform_matrix(
+        ego_pose["translation"],
+        Quaternion(ego_pose["rotation"]),
+        inverse=False,
+    )
+    return get_extrinsics_from_matrix(matrix)
+
+
+def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
+    """Convert calibration ego pose to Intrinsics."""
+    matrix = np.array(calibration["camera_intrinsic"])
+    return get_intrinsics_from_matrix(matrix)
+
+
+def parse_sequence(
+    data: NuScenes, first_sample_token: str, scene_name: str
+) -> Tuple[List[Frame], List[FrameGroup]]:
+    """Parse a full NuScenes sequence and convert it into scalabel frames."""
     sample_token = first_sample_token
+    frames, groups = [], []
+    frame_index = 0
     while sample_token:
+        sample = data.get("sample", sample_token)
+        lidar_token = sample["data"]["LIDAR_TOP"]
+        lidar_data = data.get("sample_data", lidar_token)
+        timestamp = lidar_data["timestamp"]
+        lidar_filepath = lidar_data["filename"]
+        ego_pose = data.get("ego_pose", lidar_data["ego_pose_token"])
+        # TODO add non-keyframes?
+        frame_names = []
         for cam in cams:
-            sample = data.get("sample", sample_token)
-            lidar_token = (sample["data"]["LIDAR_TOP"], sample)
             cam_token = sample["data"][cam]
             cam_data = data.get("sample_data", cam_token)
-            ego_pose_ref = data.get("ego_pose", cam_data["ego_pose_token"])
-            cam_filepath = data.get_sample_data_path(cam_token)
-            img_wh = (cam_data['width'], cam_data['height'])
-            calibration_cam = data.get("calibrated_sensor",
-                                       cam_data["calibrated_sensor_token"])
+            ego_pose_cam = data.get("ego_pose", cam_data["ego_pose_token"])
+            cam_filepath = cam_data["filename"]
+            img_wh = (cam_data["width"], cam_data["height"])
+            calibration_cam = data.get(
+                "calibrated_sensor", cam_data["calibrated_sensor_token"]
+            )
 
-            boxes = data.get_boxes(lidar_token[0])
-            labels = parse_labels(boxes, calibration_cam, ego_pose_ref, img_wh)
-            # TODO add other attributes
-            # however here is not clear how to deal with multi-cam case and
-            # LiDAR pointclouds
+            boxes = data.get_boxes(lidar_token)
+            labels = parse_labels(
+                data, boxes, calibration_cam, ego_pose_cam, img_wh
+            )
 
-            frame = Frame(size=ImageSize(width=img_wh[0], height=img_wh[1]), labels=labels)
+            frame = Frame(
+                name=os.path.basename(cam_filepath),
+                videoName=scene_name,
+                frameIndex=frame_index,
+                url=cam_filepath,
+                timestamp=cam_data["timestamp"],
+                extrinsics=ego_pose_to_extrinsics(ego_pose_cam),
+                intrinsics=calibration_to_intrinsics(calibration_cam),
+                size=ImageSize(width=img_wh[0], height=img_wh[1]),
+                labels=labels,
+            )
+            frame_names.append(frame.name)
+            frames.append(frame)
+
+        group = FrameGroup(
+            name=sample_token,
+            videoName=scene_name,
+            frameIndex=frame_index,
+            url=lidar_filepath,
+            extrinsics=ego_pose_to_extrinsics(ego_pose),
+            timestamp=timestamp,
+            frames=frame_names,  # TODO lidar labels could be stored here
+        )
+        groups.append(group)
 
         sample_token = sample["next"]
+        frame_index += 1
+
+    return frames, groups
+
 
 def from_nuscenes(
-        data_path: str,
-        version: str,
-        output_dir: str,
-        save_images: bool = False,
-        nproc: int = NPROC,
-) -> List[Frame]:
+    data_path: str,
+    version: str,
+    split: str,
+    output_dir: str,
+    nproc: int = NPROC,
+) -> Dataset:
+    """Convert NuScenes dataset to Scalabel format."""
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     data, df = load_data(data_path, version)
-    func = partial(parse_record, output_dir, save_images, use_lidar_labels)
-    partial_frames = pmap(
-        func,
-        zip(df.first_sample_token.values, df.scene_name.values),
-        nprocs=nproc,
-    )
-    frames = []
-    for f in partial_frames:
+    scene_names_per_split = create_splits_scenes()
+
+    first_sample_tokens = []
+    for token, name in zip(df.first_sample_token.values, df.scene_name.values):
+        if name in scene_names_per_split[split]:
+            first_sample_tokens.append(token)
+
+    func = partial(parse_sequence, data)
+    if nproc > 1:
+        partial_results = pmap(
+            func,
+            (first_sample_tokens, scene_names_per_split[split]),
+            nprocs=nproc,
+        )
+    else:
+        partial_results = map(  # type: ignore
+            func,
+            first_sample_tokens,
+            scene_names_per_split[split],
+        )
+    frames, groups = [], []
+    for f, g in partial_results:
         frames.extend(f)
-    return frames
+        groups.extend(g)
+
+    cfg = Config(categories=[Category(name=n) for n in DETECTION_NAMES])
+    dataset = Dataset(frames=frames, groups=groups, config=cfg)
+    return dataset
 
 
 def run(args: argparse.Namespace) -> None:
@@ -191,14 +338,22 @@ def run(args: argparse.Namespace) -> None:
         "Please install the requirements in scripts/optional.txt to use"
         "NuScenes conversion."
     )
-    result = from_nuscenes(
-        args.input,
-        args.version,
-        args.output,
-        args.save_images,
-        args.nproc,
-    )
-    save(os.path.join(args.output, "scalabel_anns.json"), result)
+
+    # TODO add test conversion
+    if "mini" in args.version:
+        splits_to_iterate = ["mini_train", "mini_val"]
+    else:
+        splits_to_iterate = ["train", "val"]
+
+    for split in splits_to_iterate:
+        result = from_nuscenes(
+            args.input,
+            args.version,
+            split,
+            args.output,
+            args.nproc,
+        )
+        save(os.path.join(args.output, f"scalabel_{split}.json"), result)
 
 
 if __name__ == "__main__":

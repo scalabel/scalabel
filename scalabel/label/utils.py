@@ -1,6 +1,6 @@
 """Utility functions for label."""
 import math
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pytest
@@ -131,10 +131,10 @@ def project_points_to_image(
 
 
 def rotation_y_to_alpha(
-    rotation_y: float, center_proj_x: float, focal_x: float, center_x: float
+    rotation_y: float, center: Tuple[float, float, float]
 ) -> float:
     """Convert rotation around y-axis to viewpoint angle (alpha)."""
-    alpha = rotation_y - math.atan2(center_proj_x - center_x, focal_x)
+    alpha = rotation_y - math.atan2(center[0], center[2])
     if alpha > math.pi:
         alpha -= 2 * math.pi
     if alpha <= -math.pi:
