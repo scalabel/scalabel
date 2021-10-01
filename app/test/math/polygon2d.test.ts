@@ -70,11 +70,11 @@ test("Test for complex polygons correctness", () => {
 
 test("Test for complex polygons speed", () => {
   const vertices: Array<[number, number]> = []
-  for (let i = 0; i < 10000; i++) {
+  for (let i = 0; i < 1000; i++) {
     vertices.push([Math.random() * 100, Math.random() * 100])
   }
   const start = performance.now()
   polyIsComplex(vertices)
   const end = performance.now()
-  expect(start - end).toBeLessThan(1000)
+  expect(start - end).toBeLessThan(10)
 })
