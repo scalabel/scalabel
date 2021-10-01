@@ -15,7 +15,8 @@ import {
   parseFiles,
   parseSingleFile,
   parseForm,
-  readConfig
+  readConfig,
+  filterIntersectedPolygonsInProject
 } from "./create_project"
 import { convertStateToExport } from "./export"
 import { FileStorage } from "./file_storage"
@@ -27,7 +28,6 @@ import { getProjectOptions, getProjectStats, getTaskOptions } from "./stats"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { parseProjectName } from "./util"
-import filterPolygons from "../math/poly_complex"
 
 /**
  * Wraps HTTP listeners
@@ -448,8 +448,7 @@ export class Listeners {
           : await parseSingleFile(storage, form.labelType, files)
       // Create the project from the form data
       const project = await createProject(form, formFileData)
-      // Checks for polygon intersections
-      const [filteredProject, polyMsg] = filterPolygons(project)
+      const [filteredProject, msg] = filterIntersectedPolygonsInProject(project)
 
       await Promise.all([
         this.projectStore.saveProject(filteredProject),
@@ -459,7 +458,7 @@ export class Listeners {
         )
         // Save the project
       ])
-      res.send(filterXSS(polyMsg))
+      res.send(filterXSS(msg))
     } catch (err) {
       Logger.error(err)
       // Alert the user that something failed

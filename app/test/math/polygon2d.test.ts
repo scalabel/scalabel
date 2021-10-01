@@ -1,4 +1,20 @@
-import { polyIsComplex } from "../../src/math/poly_complex"
+import { mergeNearbyVertices, polyIsComplex } from "../../src/math/polygon2d"
+
+test("Test for vertices merging", () => {
+  const testPolygon1: Array<[number, number]> = [
+    [1.0, 1.0],
+    [1.0, 2.0],
+    [2.0, 1.0]
+  ]
+  const testPolygon2: Array<[number, number]> = [
+    [1.0, 1.0],
+    [1.1, 1.1],
+    [1.0, 2.0],
+    [2.0, 1.0]
+  ]
+  expect(mergeNearbyVertices(testPolygon1, 1)).toMatchObject(testPolygon1)
+  expect(mergeNearbyVertices(testPolygon2, 1)).toMatchObject(testPolygon1)
+})
 
 test("Test for complex polygons correctness", () => {
   expect(
@@ -53,7 +69,7 @@ test("Test for complex polygons correctness", () => {
 })
 
 test("Test for complex polygons speed", () => {
-  const vertices: number[][] = [[]]
+  const vertices: Array<[number, number]> = []
   for (let i = 0; i < 10000; i++) {
     vertices.push([Math.random() * 100, Math.random() * 100])
   }

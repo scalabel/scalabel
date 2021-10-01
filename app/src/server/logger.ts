@@ -68,15 +68,15 @@ class Logger {
   }
 
   /**
-   * print warnings
+   * print warning messages
    *
-   * @param warn
+   * @param message
    */
-  public warning(warn: string): void {
-    if (warn !== undefined && !this._silent) {
+  public warning(message: string): void {
+    if (message !== "" && !this._silent) {
       this._logger.log({
         level: "warn",
-        message: warn
+        message: message
       })
     }
   }
