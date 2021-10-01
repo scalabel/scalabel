@@ -520,9 +520,9 @@ export function filterIntersectedPolygonsInProject(
 
   if (numberOfIntersections > 0) {
     msg =
-      `Found ${numberOfIntersections} polygon intersection(s)!\n` +
+      `Found and filtered${numberOfIntersections} polygon intersection(s)!\n` +
       msg +
-      "\nPlease check your data."
+      "Please check your data."
     Logger.warning(msg)
   }
 
