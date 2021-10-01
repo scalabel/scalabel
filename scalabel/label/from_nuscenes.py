@@ -69,6 +69,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--version",
         "-v",
+        choices=["v1.0-trainval", "v1.0-test", "v1.0-mini"],
         help="NuScenes dataset version to convert.",
     )
     parser.add_argument(
@@ -139,58 +140,60 @@ def yaw_to_quaternion(yaw: float) -> Quaternion:
     ).elements
 
 
-def move_boxes_to_camera_space(
-    boxes: List[Box], ego_pose: DictStrAny, cam_pose: DictStrAny
-) -> None:
-    """Move boxes from world space to car space to cam space.
+def transform_boxes(boxes: List[Box], pose: DictStrAny) -> None:
+    """Move boxes from world space to given pose space.
 
     Note: mutates input boxes.
     """
-    translation_car = -np.array(ego_pose["translation"])
-    rotation_car = Quaternion(ego_pose["rotation"]).inverse
-
-    translation_cam = -np.array(cam_pose["translation"])
-    rotation_cam = Quaternion(cam_pose["rotation"]).inverse
+    translation = -np.array(pose["translation"])
+    rotation = Quaternion(pose["rotation"]).inverse
 
     for box in boxes:
-        # Bring box to car space
-        box.translate(translation_car)
-        box.rotate(rotation_car)
-
-        # Bring box to cam space
-        box.translate(translation_cam)
-        box.rotate(rotation_cam)
+        box.translate(translation)
+        box.rotate(rotation)
 
 
 def parse_labels(
     data: NuScenes,
     boxes: List[Box],
-    calibration_cam: DictStrAny,
-    ego_pose_ref: DictStrAny,
-    img_size: Tuple[int, int],
+    ego_pose: DictStrAny,
+    calibration_cam: Optional[DictStrAny] = None,
+    img_size: Optional[Tuple[int, int]] = None,
 ) -> Optional[List[Label]]:
     """Parse NuScenes LiDAR labels into single camera."""
     if len(boxes):
         labels = []
         # transform into the camera coord system
-        move_boxes_to_camera_space(boxes, ego_pose_ref, calibration_cam)
-        intrinsic_matrix = np.array(calibration_cam["camera_intrinsic"])
+        transform_boxes(boxes, ego_pose)
+        if calibration_cam is not None:
+            transform_boxes(boxes, calibration_cam)
+            intrinsic_matrix = np.array(calibration_cam["camera_intrinsic"])
+
         for box in boxes:
             box_class = category_to_detection_name(box.name)
-            in_image = box_in_image(box, intrinsic_matrix, img_size)
+            in_image = True
+            if calibration_cam is not None:
+                assert img_size is not None
+                in_image = box_in_image(box, intrinsic_matrix, img_size)
+
             if in_image and box_class is not None:
                 xyz = tuple(box.center.tolist())
                 w, l, h = box.wlh
                 roty = quaternion_to_yaw(box.orientation)
-                # Project 3d box to 2d.
-                corners = box.corners()
-                corner_coords = (
-                    view_points(corners, intrinsic_matrix, True)
-                    .T[:, :2]
-                    .tolist()
-                )
-                # Keep only corners that fall within the image.
-                x1, y1, x2, y2 = post_process_coords(corner_coords)
+
+                box2d = None
+                if calibration_cam is not None:
+                    # Project 3d box to 2d.
+                    corners = box.corners()
+                    corner_coords = (
+                        view_points(corners, intrinsic_matrix, True)
+                        .T[:, :2]
+                        .tolist()
+                    )
+                    # Keep only corners that fall within the image.
+                    x1, y1, x2, y2 = post_process_coords(corner_coords)
+                    box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+
                 instance_data = data.get("sample_annotation", box.token)
                 # Attributes can be retrieved via instance_data and also the
                 # category is more fine-grained than box_class.
@@ -199,7 +202,7 @@ def parse_labels(
                 label = Label(
                     id=instance_data["instance_token"],
                     category=box_class,
-                    box2d=Box2D(x1=x1, y1=y1, x2=x2, y2=y2),
+                    box2d=box2d,
                     box3d=Box3D(
                         location=xyz,
                         dimension=(h, w, l),
@@ -243,7 +246,6 @@ def parse_sequence(
         timestamp = lidar_data["timestamp"]
         lidar_filepath = lidar_data["filename"]
         ego_pose = data.get("ego_pose", lidar_data["ego_pose_token"])
-        # TODO add non-keyframes?
         frame_names = []
         for cam in cams:
             cam_token = sample["data"][cam]
@@ -257,7 +259,7 @@ def parse_sequence(
 
             boxes = data.get_boxes(lidar_token)
             labels = parse_labels(
-                data, boxes, calibration_cam, ego_pose_cam, img_wh
+                data, boxes, ego_pose_cam, calibration_cam, img_wh
             )
 
             frame = Frame(
@@ -281,7 +283,8 @@ def parse_sequence(
             url=lidar_filepath,
             extrinsics=ego_pose_to_extrinsics(ego_pose),
             timestamp=timestamp,
-            frames=frame_names,  # TODO lidar labels could be stored here
+            frames=frame_names,
+            labels=parse_labels(data, data.get_boxes(lidar_token), ego_pose),
         )
         groups.append(group)
 
@@ -339,9 +342,10 @@ def run(args: argparse.Namespace) -> None:
         "NuScenes conversion."
     )
 
-    # TODO add test conversion
     if "mini" in args.version:
         splits_to_iterate = ["mini_train", "mini_val"]
+    elif "test" in args.version:
+        splits_to_iterate = ["test"]
     else:
         splits_to_iterate = ["train", "val"]
 

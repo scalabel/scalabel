@@ -46,7 +46,7 @@ to each label in images. Fields of item are given below.
 
 .. code-block:: yaml
     
-    - name: string
+    - name: string (must be unique over the whole dataset!)
     - url: string
     - videoName: string (optional)
     - attributes: a dictionary of frame attributes

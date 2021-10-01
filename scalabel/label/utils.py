@@ -173,7 +173,10 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
             assert frame.extrinsics == frame_ref.extrinsics
 
         if frame.labels is not None:
-            assert frame_ref.labels is not None
+            if frame_ref.labels is None:
+                frame_ref.labels = []
+                assert len(frame.labels) == 0
+
             for label, label_ref in zip(frame.labels, frame_ref.labels):
                 assert label.id == label_ref.id
                 assert label.category == label_ref.category
