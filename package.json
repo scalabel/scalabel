@@ -17,7 +17,7 @@
   "scripts": {
     "build": "webpack --config webpack.config.js --mode=production",
     "watch-dev": "webpack --watch --config webpack.config.js --mode=development",
-    "serve": "node app/dist/main.js --config ./local-data/scalabel/config.yml --max-old-space-size=8192",
+    "serve": "node app/dist/main.js --max-old-space-size=8192 --config ./local-data/scalabel/config.yml",
     "lint": "eslint -c .eslintrc.json --ext .ts,.tsx app/src/ app/test",
     "test": "jest"
   },

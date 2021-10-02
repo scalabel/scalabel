@@ -100,7 +100,7 @@ function startHTTPServer(
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    formidable(),
+    formidable({ maxFileSize: 1000 * 1024 * 1024 }),
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(
