@@ -32,6 +32,8 @@ export function mergeNearbyVertices(
  */
 export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
   const intersections: number[][] = []
+  // Closed polygon
+  vertices.push(vertices[0])
 
   for (let i = 0; i < vertices.length - 1; i++) {
     for (let j = i + 1; j < vertices.length - 1; j++) {
@@ -63,7 +65,7 @@ export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
 }
 
 /**
- * Determines if two lines intersect
+ * Determines if two line segments intersect
  *
  * @param v1
  * @param v2
@@ -76,10 +78,21 @@ function intersects(
   v3: number[],
   v4: number[]
 ): boolean {
+  // If the two vertices are the same, then they intersect
+  if (v1 === v3 && v2 === v4) {
+    return true
+  }
+
+  // Determines orthogonality of the line segments
+  // If det = 0, line segments are parallel
+  // If det = 1, line segments are orthogonal
   const det =
     (v2[0] - v1[0]) * (v4[1] - v3[1]) - (v4[0] - v3[0]) * (v2[1] - v1[1])
+
   if (det === 0) {
-    return false
+    // If line segments are colinear, then they intersect
+    // Else they are parallel non-intersecting line segments
+    return v2 === v3
   } else {
     const lambda =
       ((v4[1] - v3[1]) * (v4[0] - v1[0]) + (v3[0] - v4[0]) * (v4[1] - v1[1])) /

@@ -22,8 +22,7 @@ test("Test for complex polygons correctness", () => {
       [10, 10],
       [20, 10],
       [20, 20],
-      [10, 20],
-      [10, 10]
+      [10, 20]
     ])
   ).toEqual(expect.arrayContaining([]))
   expect(
@@ -31,8 +30,7 @@ test("Test for complex polygons correctness", () => {
       [895.4950561523438, 418.41326904296875],
       [895.4950561523438, 474.0956115722656],
       [981.058837890625, 474.0956115722656],
-      [981.058837890625, 418.41326904296875],
-      [895.4950561523438, 418.41326904296875]
+      [981.058837890625, 418.41326904296875]
     ])
   ).toEqual(expect.arrayContaining([]))
   expect(
@@ -40,8 +38,7 @@ test("Test for complex polygons correctness", () => {
       [10, 10],
       [20, 10],
       [10, 20],
-      [20, 20],
-      [10, 10]
+      [20, 20]
     ])
   ).toEqual(expect.arrayContaining([[20, 10, 10, 20, 20, 20, 10, 10]]))
   expect(
@@ -49,8 +46,7 @@ test("Test for complex polygons correctness", () => {
       [895.4950561523438, 418.41326904296875],
       [981.058837890625, 474.0956115722656],
       [895.4950561523438, 474.0956115722656],
-      [981.058837890625, 418.41326904296875],
-      [895.4950561523438, 418.41326904296875]
+      [981.058837890625, 418.41326904296875]
     ])
   ).toEqual(
     expect.arrayContaining([
@@ -66,6 +62,28 @@ test("Test for complex polygons correctness", () => {
       ]
     ])
   )
+})
+
+test("Test for complex polygons with multiple points with the same coordinates", () => {
+  expect(
+    polyIsComplex([
+      [10, 10],
+      [10, 10],
+      [30, 10],
+      [20, 20]
+    ])
+  ).toEqual(expect.arrayContaining([]))
+})
+
+test("Test for complex polygons with colinear line segments", () => {
+  expect(
+    polyIsComplex([
+      [10, 10],
+      [20, 10],
+      [30, 10],
+      [20, 20]
+    ])
+  ).toEqual(expect.arrayContaining([]))
 })
 
 test("Test for complex polygons speed", () => {
