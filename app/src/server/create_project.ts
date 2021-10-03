@@ -149,8 +149,6 @@ export async function parseFiles(
         Category[]
       ]
     ) => {
-      console.log(result[4])
-      console.log(result[1])
       return {
         items: result[0][0],
         itemGroups: result[0][1],
@@ -544,6 +542,7 @@ function partitionItemsIntoTasks(
         }
       }
     })
+    taskGroupIndices.push(itemGroups.length)
   } else {
     // If we have multiple sensors,
     // we should make those belong to the same group into the same task
@@ -558,8 +557,10 @@ function partitionItemsIntoTasks(
         currentSize = 0
       }
     }
+    if (currentSize > 0) {
+      taskGroupIndices.push(itemGroups.length)
+    }
   }
-  taskGroupIndices.push(itemGroups.length)
   return taskGroupIndices
 }
 
