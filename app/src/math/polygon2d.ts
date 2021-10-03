@@ -32,20 +32,36 @@ export function mergeNearbyVertices(
  */
 export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
   const intersections: number[][] = []
-  // Closed polygon
+  // Close polygon
   vertices.push(vertices[0])
-
   for (let i = 0; i < vertices.length - 1; i++) {
     for (let j = i + 1; j < vertices.length - 1; j++) {
       if (
-        intersects(
-          vertices[i],
-          vertices[i + 1],
-          vertices[j],
-          vertices[j + 1]
-        ) &&
-        j - i !== 1 &&
-        j - i !== vertices.length - 2
+        vertices[i][0] === vertices[j][0] &&
+        vertices[i][1] === vertices[j][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i][0] === vertices[j + 1][0] &&
+        vertices[i][1] === vertices[j + 1][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i + 1][0] === vertices[j][0] &&
+        vertices[i + 1][1] === vertices[j][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i + 1][0] === vertices[j + 1][0] &&
+        vertices[i + 1][1] === vertices[j + 1][1]
+      ) {
+        continue
+      }
+      if (
+        intersects(vertices[i], vertices[i + 1], vertices[j], vertices[j + 1])
       ) {
         intersections.push([
           vertices[i][0],
@@ -60,8 +76,49 @@ export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
       }
     }
   }
-
   return intersections
+}
+
+/**
+ * Given three collinear points v1, v2, v3, the function checks if q lies
+ * on line segment pr
+ *
+ * @param p
+ * @param q
+ * @param r
+ */
+function onSegment(p: number[], q: number[], r: number[]): boolean {
+  if (
+    q[0] <= Math.max(p[0], r[0]) &&
+    q[0] >= Math.min(p[0], r[0]) &&
+    q[1] <= Math.max(p[1], r[1]) &&
+    q[1] >= Math.min(p[1], r[1])
+  ) {
+    return true
+  }
+  return false
+}
+
+/**
+ * To find orientation of ordered triplet
+ * The function returns following values
+ * 0 -> p, q and r are collinear
+ * 1 -> Clockwise
+ * 2 -> Counterclockwise
+ *
+ * @param p
+ * @param q
+ * @param r
+ */
+function orientation(p: number[], q: number[], r: number[]): number {
+  const val = (q[0] - p[0]) * (r[1] - p[1]) - (r[0] - p[0]) * (q[1] - p[1])
+  if (val === 0) {
+    return 0
+  } else if (val > 0) {
+    return 1
+  } else {
+    return 2
+  }
 }
 
 /**
@@ -78,28 +135,25 @@ function intersects(
   v3: number[],
   v4: number[]
 ): boolean {
-  // If the two vertices are the same, then they intersect
-  if (v1 === v3 && v2 === v4) {
+  const len1 =
+    (v2[0] - v1[0]) * (v2[0] - v1[0]) + (v2[1] - v1[1]) * (v2[1] - v1[1])
+  const len2 =
+    (v4[0] - v3[0]) * (v4[0] - v3[0]) + (v4[1] - v3[1]) * (v4[1] - v3[1])
+  if (len1 < 1 || len2 < 1) {
+    return false
+  }
+  const o1 = orientation(v1, v2, v3)
+  const o2 = orientation(v1, v2, v4)
+  const o3 = orientation(v3, v4, v1)
+  const o4 = orientation(v3, v4, v2)
+  if (
+    (o1 !== o2 && o3 !== o4) ||
+    (o1 === 0 && onSegment(v1, v3, v2)) ||
+    (o2 === 0 && onSegment(v1, v4, v2)) ||
+    (o3 === 0 && onSegment(v3, v1, v4)) ||
+    (o4 === 0 && onSegment(v3, v2, v4))
+  ) {
     return true
   }
-
-  // Determines orthogonality of the line segments
-  // If det = 0, line segments are parallel
-  // If det = 1, line segments are orthogonal
-  const det =
-    (v2[0] - v1[0]) * (v4[1] - v3[1]) - (v4[0] - v3[0]) * (v2[1] - v1[1])
-
-  if (det === 0) {
-    // If line segments are colinear, then they intersect
-    // Else they are parallel non-intersecting line segments
-    return v2 === v3
-  } else {
-    const lambda =
-      ((v4[1] - v3[1]) * (v4[0] - v1[0]) + (v3[0] - v4[0]) * (v4[1] - v1[1])) /
-      det
-    const gamma =
-      ((v1[1] - v2[1]) * (v4[0] - v1[0]) + (v2[0] - v1[0]) * (v4[1] - v1[1])) /
-      det
-    return lambda >= 0 && lambda <= 1 && gamma >= 0 && gamma <= 1
-  }
+  return false
 }

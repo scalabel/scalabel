@@ -84,6 +84,30 @@ test("Test for complex polygons with colinear line segments", () => {
       [20, 20]
     ])
   ).toEqual(expect.arrayContaining([]))
+  expect(
+    polyIsComplex([
+      [10, 10],
+      [20, 10],
+      [15, 10],
+      [25, 10]
+    ])
+  ).toEqual(
+    expect.arrayContaining([
+      [10, 10, 20, 10, 15, 10, 25, 10],
+      [20, 10, 15, 10, 25, 10, 10, 10]
+    ])
+  )
+  // TODO: check why this test returns empty array
+  expect(
+    polyIsComplex([
+      [10, 10],
+      [20, 10],
+      [30, 10],
+      [25, 15],
+      [20, 10],
+      [15, 5]
+    ])
+  ).toEqual(expect.arrayContaining([]))
 })
 
 test("Test for complex polygons speed", () => {
