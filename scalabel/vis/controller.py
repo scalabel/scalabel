@@ -26,6 +26,7 @@ class DisplayConfig:
     with_box2d: bool
     with_box3d: bool
     with_poly2d: bool
+    with_graph: bool
     with_ctrl_points: bool
     with_tags: bool
     ctrl_point_size: float
@@ -36,6 +37,7 @@ class DisplayConfig:
         with_box2d: bool = True,
         with_box3d: bool = False,
         with_poly2d: bool = True,
+        with_graph: bool = True,
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
@@ -45,6 +47,7 @@ class DisplayConfig:
         self.with_box2d = with_box2d
         self.with_box3d = with_box3d
         self.with_poly2d = with_poly2d
+        self.with_graph = with_graph
         self.with_ctrl_points = with_ctrl_points
         self.with_tags = with_tags
         self.ctrl_point_size = ctrl_point_size
