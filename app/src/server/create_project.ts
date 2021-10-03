@@ -149,6 +149,8 @@ export async function parseFiles(
         Category[]
       ]
     ) => {
+      console.log(result[4])
+      console.log(result[1])
       return {
         items: result[0][0],
         itemGroups: result[0][1],
@@ -695,7 +697,6 @@ export async function createTasks(
       maxOrder += Object.keys(newItem.labels).length
 
       itemsForTask.push(newItem)
-      console.log(newItem)
     }
 
     // Update the num labels/shapes based on imports
