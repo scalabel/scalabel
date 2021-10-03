@@ -4,6 +4,7 @@ import {
   ExtrinsicsType,
   IntrinsicsType,
   ItemType,
+  SensorType,
   TaskStatus,
   TrackType,
   Vector3Type
@@ -23,6 +24,8 @@ export interface TaskData {
 export interface DatasetExport {
   /** items in dataset */
   frames: ItemExport[]
+  /** items group, contain multi-sensor information */
+  frameGroups?: ItemGroupExport[]
   /** shared fields for frames */
   config: ConfigExport
 }
@@ -48,6 +51,11 @@ export interface ItemExport {
   timestamp: number
   /** item labels */
   labels: LabelExport[]
+}
+
+export interface ItemGroupExport extends ItemExport {
+  /** name of frames, the key is the id of the corresponding sensor*/
+  frames: { [id: number]: string }
 }
 
 export interface PolygonExportType {
@@ -127,6 +135,8 @@ export interface ConfigExport {
   attributes?: Attribute[]
   /** categories */
   categories: string[]
+  /** sensors */
+  sensors?: SensorType[]
 }
 
 export interface ImageSizeType {

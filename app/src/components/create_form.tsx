@@ -248,12 +248,12 @@ export default class CreateForm extends React.Component<Props, State> {
                 form_id={FormField.LABEL_SPEC}
                 with_json
               />
-              {/* <StyledUpload
+              <StyledUpload
                 required={false}
                 label={"Sensors"}
                 form_id={FormField.SENSORS}
                 with_json
-              /> */}
+              />
             </FormGroup>
           )}
           <FormGroup row={true} className={classes.formGroup}>
