@@ -483,27 +483,28 @@ export function filterIntersectedPolygonsInProject(
             // If it is a polyline label, do not check intersection
             if (!poly.closed) {
               filteredLabels.push(label)
-            }
-            // This is a workaround for importing bdd100k labels.
-            // Its polygon may contain vertices that is very close (<1)
-            // And the intersection there always appear under this situation
-            // So we merge them first to avoid intersection
-            poly.vertices = mergeNearbyVertices(poly.vertices, 1)
-            // Check whether the polygon have intersections
-            const intersectionData = polyIsComplex(poly.vertices)
-            if (intersectionData.length > 0) {
-              numberOfIntersections += intersectionData.length
-              intersectionData.forEach((seg) => {
-                msg = `Image url: ${
-                  item.url !== undefined ? item.url.toString() : ""
-                }\n`
-                msg += `polygon ID: ${label.id.toString()}\n`
-                msg += `Segment1: (${seg[0]}, ${seg[1]}, ${seg[2]}, ${seg[3]})\n`
-                msg += `Segment2: (${seg[4]}, ${seg[5]}, ${seg[6]}, ${seg[7]})\n`
-                msg += `\n`
-              })
             } else {
-              filteredLabels.push(label)
+              // This is a workaround for importing bdd100k labels.
+              // Its polygon may contain vertices that is very close (<1)
+              // And the intersection there always appear under this situation
+              // So we merge them first to avoid intersection
+              poly.vertices = mergeNearbyVertices(poly.vertices, 1)
+              // Check whether the polygon have intersections
+              const intersectionData = polyIsComplex(poly.vertices)
+              if (intersectionData.length > 0) {
+                numberOfIntersections += intersectionData.length
+                intersectionData.forEach((seg) => {
+                  msg = `Image url: ${
+                    item.url !== undefined ? item.url.toString() : ""
+                  }\n`
+                  msg += `polygon ID: ${label.id.toString()}\n`
+                  msg += `Segment1: (${seg[0]}, ${seg[1]}, ${seg[2]}, ${seg[3]})\n`
+                  msg += `Segment2: (${seg[4]}, ${seg[5]}, ${seg[6]}, ${seg[7]})\n`
+                  msg += `\n`
+                })
+              } else {
+                filteredLabels.push(label)
+              }
             }
           })
         } else {

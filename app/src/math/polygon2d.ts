@@ -36,28 +36,7 @@ export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
   vertices.push(vertices[0])
   for (let i = 0; i < vertices.length - 1; i++) {
     for (let j = i + 1; j < vertices.length - 1; j++) {
-      if (
-        vertices[i][0] === vertices[j][0] &&
-        vertices[i][1] === vertices[j][1]
-      ) {
-        continue
-      }
-      if (
-        vertices[i][0] === vertices[j + 1][0] &&
-        vertices[i][1] === vertices[j + 1][1]
-      ) {
-        continue
-      }
-      if (
-        vertices[i + 1][0] === vertices[j][0] &&
-        vertices[i + 1][1] === vertices[j][1]
-      ) {
-        continue
-      }
-      if (
-        vertices[i + 1][0] === vertices[j + 1][0] &&
-        vertices[i + 1][1] === vertices[j + 1][1]
-      ) {
+      if (j - i === 1 || j - i === vertices.length - 2) {
         continue
       }
       if (
@@ -135,13 +114,6 @@ function intersects(
   v3: number[],
   v4: number[]
 ): boolean {
-  const len1 =
-    (v2[0] - v1[0]) * (v2[0] - v1[0]) + (v2[1] - v1[1]) * (v2[1] - v1[1])
-  const len2 =
-    (v4[0] - v3[0]) * (v4[0] - v3[0]) + (v4[1] - v3[1]) * (v4[1] - v3[1])
-  if (len1 < 1 || len2 < 1) {
-    return false
-  }
   const o1 = orientation(v1, v2, v3)
   const o2 = orientation(v1, v2, v4)
   const o3 = orientation(v3, v4, v1)

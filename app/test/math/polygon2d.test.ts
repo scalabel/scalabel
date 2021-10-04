@@ -24,7 +24,7 @@ test("Test for complex polygons correctness", () => {
       [20, 20],
       [10, 20]
     ])
-  ).toEqual(expect.arrayContaining([]))
+  ).toMatchObject([])
   expect(
     polyIsComplex([
       [895.4950561523438, 418.41326904296875],
@@ -32,7 +32,7 @@ test("Test for complex polygons correctness", () => {
       [981.058837890625, 474.0956115722656],
       [981.058837890625, 418.41326904296875]
     ])
-  ).toEqual(expect.arrayContaining([]))
+  ).toMatchObject([])
   expect(
     polyIsComplex([
       [10, 10],
@@ -40,7 +40,7 @@ test("Test for complex polygons correctness", () => {
       [10, 20],
       [20, 20]
     ])
-  ).toEqual(expect.arrayContaining([[20, 10, 10, 20, 20, 20, 10, 10]]))
+  ).toMatchObject([[20, 10, 10, 20, 20, 20, 10, 10]])
   expect(
     polyIsComplex([
       [895.4950561523438, 418.41326904296875],
@@ -48,20 +48,18 @@ test("Test for complex polygons correctness", () => {
       [895.4950561523438, 474.0956115722656],
       [981.058837890625, 418.41326904296875]
     ])
-  ).toEqual(
-    expect.arrayContaining([
-      [
-        895.4950561523438,
-        418.41326904296875,
-        981.058837890625,
-        474.0956115722656,
-        895.4950561523438,
-        474.0956115722656,
-        981.058837890625,
-        418.41326904296875
-      ]
-    ])
-  )
+  ).toMatchObject([
+    [
+      895.4950561523438,
+      418.41326904296875,
+      981.058837890625,
+      474.0956115722656,
+      895.4950561523438,
+      474.0956115722656,
+      981.058837890625,
+      418.41326904296875
+    ]
+  ])
 })
 
 test("Test for complex polygons with multiple points with the same coordinates", () => {
@@ -71,8 +69,8 @@ test("Test for complex polygons with multiple points with the same coordinates",
       [10, 10],
       [30, 10],
       [20, 20]
-    ])
-  ).toEqual(expect.arrayContaining([]))
+    ]).length
+  ).toBeGreaterThan(0)
 })
 
 test("Test for complex polygons with colinear line segments", () => {
@@ -83,7 +81,7 @@ test("Test for complex polygons with colinear line segments", () => {
       [30, 10],
       [20, 20]
     ])
-  ).toEqual(expect.arrayContaining([]))
+  ).toMatchObject([])
   expect(
     polyIsComplex([
       [10, 10],
@@ -91,13 +89,10 @@ test("Test for complex polygons with colinear line segments", () => {
       [15, 10],
       [25, 10]
     ])
-  ).toEqual(
-    expect.arrayContaining([
-      [10, 10, 20, 10, 15, 10, 25, 10],
-      [20, 10, 15, 10, 25, 10, 10, 10]
-    ])
-  )
-  // TODO: check why this test returns empty array
+  ).toMatchObject([
+    [10, 10, 20, 10, 15, 10, 25, 10],
+    [20, 10, 15, 10, 25, 10, 10, 10]
+  ])
   expect(
     polyIsComplex([
       [10, 10],
@@ -106,8 +101,8 @@ test("Test for complex polygons with colinear line segments", () => {
       [25, 15],
       [20, 10],
       [15, 5]
-    ])
-  ).toEqual(expect.arrayContaining([]))
+    ]).length
+  ).toBeGreaterThan(0)
 })
 
 test("Test for complex polygons speed", () => {
