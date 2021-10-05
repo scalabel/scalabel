@@ -20,6 +20,7 @@ Scalabel is an open-source web annotation tool.
    /config.rst
    /eval.rst
    /tools.rst
+   /visual.rst
    /label.rst
    /auto-label.rst
    /installation.rst

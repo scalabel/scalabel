@@ -45,3 +45,19 @@ will not shown.
 Once done labeling each item of the whole task, click ``Submit`` to indicate
 that the whole task is finished. This action marks the task as submitted in the
 project and vendor dashboards.
+
+Mode switch
+~~~~~~~~~~~~
+``ANNOTATING`` mode: The default mode. User could easiliy draw labels under
+this mode, but it's hard for user to select a label by clicking its edge.
+
+``SELECTING`` mode: Under this mode, labels could be selected by clicking
+its mask area.
+
+User could switch between these two modes by pressing ``x``, after clicking,
+a status bar will shown.
+
+.. figure:: ../media/doc/images/mode_switch.png
+   :alt: Mode Switch
+
+   You can switch mode by pressing x
