@@ -72,7 +72,7 @@ def load(
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
-            if content["groups"] is not None:
+            if "groups" in content and content["groups"] is not None:
                 raw_groups.extend(content["groups"])
             if content["config"] is not None:
                 raw_cfg = content["config"]
