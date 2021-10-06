@@ -233,10 +233,10 @@ def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
 
 
 def parse_sequence(
-    data: NuScenes, first_sample_token: str, scene_name: str
+    data: NuScenes, scene_info: Tuple[str, str]
 ) -> Tuple[List[Frame], List[FrameGroup]]:
     """Parse a full NuScenes sequence and convert it into scalabel frames."""
-    sample_token = first_sample_token
+    sample_token, scene_name = scene_info
     frames, groups = [], []
     frame_index = 0
     while sample_token:
@@ -316,14 +316,13 @@ def from_nuscenes(
     if nproc > 1:
         partial_results = pmap(
             func,
-            (first_sample_tokens, scene_names_per_split[split]),
+            zip(first_sample_tokens, scene_names_per_split[split]),
             nprocs=nproc,
         )
     else:
         partial_results = map(  # type: ignore
             func,
-            first_sample_tokens,
-            scene_names_per_split[split],
+            zip(first_sample_tokens, scene_names_per_split[split]),
         )
     frames, groups = [], []
     for f, g in partial_results:
