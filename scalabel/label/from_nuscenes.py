@@ -75,6 +75,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
+        default=None,
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
@@ -298,12 +299,9 @@ def from_nuscenes(
     data_path: str,
     version: str,
     split: str,
-    output_dir: str,
     nproc: int = NPROC,
 ) -> Dataset:
     """Convert NuScenes dataset to Scalabel format."""
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
     data, df = load_data(data_path, version)
     scene_names_per_split = create_splits_scenes()
 
@@ -348,15 +346,21 @@ def run(args: argparse.Namespace) -> None:
     else:
         splits_to_iterate = ["train", "val"]
 
+    if args.output is not None:
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
+        out_dir = args.output
+    else:
+        out_dir = args.input
+
     for split in splits_to_iterate:
         result = from_nuscenes(
             args.input,
             args.version,
             split,
-            args.output,
             args.nproc,
         )
-        save(os.path.join(args.output, f"scalabel_{split}.json"), result)
+        save(os.path.join(out_dir, f"scalabel_{split}.json"), result)
 
 
 if __name__ == "__main__":
