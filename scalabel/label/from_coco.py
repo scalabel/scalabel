@@ -73,7 +73,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         size = ImageSize(width=img["width"], height=img["height"])
 
         if "file_name" in img:
-            url = img["file_name"]
+            url: Optional[str] = img["file_name"]
         else:
             url = None
 
