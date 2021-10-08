@@ -1,5 +1,6 @@
 """Convert kitti to Scalabel format."""
 import argparse
+import math
 import os
 import os.path as osp
 from typing import Dict, List, Tuple
@@ -8,7 +9,10 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 
+from scalabel.label.utils import cart2hom, rotation_y_to_alpha
+
 from ..common.parallel import NPROC
+from ..common.typing import NDArrayF64
 from .io import save
 from .kitti_utlis import (
     KittiPoseParser,
@@ -20,12 +24,17 @@ from .kitti_utlis import (
 from .typing import (
     Box2D,
     Box3D,
+    Category,
+    Config,
+    Dataset,
     Extrinsics,
     Frame,
+    FrameGroup,
     ImageSize,
     Intrinsics,
     Label,
 )
+from .utils import get_extrinsics_from_matrix, get_matrix_from_extrinsics
 
 kitti_cats = {
     "Pedestrian": "pedestrian",
@@ -39,6 +48,8 @@ kitti_cats = {
     "Misc": "misc",
     "DontCare": "dontcare",
 }
+
+kitti_used_cats = ["pedestrian", "cyclist", "car", "truck", "tram", "misc"]
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -73,6 +84,80 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for conversion",
     )
     return parser.parse_args()
+
+
+def get_box_transformation_matrix(
+    obj_loc: Tuple[float, float, float],
+    obj_size: Tuple[float, float, float],
+    ry: float,
+) -> NDArrayF64:
+    """Create a transformation matrix for a given label box pose."""
+    x, y, z = obj_loc
+    cos = math.cos(ry)
+    sin = math.sin(ry)
+
+    l, h, w = obj_size
+
+    return np.array(
+        [
+            [l * cos, -w * sin, 0, x],
+            [l * sin, w * cos, 0, y],
+            [0, 0, h, z],
+            [0, 0, 0, 1],
+        ]
+    )
+
+
+def heading_transform(box3d: Box3D, calib: NDArrayF64) -> float:
+    """Transform heading from camera coordinate into lidar system."""
+    rot_y = box3d.orientation[1]
+    tm: NDArrayF64 = calib @ get_box_transformation_matrix(
+        box3d.location,
+        (box3d.dimension[0], box3d.dimension[1], box3d.dimension[2]),
+        rot_y,
+    )
+    pt1 = np.array([-0.5, 0.5, 0, 1.0])
+    pt2 = np.array([0.5, 0.5, 0, 1.0])
+    pt1 = np.matmul(tm, pt1).tolist()
+    pt2 = np.matmul(tm, pt2).tolist()
+    return -math.atan2(pt2[2] - pt1[2], pt2[0] - pt1[0])
+
+
+def parse_lidar_labels(
+    labels: List[Label],
+    calib: Extrinsics,
+) -> List[Label]:
+    """Function parsing tracking / detection labels into lidar frames."""
+    lidar2cam_mat = get_matrix_from_extrinsics(calib)
+    cam2lidar_mat = np.linalg.inv(lidar2cam_mat)
+
+    new_labels = []
+    for label in labels:
+        if label.box3d is not None:
+            box3d = label.box3d
+
+            center = np.array([box3d.location])
+            center_lidar = tuple(
+                np.dot(cam2lidar_mat, cart2hom(center).T)[:3, 0].tolist()
+            )
+            heading = heading_transform(box3d, cam2lidar_mat)
+
+            new_box3d = Box3D(
+                orientation=(0.0, heading, 0.0),
+                location=center_lidar,
+                dimension=box3d.dimension,
+                alpha=rotation_y_to_alpha(heading, center_lidar),  # type: ignore # pylint: disable=line-too-long
+            )
+        new_labels.append(
+            Label(
+                category=label.category,
+                box2d=label.box2d,
+                box3d=new_box3d if label.box3d is not None else None,
+                id=label.id,
+            )
+        )
+
+    return new_labels
 
 
 def parse_label(
@@ -202,15 +287,16 @@ def from_kitti_det(
         else:
             labels = []
 
-        image_name = osp.join(img_dir, img_name)
-        image_name = data_type + image_name.split(data_type)[-1]
+        full_path = osp.join(img_dir, img_name)
+        url = data_type + full_path.split(data_type)[-1]
 
-        video_name = "/".join(image_name.split("/")[:-1])
+        video_name = "/".join(url.split("/")[:-1])
 
         f = Frame(
             name=img_name,
             videoName=video_name,
             frameIndex=img_id,
+            url=url,
             size=image_size,
             extrinsics=cam2global,
             intrinsics=intrinsics,
@@ -224,36 +310,56 @@ def from_kitti_det(
 def from_kitti(
     data_dir: str,
     data_type: str,
-) -> List[Frame]:
+) -> Dataset:
     """Function converting kitti data to Scalabel format."""
     if data_type == "detection":
-        return from_kitti_det(data_dir, data_type)
+        return from_kitti_det(data_dir, data_type)  # type: ignore
 
-    frames = []
+    frames, groups = [], []
 
-    img_dir = osp.join(data_dir, "image_02")
+    velodyne_dir = osp.join(data_dir, "velodyne")
     label_dir = osp.join(data_dir, "label_02")
-    cali_dir = osp.join(data_dir, "calib")
+    calib_dir = osp.join(data_dir, "calib")
     oxt_dir = osp.join(data_dir, "oxts")
 
-    assert osp.exists(img_dir), f"Folder {img_dir} is not found"
-
-    vid_names = sorted(os.listdir(img_dir))
+    vid_names = sorted(os.listdir(velodyne_dir))
 
     global_track_id = 0
+    total_img_names = {}
 
     for vid_name in vid_names:
-        trackid_maps: Dict[str, int] = {}
-
-        img_names = sorted(
+        for cam in ["image_02", "image_03"]:
+            img_dir = osp.join(data_dir, cam)
+            total_img_names[cam] = sorted(
+                [
+                    f.path
+                    for f in os.scandir(osp.join(img_dir, vid_name))
+                    if f.is_file() and f.name.endswith("png")
+                ]
+            )
+        velodyne_names = sorted(
             [
                 f.path
-                for f in os.scandir(osp.join(img_dir, vid_name))
-                if f.is_file() and f.name.endswith("png")
+                for f in os.scandir(osp.join(velodyne_dir, vid_name))
+                if f.is_file() and f.name.endswith("bin")
             ]
         )
+        trackid_maps: Dict[str, int] = {}
+        frame_names = []
 
-        projection = read_calib(cali_dir, int(vid_name))
+        projections = {}
+        projections["image_02"] = read_calib(
+            calib_dir, int(vid_name), 2
+        ).reshape(3, 4)
+        projections["image_03"] = read_calib(
+            calib_dir, int(vid_name), 3
+        ).reshape(3, 4)
+        rect = read_calib(calib_dir, int(vid_name), 4).reshape(3, 3)
+        rect = np.hstack((rect, np.zeros((3, 1))))
+        rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
+
+        velo2cam = read_calib(calib_dir, int(vid_name), 5).reshape(3, 4)
+        velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
 
         if osp.exists(label_dir):
             label_file = osp.join(label_dir, f"{vid_name}.txt")
@@ -261,11 +367,7 @@ def from_kitti(
                 data_type, label_file, trackid_maps, global_track_id
             )
 
-        for fr, img_name in enumerate(sorted(img_names)):
-            with Image.open(img_name) as img:
-                width, height = img.size
-                image_size = ImageSize(height=height, width=width)
-
+        for fr in range(len(total_img_names["image_02"])):
             fields = read_oxts(oxt_dir, int(vid_name))
             poses = [KittiPoseParser(fields[i]) for i in range(len(fields))]
 
@@ -278,35 +380,70 @@ def from_kitti(
 
             cam2global = Extrinsics(location=position, rotation=rotation)
 
-            intrinsics = Intrinsics(
-                focal=(projection[0][0], projection[1][1]),
-                center=(projection[0][2], projection[1][2]),
-            )
+            for cam, img_names in total_img_names.items():
+                img_name = img_names[fr]
+                with Image.open(img_name) as img:
+                    width, height = img.size
+                    image_size = ImageSize(height=height, width=width)
 
-            if osp.exists(label_dir):
-                if not fr in labels_dict:
-                    labels = []
+                projection = projections[cam]
+                intrinsics = Intrinsics(
+                    focal=(projection[0][0], projection[1][1]),
+                    center=(projection[0][2], projection[1][2]),
+                )
+
+                if osp.exists(label_dir):
+                    if not fr in labels_dict:
+                        labels = []
+                    else:
+                        labels = labels_dict[fr]
                 else:
-                    labels = labels_dict[fr]
-            else:
-                labels = []
+                    labels = []
 
-            img_name = data_type + img_name.split(data_type)[-1]
+                url = data_type + img_name.split(data_type)[-1]
 
-            video_name = "/".join(img_name.split("/")[:-1])
+                video_name = "/".join(url.split("/")[:-1])
 
-            f = Frame(
-                name=img_name.split("/")[-1],
-                videoName=video_name,
-                frameIndex=fr,
-                size=image_size,
-                extrinsics=cam2global,
-                intrinsics=intrinsics,
-                labels=labels,
+                img_name_list = img_name.split(f"{cam}/")[-1].split("/")
+
+                img_name = f"{cam}_" + "_".join(img_name_list)
+
+                f = Frame(
+                    name=img_name,
+                    videoName=video_name,
+                    frameIndex=fr,
+                    url=url,
+                    size=image_size,
+                    extrinsics=cam2global,
+                    intrinsics=intrinsics,
+                    labels=labels,
+                )
+                frame_names.append(img_name)
+                frames.append(f)
+
+            url = data_type + velodyne_names[fr].split(data_type)[-1]
+
+            lidar2cam_mat = np.dot(rect, velo2cam)
+            lidar2global_mat = np.dot(
+                get_matrix_from_extrinsics(cam2global), lidar2cam_mat
             )
-            frames.append(f)
+            lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
+            lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
 
-    return frames
+            groups.append(
+                FrameGroup(
+                    name=vid_name,
+                    videoName=vid_name,
+                    url=url,
+                    extrinsics=lidar2global,
+                    frames=frame_names,
+                    labels=parse_lidar_labels(labels, lidar2cam),
+                )
+            )
+
+    cfg = Config(categories=[Category(name=n) for n in kitti_used_cats])
+    dataset = Dataset(frames=frames, groups=groups, config=cfg)
+    return dataset
 
 
 def run(args: argparse.Namespace) -> None:
