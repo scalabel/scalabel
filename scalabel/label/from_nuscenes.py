@@ -141,40 +141,41 @@ def yaw_to_quaternion(yaw: float) -> Quaternion:
     ).elements
 
 
-def transform_boxes(boxes: List[Box], pose: DictStrAny) -> None:
-    """Move boxes from world space to given pose space.
+def transform_boxes(
+    boxes: List[Box], ego_pose: DictStrAny, car_from_sensor: DictStrAny
+) -> None:
+    """Move boxes from world space to given sensor frame.
 
     Note: mutates input boxes.
     """
-    translation = -np.array(pose["translation"])
-    rotation = Quaternion(pose["rotation"]).inverse
-
+    translation_car = -np.array(ego_pose["translation"])
+    rotation_car = Quaternion(ego_pose["rotation"]).inverse
+    translation_sensor = -np.array(car_from_sensor["translation"])
+    rotation_sensor = Quaternion(car_from_sensor["rotation"]).inverse
     for box in boxes:
-        box.translate(translation)
-        box.rotate(rotation)
+        box.translate(translation_car)
+        box.rotate(rotation_car)
+        box.translate(translation_sensor)
+        box.rotate(rotation_sensor)
 
 
 def parse_labels(
     data: NuScenes,
     boxes: List[Box],
     ego_pose: DictStrAny,
-    calibration_cam: Optional[DictStrAny] = None,
+    calib_sensor: DictStrAny,
     img_size: Optional[Tuple[int, int]] = None,
 ) -> Optional[List[Label]]:
-    """Parse NuScenes LiDAR labels into single camera."""
+    """Parse NuScenes labels into sensor frame."""
     if len(boxes):
         labels = []
-        # transform into the camera coord system
-        transform_boxes(boxes, ego_pose)
-        if calibration_cam is not None:
-            transform_boxes(boxes, calibration_cam)
-            intrinsic_matrix = np.array(calibration_cam["camera_intrinsic"])
-
+        # transform into the sensor coord system
+        transform_boxes(boxes, ego_pose, calib_sensor)
+        intrinsic_matrix = np.array(calib_sensor["camera_intrinsic"])
         for box in boxes:
             box_class = category_to_detection_name(box.name)
             in_image = True
-            if calibration_cam is not None:
-                assert img_size is not None
+            if img_size is not None:
                 in_image = box_in_image(box, intrinsic_matrix, img_size)
 
             if in_image and box_class is not None:
@@ -183,7 +184,7 @@ def parse_labels(
                 roty = quaternion_to_yaw(box.orientation)
 
                 box2d = None
-                if calibration_cam is not None:
+                if img_size is not None:
                     # Project 3d box to 2d.
                     corners = box.corners()
                     corner_coords = (
@@ -217,14 +218,22 @@ def parse_labels(
     return None
 
 
-def ego_pose_to_extrinsics(ego_pose: DictStrAny) -> Extrinsics:
-    """Convert NuScenes ego pose to extrinsics."""
-    matrix = transform_matrix(
+def get_extrinsics(
+    ego_pose: DictStrAny, car_from_sensor: DictStrAny
+) -> Extrinsics:
+    """Convert NuScenes ego pose / sensor_to_car to global extrinsics."""
+    global_from_car = transform_matrix(
         ego_pose["translation"],
         Quaternion(ego_pose["rotation"]),
         inverse=False,
     )
-    return get_extrinsics_from_matrix(matrix)
+    car_from_sensor_ = transform_matrix(
+        car_from_sensor["translation"],
+        Quaternion(car_from_sensor["rotation"]),
+        inverse=False,
+    )
+    extrinsics = np.dot(global_from_car, car_from_sensor_)
+    return get_extrinsics_from_matrix(extrinsics)
 
 
 def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
@@ -244,6 +253,9 @@ def parse_sequence(
         sample = data.get("sample", sample_token)
         lidar_token = sample["data"]["LIDAR_TOP"]
         lidar_data = data.get("sample_data", lidar_token)
+        calibration_lidar = data.get(
+            "calibrated_sensor", lidar_data["calibrated_sensor_token"]
+        )
         timestamp = lidar_data["timestamp"]
         lidar_filepath = lidar_data["filename"]
         ego_pose = data.get("ego_pose", lidar_data["ego_pose_token"])
@@ -269,7 +281,7 @@ def parse_sequence(
                 frameIndex=frame_index,
                 url=cam_filepath,
                 timestamp=cam_data["timestamp"],
-                extrinsics=ego_pose_to_extrinsics(ego_pose_cam),
+                extrinsics=get_extrinsics(ego_pose_cam, calibration_cam),
                 intrinsics=calibration_to_intrinsics(calibration_cam),
                 size=ImageSize(width=img_wh[0], height=img_wh[1]),
                 labels=labels,
@@ -282,10 +294,12 @@ def parse_sequence(
             videoName=scene_name,
             frameIndex=frame_index,
             url=lidar_filepath,
-            extrinsics=ego_pose_to_extrinsics(ego_pose),
+            extrinsics=get_extrinsics(ego_pose, calibration_lidar),
             timestamp=timestamp,
             frames=frame_names,
-            labels=parse_labels(data, data.get_boxes(lidar_token), ego_pose),
+            labels=parse_labels(
+                data, data.get_boxes(lidar_token), ego_pose, calibration_lidar
+            ),
         )
         groups.append(group)
 
