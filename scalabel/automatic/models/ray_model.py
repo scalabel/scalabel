@@ -24,7 +24,7 @@ import ray
 from ray import serve
 
 
-@ray.remote(num_gpus=2)
+@serve.deployment(ray_actor_options={"num_cpus": 16, "num_gpus": 1})
 class RayModel(object):
     def __init__(self, cfg_path: str, item_list: List, num_workers: int, logger) -> None:
         cfg = get_cfg()
@@ -84,8 +84,6 @@ class RayModel(object):
     def __call__(self, items: Dict, request_type: str) -> List:
         self.calc_time(init=True)
         inputs = [self.image_dict[item["url"]] for item in items]
-
-        time.sleep(100)
 
         # inference
         if request_type == QueryConsts.QUERY_TYPES["inference"]:

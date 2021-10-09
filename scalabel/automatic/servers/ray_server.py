@@ -15,6 +15,7 @@ import ray
 from ray import serve
 
 ray.init()
+serve.start()
 
 
 class RayModelServerScheduler(object):
@@ -76,6 +77,7 @@ class RayModelServerScheduler(object):
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
         request_type = request_message["type"]
+
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
             self.inference_request_queue.append({
                 "items": items,
@@ -92,9 +94,8 @@ class RayModelServerScheduler(object):
                 items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
                 self.calc_time("pack data")
 
-                results = ray.get(model.__call__.remote(items, QueryConsts.QUERY_TYPES["inference"]))
-                print(results)
-                time.sleep(100)
+                results = ray.get(model.remote(items, QueryConsts.QUERY_TYPES["inference"]))
+
                 self.calc_time("model inference time")
 
                 model_response_channel = self.model_response_channel % (project_name, task_id)
@@ -153,9 +154,9 @@ class RayModelServerScheduler(object):
         self.threads[model_request_channel] = thread
 
     def get_model(self, model_name, item_list):
-        # RayModel.options(name="test").deploy(model_name, item_list, 1, self.logger)
-        # model = serve.get_deployment("test").get_handle(sync=False)
-        model = RayModel.remote(model_name, item_list, 1, self.logger)
+        RayModel.options(name="test").deploy(model_name, item_list, 1, self.logger)
+        model = serve.get_deployment("test").get_handle()
+        # model = RayModel.remote(model_name, item_list, 1, self.logger)
         return model
 
     def put_model(self, model, put_policy=None):
