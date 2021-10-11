@@ -81,8 +81,8 @@ jump to :ref:`quick-start`.
 
     .. code-block:: bash
 
-        node app/dist/main.js --max-old-space-size=8192 \
-            --config ./local-data/scalabel/config.yml
+        node --max-old-space-size=8192 \
+            app/dist/main.js --config ./local-data/scalabel/config.yml
 
     
     Depending on your system, you may also have to increase the memory limit
