@@ -34,7 +34,11 @@ from .typing import (
     Intrinsics,
     Label,
 )
-from .utils import get_extrinsics_from_matrix, get_matrix_from_extrinsics
+from .utils import (
+    get_box_transformation_matrix,
+    get_extrinsics_from_matrix,
+    get_matrix_from_extrinsics,
+)
 
 kitti_cats = {
     "Pedestrian": "pedestrian",
@@ -84,28 +88,6 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for conversion",
     )
     return parser.parse_args()
-
-
-def get_box_transformation_matrix(
-    obj_loc: Tuple[float, float, float],
-    obj_size: Tuple[float, float, float],
-    ry: float,
-) -> NDArrayF64:
-    """Create a transformation matrix for a given label box pose."""
-    x, y, z = obj_loc
-    cos = math.cos(ry)
-    sin = math.sin(ry)
-
-    l, h, w = obj_size
-
-    return np.array(
-        [
-            [l * cos, -w * sin, 0, x],
-            [l * sin, w * cos, 0, y],
-            [0, 0, h, z],
-            [0, 0, 0, 1],
-        ]
-    )
 
 
 def heading_transform(box3d: Box3D, calib: NDArrayF64) -> float:
@@ -244,17 +226,16 @@ def parse_label(
 def from_kitti_det(
     data_dir: str,
     data_type: str,
-) -> List[Frame]:
+) -> Dataset:
     """Function converting kitti detection data to Scalabel format."""
-    frames = []
+    frames, groups = [], []
 
-    img_dir = osp.join(data_dir, "image_2")
+    velodyne_dir = osp.join(data_dir, "velodyne")
+    left_img_dir = osp.join(data_dir, "image_2")
     label_dir = osp.join(data_dir, "label_2")
-    cali_dir = osp.join(data_dir, "calib")
+    calib_dir = osp.join(data_dir, "calib")
 
-    assert osp.exists(img_dir), f"Folder {img_dir} is not found"
-
-    img_names = sorted(os.listdir(img_dir))
+    img_names = sorted(os.listdir(left_img_dir))
 
     global_track_id = 0
 
@@ -264,47 +245,92 @@ def from_kitti_det(
     cam2global = Extrinsics(location=position, rotation=rotation)
 
     for img_id, img_name in enumerate(img_names):
+        velodyne_name = img_name.split(".")[0] + ".bin"
         trackid_maps: Dict[str, int] = {}
+        frame_names = []
 
-        with Image.open(osp.join(img_dir, img_name)) as img:
-            width, height = img.size
-            image_size = ImageSize(height=height, width=width)
+        rect = read_calib_det(
+            calib_dir, int(img_name.split(".")[0]), 4
+        ).reshape(3, 3)
+        rect = np.hstack((rect, np.zeros((3, 1))))
+        rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
 
-        projection = read_calib_det(cali_dir, int(img_name.split(".")[0]))
+        velo2cam = read_calib_det(
+            calib_dir, int(img_name.split(".")[0]), 5
+        ).reshape(3, 4)
+        velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
 
-        intrinsics = Intrinsics(
-            focal=(projection[0][0], projection[1][1]),
-            center=(projection[0][2], projection[1][2]),
-        )
+        for cam_id, cam in enumerate(["image_2", "image_3"]):
+            img_dir = osp.join(data_dir, cam)
+            with Image.open(osp.join(img_dir, img_name)) as img:
+                width, height = img.size
+                image_size = ImageSize(height=height, width=width)
 
-        if osp.exists(label_dir):
-            label_file = osp.join(label_dir, f"{img_name.split('.')[0]}.txt")
-            labels_dict, _, _ = parse_label(
-                data_type, label_file, trackid_maps, global_track_id
+            projection = read_calib_det(
+                calib_dir, int(img_name.split(".")[0]), cam_id + 2
+            ).reshape(3, 4)
+
+            intrinsics = Intrinsics(
+                focal=(projection[0][0], projection[1][1]),
+                center=(projection[0][2], projection[1][2]),
             )
 
-            labels = labels_dict[0]
-        else:
-            labels = []
+            if osp.exists(label_dir):
+                label_file = osp.join(
+                    label_dir, f"{img_name.split('.')[0]}.txt"
+                )
+                labels_dict, _, _ = parse_label(
+                    data_type, label_file, trackid_maps, global_track_id
+                )
 
-        full_path = osp.join(img_dir, img_name)
+                labels = labels_dict[0]
+            else:
+                labels = []
+
+            full_path = osp.join(img_dir, img_name)
+            url = data_type + full_path.split(data_type)[-1]
+
+            video_name = "/".join(url.split("/")[:-1])
+
+            f = Frame(
+                name=f"{cam}_" + img_name,
+                videoName=video_name,
+                frameIndex=img_id,
+                url=url,
+                size=image_size,
+                extrinsics=cam2global,
+                intrinsics=intrinsics,
+                labels=labels,
+            )
+            frame_names.append(f"{cam}_" + img_name)
+            frames.append(f)
+
+        full_path = osp.join(velodyne_dir, velodyne_name)
         url = data_type + full_path.split(data_type)[-1]
 
         video_name = "/".join(url.split("/")[:-1])
 
-        f = Frame(
-            name=img_name,
-            videoName=video_name,
-            frameIndex=img_id,
-            url=url,
-            size=image_size,
-            extrinsics=cam2global,
-            intrinsics=intrinsics,
-            labels=labels,
+        lidar2cam_mat = np.dot(rect, velo2cam)
+        lidar2global_mat = np.dot(
+            get_matrix_from_extrinsics(cam2global), lidar2cam_mat
         )
-        frames.append(f)
+        lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
+        lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
 
-    return frames
+        groups.append(
+            FrameGroup(
+                name=velodyne_name.split(".")[0],
+                videoName=video_name,
+                url=url,
+                extrinsics=lidar2global,
+                frames=frame_names,
+                labels=parse_lidar_labels(labels, lidar2cam),
+            )
+        )
+
+    cfg = Config(categories=[Category(name=n) for n in kitti_used_cats])
+    dataset = Dataset(frames=frames, groups=groups, config=cfg)
+    return dataset
 
 
 def from_kitti(
@@ -313,7 +339,7 @@ def from_kitti(
 ) -> Dataset:
     """Function converting kitti data to Scalabel format."""
     if data_type == "detection":
-        return from_kitti_det(data_dir, data_type)  # type: ignore
+        return from_kitti_det(data_dir, data_type)
 
     frames, groups = [], []
 

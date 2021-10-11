@@ -93,7 +93,7 @@ def read_calib_det(calib_dir: str, img_idx: int, cam: int = 2) -> NDArrayF64:
     """
     with open_read_text(os.path.join(calib_dir, f"{img_idx:06d}.txt")) as f:
         fields = [line.split() for line in f]
-    return np.asarray(fields[cam][1:], dtype=np.float64).reshape(3, 4)
+    return np.asarray(fields[cam][1:], dtype=np.float64)
 
 
 def list_from_file(

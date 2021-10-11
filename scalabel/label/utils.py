@@ -1,13 +1,13 @@
 """Utility functions for label."""
 import math
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
 from ..common.typing import NDArrayF64
-from .typing import Category, Extrinsics, Frame, Intrinsics, Label
+from .typing import Category, Extrinsics, Frame, FrameGroup, Intrinsics, Label
 
 
 def get_intrinsics_from_matrix(matrix: NDArrayF64) -> Intrinsics:
@@ -142,6 +142,28 @@ def rotation_y_to_alpha(
     return alpha
 
 
+def get_box_transformation_matrix(
+    obj_loc: Tuple[float, float, float],
+    obj_size: Tuple[float, float, float],
+    ry: float,
+) -> NDArrayF64:
+    """Create a transformation matrix for a given label box pose."""
+    x, y, z = obj_loc
+    cos = math.cos(ry)
+    sin = math.sin(ry)
+
+    l, h, w = obj_size
+
+    return np.array(
+        [
+            [l * cos, -w * sin, 0, x],
+            [l * sin, w * cos, 0, y],
+            [0, 0, h, z],
+            [0, 0, 0, 1],
+        ]
+    )
+
+
 def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
     """Compare two list of frames."""
     for frame, frame_ref in zip(result, result_compare):
@@ -204,3 +226,63 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
                     assert label.box3d == label_ref.box3d
         else:
             assert frame.labels == frame_ref.labels
+
+
+def compare_groups_results(
+    result: List[FrameGroup], result_compare: List[FrameGroup]
+) -> None:
+    """Compare two list of group of frames."""
+    for group, group_ref in zip(result, result_compare):
+        assert group.name == group_ref.name
+        assert group.videoName == group_ref.videoName
+        assert group.url == group_ref.url
+        if group.extrinsics is not None:
+            assert group_ref.extrinsics is not None
+            assert group.extrinsics.location == pytest.approx(
+                group_ref.extrinsics.location
+            )
+            assert group.extrinsics.rotation == pytest.approx(
+                group_ref.extrinsics.rotation
+            )
+        else:
+            assert group.extrinsics == group_ref.extrinsics
+
+        if group.frames is not None:
+            assert group_ref.frames is not None
+            for frame_names, frame_names_ref in zip(
+                group.name, group_ref.name
+            ):
+                assert frame_names == frame_names_ref
+        else:
+            assert group.frames == group_ref.frames
+
+        if group.labels is not None:
+            if group_ref.labels is None:
+                group_ref.labels = []
+                assert len(group.labels) == 0
+
+            for label, label_ref in zip(group.labels, group_ref.labels):
+                assert label.id == label_ref.id
+                assert label.category == label_ref.category
+                if label.box2d is not None:
+                    assert label_ref.box2d is not None
+                    assert label.box2d.x1 == pytest.approx(label_ref.box2d.x1)
+                    assert label.box2d.y1 == pytest.approx(label_ref.box2d.y1)
+                    assert label.box2d.x2 == pytest.approx(label_ref.box2d.x2)
+                    assert label.box2d.y2 == pytest.approx(label_ref.box2d.y2)
+                else:
+                    assert label.box2d == label_ref.box2d
+
+                if label.box3d is not None:
+                    assert label_ref.box3d is not None
+                    assert label.box3d.location == pytest.approx(
+                        label_ref.box3d.location
+                    )
+                    assert label.box3d.dimension == pytest.approx(
+                        label_ref.box3d.dimension
+                    )
+                    assert label.box3d.orientation == pytest.approx(
+                        label_ref.box3d.orientation
+                    )
+                else:
+                    assert label.box3d == label_ref.box3d

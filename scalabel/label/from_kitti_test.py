@@ -7,7 +7,7 @@ from ..common.parallel import NPROC
 from ..unittest.util import get_test_file
 from .from_kitti import run
 from .io import load
-from .utils import compare_results
+from .utils import compare_groups_results, compare_results
 
 
 def test_run() -> None:
@@ -29,6 +29,13 @@ def test_run() -> None:
     result_compare = load(result_filepath).frames
 
     compare_results(result, result_compare)
+
+    groups_result = load(
+        os.path.join(output_dir, "tracking_training.json")
+    ).groups
+    groups_result_compare = load(result_filepath).groups
+
+    compare_groups_results(groups_result, groups_result_compare)  # type: ignore # pylint: disable=line-too-long
 
     # clean up
     shutil.rmtree(output_dir)

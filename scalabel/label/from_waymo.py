@@ -47,7 +47,11 @@ from .typing import (
     Intrinsics,
     Label,
 )
-from .utils import get_extrinsics_from_matrix, get_matrix_from_extrinsics
+from .utils import (
+    get_box_transformation_matrix,
+    get_extrinsics_from_matrix,
+    get_matrix_from_extrinsics,
+)
 
 cameras_id2name = {
     1: "FRONT",
@@ -104,28 +108,6 @@ def parse_arguments() -> argparse.Namespace:
         help="number of processes for conversion",
     )
     return parser.parse_args()
-
-
-def get_box_transformation_matrix(
-    obj_loc: Tuple[float, float, float],
-    obj_size: Tuple[float, float, float],
-    ry: float,
-) -> NDArrayF64:
-    """Create a transformation matrix for a given label box pose."""
-    x, y, z = obj_loc
-    cos = math.cos(ry)
-    sin = math.sin(ry)
-
-    l, h, w = obj_size
-
-    return np.array(
-        [
-            [l * cos, -w * sin, 0, x],
-            [l * sin, w * cos, 0, y],
-            [0, 0, h, z],
-            [0, 0, 0, 1],
-        ]
-    )
 
 
 def heading_transform(laser_box3d: label_pb2, calib: NDArrayF64) -> float:
