@@ -89,7 +89,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    # fh = logging.FileHandler('throughput_1_1.txt')
+    # fh = logging.FileHandler('ray_throughput_4.txt')
     # fh.setLevel(logging.DEBUG)
     # logger.addHandler(fh)
 

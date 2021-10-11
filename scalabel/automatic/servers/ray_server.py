@@ -15,7 +15,7 @@ import ray
 from ray import serve
 
 ray.init()
-serve.start()
+serve.start(http_options={"port": 8001})
 
 
 class RayModelServerScheduler(object):
@@ -34,12 +34,15 @@ class RayModelServerScheduler(object):
         self.inference_request_queue = []
         self.train_request_queue = []
 
+        self.results_queue = []
+
         self.tasks = {}
         self.threads = {}
 
         self.logger = logger
         self.verbose = False
 
+        self.cao = time.time()
     # restore when server restarts, connects to redis channels.
     def restore(self):
         pass
@@ -88,52 +91,66 @@ class RayModelServerScheduler(object):
 
             self.calc_time("save data to query list")
 
-            if len(self.inference_request_queue) == self.inference_batch_size:
-                model = self.tasks[f'{project_name}_{task_id}']["model"]
+            if len(self.results_queue) == 0:
+                self.cao = time.time()
 
-                items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
-                self.calc_time("pack data")
+            model = self.tasks[f'{project_name}_{task_id}']["model"]
+            result_id = model.remote(items, QueryConsts.QUERY_TYPES["inference"])
+            self.results_queue.append(result_id)
 
-                results = ray.get(model.remote(items, QueryConsts.QUERY_TYPES["inference"]))
+            if len(self.results_queue) == 1000:
+                self.logger.info("I'm here!")
+                ray.get(self.results_queue)
+                print(time.time() - self.cao)
+                self.results_queue = []
 
-                self.calc_time("model inference time")
 
-                model_response_channel = self.model_response_channel % (project_name, task_id)
-                for i in range(self.inference_batch_size):
-                    pred_boxes: List[List[float]] = []
-                    # pred_boxes.append([1.0, 1.0, 100.0, 100.0])
-                    for box in results[i]["instances"].pred_boxes:
-                        box = box.cpu().numpy()
-                        pred_boxes.append(box.tolist())
-                    item_indices = self.inference_request_queue[i]["item_indices"]
-                    action_packet_id = self.inference_request_queue[i]["action_packet_id"]
-                    self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
-                self.inference_request_queue = []
-
-                self.calc_time("response time")
-        else:
-            self.train_request_queue.append({
-                "items": items,
-                "item_indices": item_indices,
-                "action_packet_id": action_packet_id,
-                "request_type": request_type
-            })
-
-            self.calc_time("save data to query list")
-
-            if len(self.train_request_queue) == self.train_batch_size:
-                model = self.tasks[f'{project_name}_{task_id}']["model"]
-
-                items = [self.train_request_queue[i]["items"][0] for i in range(self.train_batch_size)]
-                self.calc_time("pack data")
-
-                model(items, QueryConsts.QUERY_TYPES["training"])
-                self.calc_time("model training time")
-
-                self.train_request_queue = []
-
-            if len(self.train_request_queue) == 0:
-                pass
+        #     if len(self.inference_request_queue) == self.inference_batch_size:
+        #         model = self.tasks[f'{project_name}_{task_id}']["model"]
+        #
+        #         items = [self.inference_request_queue[i]["items"][0] for i in range(self.inference_batch_size)]
+        #         self.calc_time("pack data")
+        #
+        #         results = ray.get(model.remote(items, QueryConsts.QUERY_TYPES["inference"]))
+        #
+        #         self.calc_time("model inference time")
+        #
+        #         model_response_channel = self.model_response_channel % (project_name, task_id)
+        #         for i in range(self.inference_batch_size):
+        #             pred_boxes: List[List[float]] = []
+        #             # pred_boxes.append([1.0, 1.0, 100.0, 100.0])
+        #             for box in results[i]["instances"].pred_boxes:
+        #                 box = box.cpu().numpy()
+        #                 pred_boxes.append(box.tolist())
+        #             item_indices = self.inference_request_queue[i]["item_indices"]
+        #             action_packet_id = self.inference_request_queue[i]["action_packet_id"]
+        #             self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+        #         self.inference_request_queue = []
+        #
+        #         self.calc_time("response time")
+        # else:
+        #     self.train_request_queue.append({
+        #         "items": items,
+        #         "item_indices": item_indices,
+        #         "action_packet_id": action_packet_id,
+        #         "request_type": request_type
+        #     })
+        #
+        #     self.calc_time("save data to query list")
+        #
+        #     if len(self.train_request_queue) == self.train_batch_size:
+        #         model = self.tasks[f'{project_name}_{task_id}']["model"]
+        #
+        #         items = [self.train_request_queue[i]["items"][0] for i in range(self.train_batch_size)]
+        #         self.calc_time("pack data")
+        #
+        #         ray.get(model.remote(items, QueryConsts.QUERY_TYPES["training"]))
+        #         self.calc_time("model training time")
+        #
+        #         self.train_request_queue = []
+        #
+        #     if len(self.train_request_queue) == 0:
+        #         pass
 
     def register_task(self, project_name, task_id, item_list):
         task_model_config = self.model_config["OD"]
@@ -183,9 +200,9 @@ def launch() -> None:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler('server.log')
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
+    # fh = logging.FileHandler('ray_latency_bs_1.txt')
+    # fh.setLevel(logging.DEBUG)
+    # logger.addHandler(fh)
 
     # scheduler config
     # create scheduler
@@ -214,4 +231,5 @@ def launch() -> None:
 
 
 if __name__ == "__main__":
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1, 2"
     launch()

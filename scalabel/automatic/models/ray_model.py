@@ -24,7 +24,7 @@ import ray
 from ray import serve
 
 
-@serve.deployment(ray_actor_options={"num_cpus": 16, "num_gpus": 1})
+@serve.deployment(num_replicas=4, ray_actor_options={"num_cpus": 32, "num_gpus": 1})
 class RayModel(object):
     def __init__(self, cfg_path: str, item_list: List, num_workers: int, logger) -> None:
         cfg = get_cfg()
@@ -38,6 +38,10 @@ class RayModel(object):
 
         self.cfg = cfg.clone()
         self.model = build_model(cfg)
+        #
+        # # These are for training
+        # self.optimizer = build_optimizer(cfg, self.model)
+        # self.train_steps = 1
 
         self.model.eval()
         checkpointer = DetectionCheckpointer(self.model)
@@ -80,17 +84,53 @@ class RayModel(object):
         for url, image in zip(urls, image_list):
             self.image_dict[url] = image
 
+    @serve.batch(max_batch_size=4)
+    async def handle_batch(self, inputs):
+        with torch.no_grad():
+            predictions = self.model(inputs)
+            self.calc_time("model inference time")
+            return predictions
+
     # 0 for inference, 1 for training
-    def __call__(self, items: Dict, request_type: str) -> List:
+    async def __call__(self, items: Dict, request_type: str) -> List:
         self.calc_time(init=True)
         inputs = [self.image_dict[item["url"]] for item in items]
 
         # inference
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
-            with torch.no_grad():
-                predictions = self.model(inputs)
-                self.calc_time("model inference time")
-                return predictions
+            return await self.handle_batch(inputs[0])
+            # with torch.no_grad():
+            #     predictions = self.model(inputs)
+            #     self.calc_time("model inference time")
+            #     return predictions
+        # # training
+        # else:
+        #     # define a pseudo field for training simulation
+        #     instance_field = {"gt_boxes": Boxes(torch.tensor([1.0, 1.0, 100.0, 100.0]).unsqueeze(0)),
+        #                       "gt_classes": torch.tensor([0])}
+        #
+        #     for i in range(len(inputs)):
+        #         inputs[i]["instances"] = Instances((inputs[i]["height"], inputs[i]["width"]),
+        #                                            **instance_field)
+        #     self.calc_time("pack training data time")
+        #
+        #     self.model.train()
+        #     self.calc_time("changing to training time")
+        #     with EventStorage(0) as self.storage:
+        #         for _ in range(self.train_steps):
+        #             loss_dict = self.model(inputs)
+        #             losses = sum(loss_dict.values())
+        #
+        #             self.calc_time("loss calculation time")
+        #
+        #             self.optimizer.zero_grad()
+        #             losses.backward()
+        #             self.optimizer.step()
+        #
+        #             self.calc_time("optimization time")
+        #     self.model.eval()
+        #     self.calc_time("changing back to eval time")
+        #     return []
 
     def calc_time(self, message="", init=False):
         if not self.verbose:

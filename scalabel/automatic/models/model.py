@@ -37,7 +37,7 @@ class Predictor:
 
         # These are for training
         self.optimizer = build_optimizer(cfg, self.model)
-        self.train_steps = 2
+        self.train_steps = 1
 
         self.model.eval()
         checkpointer = DetectionCheckpointer(self.model)
@@ -51,7 +51,7 @@ class Predictor:
         self.load_inputs(item_list, num_workers)
 
         self.logger = logger
-        self.verbose = True
+        self.verbose = False
 
     @staticmethod
     def url_to_img(url: str, aug: object, device: str) -> Dict:

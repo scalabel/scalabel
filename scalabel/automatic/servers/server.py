@@ -172,9 +172,9 @@ def launch() -> None:
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler('latency_infer11_train11_no_sleep_2_step.txt')
-    fh.setLevel(logging.DEBUG)
-    logger.addHandler(fh)
+    # fh = logging.FileHandler('latency_infer11_train11_no_sleep_2_step.txt')
+    # fh.setLevel(logging.DEBUG)
+    # logger.addHandler(fh)
 
     # create scheduler
     server_config = {
@@ -191,6 +191,6 @@ def launch() -> None:
 
 
 if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     mp.set_start_method("spawn")
     launch()
