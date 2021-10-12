@@ -1,5 +1,6 @@
 """Convert kitti to Scalabel format."""
 import argparse
+import copy
 import math
 import os
 import os.path as osp
@@ -397,13 +398,20 @@ def from_kitti(
             poses = [KittiPoseParser(fields[i]) for i in range(len(fields))]
 
             rotation = tuple(
-                R.from_matrix(poses[frame_idx].rotation).as_euler("xyz").tolist()
+                R.from_matrix(poses[frame_idx].rotation)
+                .as_euler("xyz")
+                .tolist()
             )
             position = tuple(
-                np.array(poses[frame_idx].position - poses[0].position).tolist()
+                np.array(
+                    poses[frame_idx].position - poses[0].position
+                ).tolist()
             )
-
-            cam2global = Extrinsics(location=position, rotation=rotation)
+            offset_2_to_3 = (
+                projections["image_03"][0, -1] / projections["image_03"][0, 0]
+                - projections["image_02"][0, -1]
+                / projections["image_02"][0, 0]
+            )
 
             frame_names = []
             for cam, img_names in total_img_names.items():
@@ -416,6 +424,13 @@ def from_kitti(
                 intrinsics = Intrinsics(
                     focal=(projection[0][0], projection[1][1]),
                     center=(projection[0][2], projection[1][2]),
+                )
+                offset = 0
+                if cam == "image_03":
+                    offset = offset_2_to_3
+                cam2global = Extrinsics(
+                    location=(position[0] + offset, position[1], position[2]),
+                    rotation=rotation,
                 )
 
                 if osp.exists(label_dir):
@@ -432,6 +447,17 @@ def from_kitti(
 
                 img_name = f"{cam}_" + "_".join(img_name_list)
 
+                labels_cam = []
+                for label in labels:
+                    label_cam = copy.deepcopy(label)
+                    assert label_cam.box3d is not None
+                    label_cam.box3d.location = (
+                        label_cam.box3d.location[0] + offset,
+                        label_cam.box3d.location[1],
+                        label_cam.box3d.location[2],
+                    )
+                    labels_cam.append(label_cam)
+
                 frame = Frame(
                     name=img_name,
                     videoName=video_name,
@@ -440,7 +466,7 @@ def from_kitti(
                     size=image_size,
                     extrinsics=cam2global,
                     intrinsics=intrinsics,
-                    labels=labels,
+                    labels=labels_cam,
                 )
                 frame_names.append(img_name)
                 frames.append(frame)
@@ -454,7 +480,11 @@ def from_kitti(
             lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
             lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
 
-            group_name = "_".join(velodyne_names[frame_idx].split(velodyne_dir)[-1].split("/")[1:])
+            group_name = "_".join(
+                velodyne_names[frame_idx]
+                .split(velodyne_dir)[-1]
+                .split("/")[1:]
+            )
             groups.append(
                 FrameGroup(
                     name=group_name,

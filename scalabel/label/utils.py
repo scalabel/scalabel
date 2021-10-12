@@ -229,7 +229,8 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
 
 
 def compare_groups_results(
-    result: Optional[List[FrameGroup]], result_compare: Optional[List[FrameGroup]]
+    result: Optional[List[FrameGroup]],
+    result_compare: Optional[List[FrameGroup]],
 ) -> None:
     """Compare two list of group of frames."""
     assert result is not None and result_compare is not None
