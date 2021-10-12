@@ -326,6 +326,7 @@ def parse_frame(
 
     results, group_results = [], []
     frame_names = []
+    sequence = frame.context.name
     for camera_id, camera in cameras_id2name.items():
         (
             image_size,
@@ -334,9 +335,8 @@ def parse_frame(
             car2global,
             cam2global,
         ) = get_calibration(frame, camera_id)
-        seq_dir = frame.context.name + "_" + camera.lower()
-        url = os.path.join(seq_dir, frame_name)
-        img_filepath = os.path.join(output_dir, seq_dir, frame_name)
+        url = os.path.join(sequence, camera, frame_name)
+        img_filepath = os.path.join(output_dir, sequence, camera, frame_name)
 
         img_name = (
             frame.context.name + "_" + camera.lower() + f"_{frame_id:07d}.jpg"
@@ -344,7 +344,7 @@ def parse_frame(
 
         if save_images and not os.path.exists(img_filepath):
             if not os.path.exists(os.path.dirname(img_filepath)):
-                os.mkdir(os.path.dirname(img_filepath))
+                os.makedirs(os.path.dirname(img_filepath))
             im_bytes = utils.get(frame.images, camera_id).image
             with open(img_filepath, "wb") as fp:
                 fp.write(im_bytes)
@@ -356,7 +356,7 @@ def parse_frame(
 
         f = Frame(
             name=img_name,
-            videoName=seq_dir,
+            videoName=sequence,
             frameIndex=frame_id,
             url=url,
             size=image_size,
@@ -384,8 +384,8 @@ def parse_frame(
 
     group_results = [
         FrameGroup(
-            name=frame.context.name,
-            videoName=seq_dir,
+            name=frame_name,
+            videoName=sequence,
             url=url,
             extrinsics=lidar2global,
             frames=frame_names,
@@ -462,6 +462,8 @@ def run(args: argparse.Namespace) -> None:
         "Please install the requirements in scripts/optional.txt to use"
         "Waymo conversion."
     )
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
     result = from_waymo(
         args.input,
         args.output,

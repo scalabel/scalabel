@@ -7,7 +7,7 @@ from ..common.parallel import NPROC
 from ..unittest.util import get_test_file
 from .from_waymo import run
 from .io import load
-from .utils import compare_results
+from .utils import compare_results, compare_groups_results
 
 
 def test_run() -> None:
@@ -24,21 +24,25 @@ def test_run() -> None:
         nproc=NPROC,
     )
     run(args)
-    result = load(os.path.join(output_dir, "scalabel_anns.json")).frames
-    result_compare = load(result_filepath).frames
-    compare_results(result, result_compare)
+    result = load(os.path.join(output_dir, "scalabel_anns.json"))
+    result_compare = load(result_filepath)
+    compare_results(result.frames, result_compare.frames)
+    compare_groups_results(result.groups, result_compare.groups)
     os.remove(os.path.join(output_dir, "scalabel_anns.json"))
     args.use_lidar_labels = True
     run(args)
-    result = load(os.path.join(output_dir, "scalabel_anns.json")).frames
-    result_compare = load(result_lidar_filepath).frames
-    compare_results(result, result_compare)
+    result = load(os.path.join(output_dir, "scalabel_anns.json"))
+    result_compare = load(result_lidar_filepath)
+    compare_results(result.frames, result_compare.frames)
+    compare_groups_results(result.groups, result_compare.groups)
 
-    paths = [os.path.join(output_dir, cam) for cam in os.listdir(output_dir)]
-    for path in paths:
+    for path in os.listdir(output_dir):
         if os.path.isdir(path):
-            assert len(os.listdir(path)) == 2
-    assert len(paths) == 6  # 1 sequence * 5 cameras + 1 label file
+            # 1 sequence * 5 cameras + 1 label file
+            assert len(os.listdir(os.path.join(output_dir, path))) == 6
+            for subpath in os.listdir(os.path.join(output_dir, path)):
+                # 2 images
+                assert len(os.listdir(os.path.join(output_dir, subpath))) == 2
 
     # clean up
     shutil.rmtree(output_dir)

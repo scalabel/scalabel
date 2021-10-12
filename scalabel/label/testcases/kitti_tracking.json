@@ -3,7 +3,7 @@
     {
       "name": "image_02_0001_000000.png",
       "url": "tracking/training/image_02/0001/000000.png",
-      "videoName": "tracking/training/image_02/0001",
+      "videoName": "0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,
@@ -287,7 +287,7 @@
     {
       "name": "image_03_0001_000000.png",
       "url": "tracking/training/image_03/0001/000000.png",
-      "videoName": "tracking/training/image_03/0001",
+      "videoName": "0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,
@@ -571,7 +571,7 @@
     {
       "name": "image_02_0001_000001.png",
       "url": "tracking/training/image_02/0001/000001.png",
-      "videoName": "tracking/training/image_02/0001",
+      "videoName": "0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,
@@ -855,7 +855,7 @@
     {
       "name": "image_03_0001_000001.png",
       "url": "tracking/training/image_03/0001/000001.png",
-      "videoName": "tracking/training/image_03/0001",
+      "videoName": "0001",
       "intrinsics": {
         "focal": [
           721.5377197265625,
@@ -1139,7 +1139,7 @@
   ],
   "groups": [
     {
-      "name": "0001",
+      "name": "0001_000000.bin",
       "url": "tracking/training/velodyne/0001/000000.bin",
       "videoName": "0001",
       "intrinsics": null,
@@ -1157,7 +1157,7 @@
       },
       "attributes": null,
       "timestamp": null,
-      "frameIndex": null,
+      "frameIndex": 0,
       "size": null,
       "labels": [
         {
@@ -1412,7 +1412,7 @@
       ]
     },
     {
-      "name": "0001",
+      "name": "0001_000001.bin",
       "url": "tracking/training/velodyne/0001/000001.bin",
       "videoName": "0001",
       "intrinsics": null,
@@ -1430,7 +1430,7 @@
       },
       "attributes": null,
       "timestamp": null,
-      "frameIndex": null,
+      "frameIndex": 1,
       "size": null,
       "labels": [
         {
@@ -1680,8 +1680,6 @@
         }
       ],
       "frames": [
-        "image_02_0001_000000.png",
-        "image_03_0001_000000.png",
         "image_02_0001_000001.png",
         "image_03_0001_000001.png"
       ]

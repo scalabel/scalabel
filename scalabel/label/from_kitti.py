@@ -348,66 +348,66 @@ def from_kitti(
     calib_dir = osp.join(data_dir, "calib")
     oxt_dir = osp.join(data_dir, "oxts")
 
-    vid_names = sorted(os.listdir(velodyne_dir))
+    video_names = sorted(os.listdir(velodyne_dir))
 
     global_track_id = 0
     total_img_names = {}
 
-    for vid_name in vid_names:
+    for video_name in video_names:
         for cam in ["image_02", "image_03"]:
             img_dir = osp.join(data_dir, cam)
             total_img_names[cam] = sorted(
                 [
                     f.path
-                    for f in os.scandir(osp.join(img_dir, vid_name))
+                    for f in os.scandir(osp.join(img_dir, video_name))
                     if f.is_file() and f.name.endswith("png")
                 ]
             )
         velodyne_names = sorted(
             [
                 f.path
-                for f in os.scandir(osp.join(velodyne_dir, vid_name))
+                for f in os.scandir(osp.join(velodyne_dir, video_name))
                 if f.is_file() and f.name.endswith("bin")
             ]
         )
         trackid_maps: Dict[str, int] = {}
-        frame_names = []
 
         projections = {}
         projections["image_02"] = read_calib(
-            calib_dir, int(vid_name), 2
+            calib_dir, int(video_name), 2
         ).reshape(3, 4)
         projections["image_03"] = read_calib(
-            calib_dir, int(vid_name), 3
+            calib_dir, int(video_name), 3
         ).reshape(3, 4)
-        rect = read_calib(calib_dir, int(vid_name), 4).reshape(3, 3)
+        rect = read_calib(calib_dir, int(video_name), 4).reshape(3, 3)
         rect = np.hstack((rect, np.zeros((3, 1))))
         rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
 
-        velo2cam = read_calib(calib_dir, int(vid_name), 5).reshape(3, 4)
+        velo2cam = read_calib(calib_dir, int(video_name), 5).reshape(3, 4)
         velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
 
         if osp.exists(label_dir):
-            label_file = osp.join(label_dir, f"{vid_name}.txt")
+            label_file = osp.join(label_dir, f"{video_name}.txt")
             labels_dict, trackid_maps, global_track_id = parse_label(
                 data_type, label_file, trackid_maps, global_track_id
             )
 
-        for fr in range(len(total_img_names["image_02"])):
-            fields = read_oxts(oxt_dir, int(vid_name))
+        for frame_idx in range(len(total_img_names["image_02"])):
+            fields = read_oxts(oxt_dir, int(video_name))
             poses = [KittiPoseParser(fields[i]) for i in range(len(fields))]
 
             rotation = tuple(
-                R.from_matrix(poses[fr].rotation).as_euler("xyz").tolist()
+                R.from_matrix(poses[frame_idx].rotation).as_euler("xyz").tolist()
             )
             position = tuple(
-                np.array(poses[fr].position - poses[0].position).tolist()
+                np.array(poses[frame_idx].position - poses[0].position).tolist()
             )
 
             cam2global = Extrinsics(location=position, rotation=rotation)
 
+            frame_names = []
             for cam, img_names in total_img_names.items():
-                img_name = img_names[fr]
+                img_name = img_names[frame_idx]
                 with Image.open(img_name) as img:
                     width, height = img.size
                     image_size = ImageSize(height=height, width=width)
@@ -419,25 +419,23 @@ def from_kitti(
                 )
 
                 if osp.exists(label_dir):
-                    if not fr in labels_dict:
+                    if not frame_idx in labels_dict:
                         labels = []
                     else:
-                        labels = labels_dict[fr]
+                        labels = labels_dict[frame_idx]
                 else:
                     labels = []
 
                 url = data_type + img_name.split(data_type)[-1]
 
-                video_name = "/".join(url.split("/")[:-1])
-
                 img_name_list = img_name.split(f"{cam}/")[-1].split("/")
 
                 img_name = f"{cam}_" + "_".join(img_name_list)
 
-                f = Frame(
+                frame = Frame(
                     name=img_name,
                     videoName=video_name,
-                    frameIndex=fr,
+                    frameIndex=frame_idx,
                     url=url,
                     size=image_size,
                     extrinsics=cam2global,
@@ -445,9 +443,9 @@ def from_kitti(
                     labels=labels,
                 )
                 frame_names.append(img_name)
-                frames.append(f)
+                frames.append(frame)
 
-            url = data_type + velodyne_names[fr].split(data_type)[-1]
+            url = data_type + velodyne_names[frame_idx].split(data_type)[-1]
 
             lidar2cam_mat = np.dot(rect, velo2cam)
             lidar2global_mat = np.dot(
@@ -456,10 +454,12 @@ def from_kitti(
             lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
             lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
 
+            group_name = "_".join(velodyne_names[frame_idx].split(velodyne_dir)[-1].split("/")[1:])
             groups.append(
                 FrameGroup(
-                    name=vid_name,
-                    videoName=vid_name,
+                    name=group_name,
+                    videoName=video_name,
+                    frameIndex=frame_idx,
                     url=url,
                     extrinsics=lidar2global,
                     frames=frame_names,
@@ -475,7 +475,7 @@ def from_kitti(
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
     if not osp.exists(args.output_dir):
-        os.mkdir(args.output_dir)
+        os.makedirs(args.output_dir)
 
     output_name = f"{args.data_type}_{args.split}.json"
 

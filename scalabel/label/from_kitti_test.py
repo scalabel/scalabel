@@ -25,17 +25,11 @@ def test_run() -> None:
     )
     run(args)
 
-    result = load(os.path.join(output_dir, "tracking_training.json")).frames
-    result_compare = load(result_filepath).frames
+    result = load(os.path.join(output_dir, "tracking_training.json"))
+    result_compare = load(result_filepath)
 
-    compare_results(result, result_compare)
-
-    groups_result = load(
-        os.path.join(output_dir, "tracking_training.json")
-    ).groups
-    groups_result_compare = load(result_filepath).groups
-
-    compare_groups_results(groups_result, groups_result_compare)  # type: ignore # pylint: disable=line-too-long
+    compare_results(result.frames, result_compare.frames)
+    compare_groups_results(result.groups, result_compare.groups)
 
     # clean up
     shutil.rmtree(output_dir)

@@ -229,9 +229,10 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
 
 
 def compare_groups_results(
-    result: List[FrameGroup], result_compare: List[FrameGroup]
+    result: Optional[List[FrameGroup]], result_compare: Optional[List[FrameGroup]]
 ) -> None:
     """Compare two list of group of frames."""
+    assert result is not None and result_compare is not None
     for group, group_ref in zip(result, result_compare):
         assert group.name == group_ref.name
         assert group.videoName == group_ref.videoName
