@@ -273,12 +273,14 @@ export abstract class Label2D {
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
+   * @param {boolean} isTrackLinking
    * @param {ModeStatus} sessionMode
    */
   public abstract draw(
     canvas: Context2D,
     ratio: number,
     mode: DrawMode,
+    isTrackLinking: boolean,
     sessionMode: ModeStatus | undefined
   ): void
 
@@ -289,12 +291,14 @@ export abstract class Label2D {
    * @param {Vector2D} position
    * @param {number} ratio
    * @param {number[]} fillStyle
+   * @param {boolean} isTrackLinking
    */
   public drawTag(
     ctx: Context2D,
     ratio: number,
     position: Vector2D,
-    fillStyle: number[]
+    fillStyle: number[],
+    isTrackLinking: boolean = false
   ): void {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
@@ -334,6 +338,11 @@ export abstract class Label2D {
           tw += 72
         }
       }
+    }
+
+    if (isTrackLinking) {
+      abbr += ", selected"
+      tw += 100
     }
 
     ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
