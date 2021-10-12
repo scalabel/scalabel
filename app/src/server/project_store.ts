@@ -20,7 +20,7 @@ import {
   makeUserMetadata,
   safeParseJSON
 } from "./util"
-import { ItemExport } from "../types/export"
+// import { ItemExport } from "../types/export"
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -187,16 +187,7 @@ export class ProjectStore {
    */
   public async saveProject(project: Project): Promise<void> {
     const key = path.getProjectKey(project.config.projectName)
-    const toSaveProjectItems: Array<Partial<ItemExport>> = []
-    for (const item of project.items) {
-      const toSaveProjectItem: Partial<ItemExport> = {
-        ...item,
-        labels: []
-      }
-      toSaveProjectItems.push(toSaveProjectItem)
-    }
-    const toSaveProject = { ...project, items: toSaveProjectItems }
-    const data = JSON.stringify(toSaveProject, null, 2)
+    const data = JSON.stringify(project, null)
     await this.save(key, data)
   }
 
@@ -251,13 +242,11 @@ export class ProjectStore {
    * @param tasks
    */
   public async saveTasks(tasks: TaskType[]): Promise<void> {
-    const promises: Array<Promise<void>> = []
     for (const task of tasks) {
       const key = path.getTaskKey(task.config.projectName, task.config.taskId)
       const data = JSON.stringify(task, null, 2)
-      promises.push(this.save(key, data))
+      await this.save(key, data)
     }
-    await Promise.all(promises)
   }
 
   /**

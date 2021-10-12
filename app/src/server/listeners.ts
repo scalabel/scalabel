@@ -8,7 +8,6 @@ import { getSubmissionTime } from "../components/util"
 import { FormField } from "../const/project"
 import { DatasetExport, ItemExport } from "../types/export"
 import { Project } from "../types/project"
-import { TaskType } from "../types/state"
 import {
   createProject,
   createTasks,
@@ -340,8 +339,7 @@ export class Listeners {
     project.items = items
     const oldTasks = await this.projectStore.getTasksInProject(projectName)
     const taskStartNum = oldTasks.length
-    const tasks = await createTasks(project, taskStartNum, itemStartNum)
-    await this.projectStore.saveTasks(tasks)
+    await createTasks(project, this.projectStore, taskStartNum, itemStartNum)
 
     res.sendStatus(200)
   }
@@ -450,10 +448,7 @@ export class Listeners {
       await Promise.all([
         this.projectStore.saveProject(project),
         // Create tasks then save them
-        createTasks(project).then(
-          async (tasks: TaskType[]) => await this.projectStore.saveTasks(tasks)
-        )
-        // Save the project
+        createTasks(project, this.projectStore)
       ])
       res.send()
     } catch (err) {
