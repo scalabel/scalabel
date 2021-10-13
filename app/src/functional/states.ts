@@ -403,10 +403,10 @@ export function makeDefaultViewerConfig(
  */
 export function makeAttribute(params: Partial<Attribute> = {}): Attribute {
   return {
-    toolType: types.AttributeToolType.SWITCH,
+    type: types.AttributeToolType.SWITCH,
     name: "",
     values: [],
-    tagText: "",
+    tag: "",
     tagPrefix: "",
     tagSuffixes: [],
     buttonColors: [],

@@ -1,6 +1,6 @@
 -
   name: Weather
-  toolType: list
+  type: list
   values:
     - NA
     - Rainy
@@ -29,7 +29,7 @@
 
 -
   name: Scene
-  toolType: list
+  type: list
   values:
     - NA
     - Tunnel
@@ -58,7 +58,7 @@
 
 -
   name: Timeofday
-  toolType: list
+  type: list
   values:
     - NA
     - Daytime

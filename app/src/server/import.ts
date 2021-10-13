@@ -129,7 +129,7 @@ function parseExportAttributes(
     if (name in attributeNameMap) {
       const [configIndex, currentAttribute] = attributeNameMap[name]
       // Load the attribute based on its type
-      if (currentAttribute.toolType === AttributeToolType.SWITCH) {
+      if (currentAttribute.type === AttributeToolType.SWITCH) {
         // Boolean attribute case- only two choices, not a list
         let value = 0
         const attributeVal = attributeList as boolean
@@ -138,8 +138,8 @@ function parseExportAttributes(
         }
         labelAttributes[configIndex] = [value]
       } else if (
-        currentAttribute.toolType === AttributeToolType.LIST ||
-        currentAttribute.toolType === AttributeToolType.LONG_LIST
+        currentAttribute.type === AttributeToolType.LIST ||
+        currentAttribute.type === AttributeToolType.LONG_LIST
       ) {
         // List attribute case- can choose multiple values
         const selectedIndices: number[] = []

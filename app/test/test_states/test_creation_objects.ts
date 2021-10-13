@@ -45,17 +45,17 @@ const sampleTreeCategories: Category[] = [
 const sampleAttributes: Array<Partial<Attribute>> = [
   {
     name: "Occluded",
-    toolType: AttributeToolType.SWITCH,
-    tagText: "o"
+    type: AttributeToolType.SWITCH,
+    tag: "o"
   },
   {
     name: "Truncated",
-    toolType: AttributeToolType.SWITCH,
-    tagText: "t"
+    type: AttributeToolType.SWITCH,
+    tag: "t"
   },
   {
     name: "Traffic Light Color",
-    toolType: AttributeToolType.LIST,
+    type: AttributeToolType.LIST,
     tagPrefix: "t",
     tagSuffixes: ["", "g", "y", "r"],
     values: ["NA", "G", "Y", "R"],

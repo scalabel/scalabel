@@ -309,19 +309,19 @@ export interface Category {
 
 export interface Attribute {
   /** Attribute tool type */
-  toolType: AttributeToolType
+  type: AttributeToolType
   /** Attribute name */
   name: string
   /** Values of attribute */
   values: string[]
   /** Tag text */
-  tagText: string
+  tag: string
   /** Tag prefix */
   tagPrefix: string
   /** Tag suffixes */
   tagSuffixes: string[]
   /** button colors */
-  buttonColors: string[]
+  buttonColors?: string[]
 }
 
 /*

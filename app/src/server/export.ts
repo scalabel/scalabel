@@ -159,8 +159,8 @@ function parseLabelAttributes(
     const index = parseInt(key, 10)
     const attribute = configAttributes[index]
     if (
-      attribute.toolType === AttributeToolType.LIST ||
-      attribute.toolType === AttributeToolType.LONG_LIST
+      attribute.type === AttributeToolType.LIST ||
+      attribute.type === AttributeToolType.LONG_LIST
     ) {
       // List attribute case- check whether each value is applied
       const selectedValues: string[] = []
@@ -170,7 +170,7 @@ function parseLabelAttributes(
         }
       })
       exportAttributes[attribute.name] = selectedValues
-    } else if (attribute.toolType === AttributeToolType.SWITCH) {
+    } else if (attribute.type === AttributeToolType.SWITCH) {
       // Boolean attribute case- should be a single boolean in the list
       let value = false
       if (attributeList.length > 0) {

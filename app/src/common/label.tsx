@@ -9,7 +9,7 @@ import { AttributeToolType } from "../const/common"
 /**
  * This is renderTemplate function that renders the category.
  *
- * @param {string} toolType
+ * @param {string} type
  * @param {Function} handleToggle
  * @param handleAttributeToggle
  * @param getAlignmentIndex
@@ -17,14 +17,14 @@ import { AttributeToolType } from "../const/common"
  * @param {string[]} options
  */
 export function renderTemplate(
-  toolType: string,
+  type: string,
   handleToggle: (switchName: string) => void,
   handleAttributeToggle: (toggleName: string, alignment: string) => void,
   getAlignmentIndex: (switName: string) => number,
   name: string,
   options: string[]
 ): React.ReactNode {
-  if (toolType === AttributeToolType.SWITCH) {
+  if (type === AttributeToolType.SWITCH) {
     return (
       <SwitchButton
         onChange={handleToggle}
@@ -32,7 +32,7 @@ export function renderTemplate(
         getAlignmentIndex={getAlignmentIndex}
       />
     )
-  } else if (toolType === AttributeToolType.LIST) {
+  } else if (type === AttributeToolType.LIST) {
     return (
       <ListItem dense={true} style={{ textAlign: "center" }}>
         <ListButton
@@ -43,7 +43,7 @@ export function renderTemplate(
         />
       </ListItem>
     )
-  } else if (toolType === AttributeToolType.LONG_LIST) {
+  } else if (type === AttributeToolType.LONG_LIST) {
     return (
       <ListItem dense={true} style={{ textAlign: "center" }}>
         <ToolbarCategory
