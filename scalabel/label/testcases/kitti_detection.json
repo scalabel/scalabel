@@ -17,18 +17,6 @@
         "radial": null,
         "tangential": null
       },
-      "extrinsics": {
-        "location": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0
-        ]
-      },
       "attributes": null,
       "timestamp": null,
       "frameIndex": 0,
@@ -91,18 +79,6 @@
         "radial": null,
         "tangential": null
       },
-      "extrinsics": {
-        "location": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0
-        ]
-      },
       "attributes": null,
       "timestamp": null,
       "frameIndex": 0,
@@ -164,18 +140,6 @@
         "skew": 0,
         "radial": null,
         "tangential": null
-      },
-      "extrinsics": {
-        "location": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0
-        ]
       },
       "attributes": null,
       "timestamp": null,
@@ -308,18 +272,6 @@
         "skew": 0,
         "radial": null,
         "tangential": null
-      },
-      "extrinsics": {
-        "location": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0
-        ]
       },
       "attributes": null,
       "timestamp": null,

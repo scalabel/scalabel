@@ -299,12 +299,6 @@ def from_kitti_det(
     img_names = sorted(os.listdir(velodyne_dir))
 
     global_track_id = 0
-
-    rotation = (0, 0, 0)
-    position = (0, 0, 0)
-
-    cam2global = Extrinsics(location=position, rotation=rotation)
-
     for frame_idx, velodyne_name in enumerate(img_names):
         img_name = velodyne_name.split(".")[0] + ".png"
         trackid_maps: Dict[str, int] = {}
@@ -351,7 +345,6 @@ def from_kitti_det(
                 url=url,
                 size=image_size,
                 intrinsics=intrinsics,
-                extrinsics=cam2global,
                 labels=labels_cam,
             )
             frame_names.append(f"{cam}_" + img_name)
@@ -361,17 +354,13 @@ def from_kitti_det(
         url = data_type + full_path.split(data_type)[-1]
 
         lidar2cam_mat = np.dot(rect, velo2cam)
-        lidar2global_mat = np.dot(
-            get_matrix_from_extrinsics(cam2global), lidar2cam_mat
-        )
         lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
-        lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
 
         groups.append(
             FrameGroup(
                 name=velodyne_name,
                 url=url,
-                extrinsics=lidar2global,
+                extrinsics=lidar2cam_mat,
                 frames=frame_names,
                 labels=parse_lidar_labels(labels, lidar2cam),
             )
@@ -476,11 +465,8 @@ def from_kitti(
                     labels = []
 
                 url = data_type + img_name.split(data_type)[-1]
-
                 img_name_list = img_name.split(f"{cam}/")[-1].split("/")
-
                 img_name = f"{cam}_" + "_".join(img_name_list)
-
                 labels_cam = generate_labels_cam(labels, offset)
 
                 frame = Frame(
