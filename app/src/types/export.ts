@@ -115,9 +115,9 @@ export interface LabelExport {
   /** box3d label */
   box3d: Box3DType | null
   /** plane3d label */
-  plane3d: Plane3DType | null
+  plane3d?: Plane3DType | null
   /** custom labels */
-  customs: { [name: string]: CustomExportType }
+  customs?: { [name: string]: CustomExportType }
 }
 
 export interface ConfigExport {

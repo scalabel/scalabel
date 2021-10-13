@@ -86,9 +86,7 @@ export function convertItemToExport(
       manualShape: label.manual,
       box2d: null,
       poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     }
     if (label.shapes.length > 0) {
       const shapeId0 = label.shapes[0]
@@ -120,15 +118,6 @@ export function convertItemToExport(
               points.push([node.x, node.y])
               names.push(node.name)
               hidden.push(Boolean(node.hidden))
-            }
-
-            const template = config.label2DTemplates[label.type]
-
-            labelExport.customs[template.name] = {
-              points,
-              names,
-              hidden,
-              edges: template.edges
             }
           }
       }
