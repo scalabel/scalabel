@@ -161,8 +161,15 @@ class Config(BaseModel):
     categories: List[Category]
 
 
+class FrameGroup(Frame):
+    """Define group of frames and shared attributes."""
+
+    frames: List[str]
+
+
 class Dataset(BaseModel):
     """Define dataset components."""
 
     frames: List[Frame]
+    groups: Optional[List[FrameGroup]]
     config: Optional[Config]
