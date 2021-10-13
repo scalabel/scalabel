@@ -68,6 +68,7 @@ export function convertItemToImport(
     urls[sensorId] = itemExportMap[sensorId].url as string
     let labelsExport = itemExportMap[sensorId].labels
     const itemAttributes = itemExportMap[sensorId].attributes
+    let isTagging = false
     if (
       itemAttributes !== undefined &&
       Object.keys(itemAttributes).length > 0
@@ -78,7 +79,7 @@ export function convertItemToImport(
       labelsExport = labelsExport.concat(
         convertAttributeToLabel(itemAttributes)
       )
-      console.log(labelsExport)
+      isTagging = true
     }
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
@@ -110,6 +111,9 @@ export function convertItemToImport(
           categories,
           attributes
         )
+        if (isTagging) {
+          importedLabel.type = "tag"
+        }
 
         if (tracking) {
           importedLabel.track = labelExport.id.toString()
