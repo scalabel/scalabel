@@ -31,7 +31,7 @@ from .utils import (
 )
 
 try:
-    import nuscenes as nu
+    from nuscenes import NuScenes
     from nuscenes.eval.detection.constants import DETECTION_NAMES
     from nuscenes.eval.detection.utils import category_to_detection_name
     from nuscenes.nuscenes import NuScenes
@@ -46,7 +46,7 @@ try:
     )
     from nuscenes.utils.splits import create_splits_scenes
 except ImportError:
-    nu = None
+    NuScenes = None
 
 cams = [
     "CAM_FRONT",
@@ -79,6 +79,11 @@ def parse_arguments() -> argparse.Namespace:
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
+        "--add-non-key",
+        action="store_true",
+        help="Add non-key frames (not annotated) to the converted data.",
+    )
+    parser.add_argument(
         "--nproc",
         type=int,
         default=NPROC,
@@ -87,7 +92,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_data(filepath: str, version: str) -> Tuple[nu.NuScenes, pd.DataFrame]:
+def load_data(filepath: str, version: str) -> Tuple[NuScenes, pd.DataFrame]:
     """Load nuscenes data and extract meta-information into dataframe."""
     data = NuScenes(version=version, dataroot=filepath, verbose=True)
     records = [
@@ -242,8 +247,49 @@ def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
     return get_intrinsics_from_matrix(matrix)
 
 
+def parse_frame(
+    data: NuScenes,
+    scene_name: str,
+    frame_index: int,
+    cam_token: str,
+    boxes: Optional[List[Box]] = None,
+) -> Tuple[Frame, Optional[str]]:
+    """Parse a single camera frame."""
+    cam_data = data.get("sample_data", cam_token)
+    ego_pose_cam = data.get("ego_pose", cam_data["ego_pose_token"])
+    cam_filepath = cam_data["filename"]
+    img_wh = (cam_data["width"], cam_data["height"])
+    calibration_cam = data.get(
+        "calibrated_sensor", cam_data["calibrated_sensor_token"]
+    )
+    labels: Optional[List[Label]] = None
+    if boxes is not None:
+        labels = parse_labels(
+            data, boxes, ego_pose_cam, calibration_cam, img_wh
+        )
+
+    frame = Frame(
+        name=os.path.basename(cam_filepath),
+        videoName=scene_name,
+        frameIndex=frame_index,
+        url=cam_filepath,
+        timestamp=cam_data["timestamp"],
+        extrinsics=get_extrinsics(ego_pose_cam, calibration_cam),
+        intrinsics=calibration_to_intrinsics(calibration_cam),
+        size=ImageSize(width=img_wh[0], height=img_wh[1]),
+        labels=labels,
+    )
+    next_token: Optional[str] = None
+    if (
+        cam_data["next"] != ""
+        and not data.get("sample_data", cam_data["next"])["is_key_frame"]
+    ):
+        next_token = cam_data["next"]
+    return frame, next_token
+
+
 def parse_sequence(
-    data: NuScenes, scene_info: Tuple[str, str]
+    data: NuScenes, add_nonkey_frames: bool, scene_info: Tuple[str, str]
 ) -> Tuple[List[Frame], List[FrameGroup]]:
     """Parse a full NuScenes sequence and convert it into scalabel frames."""
     sample_token, scene_name = scene_info
@@ -260,34 +306,17 @@ def parse_sequence(
         lidar_filepath = lidar_data["filename"]
         ego_pose = data.get("ego_pose", lidar_data["ego_pose_token"])
         frame_names = []
+        next_nonkey_frames = []
         for cam in cams:
             cam_token = sample["data"][cam]
-            cam_data = data.get("sample_data", cam_token)
-            ego_pose_cam = data.get("ego_pose", cam_data["ego_pose_token"])
-            cam_filepath = cam_data["filename"]
-            img_wh = (cam_data["width"], cam_data["height"])
-            calibration_cam = data.get(
-                "calibrated_sensor", cam_data["calibrated_sensor_token"]
-            )
-
             boxes = data.get_boxes(lidar_token)
-            labels = parse_labels(
-                data, boxes, ego_pose_cam, calibration_cam, img_wh
-            )
-
-            frame = Frame(
-                name=os.path.basename(cam_filepath),
-                videoName=scene_name,
-                frameIndex=frame_index,
-                url=cam_filepath,
-                timestamp=cam_data["timestamp"],
-                extrinsics=get_extrinsics(ego_pose_cam, calibration_cam),
-                intrinsics=calibration_to_intrinsics(calibration_cam),
-                size=ImageSize(width=img_wh[0], height=img_wh[1]),
-                labels=labels,
+            frame, next_token = parse_frame(
+                data, scene_name, frame_index, cam_token, boxes
             )
             frame_names.append(frame.name)
             frames.append(frame)
+            if add_nonkey_frames and next_token is not None:
+                next_nonkey_frames.append(next_token)
 
         group = FrameGroup(
             name=sample_token,
@@ -302,9 +331,34 @@ def parse_sequence(
             ),
         )
         groups.append(group)
+        frame_index += 1
+
+        nonkey_count = 0
+        while len(next_nonkey_frames) > 0:
+            new_next_nonkey_frames = []
+            frame_names = []
+            nonkey_count += 1
+            for cam_token in next_nonkey_frames:
+                assert cam_token is not None, "camera for non-key missing!"
+                frame, next_token = parse_frame(
+                    data, scene_name, frame_index, cam_token
+                )
+                frame_names.append(frame.name)
+                frames.append(frame)
+                if add_nonkey_frames and next_token is not None:
+                    new_next_nonkey_frames.append(next_token)
+
+            group = FrameGroup(
+                name=sample_token + f"_{nonkey_count}",
+                videoName=scene_name,
+                frameIndex=frame_index,
+                frames=frame_names,
+            )
+            groups.append(group)
+            next_nonkey_frames = new_next_nonkey_frames
+            frame_index += 1
 
         sample_token = sample["next"]
-        frame_index += 1
 
     return frames, groups
 
@@ -314,6 +368,7 @@ def from_nuscenes(
     version: str,
     split: str,
     nproc: int = NPROC,
+    add_nonkey_frames: bool = False,
 ) -> Dataset:
     """Convert NuScenes dataset to Scalabel format."""
     data, df = load_data(data_path, version)
@@ -324,7 +379,7 @@ def from_nuscenes(
         if name in scene_names_per_split[split]:
             first_sample_tokens.append(token)
 
-    func = partial(parse_sequence, data)
+    func = partial(parse_sequence, data, add_nonkey_frames)
     if nproc > 1:
         partial_results = pmap(
             func,
@@ -348,7 +403,7 @@ def from_nuscenes(
 
 def run(args: argparse.Namespace) -> None:
     """Run conversion with command line arguments."""
-    assert nu is not None, (
+    assert NuScenes is not None, (
         "Please install the requirements in scripts/optional.txt to use"
         "NuScenes conversion."
     )
@@ -373,6 +428,7 @@ def run(args: argparse.Namespace) -> None:
             args.version,
             split,
             args.nproc,
+            args.add_non_key,
         )
         save(os.path.join(out_dir, f"scalabel_{split}.json"), result)
 
