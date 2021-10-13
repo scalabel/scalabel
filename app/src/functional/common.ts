@@ -1534,3 +1534,26 @@ export function updateSessionStatus(
     session: newSession
   })
 }
+
+/**
+ * Change session mode, 'annotating' or 'selecting'
+ * When in 'selecting' mode, user could drag annotation by clicking mask
+ *
+ * @param state
+ * @param action
+ */
+export function changeSessionMode(
+  state: State,
+  action: actionTypes.ChangeSessionModeAction
+): State {
+  const newMode = action.newMode
+
+  const oldSession = state.session
+
+  const newSession = updateObject(oldSession, {
+    mode: newMode
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}

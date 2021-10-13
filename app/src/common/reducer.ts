@@ -84,6 +84,11 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.UpdateSessionStatusAction
       )
+    case actionConsts.CHANGE_SESSION_MODE:
+      return common.changeSessionMode(
+        state,
+        action as actionTypes.ChangeSessionModeAction
+      )
     case actionConsts.NULL:
       return state
     default:

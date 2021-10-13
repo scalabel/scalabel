@@ -3,7 +3,7 @@ import _ from "lodash"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
 import { makeState } from "../../functional/states"
-import { Label2DTemplateType, State } from "../../types/state"
+import { Label2DTemplateType, ModeStatus, State } from "../../types/state"
 import { Context2D } from "../util"
 import { Box2D } from "./box2d"
 import { CustomLabel2D } from "./custom_label"
@@ -152,19 +152,25 @@ export class Label2DList {
    * @param {number} ratio: ratio: display to image size ratio
    * @param ratio
    * @param hideLabels
+   * @param sessionMode
    */
   public redraw(
     labelContext: Context2D,
     controlContext: Context2D,
     ratio: number,
-    hideLabels?: boolean
+    hideLabels?: boolean,
+    sessionMode?: ModeStatus
   ): void {
     const labelsToDraw =
       hideLabels !== null && hideLabels !== undefined && hideLabels
         ? this._labelList.filter((label) => label.selected)
         : this._labelList
-    labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
-    labelsToDraw.forEach((v) => v.draw(controlContext, ratio, DrawMode.CONTROL))
+    labelsToDraw.forEach((v) =>
+      v.draw(labelContext, ratio, DrawMode.VIEW, sessionMode)
+    )
+    labelsToDraw.forEach((v) =>
+      v.draw(controlContext, ratio, DrawMode.CONTROL, sessionMode)
+    )
   }
 
   /**
