@@ -5,6 +5,7 @@ import {
   makeCube,
   makeItem,
   makeLabel,
+  makeLabelExport,
   makePathPoint2D,
   makePlane,
   makeRect
@@ -20,6 +21,19 @@ import {
   ShapeIdMap,
   ShapeType
 } from "../types/state"
+
+/**
+ * Convert the attributes to label to ensure the format consistency
+ *
+ * @param attributes
+ */
+function convertAttributeToLabel(attributes: {
+  [key: string]: string | string[]
+}): LabelExport {
+  return makeLabelExport({
+    attributes: attributes
+  })
+}
 
 /**
  * Converts single exported item to frontend state format
@@ -52,7 +66,20 @@ export function convertItemToImport(
   for (const key of Object.keys(itemExportMap)) {
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
-    const labelsExport = itemExportMap[sensorId].labels
+    let labelsExport = itemExportMap[sensorId].labels
+    const itemAttributes = itemExportMap[sensorId].attributes
+    if (
+      itemAttributes !== undefined &&
+      Object.keys(itemAttributes).length > 0
+    ) {
+      if (labelsExport === undefined) {
+        labelsExport = []
+      }
+      labelsExport = labelsExport.concat(
+        convertAttributeToLabel(itemAttributes)
+      )
+      console.log(labelsExport)
+    }
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
         const labelId = labelExport.id.toString()
@@ -119,13 +146,16 @@ export function convertItemToImport(
  * @param attributeValueMap look up an attribute value's index
  */
 function parseExportAttributes(
-  attributesExport: { [key: string]: string[] | boolean },
+  attributesExport: { [key: string]: string | string[] | boolean },
   attributeNameMap: { [key: string]: [number, Attribute] },
   attributeValueMap: { [key: string]: number }
 ): { [key: number]: number[] } {
   const labelAttributes: { [key: number]: number[] } = {}
   Object.entries(attributesExport).forEach(([name, attributeList]) => {
     // Get the config attribute that matches the exported attribute name
+    if (typeof attributeList === "string") {
+      attributeList = [attributeList]
+    }
     if (name in attributeNameMap) {
       const [configIndex, currentAttribute] = attributeNameMap[name]
       // Load the attribute based on its type

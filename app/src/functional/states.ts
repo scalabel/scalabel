@@ -469,7 +469,7 @@ export function makeLabelExport(
   params: Partial<LabelExport> = {}
 ): LabelExport {
   return {
-    id: INVALID_ID,
+    id: genLabelId(),
     category: "",
     attributes: {},
     manualShape: true,

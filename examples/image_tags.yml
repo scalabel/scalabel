@@ -18,14 +18,6 @@
     - o
     - p
     - f
-  buttonColors:
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
 
 -
   name: Scene
@@ -47,14 +39,6 @@
     - c
     - g
     - h
-  buttonColors:
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
 
 -
   name: Timeofday
@@ -70,8 +54,3 @@
     - day
     - n
     - daw
-  buttonColors:
-    - white
-    - white
-    - white
-    - white

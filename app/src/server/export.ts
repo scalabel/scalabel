@@ -127,7 +127,14 @@ export function convertItemToExport(
       labelExport.id = label.track
     }
     for (const sensor of label.sensors) {
-      itemExports[sensor].labels.push(labelExport)
+      if (label.type === LabelTypeName.TAG) {
+        itemExports[sensor].attributes = parseLabelAttributes(
+          label.attributes,
+          config.attributes
+        ) as { [key: string]: string | string[] }
+      } else {
+        itemExports[sensor].labels.push(labelExport)
+      }
     }
   }
   return Object.values(itemExports)
@@ -142,8 +149,8 @@ export function convertItemToExport(
 function parseLabelAttributes(
   labelAttributes: { [key: number]: number[] },
   configAttributes: Attribute[]
-): { [key: string]: string[] | boolean } {
-  const exportAttributes: { [key: string]: string[] | boolean } = {}
+): { [key: string]: string | string[] | boolean } {
+  const exportAttributes: { [key: string]: string | string[] | boolean } = {}
   Object.entries(labelAttributes).forEach(([key, attributeList]) => {
     const index = parseInt(key, 10)
     const attribute = configAttributes[index]
@@ -158,7 +165,11 @@ function parseLabelAttributes(
           selectedValues.push(attribute.values[valueIndex])
         }
       })
-      exportAttributes[attribute.name] = selectedValues
+      if (selectedValues.length === 1) {
+        exportAttributes[attribute.name] = selectedValues[0]
+      } else {
+        exportAttributes[attribute.name] = selectedValues
+      }
     } else if (attribute.type === AttributeToolType.SWITCH) {
       // Boolean attribute case- should be a single boolean in the list
       let value = false
