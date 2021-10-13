@@ -15,13 +15,7 @@ from scalabel.label.utils import cart2hom, rotation_y_to_alpha
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
 from .io import save
-from .kitti_utlis import (
-    KittiPoseParser,
-    list_from_file,
-    read_calib,
-    read_calib_det,
-    read_oxts,
-)
+from .kitti_utlis import KittiPoseParser, list_from_file, read_calib, read_oxts
 from .typing import (
     Box2D,
     Box3D,
@@ -143,6 +137,21 @@ def parse_lidar_labels(
     return new_labels
 
 
+def get_extrinsics(
+    rect: NDArrayF64,
+    velo2cam: NDArrayF64,
+    cam2global: Extrinsics,
+) -> Tuple[Extrinsics, Extrinsics]:
+    """Convert KITTI velodyne to global extrinsics."""
+    lidar2cam_mat = np.dot(rect, velo2cam)
+    lidar2global_mat = np.dot(
+        get_matrix_from_extrinsics(cam2global), lidar2cam_mat
+    )
+    lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
+    lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
+    return lidar2cam, lidar2global
+
+
 def parse_label(
     data_type: str,
     label_file: str,
@@ -224,6 +233,58 @@ def parse_label(
     return labels_dict, trackid_maps, global_track_id
 
 
+def generate_labels_cam(labels: List[Label], offset: float) -> List[Label]:
+    """Adjust label with different cameras."""
+    labels_cam = []
+    for label in labels:
+        label_cam = copy.deepcopy(label)
+        assert label_cam.box3d is not None
+        label_cam.box3d.location = (
+            label_cam.box3d.location[0] + offset,
+            label_cam.box3d.location[1],
+            label_cam.box3d.location[2],
+        )
+        labels_cam.append(label_cam)
+
+    return labels_cam
+
+
+def find_nearest_lidar_frame(
+    velodyne_name: str,
+    velodyne_dir: str,
+    video_name: str,
+    frame_idx: int,
+    velodyne_names: List[str],
+) -> str:
+    """Find the nearest lidar frame to handle the missing one."""
+    count_last = 0
+    last_frame = velodyne_name
+    while not last_frame in velodyne_names:
+        count_last += 1
+        last_frame = osp.join(
+            velodyne_dir,
+            video_name,
+            f"{str(frame_idx-count_last).zfill(6)}.bin",
+        )
+
+    count_next = 0
+    next_frame = velodyne_name
+    while not next_frame in velodyne_names:
+        count_next += 1
+        next_frame = osp.join(
+            velodyne_dir,
+            video_name,
+            f"{str(frame_idx+count_next).zfill(6)}.bin",
+        )
+
+    if count_last <= count_next:
+        velodyne_name = last_frame
+    else:
+        velodyne_name = next_frame
+
+    return velodyne_name
+
+
 def from_kitti_det(
     data_dir: str,
     data_type: str,
@@ -232,11 +293,10 @@ def from_kitti_det(
     frames, groups = [], []
 
     velodyne_dir = osp.join(data_dir, "velodyne")
-    left_img_dir = osp.join(data_dir, "image_2")
     label_dir = osp.join(data_dir, "label_2")
     calib_dir = osp.join(data_dir, "calib")
 
-    img_names = sorted(os.listdir(left_img_dir))
+    img_names = sorted(os.listdir(velodyne_dir))
 
     global_track_id = 0
 
@@ -245,35 +305,28 @@ def from_kitti_det(
 
     cam2global = Extrinsics(location=position, rotation=rotation)
 
-    for img_id, img_name in enumerate(img_names):
-        velodyne_name = img_name.split(".")[0] + ".bin"
+    for frame_idx, velodyne_name in enumerate(img_names):
+        img_name = velodyne_name.split(".")[0] + ".png"
         trackid_maps: Dict[str, int] = {}
         frame_names = []
 
-        rect = read_calib_det(
-            calib_dir, int(img_name.split(".")[0]), 4
-        ).reshape(3, 3)
-        rect = np.hstack((rect, np.zeros((3, 1))))
-        rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
+        projections, rect, velo2cam, left_to_right_offset = read_calib(
+            calib_dir, int(img_name.split(".")[0]), mode="detection"
+        )
 
-        velo2cam = read_calib_det(
-            calib_dir, int(img_name.split(".")[0]), 5
-        ).reshape(3, 4)
-        velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
-
-        for cam_id, cam in enumerate(["image_2", "image_3"]):
+        for cam in ["image_2", "image_3"]:
             img_dir = osp.join(data_dir, cam)
             with Image.open(osp.join(img_dir, img_name)) as img:
                 width, height = img.size
                 image_size = ImageSize(height=height, width=width)
 
-            projection = read_calib_det(
-                calib_dir, int(img_name.split(".")[0]), cam_id + 2
-            ).reshape(3, 4)
+            offset = 0.0
+            if cam == "image_3":
+                offset = left_to_right_offset
 
             intrinsics = Intrinsics(
-                focal=(projection[0][0], projection[1][1]),
-                center=(projection[0][2], projection[1][2]),
+                focal=(projections[cam][0][0], projections[cam][1][1]),
+                center=(projections[cam][0][2], projections[cam][1][2]),
             )
 
             if osp.exists(label_dir):
@@ -283,33 +336,29 @@ def from_kitti_det(
                 labels_dict, _, _ = parse_label(
                     data_type, label_file, trackid_maps, global_track_id
                 )
-
                 labels = labels_dict[0]
             else:
                 labels = []
 
+            labels_cam = generate_labels_cam(labels, offset)
+
             full_path = osp.join(img_dir, img_name)
             url = data_type + full_path.split(data_type)[-1]
 
-            video_name = "/".join(url.split("/")[:-1])
-
             f = Frame(
                 name=f"{cam}_" + img_name,
-                videoName=video_name,
-                frameIndex=img_id,
+                frameIndex=frame_idx,
                 url=url,
                 size=image_size,
-                extrinsics=cam2global,
                 intrinsics=intrinsics,
-                labels=labels,
+                extrinsics=cam2global,
+                labels=labels_cam,
             )
             frame_names.append(f"{cam}_" + img_name)
             frames.append(f)
 
         full_path = osp.join(velodyne_dir, velodyne_name)
         url = data_type + full_path.split(data_type)[-1]
-
-        video_name = "/".join(url.split("/")[:-1])
 
         lidar2cam_mat = np.dot(rect, velo2cam)
         lidar2global_mat = np.dot(
@@ -320,8 +369,7 @@ def from_kitti_det(
 
         groups.append(
             FrameGroup(
-                name=velodyne_name.split(".")[0],
-                videoName=video_name,
+                name=velodyne_name,
                 url=url,
                 extrinsics=lidar2global,
                 frames=frame_names,
@@ -373,19 +421,9 @@ def from_kitti(
         )
         trackid_maps: Dict[str, int] = {}
 
-        projections = {}
-        projections["image_02"] = read_calib(
-            calib_dir, int(video_name), 2
-        ).reshape(3, 4)
-        projections["image_03"] = read_calib(
-            calib_dir, int(video_name), 3
-        ).reshape(3, 4)
-        rect = read_calib(calib_dir, int(video_name), 4).reshape(3, 3)
-        rect = np.hstack((rect, np.zeros((3, 1))))
-        rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
-
-        velo2cam = read_calib(calib_dir, int(video_name), 5).reshape(3, 4)
-        velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
+        projections, rect, velo2cam, left_to_right_offset = read_calib(
+            calib_dir, int(video_name)
+        )
 
         if osp.exists(label_dir):
             label_file = osp.join(label_dir, f"{video_name}.txt")
@@ -407,11 +445,6 @@ def from_kitti(
                     poses[frame_idx].position - poses[0].position
                 ).tolist()
             )
-            offset_2_to_3 = (
-                projections["image_03"][0, -1] / projections["image_03"][0, 0]
-                - projections["image_02"][0, -1]
-                / projections["image_02"][0, 0]
-            )
 
             frame_names = []
             for cam, img_names in total_img_names.items():
@@ -420,14 +453,15 @@ def from_kitti(
                     width, height = img.size
                     image_size = ImageSize(height=height, width=width)
 
-                projection = projections[cam]
                 intrinsics = Intrinsics(
-                    focal=(projection[0][0], projection[1][1]),
-                    center=(projection[0][2], projection[1][2]),
+                    focal=(projections[cam][0][0], projections[cam][1][1]),
+                    center=(projections[cam][0][2], projections[cam][1][2]),
                 )
-                offset = 0
+
+                offset = 0.0
                 if cam == "image_03":
-                    offset = offset_2_to_3
+                    offset = left_to_right_offset
+
                 cam2global = Extrinsics(
                     location=(position[0] + offset, position[1], position[2]),
                     rotation=rotation,
@@ -447,16 +481,7 @@ def from_kitti(
 
                 img_name = f"{cam}_" + "_".join(img_name_list)
 
-                labels_cam = []
-                for label in labels:
-                    label_cam = copy.deepcopy(label)
-                    assert label_cam.box3d is not None
-                    label_cam.box3d.location = (
-                        label_cam.box3d.location[0] + offset,
-                        label_cam.box3d.location[1],
-                        label_cam.box3d.location[2],
-                    )
-                    labels_cam.append(label_cam)
+                labels_cam = generate_labels_cam(labels, offset)
 
                 frame = Frame(
                     name=img_name,
@@ -471,20 +496,29 @@ def from_kitti(
                 frame_names.append(img_name)
                 frames.append(frame)
 
-            url = data_type + velodyne_names[frame_idx].split(data_type)[-1]
-
-            lidar2cam_mat = np.dot(rect, velo2cam)
-            lidar2global_mat = np.dot(
-                get_matrix_from_extrinsics(cam2global), lidar2cam_mat
+            velodyne_name = osp.join(
+                velodyne_dir, video_name, f"{str(frame_idx).zfill(6)}.bin"
             )
-            lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
-            lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
+
+            if not velodyne_name in velodyne_names:
+                velodyne_name = find_nearest_lidar_frame(
+                    velodyne_name,
+                    velodyne_dir,
+                    video_name,
+                    frame_idx,
+                    velodyne_names,
+                )
 
             group_name = "_".join(
-                velodyne_names[frame_idx]
-                .split(velodyne_dir)[-1]
-                .split("/")[1:]
+                velodyne_name.split(velodyne_dir)[-1].split("/")[1:]
             )
+
+            url = data_type + velodyne_name.split(data_type)[-1]
+
+            lidar2cam, lidar2global = get_extrinsics(
+                rect, velo2cam, cam2global
+            )
+
             groups.append(
                 FrameGroup(
                     name=group_name,
