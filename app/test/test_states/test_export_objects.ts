@@ -353,3 +353,19 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     sensor: -1
   }
 ]
+
+export const sampleItemExportImageTagging: ItemExport = {
+  name:
+    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  url:
+    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  videoName: "",
+  attributes: {
+    Weather: "Rainy",
+    Scene: "City Street",
+    Timeofday: "Night"
+  },
+  timestamp: 0,
+  sensor: -1,
+  labels: []
+}

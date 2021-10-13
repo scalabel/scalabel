@@ -9,6 +9,7 @@ import {
 } from "../../src/server/export"
 import { PathPointType, State } from "../../src/types/state"
 import {
+  sampleItemExportImageTagging,
   sampleItemExportImage,
   sampleItemExportImagePolygon,
   sampleStateExportImage,
@@ -18,6 +19,7 @@ import {
 const sampleStateFile = "./app/test/test_states/sample_state.json"
 const samplePolygonStateFile =
   "./app/test/test_states/sample_state_polygon.json"
+const sampleTagStateFile = "./app/test/test_states/sample_state_tag.json"
 
 describe("test export functionality across multiple labeling types", () => {
   test("unit test for polygon export", () => {
@@ -36,6 +38,17 @@ describe("test export functionality across multiple labeling types", () => {
     ])
   })
 })
+
+describe("test export functionality for image tagging", () => {
+  test("single item conversion", () => {
+    const state = readSampleState(sampleTagStateFile)
+    const config = state.task.config
+    const item = state.task.items[0]
+    const itemExport = convertItemToExport(config, item)[0]
+    expect(itemExport).toEqual(sampleItemExportImageTagging)
+  })
+})
+
 describe("test export functionality for bounding box", () => {
   test("single item conversion", () => {
     const state = readSampleState(sampleStateFile)
