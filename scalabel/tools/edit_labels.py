@@ -77,7 +77,7 @@ def read_input(filename: str) -> List[LabelObject]:
         if ext == ".json":
             labels = json.load(fp)
         elif ext in [".yml", ".yaml"]:
-            labels = yaml.load(fp)
+            labels = yaml.safe_load(fp)
         else:
             raise ValueError(f"Unrecognized file extension {ext}")
     return labels

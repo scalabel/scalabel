@@ -99,11 +99,12 @@ def from_mot(data_path: str) -> List[Frame]:
 
         for i, img_name in enumerate(img_names):
             assert i + 1 == int(img_name.replace(".jpg", ""))
-            img_filepath = os.path.join(data_path, video, "img1", img_name)
-            img = Image.open(img_filepath)
+            relative_path = os.path.join(video, "img1", img_name)
+            img = Image.open(os.path.join(data_path, relative_path))
             frame = Frame(
-                name=os.path.join("img1", img_name),
+                name=img_name,
                 video_name=video,
+                url=relative_path,
                 frame_index=i,
                 size=ImageSize(width=img.width, height=img.height),
                 labels=annotations[i + 1] if i in annotations else None,

@@ -68,6 +68,20 @@ class Logger {
   }
 
   /**
+   * print warning messages
+   *
+   * @param message
+   */
+  public warning(message: string): void {
+    if (message !== "" && !this._silent) {
+      this._logger.log({
+        level: "warn",
+        message: message
+      })
+    }
+  }
+
+  /**
    * print informative messages
    *
    * @param message
