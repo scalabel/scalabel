@@ -422,8 +422,9 @@ def run(args: argparse.Namespace) -> None:
         splits_to_iterate = ["train", "val"]
 
     if len(args.splits) > 0:
-        assert all([s in splits_to_iterate for s in args.splits]), \
-            f"Invalid splits, please select splits from {splits_to_iterate}!"
+        assert all(
+            (s in splits_to_iterate for s in args.splits)
+        ), f"Invalid splits, please select splits from {splits_to_iterate}!"
         splits_to_iterate = args.splits
 
     if args.output is not None:
