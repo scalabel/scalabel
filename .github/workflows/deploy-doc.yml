@@ -36,4 +36,4 @@ jobs:
           AWS_S3_BUCKET: doc.scalabel.ai
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: "doc/_build/html/"
+          SOURCE_DIR: "doc/_build/src/html/"
