@@ -177,7 +177,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def convert_track(
+def to_nuscenes(
     dataset: Dataset,
     mode: str,
 ) -> DictStrAny:
@@ -282,7 +282,7 @@ def run(args: argparse.Namespace) -> None:
     )
     dataset = load(args.input, args.nproc)
 
-    nusc = convert_track(dataset, args.mode)
+    nusc = to_nuscenes(dataset, args.mode)
 
     with open_write_text(args.output) as f:
         json.dump(nusc, f)
