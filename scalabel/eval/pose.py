@@ -260,6 +260,10 @@ def evaluate_pose(
         0.107,
         0.087,
         0.089,
+        0.062,
+        0.062,
+        0.062,
+        0.062,
     ]
     coco_eval = COCOevalV2(
         cat_names, coco_gt, coco_dt, ann_type, sigmas, nproc
