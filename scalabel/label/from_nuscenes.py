@@ -79,6 +79,12 @@ def parse_arguments() -> argparse.Namespace:
         help="Output path for Scalabel format annotations.",
     )
     parser.add_argument(
+        "--splits",
+        nargs="+",
+        default=[],
+        help="Data splits to convert.",
+    )
+    parser.add_argument(
         "--add-non-key",
         action="store_true",
         help="Add non-key frames (not annotated) to the converted data.",
@@ -414,6 +420,11 @@ def run(args: argparse.Namespace) -> None:
         splits_to_iterate = ["test"]
     else:
         splits_to_iterate = ["train", "val"]
+
+    if len(args.splits) > 0:
+        assert all([s in splits_to_iterate for s in args.splits]), \
+            f"Invalid splits, please select splits from {splits_to_iterate}!"
+        splits_to_iterate = args.splits
 
     if args.output is not None:
         if not os.path.exists(args.output):
