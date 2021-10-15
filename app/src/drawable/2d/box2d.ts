@@ -4,7 +4,13 @@ import { Cursor, LabelTypeName } from "../../const/common"
 import { makeLabel, makeRect } from "../../functional/states"
 import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
-import { LabelType, RectType, ShapeType, State } from "../../types/state"
+import {
+  LabelType,
+  RectType,
+  ShapeType,
+  State,
+  ModeStatus
+} from "../../types/state"
 import { blendColor, Context2D, encodeControlColor } from "../util"
 import { DrawMode, Label2D } from "./label2d"
 import { Label2DList } from "./label2d_list"
@@ -93,8 +99,14 @@ export class Box2D extends Label2D {
    * @param context
    * @param ratio
    * @param mode
+   * @param sessionMode
    */
-  public draw(context: Context2D, ratio: number, mode: DrawMode): void {
+  public draw(
+    context: Context2D,
+    ratio: number,
+    mode: DrawMode,
+    sessionMode: ModeStatus | undefined
+  ): void {
     // Set proper drawing styles
     let pointStyle = makePoint2DStyle()
     let highPointStyle = makePoint2DStyle()
@@ -133,6 +145,13 @@ export class Box2D extends Label2D {
       this.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), this._color)
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
+      if (
+        sessionMode !== undefined &&
+        sessionMode === ModeStatus.SELECTING &&
+        (this._highlighted || mode === DrawMode.CONTROL)
+      ) {
+        rect.drawInSelectingMode(context, ratio, rectStyle, mode)
+      }
       for (let i = 1; i <= 8; i += 1) {
         let style
         if (i === this._highlightedHandle) {

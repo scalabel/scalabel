@@ -13,8 +13,8 @@ class TestBDD100KDetectEval(unittest.TestCase):
     """Test cases for BDD100K detection evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = "{}/testcases/track_sample_anns.json".format(cur_dir)
-    preds_path = "{}/testcases/bbox_predictions.json".format(cur_dir)
+    gts_path = f"{cur_dir}/testcases/track_sample_anns.json"
+    preds_path = f"{cur_dir}/testcases/bbox_predictions.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
     config = load_label_config(get_test_file("det_configs.toml"))

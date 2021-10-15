@@ -7,20 +7,39 @@ from functools import partial
 from itertools import groupby
 from typing import Any, List, Optional, Union
 
-from ..common.io import load_config
+from ..common.io import load_config, open_read_text, open_write_text
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
-from .typing import Box2D, Box3D, Config, Dataset, Frame, Label, Poly2D
+from .typing import (
+    Box2D,
+    Box3D,
+    Config,
+    Dataset,
+    Extrinsics,
+    Frame,
+    FrameGroup,
+    Graph,
+    ImageSize,
+    Intrinsics,
+    Label,
+    Poly2D,
+)
 
 
 def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
     """Parse a single frame."""
     if not validate_frames:
+        # ignore the construct arguments in mypy, add type ignores
         frame = Frame.construct(**raw_frame)
+        if frame.intrinsics is not None:
+            frame.intrinsics = Intrinsics.construct(**frame.intrinsics)  # type: ignore # pylint: disable=line-too-long
+        if frame.extrinsics is not None:
+            frame.extrinsics = Extrinsics.construct(**frame.extrinsics)  # type: ignore # pylint: disable=line-too-long
+        if frame.size is not None:
+            frame.size = ImageSize.construct(**frame.size)  # type: ignore # pylint: disable=line-too-long
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
-                # ignore the construct arguments in mypy
                 label = Label.construct(**l)  # type: ignore
                 if label.box2d is not None:
                     label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
@@ -30,6 +49,8 @@ def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
                     label.poly2d = [
                         Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
                     ]
+                if label.graph is not None:
+                    label.graph = Graph.construct(**label.graph)  # type: ignore # pylint: disable=line-too-long
                 labels.append(label)
             frame.labels = labels
         return frame
@@ -41,16 +62,20 @@ def load(
 ) -> Dataset:
     """Load labels from a json file or a folder of json files."""
     raw_frames: List[DictStrAny] = []
+    raw_groups: List[DictStrAny] = []
     if not osp.exists(inputs):
         raise FileNotFoundError(f"{inputs} does not exist.")
 
     def process_file(filepath: str) -> Optional[DictStrAny]:
         raw_cfg = None
-        with open(filepath, "r") as fp:
+        with open_read_text(filepath) as fp:
             content = json.load(fp)
         if isinstance(content, dict):
             raw_frames.extend(content["frames"])
-            raw_cfg = content["config"]
+            if "groups" in content and content["groups"] is not None:
+                raw_groups.extend(content["groups"])
+            if content["config"] is not None:
+                raw_cfg = content["config"]
         elif isinstance(content, list):
             raw_frames.extend(content)
         else:
@@ -77,8 +102,16 @@ def load(
 
     parse_ = partial(parse, validate_frames=validate_frames)
     if nprocs > 1:
-        return Dataset(frames=pmap(parse_, raw_frames, nprocs), config=config)
-    return Dataset(frames=list(map(parse_, raw_frames)), config=config)
+        frames = pmap(parse_, raw_frames, nprocs)
+        groups = None
+        if len(raw_groups) > 0:
+            groups = pmap(lambda x: FrameGroup(**x), raw_groups, nprocs)
+    else:
+        frames = list(map(parse_, raw_frames))
+        groups = None
+        if len(raw_groups) > 0:
+            groups = list(map(lambda x: FrameGroup(**x), raw_groups))
+    return Dataset(frames=frames, groups=groups, config=config)
 
 
 def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
@@ -115,27 +148,17 @@ def remove_empty_elements(frame: DictStrAny) -> DictStrAny:
             for v in (remove_empty_elements(v) for v in frame)
             if not empty(v)
         ]
-    return {
-        k: v
-        for k, v in ((k, remove_empty_elements(v)) for k, v in frame.items())
-        if not empty(v)
-    }
+    result = ((k, remove_empty_elements(v)) for k, v in frame.items())
+    return {k: v for k, v in result if not empty(v)}
 
 
-def save(
-    filepath: str, dataset: Union[List[Frame], Dataset], nprocs: int = 0
-) -> None:
+def save(filepath: str, dataset: Union[List[Frame], Dataset]) -> None:
     """Save labels in Scalabel format."""
     if not isinstance(dataset, Dataset):
-        dataset = Dataset(frames=dataset, config=None)
+        dataset = Dataset(frames=dataset)
     dataset_dict = dataset.dict()
 
-    if nprocs > 1:
-        dataset_dict["frames"] = pmap(dump, dataset_dict["frames"], nprocs)
-    else:
-        dataset_dict["frames"] = list(map(dump, dataset_dict["frames"]))
-
-    with open(filepath, "w") as fp:
+    with open_write_text(filepath) as fp:
         json.dump(dataset_dict, fp, indent=2)
 
 

@@ -7,6 +7,8 @@ import subprocess
 import psutil
 import yaml
 
+from ..common.io import open_read_text
+
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -27,7 +29,7 @@ def launch() -> None:
     )
     args = parser.parse_args()
 
-    with open(args.config, "r") as fp:
+    with open_read_text(args.config) as fp:
         config = yaml.load(fp, Loader=yaml.FullLoader)
 
     # launch the python server if bot option is true
@@ -52,7 +54,7 @@ def launch() -> None:
             "polyrnn_scalabel",
         )
         if python_path in py_env:
-            model_path = "{}:{}".format(py_env[python_path], model_path)
+            model_path = f"{py_env[python_path]}:{model_path}"
         py_env[python_path] = model_path
 
         logger.info("Launching python server")
@@ -70,7 +72,7 @@ def launch() -> None:
         "app/dist/main.js",
         "--config",
         args.config,
-        "--max-old-space-size={}".format(max_memory),
+        f"--max-old-space-size={max_memory}",
     ]
     logger.info("Launching nodejs")
     logger.info(" ".join(node_cmd))

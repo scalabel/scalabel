@@ -20,6 +20,7 @@ import {
   ItemType,
   LabelType,
   LayoutType,
+  ModeStatus,
   Node2DType,
   PaneType,
   PathPoint2DType,
@@ -69,6 +70,7 @@ export function makeLabel(
     track: INVALID_ID,
     order: 0,
     manual: true, // By default, manual is true
+    changed: false, // If shape has changed, then interpolation will not apply
     ..._.cloneDeep(params)
   }
   if (newId && params.id !== undefined) {
@@ -500,6 +502,7 @@ export function makeTaskConfig(params: Partial<ConfigType> = {}): ConfigType {
     instructionPage: "", // Instruction url
     bundleFile: "",
     categories: [],
+    treeCategories: [],
     attributes: [],
     taskId: "",
     demoMode: false,
@@ -633,6 +636,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     itemStatuses: [],
     trackLinking: false,
     status: ConnectionStatus.UNSAVED,
+    mode: ModeStatus.ANNOTATING,
     numUpdates: 0,
     ...params
   }

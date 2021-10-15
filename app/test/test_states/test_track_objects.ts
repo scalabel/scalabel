@@ -25,6 +25,18 @@ export const testJson: DeepPartialState = {
         "traffic sign",
         "traffic light"
       ],
+      treeCategories: [
+        { name: "person" },
+        { name: "rider" },
+        { name: "car" },
+        { name: "truck" },
+        { name: "bus" },
+        { name: "train" },
+        { name: "motorcycle" },
+        { name: "bike" },
+        { name: "traffic sign" },
+        { name: "traffic light" }
+      ],
       attributes: [
         {
           name: "Occluded",
@@ -666,7 +678,7 @@ export const emptyTrackingTask: DeepPartialState = {
     config: {
       projectName: "Test3",
       itemType: "image",
-      labelTypes: ["box2d"],
+      labelTypes: ["box2d", "polygon2d"],
       label2DTemplates: {},
       taskSize: 8,
       handlerUrl: "label",
@@ -684,6 +696,18 @@ export const emptyTrackingTask: DeepPartialState = {
         "bike",
         "traffic sign",
         "traffic light"
+      ],
+      treeCategories: [
+        { name: "person" },
+        { name: "rider" },
+        { name: "car" },
+        { name: "truck" },
+        { name: "bus" },
+        { name: "train" },
+        { name: "motorcycle" },
+        { name: "bike" },
+        { name: "traffic sign" },
+        { name: "traffic light" }
       ],
       attributes: [
         {

@@ -163,8 +163,6 @@ class PlayerControl extends Component<Props> {
             <Slider
               className={classes.slider}
               value={this.currentFrame}
-              onMouseDown={(e) => e.stopPropagation()}
-              onMouseUp={(e) => e.stopPropagation()}
               onDoubleClick={(e) => e.stopPropagation()}
               onChange={(e, newVal) => this.handleSliderChange(e, newVal)}
               aria-labelledby="input-slider"

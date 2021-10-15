@@ -3,7 +3,7 @@ import _ from "lodash"
 import React from "react"
 
 import * as action from "../../src/action/common"
-import { selectLabel, unselectLabels } from "../../src/action/select"
+import { selectLabel } from "../../src/action/select"
 import Session, { dispatch, getState, getStore } from "../../src/common/session"
 import { updateTracks } from "../../src/common/session_setup"
 import { Label2dCanvas } from "../../src/components/label2d_canvas"
@@ -15,6 +15,8 @@ import { checkBox2D } from "../util/shape"
 import {
   drag,
   drawBox2DTracks,
+  keyDown,
+  keyUp,
   mouseMoveClick,
   setUpLabel2dCanvas
 } from "./canvas_util"
@@ -66,6 +68,7 @@ test("Adding and deleting tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
@@ -94,10 +97,10 @@ test("Adding and deleting tracks", () => {
     expect(_.size(state.task.tracks[trackIds[i]].labels)).toEqual(
       numItems - itemIndex
     )
-    state.task.items.forEach((item, index) => {
-      expect(_.size(item.labels)).toEqual(numLabels[index])
-      expect(_.size(item.shapes)).toEqual(numLabels[index])
-    })
+  })
+  state.task.items.forEach((item, index) => {
+    expect(_.size(item.labels)).toEqual(numLabels[index])
+    expect(_.size(item.shapes)).toEqual(numLabels[index])
   })
   // Check all the shapes have unique IDs
   state.task.items.forEach((item) => {
@@ -181,6 +184,7 @@ test("Linking tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={null}
+      treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
     />
@@ -202,16 +206,8 @@ test("Linking tracks", () => {
   const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
 
   // Terminate the track by button
-  let state = getState()
   dispatch(action.goToItem(2))
-  Session.dispatch(
-    unselectLabels(
-      state.user.select.labels,
-      state.user.select.item,
-      state.user.select.labels[state.user.select.item]
-    )
-  )
-  state = getState()
+  let state = getState()
   Session.dispatch(
     selectLabel(
       state.user.select.labels,
@@ -264,6 +260,52 @@ test("Linking tracks", () => {
   expect(_.size(state.task.tracks)).toEqual(3)
 })
 
+test("Breaking track", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const toolbarRef: React.Ref<ToolBar> = React.createRef()
+  const { getAllByText } = render(
+    <ToolBar
+      ref={toolbarRef}
+      categories={null}
+      treeCategories={null}
+      attributes={[]}
+      labelType={"labelType"}
+    />
+  )
+  expect(toolbarRef.current).not.toBeNull()
+  expect(toolbarRef.current).not.toBeUndefined()
+  if (toolbarRef.current !== null) {
+    toolbarRef.current.componentDidMount()
+  }
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+
+  // Terminate the track by button
+  dispatch(action.goToItem(2))
+  let state = getState()
+  Session.dispatch(
+    selectLabel(
+      state.user.select.labels,
+      2,
+      state.task.tracks[trackIds[0]].labels[2]
+    )
+  )
+  fireEvent(
+    getAllByText("Break Track")[0],
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+
+  state = getState()
+  expect(_.size(state.task.tracks)).toEqual(2)
+})
+
 test("Changing attributes and categories of tracks", () => {
   const label2d = canvasRef.current as Label2dCanvas
 
@@ -272,6 +314,7 @@ test("Changing attributes and categories of tracks", () => {
     <ToolBar
       ref={toolbarRef}
       categories={(emptyTrackingTask as State).task.config.categories}
+      treeCategories={null}
       attributes={(emptyTrackingTask as State).task.config.attributes}
       labelType={"labelType"}
     />
@@ -388,4 +431,68 @@ test("Changing shapes and locations of tracks", () => {
       i
     )
   }
+})
+
+test("Single frame addtion", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  keyDown(label2d, "s")
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+  keyUp(label2d, "s")
+
+  const state = getState()
+  expect(_.size(state.task.tracks)).toEqual(1)
+  expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(1)
+})
+
+test("Single frame deletion", () => {
+  const label2d = canvasRef.current as Label2dCanvas
+
+  const toolbarRef: React.Ref<ToolBar> = React.createRef()
+  const { getByText } = render(
+    <ToolBar
+      ref={toolbarRef}
+      categories={null}
+      treeCategories={null}
+      attributes={[]}
+      labelType={"labelType"}
+    />
+  )
+  expect(toolbarRef.current).not.toBeNull()
+  expect(toolbarRef.current).not.toBeUndefined()
+  if (toolbarRef.current !== null) {
+    toolbarRef.current.componentDidMount()
+  }
+
+  const itemIndices = [0]
+  const boxes = [[1, 1, 50, 50]]
+
+  const trackIds = drawBox2DTracks(label2d, getStore(), itemIndices, boxes)
+
+  dispatch(action.goToItem(1))
+  mouseMoveClick(label2d, 1, 30)
+  fireEvent.keyDown(document, { key: "s" })
+  fireEvent(
+    getByText("Delete"),
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true
+    })
+  )
+
+  const state = getState()
+  expect(_.size(state.task.tracks)).toEqual(1)
+  expect(_.size(state.task.tracks[trackIds[0]].labels)).toEqual(7)
+  expect(_.keys(state.task.tracks[trackIds[0]].labels)).toMatchObject([
+    "0",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7"
+  ])
 })

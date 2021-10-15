@@ -233,11 +233,13 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
       this.controlContext !== null
     ) {
       const config = this.state.user.viewerConfigs[this.props.id]
+      const mode = this.state.session.mode
       this._labelList.redraw(
         this.labelContext,
         this.controlContext,
         this.displayToImageRatio * UP_RES_RATIO,
-        config.hideLabels
+        config.hideLabels,
+        mode
       )
     }
     return true

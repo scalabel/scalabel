@@ -45,6 +45,8 @@ export interface LabelType {
   order: number
   /** whether the label is created manually */
   manual: boolean
+  /** Has shape changed? e.g. vertex is added/deleted. */
+  changed: boolean
 }
 
 export interface TrackType {
@@ -298,6 +300,13 @@ export interface Label2DTemplateType {
   edges: Array<[number, number]>
 }
 
+export interface Category {
+  /** Category name */
+  name: string
+  /** Children categories if tree structure */
+  subcategories?: Category[]
+}
+
 export interface Attribute {
   /** Attribute tool type */
   toolType: AttributeToolType
@@ -345,6 +354,8 @@ export interface ConfigType {
   bundleFile: string
   /** Categories */
   categories: string[]
+  /** Categories in tree structure*/
+  treeCategories: Category[]
   /** Attributes */
   attributes: Attribute[]
   /** task id */
@@ -489,6 +500,11 @@ export const enum ConnectionStatus {
   NOTIFY_SUBMITTED
 }
 
+export const enum ModeStatus {
+  ANNOTATING,
+  SELECTING
+}
+
 /**
  * Information for this particular session
  */
@@ -507,6 +523,8 @@ export interface SessionType {
   trackLinking: boolean
   /** Current connection status */
   status: ConnectionStatus
+  /** Current mode */
+  mode: ModeStatus
   /** Number of time status has changed */
   numUpdates: number
 }

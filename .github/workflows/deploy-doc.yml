@@ -1,0 +1,39 @@
+# This workflow will deploy the current version of the documentation to the scalabel website
+
+name: deploy doc
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "doc/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --ignore-installed -r scripts/requirements.txt
+      - name: test website build
+        run: |
+          cd doc
+          wget https://github.com/scalabel/scalabel-doc-media/archive/main.zip
+          unzip main.zip && mv scalabel-doc-media-main media
+          make html
+      - name: deploy website to AWS
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --exclude ".DS_Store"
+        env:
+          AWS_S3_BUCKET: doc.scalabel.ai
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: "doc/_build/src/html/"

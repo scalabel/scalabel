@@ -41,13 +41,13 @@ The exporting format has the following fields.
         - categories: string[]
 
 Each item in the ``frame`` field is an image with several fields.
-``attributes``, ``categories`` are are the list of tags giving
-to each label in images. Fields of item is given below.
+``attributes``, ``categories`` are the list of tags given
+to each label in images. Fields of item are given below.
 
 .. code-block:: yaml
     
-    - name: string
-    - url: string
+    - name: string (must be unique over the whole dataset!)
+    - url: string (relative path or URL to data file)
     - videoName: string (optional)
     - attributes: a dictionary of frame attributes
     - intrinsics
@@ -84,10 +84,27 @@ to each label in images. Fields of item is given below.
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean
+        - graph: (optional)
+            - nodes [ ]:
+                - location: [x, y] or [x, y, z]
+                - category: string
+                - visibility: string (optional)
+                - type: string (optional)
+                - id: string
+            - edges [ ]:
+                - source: string
+                - target: string
+                - type: string (optional)
+            - type: string (optional)
 
 
 More details about the fields
 
+* name / videoName / url
+    * When there is no url the data folder structure is assumed to be:
+        * <data_root>/videoName (if any)/name
+    * If your data folder structure differs from that, you can store the relative path from <data_root> to the data file in url.
+    * Note that 'name' must be unique over the whole dataset, s.t. ``frameGroup`` can refer to each frame via its name.
 * labels
 
     * index: index of the label in an image or a video
@@ -107,3 +124,28 @@ More details about the fields
           same index in vertices. ‘L’ for vertex and ‘C’ for control point of a
           bezier curve.
         * closed: true for polygon and otherwise for path
+
+    * graph
+
+        * nodes
+            * location: 2D or 3D coordinates. In 2D: (x, y), x horizontal, y vertical, (0, 0) top left corner.
+            * category: Either joint name or type of segmentation (see closed in `poly2d`).
+            * visibility: Visibility of joint for pose.
+            * type: Type of vertex for segmentation (see type in `poly2d`).
+            * id: Unique ID.
+
+        * edges
+            * source: Unique ID of the source node of the edge.
+            * target: Unique ID of the target node of the edge.
+            * type: Type of edge.
+
+        * type: Specification of graph.
+
+
+If your dataset contains multiple data sources (e.g. multiple cameras or other sensors), you can group frames together using ``frameGroup``.
+This data structure inherits from ``frame``, s.t. each  ``frameGroup`` has all of the attributes above, plus a list of frame names that are assigned to the group:
+
+.. code-block:: yaml
+
+    - [inherits all attributes from frame]
+    - frames: [ ]str (list of frame names in the group)

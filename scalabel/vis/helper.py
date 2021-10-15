@@ -12,7 +12,7 @@ from PIL import Image
 
 from ..common.logger import logger
 from ..common.typing import NDArrayF64, NDArrayU8
-from ..label.typing import Frame, Intrinsics, Label
+from ..label.typing import Edge, Frame, Intrinsics, Label, Node
 from ..label.utils import get_matrix_from_intrinsics
 from .geometry import Label3d
 
@@ -154,3 +154,44 @@ def poly2patch(
         antialiased=False,
         snap=True,
     )
+
+
+def gen_graph_point(
+    node: Node,
+    color: List[float],
+    radius: int,
+) -> List[mpatches.Circle]:
+    """Generate graph point from node."""
+    assert node is not None
+
+    # Draw and add graph node to the figure
+    return [
+        mpatches.Circle(
+            node.location,
+            radius=radius,
+            color=color,
+        )
+    ]
+
+
+def gen_graph_edge(
+    edge: Edge,
+    label: Label,
+    color: List[float],
+    linewidth: int,
+) -> List[mpatches.ConnectionPatch]:
+    """Generate graph edges from graph label."""
+    assert edge is not None
+    assert label.graph is not None
+    nodes = {node.id: node for node in label.graph.nodes}
+
+    # Draw and add graph edges to the figure
+    return [
+        mpatches.ConnectionPatch(
+            nodes[edge.source].location,
+            nodes[edge.target].location,
+            "data",
+            color=color,
+            linewidth=linewidth,
+        )
+    ]

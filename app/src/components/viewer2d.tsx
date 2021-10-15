@@ -11,7 +11,12 @@ import * as types from "../const/common"
 import { Vector2D } from "../math/vector2d"
 import { viewerStyles } from "../styles/viewer"
 import { ImageViewerConfigType } from "../types/state"
-import { MAX_SCALE, MIN_SCALE, SCROLL_ZOOM_RATIO } from "../view_config/image"
+import {
+  MAX_SCALE,
+  MIN_SCALE,
+  SCROLL_ZOOM_RATIO,
+  ZOOM_RATIO
+} from "../view_config/image"
 import {
   DrawableViewer,
   ViewerClassTypes,
@@ -81,8 +86,15 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
           onClick={() => {
             if (this._container !== null) {
               const rect = this._container.getBoundingClientRect()
+              let zoomRatio = SCROLL_ZOOM_RATIO
+              if (
+                this.isKeyDown(types.Key.META) ||
+                this.isKeyDown(types.Key.CONTROL)
+              ) {
+                zoomRatio = ZOOM_RATIO
+              }
               this.zoom(
-                SCROLL_ZOOM_RATIO,
+                zoomRatio,
                 new Vector2D(rect.width / 2, rect.height / 2)
               )
             }
@@ -98,8 +110,15 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
           onClick={() => {
             if (this._container !== null) {
               const rect = this._container.getBoundingClientRect()
+              let zoomRatio = 1 / SCROLL_ZOOM_RATIO
+              if (
+                this.isKeyDown(types.Key.META) ||
+                this.isKeyDown(types.Key.CONTROL)
+              ) {
+                zoomRatio = 1 / ZOOM_RATIO
+              }
               this.zoom(
-                1 / SCROLL_ZOOM_RATIO,
+                zoomRatio,
                 new Vector2D(rect.width / 2, rect.height / 2)
               )
             }
@@ -167,6 +186,24 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    * @param e
    */
   protected onDoubleClick(): void {}
+
+  /**
+   * Handle key down
+   *
+   * @param e
+   */
+  protected onKeyDown(e: KeyboardEvent): void {
+    super.onKeyDown(e)
+    switch (e.key) {
+      case types.Key.EQUAL:
+      case types.Key.PLUS:
+        this.zoom(ZOOM_RATIO, new Vector2D(this._mX, this._mY))
+        break
+      case types.Key.MINUS:
+        this.zoom(1 / ZOOM_RATIO, new Vector2D(this._mX, this._mY))
+    }
+    e.stopPropagation()
+  }
 
   /**
    * Handle mouse leave

@@ -1,9 +1,13 @@
+import "react-toastify/dist/ReactToastify.css"
 import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
+import { ToastContainer, toast, Slide } from "react-toastify"
 
 import {
+  changeModeToAnnotating,
+  changeModeToSelecting,
   changeSelect,
   changeViewerConfig,
   mergeTracks,
@@ -23,15 +27,17 @@ import { Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, State } from "../types/state"
+import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
-import { Category } from "./toolbar_category"
+import { ToolbarCategory } from "./toolbar_category"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
   /** categories of ToolBar */
   categories: string[] | null
+  /** treeCategories of Toolbar */
+  treeCategories: Category[] | null
   /** attributes of ToolBar */
   attributes: Attribute[]
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
@@ -82,6 +88,22 @@ export class ToolBar extends Component<Props> {
         }
         config.hideLabels = !config.hideLabels
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
+        break
+      }
+      case Key.X_LOW: {
+        if (this.state.session.mode === ModeStatus.ANNOTATING) {
+          Session.dispatch(changeModeToSelecting())
+          toast("Change to SELECTING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
+        } else {
+          Session.dispatch(changeModeToAnnotating())
+          toast("Change to ANNOTATING mode.", {
+            position: "top-center",
+            autoClose: 2000
+          })
+        }
       }
     }
     this._keyDownMap[e.key] = true
@@ -131,11 +153,15 @@ export class ToolBar extends Component<Props> {
    * @return component
    */
   public render(): React.ReactNode {
-    const { categories, attributes } = this.props
+    const { categories, treeCategories, attributes } = this.props
     return (
       <div>
         {categories !== null ? (
-          <Category categories={categories} headerText={"Category"} />
+          <ToolbarCategory
+            categories={categories}
+            treeCategories={treeCategories}
+            headerText={"Category"}
+          />
         ) : null}
         <List>
           {attributes.map((element: Attribute) => (
@@ -170,12 +196,13 @@ export class ToolBar extends Component<Props> {
           )}
           {this.state.task.config.tracking && (
             <div>
-              {makeButton("Unlink Track", () => {
+              {makeButton("Break Track", () => {
                 this.unlinkSelectedTrack(this.state)
               })}
             </div>
           )}
         </div>
+        <ToastContainer hideProgressBar transition={Slide} />
       </div>
     )
   }

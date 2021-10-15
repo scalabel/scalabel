@@ -67,11 +67,14 @@ export function convertItemToImport(
           categories.push(categoryNameMap[labelExport.category])
         }
 
-        const attributes = parseExportAttributes(
-          labelExport.attributes,
-          attributeNameMap,
-          attributeValueMap
-        )
+        let attributes: { [key: number]: number[] } = {}
+        if (labelExport.attributes !== undefined) {
+          attributes = parseExportAttributes(
+            labelExport.attributes,
+            attributeNameMap,
+            attributeValueMap
+          )
+        }
 
         const [importedLabel, importedShapes] = convertLabelToImport(
           labelExport,

@@ -1,12 +1,17 @@
 """Functions for KITTI."""
 import os
-from typing import List
+from typing import Dict, List, Tuple
 
 import numpy as np
-import utm  # type: ignore
 from scipy.spatial.transform import Rotation as R
 
+from ..common.io import open_read_text
 from ..common.typing import NDArrayF64
+
+try:
+    import utm
+except ImportError:
+    utm = None
 
 
 # Functions from kio_slim
@@ -33,6 +38,10 @@ class KittiPoseParser:
         """
         fields = [float(f) for f in fields_str]
         self.latlon = fields[:2]
+        assert utm is not None, (
+            "KITTI conversion requires utm to be "
+            "installed, see scripts/optional.txt"
+        )
         location = utm.from_latlon(*self.latlon)
         self.position = np.array([location[0], location[1], fields[2]])
 
@@ -60,31 +69,49 @@ def read_oxts(oxts_dir: str, seq_idx: int) -> List[List[str]]:
         fields: list of oxts information
     """
     oxts_path = os.path.join(oxts_dir, f"{seq_idx:04d}.txt")
-    with open(oxts_path, "r") as f:
+    with open_read_text(oxts_path) as f:
         fields = [line.strip().split() for line in f]
     return fields
 
 
-def read_calib(calib_dir: str, seq_idx: int, cam: int = 2) -> NDArrayF64:
-    """Read calibration file and return camera matrix.
+def read_calib(
+    calib_dir: str, seq_idx: int, mode: str = "tracking"
+) -> Tuple[Dict[str, NDArrayF64], NDArrayF64, NDArrayF64, float]:
+    """Read calibration file and return transformation matrice."""
+    if mode == "tracking":
+        seq_id = f"{seq_idx:04d}.txt"
+        left_cam = "image_02"
+        right_cam = "image_03"
+    else:
+        seq_id = f"{seq_idx:06d}.txt"
+        left_cam = "image_2"
+        right_cam = "image_3"
 
-    e.g.,
-        projection = read_calib(cali_dir, vid_id)
-    """
-    with open(os.path.join(calib_dir, f"{seq_idx:04d}.txt")) as f:
+    with open_read_text(os.path.join(calib_dir, seq_id)) as f:
         fields = [line.split() for line in f]
-    return np.asarray(fields[cam][1:], dtype=np.float32).reshape(3, 4)
 
+    projections = {}
 
-def read_calib_det(calib_dir: str, img_idx: int, cam: int = 2) -> NDArrayF64:
-    """Read calibration file and return camera matrix.
+    projections[left_cam] = np.asarray(
+        fields[2][1:], dtype=np.float32
+    ).reshape(3, 4)
+    projections[right_cam] = np.asarray(
+        fields[3][1:], dtype=np.float32
+    ).reshape(3, 4)
 
-    e.g.,
-        projection = read_calib(cali_dir, img_id)
-    """
-    with open(os.path.join(calib_dir, f"{img_idx:06d}.txt")) as f:
-        fields = [line.split() for line in f]
-    return np.asarray(fields[cam][1:], dtype=np.float64).reshape(3, 4)
+    left_to_right_offset = (
+        projections[right_cam][0, -1] / projections[right_cam][0, 0]
+        - projections[left_cam][0, -1] / projections[left_cam][0, 0]
+    )
+
+    rect = np.asarray(fields[4][1:], dtype=np.float32).reshape(3, 3)
+    rect = np.hstack((rect, np.zeros((3, 1))))
+    rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
+
+    velo2cam = np.asarray(fields[5][1:], dtype=np.float32).reshape(3, 4)
+    velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
+
+    return projections, rect, velo2cam, left_to_right_offset
 
 
 def list_from_file(
@@ -104,7 +131,7 @@ def list_from_file(
     """
     cnt = 0
     item_list = []
-    with open(filename, "r") as f:
+    with open_read_text(filename) as f:
         for _ in range(offset):
             f.readline()
         for line in f:

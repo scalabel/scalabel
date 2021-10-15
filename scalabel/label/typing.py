@@ -32,6 +32,34 @@ class Poly2D(BaseModel):
     closed: bool
 
 
+class Node(BaseModel):
+    """Node of a graph."""
+
+    # 2D or 3D coordinates.
+    # in 2D: (x, y), x horizontal, y vertical, (0, 0) top left corner
+    location: Union[Tuple[float, float], Tuple[float, float, float]]
+    category: str
+    visibility: Optional[str] = None
+    type: Optional[str] = None
+    id: str
+
+
+class Edge(BaseModel):
+    """Edge of a graph."""
+
+    source: str
+    target: str
+    type: Optional[str] = None
+
+
+class Graph(BaseModel):
+    """Graph."""
+
+    nodes: List[Node]
+    edges: List[Edge]
+    type: Optional[str] = None
+
+
 class Label(BaseModel):
     """Label."""
 
@@ -45,6 +73,7 @@ class Label(BaseModel):
     box2d: Optional[Box2D]
     box3d: Optional[Box3D]
     poly2d: Optional[List[Poly2D]]
+    graph: Optional[Graph]
 
     def __init__(self, **data: Any) -> None:  # type: ignore
         """Init structure and convert the id type to string."""
@@ -132,8 +161,15 @@ class Config(BaseModel):
     categories: List[Category]
 
 
+class FrameGroup(Frame):
+    """Define group of frames and shared attributes."""
+
+    frames: List[str]
+
+
 class Dataset(BaseModel):
     """Define dataset components."""
 
     frames: List[Frame]
+    groups: Optional[List[FrameGroup]]
     config: Optional[Config]

@@ -1,14 +1,12 @@
 """Definition of the base evaluation result class."""
 
 from collections import defaultdict
-from typing import AbstractSet, Callable, Dict, List, Optional, Union
+from typing import AbstractSet, Dict, List, Optional, Union
 
 import numpy as np
-from mypy_extensions import KwArg, VarArg
 from pandas import DataFrame
 from pydantic import BaseModel, PrivateAttr
 
-FORMATTER = Callable[[VarArg(object), KwArg(object)], str]
 Scores = Dict[str, Union[int, float]]
 ScoresList = List[Scores]
 AVERAGE = "AVERAGE"
@@ -26,7 +24,7 @@ class Result(BaseModel):
     classes for the two-level class hierarchy case.
 
     Functions:
-        dict() -> dict[str, dict[str, int | float]]:
+        {} -> dict[str, dict[str, int | float]]:
             export all data to a nested dict.
         json() -> str:
             export the nested dict of `dict()` into a JSON string.
@@ -40,7 +38,6 @@ class Result(BaseModel):
             the same as `table()`.
     """
 
-    _formatters: Dict[str, FORMATTER] = PrivateAttr(dict())
     _row_breaks: List[int] = PrivateAttr([])
 
     def __init__(self, **data: Union[int, float, ScoresList]) -> None:
@@ -125,14 +122,7 @@ class Result(BaseModel):
             table (str): the exported table string
         """
         data_frame = self.pd_frame(include, exclude)
-        if not self._formatters:
-            formatters = {
-                metric: "{:.1f}".format for metric in data_frame.columns
-            }
-        else:
-            formatters = self._formatters
-
-        summary = data_frame.to_string(formatters=formatters)
+        summary = data_frame.to_string(float_format=lambda num: f"{num:.1f}")
         summary = summary.replace("NaN", " - ")
         strs = summary.split("\n")
         split_line = "-" * len(strs[0])
@@ -165,7 +155,7 @@ class Result(BaseModel):
         Returns:
             dict[str, int | float]: returned summary of the result
         """
-        summary_dict: Dict[str, Union[int, float]] = dict()
+        summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
             include=include, exclude=exclude  # type: ignore
         ).items():

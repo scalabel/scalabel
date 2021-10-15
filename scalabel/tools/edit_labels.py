@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List
 
 import yaml
 
+from ..common.io import open_read_text, open_write_text
 from ..common.logger import logger
 
 LabelObject = Dict[str, Any]  # type: ignore
@@ -72,13 +73,13 @@ def read_input(filename: str) -> List[LabelObject]:
     labels: List[LabelObject]
     ext = splitext(filename)[1]
     logger.info("Reading %s", filename)
-    with open(filename, "r") as fp:
+    with open_read_text(filename) as fp:
         if ext == ".json":
             labels = json.load(fp)
         elif ext in [".yml", ".yaml"]:
-            labels = yaml.load(fp)
+            labels = yaml.safe_load(fp)
         else:
-            raise ValueError("Unrecognized file extension {}".format(ext))
+            raise ValueError(f"Unrecognized file extension {ext}")
     return labels
 
 
@@ -86,13 +87,13 @@ def write_output(filename: str, labels: List[LabelObject]) -> None:
     """Write output file."""
     ext = splitext(filename)[1]
     logger.info("Writing %s", filename)
-    with open(filename, "w") as fp:
+    with open_write_text(filename) as fp:
         if ext == ".json":
             json.dump(labels, fp)
         elif ext in [".yml", ".yaml"]:
             yaml.dump(labels, fp)
         else:
-            raise ValueError("Unrecognized file extension {}".format(ext))
+            raise ValueError(f"Unrecognized file extension {ext}")
 
 
 def main() -> None:

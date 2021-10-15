@@ -7,6 +7,7 @@ import {
   DeepPartialState,
   IdType,
   LabelType,
+  ModeStatus,
   PaneType,
   Select,
   ShapeType,
@@ -71,6 +72,11 @@ export interface UpdateStateAction extends BaseAction {
 export interface UpdateSessionStatusAction extends BaseAction {
   /** New status of the session */
   newStatus: ConnectionStatus
+}
+
+export interface ChangeSessionModeAction extends BaseAction {
+  /** New mode of the session */
+  newMode: ModeStatus
 }
 
 export interface AddLabelsAction extends BaseAction {

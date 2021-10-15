@@ -15,10 +15,11 @@ import {
   makeTask,
   makeTrack
 } from "../functional/states"
-import { DatasetExport, ItemExport } from "../types/export"
+import { DatasetExport, ItemExport, LabelExport } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
   Attribute,
+  Category,
   ConfigType,
   ItemType,
   Label2DTemplateType,
@@ -32,6 +33,8 @@ import { convertItemToImport } from "./import"
 import { ProjectStore } from "./project_store"
 import { Storage } from "./storage"
 import * as util from "./util"
+import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
+import Logger from "./logger"
 
 /**
  * convert fields to form and validate input
@@ -93,12 +96,6 @@ export async function parseForm(
   return form
 }
 
-/** Format of the category in the config file */
-type Categories = Array<{
-  /** Name of the category */
-  name: string
-}>
-
 /**
  * Parses item, category, and attribute files from paths
  *
@@ -114,7 +111,7 @@ export async function parseFiles(
 ): Promise<FormFileData> {
   const items = parseItems(storage, files, itemsRequired)
 
-  const categories: Promise<Categories> = readConfig(
+  const categories: Promise<Category[]> = readConfig(
     storage,
     _.get(files, FormField.CATEGORIES),
     getDefaultCategories(labelType)
@@ -151,20 +148,15 @@ export async function parseFiles(
         SensorType[],
         Label2DTemplateType[],
         Attribute[],
-        Categories
+        Category[]
       ]
     ) => {
-      const categoriesData = result[4]
-      const categoriesList = []
-      for (const category of categoriesData) {
-        categoriesList.push(category.name)
-      }
       return {
         items: result[0],
         sensors: result[1],
         templates: result[2],
         attributes: result[3],
-        categories: categoriesList
+        categories: result[4]
       }
     }
   )
@@ -188,12 +180,16 @@ export async function parseSingleFile(
   )
 
   return await dataset.then((dataset: DatasetExport) => {
+    const categories: Category[] = []
+    dataset.config.categories.forEach((category) =>
+      categories.push({ name: category })
+    )
     return {
       items: dataset.frames as Array<Partial<ItemExport>>,
       sensors: [],
       templates: [],
       attributes: dataset.config.attributes as Attribute[],
-      categories: dataset.config.categories
+      categories: categories
     }
   })
 }
@@ -230,7 +226,7 @@ export async function readConfig<T>(
  *
  * @param labelType
  */
-function getDefaultCategories(labelType: string): Categories {
+function getDefaultCategories(labelType: string): Category[] {
   switch (labelType) {
     // TODO: add seg2d defaults (requires subcategories)
     case LabelTypeName.BOX_3D:
@@ -285,7 +281,15 @@ export async function parseItems(
   itemsRequired: boolean
 ): Promise<Array<Partial<ItemExport>>> {
   if (FormField.ITEMS in files) {
-    return await readConfig(storage, files[FormField.ITEMS], [])
+    let items = await readConfig<Array<Partial<ItemExport>> | DatasetExport>(
+      storage,
+      files[FormField.ITEMS],
+      []
+    )
+    if ("frames" in items) {
+      items = items.frames
+    }
+    return items
   } else {
     if (itemsRequired) {
       throw new Error("No item file.")
@@ -329,7 +333,8 @@ export async function createProject(
     pageTitle: form.pageTitle,
     instructionPage: form.instructionUrl,
     bundleFile,
-    categories: formFileData.categories,
+    categories: getLeafCategories(formFileData.categories),
+    treeCategories: formFileData.categories,
     attributes: formFileData.attributes,
     taskId: "",
     tracking,
@@ -362,6 +367,25 @@ export async function createProject(
     sensors
   }
   return Promise.resolve(project)
+}
+
+/**
+ * Get leaf categories
+ *
+ * @param categoires
+ */
+function getLeafCategories(categoires: Category[]): string[] {
+  let leafCategoires: string[] = []
+  for (const category of categoires) {
+    if (category.subcategories !== undefined) {
+      leafCategoires = leafCategoires.concat(
+        getLeafCategories(category.subcategories)
+      )
+    } else {
+      leafCategoires.push(category.name)
+    }
+  }
+  return leafCategoires
 }
 
 /**
@@ -434,6 +458,77 @@ function filterInvalidItems(
         itemExport.dataType === undefined || itemExport.dataType === itemType
     )
   }
+}
+
+/**
+ * If the imported items have polygon annotations,
+ * check whether the polygon have intersections. Filter them and throw a warning
+ *
+ * @param project
+ */
+export function filterIntersectedPolygonsInProject(
+  project: Project
+): [Project, string] {
+  const items = project.items
+  let msg: string = ""
+  let numberOfIntersections = 0
+
+  const newItems = items.map((item) => {
+    let newItem: Partial<ItemExport> = item
+    if (item.labels !== undefined) {
+      const filteredLabels: LabelExport[] = []
+      item.labels.forEach((label) => {
+        if (label.poly2d !== undefined && label.poly2d !== null) {
+          label.poly2d.forEach((poly) => {
+            // If it is a polyline label, do not check intersection
+            if (!poly.closed) {
+              filteredLabels.push(label)
+            } else {
+              // This is a workaround for importing bdd100k labels.
+              // Its polygon may contain vertices that is very close (<1)
+              // And the intersection there always appear under this situation
+              // So we merge them first to avoid intersection
+              poly.vertices = mergeNearbyVertices(poly.vertices, 1)
+              // Check whether the polygon have intersections
+              const intersectionData = polyIsComplex(poly.vertices)
+              if (intersectionData.length > 0) {
+                numberOfIntersections += intersectionData.length
+                intersectionData.forEach((seg) => {
+                  msg = `Image url: ${
+                    item.url !== undefined ? item.url.toString() : ""
+                  }\n`
+                  msg += `polygon ID: ${label.id.toString()}\n`
+                  msg += `Segment1: (${seg[0]}, ${seg[1]}, ${seg[2]}, ${seg[3]})\n`
+                  msg += `Segment2: (${seg[4]}, ${seg[5]}, ${seg[6]}, ${seg[7]})\n`
+                  msg += `\n`
+                })
+              } else {
+                filteredLabels.push(label)
+              }
+            }
+          })
+        } else {
+          filteredLabels.push(label)
+        }
+      })
+      newItem = {
+        ...newItem,
+        labels: filteredLabels
+      }
+    }
+    return newItem
+  })
+
+  if (numberOfIntersections > 0) {
+    msg =
+      `Found and filtered${numberOfIntersections} polygon intersection(s)!\n` +
+      msg +
+      "Please check your data."
+    Logger.warning(msg)
+  }
+
+  project.items = newItems
+  return [project, msg]
 }
 
 /**

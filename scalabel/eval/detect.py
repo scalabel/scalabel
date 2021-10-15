@@ -14,6 +14,7 @@ import numpy as np
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
+from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
@@ -21,7 +22,7 @@ from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result, Scores, ScoresList
+from .result import OVERALL, Result, Scores
 
 
 class DetResult(Result):
@@ -40,13 +41,6 @@ class DetResult(Result):
     ARm: List[Dict[str, float]]
     ARl: List[Dict[str, float]]
 
-    def __init__(self, **data: ScoresList) -> None:
-        """Set extra parameters."""
-        super().__init__(**data)
-        self._formatters = {
-            metric: "{:.1f}".format for metric in self.__fields__
-        }
-
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
@@ -63,7 +57,7 @@ class DetResult(Result):
             for category, score in scores.items():
                 if category == OVERALL:
                     continue
-                summary_dict["{}/{}".format("AP", category)] = score
+                summary_dict[f"AP/{category}"] = score
         return summary_dict
 
 
@@ -82,9 +76,7 @@ class COCOV2(COCO):  # type: ignore
         if annotation_file is None:
             assert isinstance(
                 annotations, dict
-            ), "annotation file format {} not supported".format(
-                type(annotations)
-            )
+            ), f"annotation file format {type(annotations)} not supported"
             self.dataset = annotations
             self.createIndex()
 
@@ -196,7 +188,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             to_updates = list(map(self.compute_match, range(len(p.imgIds))))
 
         eval_num = len(p.catIds) * len(p.areaRng) * len(p.imgIds)
-        self.evalImgs: List[DictStrAny] = [dict() for _ in range(eval_num)]
+        self.evalImgs: List[DictStrAny] = [{} for _ in range(eval_num)]
         for to_update in to_updates:
             for ind, item in to_update.items():
                 self.evalImgs[ind] = item
@@ -209,7 +201,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         area_num = len(p.areaRng)
         img_num = len(p.imgIds)
 
-        to_updates: Dict[int, DictStrAny] = dict()
+        to_updates: Dict[int, DictStrAny] = {}
         for cat_ind, cat_id in enumerate(p.catIds):
             for area_ind, area_rng in enumerate(p.areaRng):
                 eval_ind: int = (
@@ -280,7 +272,6 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-    with_logs: bool = True,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -289,7 +280,6 @@ def evaluate_det(
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
         nproc: the number of process.
-        with_logs: whether to print logs
 
     Returns:
         DetResult: rendered eval results.
@@ -320,11 +310,9 @@ def evaluate_det(
     coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
     coco_eval.params.imgIds = img_ids
 
-    if with_logs:
-        logger.info("evaluating...")
+    logger.info("evaluating...")
     coco_eval.evaluate()
-    if with_logs:
-        logger.info("accumulating...")
+    logger.info("accumulating...")
     coco_eval.accumulate()
     result = coco_eval.summarize()
     return result
@@ -359,12 +347,6 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for detection evaluation",
     )
-    parser.add_argument(
-        "--quite",
-        "-q",
-        action="store_true",
-        help="without logging",
-    )
     return parser.parse_args()
 
 
@@ -380,9 +362,9 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_det(gts, preds, cfg, args.nproc, not args.quite)
+    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
-        with open(args.out_file, "w") as fp:
+        with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)
