@@ -178,7 +178,7 @@ def parse_arguments() -> argparse.Namespace:
         "--metadata",
         nargs="+",
         default=[],
-        help="Meta Data for official evaluation.",
+        help="Modalities / Data used: camera, lidar, radar, map, external",
     )
     return parser.parse_args()
 
@@ -289,12 +289,13 @@ def run(args: argparse.Namespace) -> None:
 
     assert len(args.metadata) > 0, "Please state the used modality and data!"
 
-    assert all(
-        (m in metadata for m in args.metadata)
-    ), f"Invalid metadata, please select splits from {list(metadata.keys())}!"
+    assert all(("use_" + m in metadata for m in args.metadata)), (
+        "Invalid metadata, please select from "
+        f"{[m.replace('use_', '') for m in list(metadata.keys())]}!"
+    )
 
     for m in args.metadata:
-        metadata[m] = True
+        metadata["use_" + m] = True
 
     dataset = load(args.input, args.nproc)
 
