@@ -147,7 +147,7 @@ tracking_cats = [
 
 def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
-    parser = argparse.ArgumentParser(description="Scalabel to COCO format")
+    parser = argparse.ArgumentParser(description="Scalabel to nuScenes format")
     parser.add_argument(
         "--input",
         "-i",
