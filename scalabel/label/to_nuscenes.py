@@ -183,7 +183,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def convert_track(
+def to_nuscenes(
     dataset: Dataset, mode: str, metadata: Dict[str, bool]
 ) -> DictStrAny:
     """Conver Scalabel format prediction into nuScenes JSON file."""
@@ -290,7 +290,7 @@ def run(args: argparse.Namespace) -> None:
     assert len(args.metadata) > 0, "Please state the used modality and data!"
 
     assert all(
-        [m in metadata.keys() for m in args.metadata]
+        (m in metadata.keys() for m in args.metadata)
     ), f"Invalid metadata, please select splits from {list(metadata.keys())}!"
 
     for m in args.metadata:
@@ -298,7 +298,7 @@ def run(args: argparse.Namespace) -> None:
 
     dataset = load(args.input, args.nproc)
 
-    nusc = convert_track(dataset, args.mode, metadata)
+    nusc = to_nuscenes(dataset, args.mode, metadata)
 
     with open_write_text(args.output) as f:
         json.dump(nusc, f)

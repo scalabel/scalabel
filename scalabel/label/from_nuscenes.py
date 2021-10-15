@@ -423,7 +423,7 @@ def run(args: argparse.Namespace) -> None:
 
     if len(args.splits) > 0:
         assert all(
-            [s in splits_to_iterate for s in args.splits]
+            (s in splits_to_iterate for s in args.splits)
         ), f"Invalid splits, please select splits from {splits_to_iterate}!"
         splits_to_iterate = args.splits
 
