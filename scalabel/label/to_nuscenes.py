@@ -290,7 +290,7 @@ def run(args: argparse.Namespace) -> None:
     assert len(args.metadata) > 0, "Please state the used modality and data!"
 
     assert all(
-        (m in metadata.keys() for m in args.metadata)
+        (m in metadata for m in args.metadata)
     ), f"Invalid metadata, please select splits from {list(metadata.keys())}!"
 
     for m in args.metadata:
