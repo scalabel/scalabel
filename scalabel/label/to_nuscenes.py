@@ -174,12 +174,17 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for conversion",
     )
+    parser.add_argument(
+        "--metadata",
+        nargs="+",
+        default=[],
+        help="Meta Data for official evaluation.",
+    )
     return parser.parse_args()
 
 
 def convert_track(
-    dataset: Dataset,
-    mode: str,
+    dataset: Dataset, mode: str, metadata: Dict[str, bool]
 ) -> DictStrAny:
     """Conver Scalabel format prediction into nuScenes JSON file."""
     results: DictStrAny = {}
@@ -252,7 +257,7 @@ def convert_track(
                         "translation": translation.tolist(),
                         "size": dimension,
                         "rotation": rotation.elements.tolist(),
-                        "velocity": [0.0, 0.0],
+                        "velocity": [velocity[0], velocity[1]],
                         "tracking_id": tracking_id,
                         "tracking_name": label.category,
                         "tracking_score": label.score,
@@ -262,13 +267,7 @@ def convert_track(
 
     nusc_annos = {
         "results": results,
-        "meta": {
-            "use_camera": True,
-            "use_lidar": False,
-            "use_radar": False,
-            "use_map": False,
-            "use_external": False,
-        },
+        "meta": metadata,
     }
 
     return nusc_annos
@@ -280,9 +279,26 @@ def run(args: argparse.Namespace) -> None:
         "Please install the requirements in scripts/optional.txt to use"
         "NuScenes conversion."
     )
+    metadata = {
+        "use_camera": False,
+        "use_lidar": False,
+        "use_radar": False,
+        "use_map": False,
+        "use_external": False,
+    }
+
+    assert len(args.metadata) > 0, "Please state the used modality and data!"
+
+    assert all(
+        [m in metadata.keys() for m in args.metadata]
+    ), f"Invalid metadata, please select splits from {list(metadata.keys())}!"
+
+    for m in args.metadata:
+        metadata[m] = True
+
     dataset = load(args.input, args.nproc)
 
-    nusc = convert_track(dataset, args.mode)
+    nusc = convert_track(dataset, args.mode, metadata)
 
     with open_write_text(args.output) as f:
         json.dump(nusc, f)
