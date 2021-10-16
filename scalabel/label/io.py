@@ -11,6 +11,7 @@ from ..common.io import load_config, open_read_text, open_write_text
 from ..common.parallel import pmap
 from ..common.typing import DictStrAny
 from .typing import (
+    RLE,
     Box2D,
     Box3D,
     Config,
@@ -23,7 +24,6 @@ from .typing import (
     Intrinsics,
     Label,
     Poly2D,
-    RLE,
 )
 
 
