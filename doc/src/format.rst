@@ -84,6 +84,9 @@ to each label in images. Fields of item are given below.
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean
+        - rle:
+            - counts: str
+            - size: (height, width)
         - graph: (optional)
             - nodes [ ]:
                 - location: [x, y] or [x, y, z]
