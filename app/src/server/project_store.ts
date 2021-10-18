@@ -20,7 +20,7 @@ import {
   makeUserMetadata,
   safeParseJSON
 } from "./util"
-// import { ItemExport } from "../types/export"
+import { ItemExport } from "../types/export"
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -181,14 +181,38 @@ export class ProjectStore {
   }
 
   /**
+   * Loads the project except all the labels to decrease the loading time
+   *
+   * @param projectName
+   */
+  public async loadProjectInfo(projectName: string): Promise<Project> {
+    const key = path.getProjectInfoKey(projectName)
+    const fields = await this.storage.load(key)
+    const loadedProject = safeParseJSON(fields) as Project
+    return loadedProject
+  }
+
+  /**
    * Saves the project
    *
    * @param project
    */
   public async saveProject(project: Project): Promise<void> {
     const key = path.getProjectKey(project.config.projectName)
-    const data = JSON.stringify(project, null)
+    let data = JSON.stringify(project, null)
     await this.save(key, data)
+
+    const toSaveProjectItems: Array<Partial<ItemExport>> = []
+    for (const item of project.items) {
+      const toSaveProjectItem: Partial<ItemExport> = {
+        ...item,
+        labels: []
+      }
+      toSaveProjectItems.push(toSaveProjectItem)
+    }
+    const toSaveProject = { ...project, items: toSaveProjectItems }
+    data = JSON.stringify(toSaveProject, null, 2)
+    await this.save(key + "_info", data)
   }
 
   /**

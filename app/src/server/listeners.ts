@@ -380,7 +380,7 @@ export class Listeners {
     try {
       const projectName = req.query.name as string
 
-      const project = await this.projectStore.loadProject(projectName)
+      const project = await this.projectStore.loadProjectInfo(projectName)
       const projectMetaData = getProjectOptions(project)
 
       const savedTasks = await this.projectStore.loadTaskStates(projectName)
