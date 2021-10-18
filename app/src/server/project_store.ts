@@ -186,7 +186,10 @@ export class ProjectStore {
    * @param projectName
    */
   public async loadProjectInfo(projectName: string): Promise<Project> {
-    const key = path.getProjectInfoKey(projectName)
+    let key = path.getProjectInfoKey(projectName)
+    if (!(await this.storage.hasKey(key))) {
+      key = path.getProjectKey(projectName)
+    }
     const fields = await this.storage.load(key)
     const loadedProject = safeParseJSON(fields) as Project
     return loadedProject
