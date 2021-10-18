@@ -187,7 +187,7 @@ class LabelViewer:
         frame: Frame,
         with_attr: bool = True,
         with_box2d: bool = True,
-        with_box3d: bool = False,
+        with_box3d: bool = True,
         with_poly2d: bool = True,
         with_graph: bool = True,
         with_ctrl_points: bool = False,

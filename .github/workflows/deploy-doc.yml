@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install --ignore-installed -r scripts/requirements.txt
+          python3 -m pip install --ignore-installed -r doc/requirements.txt
       - name: test website build
         run: |
           cd doc
