@@ -241,6 +241,20 @@ export class ProjectStore {
   }
 
   /**
+   * gets all task keys in project sorted by index
+   *
+   * @param projectName
+   */
+  public async getTaskKeysInProject(projectName: string): Promise<string[]> {
+    const taskDir = path.getTaskDir(projectName)
+    const keys = await this.storage.listKeys(taskDir, false)
+    keys.sort((a: string, b: string) => {
+      return parseInt(a, 10) - parseInt(b, 10)
+    })
+    return keys
+  }
+
+  /**
    * Get the latest state for each task in the project
    * Check redis first, then memory
    * If there is no saved state for a task, returns the initial task

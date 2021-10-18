@@ -29,6 +29,7 @@ import {
 import { SubmitData } from "../types/state"
 import DividedPage from "./divided_page"
 import { formatDate, getSubmissionTime } from "./util"
+import { getAuth } from "../common/service"
 
 export interface ProjectOptions {
   /** project name */
@@ -63,6 +64,8 @@ export interface DashboardContents {
   projectMetaData: ProjectOptions
   /** tasks */
   taskMetaDatas: TaskOptions[]
+  /** task keys */
+  taskKeys?: string[]
   /** num users */
   numUsers: number
 }
@@ -148,128 +151,220 @@ interface ListEntryClassType {
   listContainer: string
 }
 
+export interface DashboardState {
+  /** project meta data */
+  projectMetaData: ProjectOptions
+  /** task meta datas */
+  taskMetaDatas: TaskOptions[]
+  /** number of users */
+  numUsers: number
+  /** task keys */
+  taskKeys: string[]
+}
+
 /**
- * creates the dashboard component
+ * Component which display the dashboard page
  *
- * @param props
- * @constructor
+ * @param {object} props
+ * @return component
  */
-function Dashboard(props: DashboardProps): JSX.Element {
-  const { classes, vendor } = props
-  let totalTaskLabeled = 0
-  let totalLabels = 0
-  const projectMetaData = props.dashboardContents.projectMetaData
-  const taskMetaDatas = props.dashboardContents.taskMetaDatas
-  const numUsers = props.dashboardContents.numUsers
-  const sidebarContent = (
-    <StyledSidebar projectMetaData={projectMetaData} vendor={vendor} />
-  )
-  const align = "center"
-  const mainContent = (
-    <div className={classes.root}>
-      <Table size="small" stickyHeader={true}>
-        <TableHead>
-          <TableRow>
-            <TableCell align={align} className={classes.headerCell}>
-              {"Task Index"}
-            </TableCell>
-            <TableCell align={align} className={classes.headerCell}>
-              {"# Labeled Images"}
-            </TableCell>
-            <TableCell align={align} className={classes.headerCell}>
-              {"# Labels"}
-            </TableCell>
-            <TableCell align={align} className={classes.headerCell}>
-              {"Submitted"}
-            </TableCell>
-            <TableCell align={align} className={classes.headerCell}>
-              {"Task Link"}
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {taskMetaDatas.map((value: TaskOptions, index) => {
-            const time = getSubmissionTime(value.submissions)
-            let dateString = ""
-            if (time !== -1) {
-              dateString = formatDate(time)
-            }
-            totalLabels += Number(value.numLabels)
-            totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
-            return (
-              <TableRow
-                key={index}
-                className={index % 2 === 0 ? classes.row : ""}
-              >
-                <TableCell className={classes.bodyCell} align={align}>
-                  {index}
-                </TableCell>
-                <TableCell
-                  className={classes.bodyCell}
-                  align={align}
-                  data-testid={"num-labeled-images-" + index.toString()}
-                >
-                  {value.numLabeledItems}
-                </TableCell>
-                <TableCell
-                  className={classes.bodyCell}
-                  align={align}
-                  data-testid={"num-labels-" + index.toString()}
-                >
-                  {value.numLabels}
-                </TableCell>
-                <TableCell
-                  className={classes.bodyCell}
-                  align={align}
-                  data-testid={"submitted-" + index.toString()}
-                >
-                  {dateString}
-                </TableCell>
-                <TableCell className={classes.bodyCell} align={align}>
-                  <IconButton
-                    className={classes.linkButton}
-                    color="inherit"
-                    href={
-                      `./${value.handlerUrl}` +
-                      `?${QueryArg.PROJECT_NAME}=${projectMetaData.name}` +
-                      `&${QueryArg.TASK_INDEX}=${index}`
-                    }
-                    data-testid={"task-link-" + index.toString()}
-                  >
-                    <FontAwesomeIcon
-                      icon={fa.faExternalLinkAlt}
-                      size="1x"
-                      transform="grow-6"
-                    />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </div>
-  )
-  const headerContent = (
-    <StyledHeader
-      totalLabels={totalLabels}
-      totalTaskLabeled={totalTaskLabeled}
-      numUsers={numUsers}
-      vendor={vendor}
-    />
-  )
+class Dashboard extends React.Component<DashboardProps, DashboardState> {
   /**
-   * renders the dashboard
+   * Constructor
+   *
+   * @param props
+   */
+  constructor(props: DashboardProps) {
+    super(props)
+    this.state = {
+      projectMetaData: props.dashboardContents.projectMetaData,
+      taskMetaDatas: props.dashboardContents.taskMetaDatas,
+      numUsers: props.dashboardContents.numUsers,
+      taskKeys: props.dashboardContents.taskKeys as string[]
+    }
+  }
+
+  /**
+   * cao
+   */
+  componentDidMount(): void {
+    for (let index = 0; index < this.state.taskMetaDatas.length; index++) {
+      this.getTaskMetaData(
+        this.state.projectMetaData.name,
+        this.state.taskKeys[index],
+        index
+      )
+    }
+  }
+
+  /**
+   * renders the dashboard page
    *
    * @return component
    */
-  return (
-    <DividedPage
-      header={headerContent}
-      sidebar={sidebarContent}
-      main={mainContent}
-    />
-  )
+  public render(): React.ReactNode {
+    const { classes, vendor } = this.props
+    let totalTaskLabeled = 0
+    let totalLabels = 0
+    const sidebarContent = (
+      <StyledSidebar
+        projectMetaData={this.state.projectMetaData}
+        vendor={vendor}
+      />
+    )
+    const align = "center"
+    const mainContent = (
+      <div className={classes.root}>
+        <Table size="small" stickyHeader={true}>
+          <TableHead>
+            <TableRow>
+              <TableCell align={align} className={classes.headerCell}>
+                {"Task Index"}
+              </TableCell>
+              <TableCell align={align} className={classes.headerCell}>
+                {"# Labeled Images"}
+              </TableCell>
+              <TableCell align={align} className={classes.headerCell}>
+                {"# Labels"}
+              </TableCell>
+              <TableCell align={align} className={classes.headerCell}>
+                {"Submitted"}
+              </TableCell>
+              <TableCell align={align} className={classes.headerCell}>
+                {"Task Link"}
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.state.taskMetaDatas.map((value: TaskOptions, index) => {
+              const time = getSubmissionTime(value.submissions)
+              let dateString = ""
+              if (time !== -1) {
+                dateString = formatDate(time)
+              }
+              totalLabels += Number(value.numLabels)
+              totalTaskLabeled += Number(value.numLabeledItems) > 0 ? 1 : 0
+              return (
+                <TableRow
+                  key={index}
+                  className={index % 2 === 0 ? classes.row : ""}
+                >
+                  <TableCell className={classes.bodyCell} align={align}>
+                    {index}
+                  </TableCell>
+                  <TableCell
+                    className={classes.bodyCell}
+                    align={align}
+                    data-testid={"num-labeled-images-" + index.toString()}
+                  >
+                    {Number(value.numLabeledItems) < 0 ? (
+                      <FontAwesomeIcon
+                        icon={fa.faSpinner}
+                        size="1x"
+                        spin={true}
+                        transform="grow-6"
+                      />
+                    ) : (
+                      value.numLabeledItems
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className={classes.bodyCell}
+                    align={align}
+                    data-testid={"num-labels-" + index.toString()}
+                  >
+                    {Number(value.numLabels) < 0 ? (
+                      <FontAwesomeIcon
+                        icon={fa.faSpinner}
+                        size="1x"
+                        spin={true}
+                        transform="grow-6"
+                      />
+                    ) : (
+                      value.numLabels
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className={classes.bodyCell}
+                    align={align}
+                    data-testid={"submitted-" + index.toString()}
+                  >
+                    {dateString}
+                  </TableCell>
+                  <TableCell className={classes.bodyCell} align={align}>
+                    <IconButton
+                      className={classes.linkButton}
+                      color="inherit"
+                      href={
+                        `./${value.handlerUrl}` +
+                        `?${QueryArg.PROJECT_NAME}=${this.state.projectMetaData.name}` +
+                        `&${QueryArg.TASK_INDEX}=${index}`
+                      }
+                      data-testid={"task-link-" + index.toString()}
+                    >
+                      <FontAwesomeIcon
+                        icon={fa.faExternalLinkAlt}
+                        size="1x"
+                        transform="grow-6"
+                      />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    )
+    const headerContent = (
+      <StyledHeader
+        totalLabels={totalLabels}
+        totalTaskLabeled={totalTaskLabeled}
+        numUsers={this.state.numUsers}
+        vendor={vendor}
+      />
+    )
+
+    return (
+      <DividedPage
+        header={headerContent}
+        sidebar={sidebarContent}
+        main={mainContent}
+      />
+    )
+  }
+
+  /**
+   * get task meta data
+   *
+   * @param projectName
+   * @param taskId
+   * @param index
+   */
+  public getTaskMetaData(
+    projectName: string,
+    taskId: string,
+    index: number
+  ): void {
+    const xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = () => {
+      const newTaskMetaData = this.state.taskMetaDatas
+      newTaskMetaData[index] = JSON.parse(xhr.responseText)
+      if (xhr.readyState === 4) {
+        this.setState({ taskMetaDatas: newTaskMetaData })
+      }
+    }
+    taskId = taskId.substring(taskId.length - 6)
+    xhr.open(
+      "GET",
+      `${Endpoint.GET_TASK_METADATA}?project_name=${projectName}&task_id=${taskId}`
+    )
+    const auth = getAuth()
+    if (auth !== "") {
+      xhr.setRequestHeader("Authorization", auth)
+    }
+    xhr.send()
+  }
 }
 
 /**

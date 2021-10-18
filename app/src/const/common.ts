@@ -158,5 +158,6 @@ export enum AttributeToolType {
 export enum QueryArg {
   PROJECT_NAME = "project_name",
   TASK_INDEX = "task_index",
+  TASK_ID = "task_id",
   DEV_MODE = "dev"
 }

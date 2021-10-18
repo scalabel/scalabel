@@ -92,6 +92,11 @@ function startHTTPServer(
     listeners.dashboardHandler.bind(listeners)
   )
   app.get(
+    Endpoint.GET_TASK_METADATA,
+    authMiddleWare,
+    listeners.taskMetaDataHandler.bind(listeners)
+  )
+  app.get(
     Endpoint.DELETE_PROJECT,
     authMiddleWare,
     listeners.deleteProjectHandler.bind(listeners)
