@@ -168,6 +168,7 @@ class Config(BaseModel):
     imageSize: Optional[ImageSize]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
+    poseSigmas: Optional[List[float]]
 
 
 class FrameGroup(Frame):

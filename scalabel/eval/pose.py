@@ -1,4 +1,4 @@
-"""Detection evaluation code.
+"""Pose estimation evaluation code.
 
 The prediction and ground truth are expected in scalabel format. The evaluation
 results are from the COCO toolkit.
@@ -11,8 +11,8 @@ from multiprocessing import Pool
 from typing import Callable, Dict, List, Optional
 
 import numpy as np
-from xtcocotools.coco import COCO  # type: ignore
-from xtcocotools.cocoeval import COCOeval  # type: ignore
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval, Params  # type: ignore
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -43,6 +43,19 @@ class PoseResult(Result):
     def __eq__(self, other: "Result") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
+
+
+class ParamsV2(Params):  # type: ignore
+    """Modify COCO API params to set the keypoint OKS sigmas."""
+
+    def __init__(
+        self, iouType: str = "keypoints", sigmas: Optional[List[float]] = None
+    ):
+        """Init."""
+        super().__init__(iouType)
+        self.maxDets = [20]
+        if sigmas is not None:
+            self.kpt_oks_sigmas = np.array(sigmas)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -78,12 +91,10 @@ class COCOevalV2(COCOeval):  # type: ignore
         nproc: int = NPROC,
     ):
         """Init."""
-        super().__init__(
-            cocoGt=cocoGt,
-            cocoDt=cocoDt,
-            iouType=iouType,
-            sigmas=np.array(sigmas),
-        )
+        super().__init__(cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType)
+        cat_ids = self.params.catIds  # type: ignore
+        self.params = ParamsV2(iouType, sigmas)
+        self.params.catIds = cat_ids
         self.cat_names = cat_names
         self.nproc = nproc
 
@@ -103,11 +114,11 @@ class COCOevalV2(COCOeval):  # type: ignore
         )
 
         # useSegm is deprecated
-        assert self.params.useSegm is None  # type: ignore
+        assert self.params.useSegm is None
 
     def evaluate(self) -> None:
         """Run per image evaluation on given images."""
-        p = self.params  # type: ignore
+        p = self.params
         p.imgIds = list(np.unique(p.imgIds))
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
@@ -245,28 +256,8 @@ def evaluate_pose(
 
     img_ids = sorted(coco_gt.getImgIds())
     ann_type = "keypoints"
-    sigmas = [
-        0.079,
-        0.079,
-        0.079,
-        0.072,
-        0.062,
-        0.079,
-        0.072,
-        0.062,
-        0.107,
-        0.087,
-        0.089,
-        0.107,
-        0.087,
-        0.089,
-        0.062,
-        0.062,
-        0.062,
-        0.062,
-    ]
     coco_eval = COCOevalV2(
-        cat_names, coco_gt, coco_dt, ann_type, sigmas, nproc
+        cat_names, coco_gt, coco_dt, ann_type, config.poseSigmas, nproc
     )
     coco_eval.params.imgIds = img_ids
 
