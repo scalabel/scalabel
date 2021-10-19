@@ -49,7 +49,6 @@ setuptools.setup(
         "tabulate",
         "tqdm",
         "toml",
-        "xtcocotools",
     ],
     include_package_data=True,
 )
