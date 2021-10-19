@@ -1,6 +1,6 @@
 """General utils functions."""
 
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ from nanoid import generate  # type: ignore
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType
-from .typing import Box2D, Config, ImageSize, Node, Poly2D
+from .typing import Box2D, Config, Edge, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
 
 __all__ = [
@@ -138,15 +138,41 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     return mask
 
 
-def keypoints_to_nodes(kpts: List[float]) -> List[Node]:
+def keypoints_to_nodes(
+    kpts: List[float], cats: Optional[List[str]] = None
+) -> List[Node]:
     """Converting COCO keypoints to list of Nodes."""
     assert len(kpts) % 3 == 0
+    if cats is None:
+        cats = ["coco_kpt"] * (len(kpts) // 3)
     return [
         Node(
             location=(kpts[i], kpts[i + 1]),
-            category="coco_kpt",
+            category=cats[i // 3],
             id=generate(size=16),
             score=kpts[i + 2],
         )
         for i in range(0, len(kpts), 3)
     ]
+
+
+def nodes_to_edges(
+    nodes: List[Node], edge_map: Dict[int, Tuple[List[int], str]]
+) -> List[Edge]:
+    """Converting list of Nodes to list of Edges using an edge map.
+
+    edge_map is a mapping from source node index to a tuple consisting of a
+    list of target nodes' indices and edge type.
+    """
+    edges = []
+    for edge_idx in edge_map.keys():
+        conns, etype = edge_map[edge_idx]
+        for conn in conns:
+            edges.append(
+                Edge(
+                    source=nodes[edge_idx].id,
+                    target=nodes[conn].id,
+                    type=etype,
+                )
+            )
+    return edges

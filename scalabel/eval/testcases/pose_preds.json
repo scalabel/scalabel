@@ -18,7 +18,7 @@
           "manualAttributes": null,
           "score": 0.6704139295551512,
           "attributes": null,
-          "category": "person",
+          "category": "pedestrian",
           "box2d": null,
           "box3d": null,
           "poly2d": null,
@@ -321,7 +321,7 @@
           "manualAttributes": null,
           "score": 0.46725934909449685,
           "attributes": null,
-          "category": "person",
+          "category": "pedestrian",
           "box2d": null,
           "box3d": null,
           "poly2d": null,
@@ -624,7 +624,7 @@
           "manualAttributes": null,
           "score": 0.4482606202363968,
           "attributes": null,
-          "category": "person",
+          "category": "pedestrian",
           "box2d": null,
           "box3d": null,
           "poly2d": null,
@@ -940,7 +940,7 @@
           "manualAttributes": null,
           "score": 0.6468611028459337,
           "attributes": null,
-          "category": "person",
+          "category": "pedestrian",
           "box2d": null,
           "box3d": null,
           "poly2d": null,
@@ -1248,7 +1248,7 @@
     "attributes": null,
     "categories": [
       {
-        "name": "person",
+        "name": "pedestrian",
         "subcategories": null
       }
     ],
