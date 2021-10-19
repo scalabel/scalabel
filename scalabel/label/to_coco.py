@@ -18,7 +18,7 @@ from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
 from .transforms import box2d_to_bbox, get_coco_categories, poly2ds_to_mask
-from .typing import Config, Frame, ImageSize, Label, Poly2D
+from .typing import RLE, Config, Frame, ImageSize, Label, Poly2D
 from .utils import check_crowd, check_ignored, get_leaf_categories
 
 # 0 is for category that is not in the config.
@@ -73,20 +73,26 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
     return annotation
 
 
+def set_rle_object_geometry(annotation: AnnType, rle: RLE) -> AnnType:
+    """Parsing bbox and area from rle ann."""
+    segmentation: RLEType = dict(counts=rle.counts, size=rle.size)
+    bbox = mask_utils.toBbox(segmentation).tolist()
+    area = mask_utils.area(segmentation).tolist()
+    annotation.update(dict(bbox=bbox, area=area))
+    annotation.update(dict(segmentation=segmentation))
+    return annotation
+
+
 def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
     """Parsing bbox, area, polygon from seg ann."""
     if not mask.sum():
         return annotation
 
-    rle: RLEType = mask_utils.encode(
+    rle = mask_utils.encode(
         np.array(mask[:, :, None], order="F", dtype="uint8")
     )[0]
-    rle["counts"] = rle["counts"].decode("utf-8")  # type: ignore
-    bbox = mask_utils.toBbox(rle).tolist()
-    area = mask_utils.area(rle).tolist()
-    annotation.update(dict(segmentation=rle))
-
-    annotation.update(dict(bbox=bbox, area=area))
+    rle["counts"] = rle["counts"].decode("utf-8")
+    annotation = set_rle_object_geometry(annotation, RLE(**rle))
     return annotation
 
 
@@ -141,7 +147,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             id=image_id,
         )
         if image_anns.url is not None:
-            image["coco_url"] = image_anns.url
+            image["file_name"] = image_anns.url
         images.append(image)
 
         if image_anns.labels is None:
@@ -203,16 +209,15 @@ def scalabel2coco_ins_seg(
             width=img_shape.width,
             id=image_id,
         )
-        shapes.append(img_shape)
         if image_anns.url is not None:
-            image["coco_url"] = image_anns.url
+            image["file_name"] = image_anns.url
         images.append(image)
 
         if image_anns.labels is None:
             continue
 
         for label in image_anns.labels:
-            if label.poly2d is None:
+            if label.poly2d is None and label.rle is None:
                 continue
             if label.category not in cat_name2id:
                 continue
@@ -228,10 +233,14 @@ def scalabel2coco_ins_seg(
             )
             if label.score is not None:
                 annotation["score"] = label.score
+            if label.rle is not None:
+                set_rle_object_geometry(annotation, label.rle)
             annotations.append(annotation)
             poly2ds.append(label.poly2d)
+            shapes.append(img_shape)
 
-    annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
+    if len(annotations) > 0 and "segmentation" not in annotations[0]:
+        annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
     return GtType(
         type="instance",
         categories=get_coco_categories(config),
@@ -296,7 +305,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 id=image_id,
             )
             if image_anns.url is not None:
-                image["coco_url"] = image_anns.url
+                image["file_name"] = image_anns.url
             images.append(image)
 
             if image_anns.labels is None:
@@ -378,7 +387,7 @@ def scalabel2coco_seg_track(
             )
             shapes.append(img_shape)
             if image_anns.url is not None:
-                image["coco_url"] = image_anns.url
+                image["file_name"] = image_anns.url
             images.append(image)
 
             if image_anns.labels is None:
@@ -425,7 +434,11 @@ def run(args: argparse.Namespace) -> None:
 
     if args.config is not None:
         config = load_label_config(args.config)
-    assert config is not None
+    if config is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
 
     logger.info("Start format converting...")
     if args.mode in ["det", "box_track"]:

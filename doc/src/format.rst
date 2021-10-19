@@ -46,8 +46,8 @@ to each label in images. Fields of item are given below.
 
 .. code-block:: yaml
     
-    - name: string
-    - url: string
+    - name: string (must be unique over the whole dataset!)
+    - url: string (relative path or URL to data file)
     - videoName: string (optional)
     - attributes: a dictionary of frame attributes
     - intrinsics
@@ -84,6 +84,9 @@ to each label in images. Fields of item are given below.
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean
+        - rle:
+            - counts: str
+            - size: (height, width)
         - graph: (optional)
             - nodes [ ]:
                 - location: [x, y] or [x, y, z]
@@ -100,6 +103,11 @@ to each label in images. Fields of item are given below.
 
 More details about the fields
 
+* name / videoName / url
+    * When there is no url the data folder structure is assumed to be:
+        * <data_root>/videoName (if any)/name
+    * If your data folder structure differs from that, you can store the relative path from <data_root> to the data file in url.
+    * Note that 'name' must be unique over the whole dataset, s.t. ``frameGroup`` can refer to each frame via its name.
 * labels
 
     * index: index of the label in an image or a video
@@ -135,3 +143,12 @@ More details about the fields
             * type: Type of edge.
 
         * type: Specification of graph.
+
+
+If your dataset contains multiple data sources (e.g. multiple cameras or other sensors), you can group frames together using ``frameGroup``.
+This data structure inherits from ``frame``, s.t. each  ``frameGroup`` has all of the attributes above, plus a list of frame names that are assigned to the group:
+
+.. code-block:: yaml
+
+    - [inherits all attributes from frame]
+    - frames: [ ]str (list of frame names in the group)
