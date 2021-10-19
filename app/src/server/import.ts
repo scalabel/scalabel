@@ -20,6 +20,7 @@ import {
   ShapeIdMap,
   ShapeType
 } from "../types/state"
+import { uid } from "../common/uid"
 
 /**
  * Converts single exported item to frontend state format
@@ -55,7 +56,10 @@ export function convertItemToImport(
     const labelsExport = itemExportMap[sensorId].labels
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
-        const labelId = labelExport.id.toString()
+        let labelId = labelExport.id.toString()
+        if (tracking) {
+          labelId = uid()
+        }
         // Each label may appear in multiple sensors
         if (tracking && labelExport.id in labels) {
           labels[labelId].sensors.push(sensorId)
@@ -81,7 +85,8 @@ export function convertItemToImport(
           itemIndex,
           sensorId,
           categories,
-          attributes
+          attributes,
+          labelId
         )
 
         if (tracking) {
@@ -168,17 +173,23 @@ function parseExportAttributes(
  * @param item
  * @param sensorId
  * @param category
+ * @param attributes
+ * @param newLabelId
  */
 function convertLabelToImport(
   labelExport: LabelExport,
   item: number,
   sensorId: number,
   category?: number[],
-  attributes?: { [key: number]: number[] }
+  attributes?: { [key: number]: number[] },
+  newLabelId?: string
 ): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
   let shapes: null | ShapeType[] = null
-  const labelId = labelExport.id.toString()
+  let labelId = labelExport.id.toString()
+  if (newLabelId !== undefined) {
+    labelId = newLabelId
+  }
 
   /**
    * Convert each import shape based on their type
