@@ -147,10 +147,10 @@ class Attribute(BaseModel):
     """Define Scalabel attribute type."""
 
     name: str
-    type: str
-    tag: str
+    type: Optional[str]
+    tag: Optional[str]
     tagPrefix: Optional[str]
-    tagSuffixes: Optional[str]
+    tagSuffixes: Optional[List[str]]
     values: Optional[List[str]]
 
 
