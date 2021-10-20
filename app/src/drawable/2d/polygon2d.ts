@@ -6,6 +6,7 @@ import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import {
   LabelType,
+  ModeStatus,
   PathPoint2DType,
   PathPointType,
   ShapeType,
@@ -21,6 +22,7 @@ import {
   makePathPoint2DStyle,
   PathPoint2D
 } from "./path_point2d"
+
 const DEFAULT_VIEW_EDGE_STYLE = makeEdge2DStyle({ lineWidth: 4 })
 const DEFAULT_VIEW_POINT_STYLE = makePathPoint2DStyle({ radius: 8 })
 const DEFAULT_VIEW_HIGH_POINT_STYLE = makePathPoint2DStyle({ radius: 12 })
@@ -100,8 +102,14 @@ export class Polygon2D extends Label2D {
    * @param context
    * @param ratio
    * @param mode
+   * @param sessionMode
    */
-  public draw(context: Context2D, ratio: number, mode: DrawMode): void {
+  public draw(
+    context: Context2D,
+    ratio: number,
+    mode: DrawMode,
+    sessionMode: ModeStatus | undefined
+  ): void {
     const numPoints = this._points.length
 
     if (numPoints === 0) return
@@ -183,6 +191,9 @@ export class Polygon2D extends Label2D {
       if (mode === DrawMode.VIEW) {
         const fillStyle = this._color.concat(OPACITY)
         context.fillStyle = toCssColor(fillStyle)
+        context.fill()
+      } else if (sessionMode === ModeStatus.SELECTING) {
+        context.fillStyle = toCssColor(edgeStyle.color)
         context.fill()
       }
     }
@@ -554,6 +565,10 @@ export class Polygon2D extends Label2D {
     this.editing = true
     this._state = Polygon2DState.DRAW
     const itemIndex = state.user.select.item
+    let sensor = -1
+    if (state.user.viewerConfigs[0] !== undefined) {
+      sensor = state.user.viewerConfigs[0].sensor
+    }
     const labelType = this._closed
       ? LabelTypeName.POLYGON_2D
       : LabelTypeName.POLYLINE_2D
@@ -561,7 +576,8 @@ export class Polygon2D extends Label2D {
       type: labelType,
       item: itemIndex,
       category: [state.user.select.category],
-      order: this._order
+      order: this._order,
+      sensors: [sensor]
     })
     this._highlightedHandle = 1
     return label
@@ -1000,6 +1016,13 @@ export class Polygon2D extends Label2D {
     const q1 = a[1]
     const p2 = b[0]
     const q2 = b[1]
+    const length1 =
+      (q1.x - p1.x) * (q1.x - p1.x) + (q1.y - p1.y) * (q1.y - p1.y)
+    const length2 =
+      (q2.x - p2.x) * (q2.x - p2.x) + (q2.y - p2.y) * (q2.y - p2.y)
+    if (length1 < 1 || length2 < 1) {
+      return false
+    }
     const o1 = this.orientation(p1, q1, p2)
     const o2 = this.orientation(p1, q1, q2)
     const o3 = this.orientation(p2, q2, p1)

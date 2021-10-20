@@ -3,7 +3,7 @@ import _ from "lodash"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
 import { makeState } from "../../functional/states"
-import { Label2DTemplateType, State } from "../../types/state"
+import { Label2DTemplateType, ModeStatus, State } from "../../types/state"
 import { Context2D } from "../util"
 import { Box2D } from "./box2d"
 import { CustomLabel2D } from "./custom_label"
@@ -152,19 +152,25 @@ export class Label2DList {
    * @param {number} ratio: ratio: display to image size ratio
    * @param ratio
    * @param hideLabels
+   * @param sessionMode
    */
   public redraw(
     labelContext: Context2D,
     controlContext: Context2D,
     ratio: number,
-    hideLabels?: boolean
+    hideLabels?: boolean,
+    sessionMode?: ModeStatus
   ): void {
     const labelsToDraw =
       hideLabels !== null && hideLabels !== undefined && hideLabels
         ? this._labelList.filter((label) => label.selected)
         : this._labelList
-    labelsToDraw.forEach((v) => v.draw(labelContext, ratio, DrawMode.VIEW))
-    labelsToDraw.forEach((v) => v.draw(controlContext, ratio, DrawMode.CONTROL))
+    labelsToDraw.forEach((v) =>
+      v.draw(labelContext, ratio, DrawMode.VIEW, sessionMode)
+    )
+    labelsToDraw.forEach((v) =>
+      v.draw(controlContext, ratio, DrawMode.CONTROL, sessionMode)
+    )
   }
 
   /**
@@ -182,24 +188,36 @@ export class Label2DList {
     this._labelTemplates = state.task.config.label2DTemplates
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
+    let sensor = -1
+    if (state.user.viewerConfigs[0] !== undefined) {
+      sensor = state.user.viewerConfigs[0].sensor
+    }
     // Remove any label not in the state
     this._labels = Object.assign({}, _.pick(this._labels, _.keys(item.labels)))
+    for (const key of Object.keys(this._labels)) {
+      if (!this._labels[key].label.sensors.includes(sensor)) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete this._labels[key]
+      }
+    }
     // Update drawable label values
     _.forEach(item.labels, (label, labelId) => {
-      if (!(labelId in this._labels)) {
-        const newLabel = makeDrawableLabel2D(
-          this,
-          label.type,
-          this._labelTemplates
-        )
-        if (newLabel !== null) {
-          this._labels[labelId] = newLabel
+      if (label.sensors.includes(sensor)) {
+        if (!(labelId in this._labels)) {
+          const newLabel = makeDrawableLabel2D(
+            this,
+            label.type,
+            this._labelTemplates
+          )
+          if (newLabel !== null) {
+            this._labels[labelId] = newLabel
+          }
         }
-      }
-      if (labelId in this._labels) {
-        const drawableLabel = this._labels[labelId]
-        if (!drawableLabel.editing) {
-          drawableLabel.updateState(state, itemIndex, labelId)
+        if (labelId in this._labels) {
+          const drawableLabel = this._labels[labelId]
+          if (!drawableLabel.editing) {
+            drawableLabel.updateState(state, itemIndex, labelId)
+          }
         }
       }
     })

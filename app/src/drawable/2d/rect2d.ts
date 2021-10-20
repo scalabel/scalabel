@@ -4,6 +4,8 @@ import { makeRect } from "../../functional/states"
 import { Vector } from "../../math/vector"
 import { RectType } from "../../types/state"
 import { Context2D, toCssColor } from "../util"
+import { DrawMode } from "./label2d"
+import { OPACITY } from "./common"
 
 export interface Rect2DStyle {
   /** line width of the rect sides */
@@ -146,6 +148,32 @@ export class Rect2D {
     context.lineWidth = style.lineWidth
     context.strokeRect(real[0], real[1], real[2], real[3])
     context.restore()
+  }
+
+  /**
+   * Draw the rect on a 2D context
+   *
+   * @param {Context2D} context
+   * @param {number} ratio: display to image ratio
+   * @param ratio
+   * @param {RectStyle} style
+   * @param mode
+   */
+  public drawInSelectingMode(
+    context: Context2D,
+    ratio: number,
+    style: Rect2DStyle,
+    mode: DrawMode
+  ): void {
+    context.save()
+    const real = this.vector().scale(ratio)
+    context.rect(real[0], real[1], real[2], real[3])
+    if (mode === DrawMode.VIEW) {
+      context.fillStyle = toCssColor(style.color.concat(OPACITY))
+    } else {
+      context.fillStyle = toCssColor(style.color)
+    }
+    context.fill()
   }
 
   /**

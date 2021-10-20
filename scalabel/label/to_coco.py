@@ -9,11 +9,11 @@ from typing import Callable, Dict, List, Tuple
 
 import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
-from tqdm import tqdm
 
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
+from ..common.tqdm import tqdm
 from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
@@ -109,10 +109,7 @@ def poly2ds_list_to_coco(
     with Pool(nproc) as pool:
         annotations = pool.starmap(
             poly2ds_to_coco,
-            tqdm(
-                zip(annotations, poly2ds, shape),
-                total=len(annotations),
-            ),
+            tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
         )
 
     sorted(annotations, key=lambda ann: ann["id"])
@@ -144,7 +141,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             id=image_id,
         )
         if image_anns.url is not None:
-            image["coco_url"] = image_anns.url
+            image["file_name"] = image_anns.url
         images.append(image)
 
         if image_anns.labels is None:
@@ -208,7 +205,7 @@ def scalabel2coco_ins_seg(
         )
         shapes.append(img_shape)
         if image_anns.url is not None:
-            image["coco_url"] = image_anns.url
+            image["file_name"] = image_anns.url
         images.append(image)
 
         if image_anns.labels is None:
@@ -273,6 +270,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
         video_id += 1
         video_name = video_anns[0].videoName
+        assert video_name is not None, "Tracking annotations have no videoName"
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
@@ -285,16 +283,20 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 else:
                     raise ValueError("Image shape not defined!")
 
+            frame_index = image_anns.frameIndex
+            assert (
+                frame_index is not None
+            ), "Tracking annotations have no frameIndex"
             image = ImgType(
                 video_id=video_id,
-                frame_id=image_anns.frameIndex,
+                frame_id=frame_index,
                 file_name=osp.join(video_name, image_anns.name),
                 height=img_shape.height,
                 width=img_shape.width,
                 id=image_id,
             )
             if image_anns.url is not None:
-                image["coco_url"] = image_anns.url
+                image["file_name"] = image_anns.url
             images.append(image)
 
             if image_anns.labels is None:
@@ -353,6 +355,7 @@ def scalabel2coco_seg_track(
 
         video_id += 1
         video_name = video_anns[0].videoName
+        assert video_name is not None, "Tracking annotations have no videoName"
         video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
@@ -375,7 +378,7 @@ def scalabel2coco_seg_track(
             )
             shapes.append(img_shape)
             if image_anns.url is not None:
-                image["coco_url"] = image_anns.url
+                image["file_name"] = image_anns.url
             images.append(image)
 
             if image_anns.labels is None:

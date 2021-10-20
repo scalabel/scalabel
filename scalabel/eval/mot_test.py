@@ -43,10 +43,10 @@ class TestBDD100KMotEval(unittest.TestCase):
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts = group_and_sort(
-        load("{}/testcases/track_sample_anns.json".format(cur_dir)).frames
+        load(f"{cur_dir}/testcases/track_sample_anns.json").frames
     )
     preds = group_and_sort(
-        load("{}/testcases/track_predictions.json".format(cur_dir)).frames
+        load(f"{cur_dir}/testcases/track_predictions.json").frames
     )
     config = load_label_config(get_test_file("box_track_configs.toml"))
     result = evaluate_track(acc_single_video_mot, gts, preds, config)
