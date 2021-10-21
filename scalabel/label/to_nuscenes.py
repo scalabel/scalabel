@@ -189,8 +189,8 @@ def to_nuscenes(
     """Conver Scalabel format prediction into nuScenes JSON file."""
     results: DictStrAny = {}
 
-    assert dataset.groups is not None
-    key_frames = [g for g in dataset.groups if not "_" in g.name]
+    assert dataset.frames is not None
+    key_frames = [f for f in dataset.frames if not "_" in f.name]
 
     if mode == "detection":
         categories = DETECTION_NAMES
