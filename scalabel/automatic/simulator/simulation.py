@@ -55,10 +55,8 @@ class Simulator(object):
         state["actionPacketId"] = "test"
 
         self.state = state
-        self.model_request_channel = self.model_request_channel % (
-            state["projectName"], state["taskId"])
-        self.model_response_channel = self.model_response_channel % (
-            state["projectName"], state["taskId"])
+        self.model_request_channel = self.model_request_channel % f'{state["projectName"]}_{state["taskId"]}'
+        self.model_response_channel = self.model_response_channel % f'{state["projectName"]}_{state["taskId"]}'
 
         return
 

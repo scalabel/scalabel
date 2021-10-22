@@ -175,7 +175,7 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
 async function launchModelServer(): Promise<void> {
   const modelServerProc = child.spawn("python", [
     "-m",
-    "scalabel.automatic.server"
+    "scalabel.automatic.servers.ray_server_new"
   ])
   modelServerProc.stdout.on("data", (data) => {
     process.stdout.write(data)
