@@ -11,6 +11,7 @@ import {
   DeepPartialState,
   IdType,
   LabelType,
+  ModeStatus,
   PaneType,
   Select,
   ShapeAllType,
@@ -684,6 +685,34 @@ export function setStatusAfterConnect(): actionTypes.UpdateSessionStatusAction {
  */
 export function setStatusToComputing(): actionTypes.UpdateSessionStatusAction {
   return updateSessionStatus(ConnectionStatus.COMPUTING)
+}
+
+/**
+ * Change session mode
+ *
+ * @param mode
+ */
+export function changeSessionMode(
+  mode: ModeStatus
+): actionTypes.ChangeSessionModeAction {
+  return {
+    ...makeBaseAction(actionConsts.CHANGE_SESSION_MODE),
+    newMode: mode
+  }
+}
+
+/**
+ * Mark mode as selecting
+ */
+export function changeModeToSelecting(): actionTypes.ChangeSessionModeAction {
+  return changeSessionMode(ModeStatus.SELECTING)
+}
+
+/**
+ * Mark mode as selecting
+ */
+export function changeModeToAnnotating(): actionTypes.ChangeSessionModeAction {
+  return changeSessionMode(ModeStatus.ANNOTATING)
 }
 
 /**
