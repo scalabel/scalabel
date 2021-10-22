@@ -3,7 +3,6 @@ import argparse
 import json
 import time
 from functools import partial
-from logging import Logger
 from multiprocessing import Pool
 from typing import Callable, Dict, List, Tuple, TypeVar, Union
 
@@ -11,9 +10,9 @@ import motmetrics as mm
 import numpy as np
 
 from ..common.io import open_write_text
-from ..common.logger import logger as scalabel_logger
+from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayF64, NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32, NDArrayU8
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -176,7 +175,7 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps = np.ones(pred_bboxes_c.shape[0]).astype(bool)
+                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0]).astype(bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
@@ -348,7 +347,6 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-    logger: Logger = scalabel_logger,
 ) -> BoxTrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
@@ -362,7 +360,6 @@ def evaluate_track(
         ignore_unknown_cats: if False, raise KeyError when trying to evaluate
             unknown categories.
         nproc: processes number for loading files
-        logger: the logger to be used. Default as the scalabel's logger
 
     Returns:
         BoxTrackResult: rendered eval results.
@@ -472,12 +469,6 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for mot evaluation",
     )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="without logging",
-    )
     return parser.parse_args()
 
 
@@ -487,7 +478,11 @@ if __name__ == "__main__":
     gt_frames, cfg = dataset.frames, dataset.config
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     eval_result = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
@@ -498,8 +493,8 @@ if __name__ == "__main__":
         args.ignore_unknown_cats,
         args.nproc,
     )
-    scalabel_logger.info(eval_result)
-    scalabel_logger.info(eval_result.summary())
+    logger.info(eval_result)
+    logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump((eval_result.json()), fp)

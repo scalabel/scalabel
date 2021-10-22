@@ -7,10 +7,9 @@ from itertools import groupby
 from multiprocessing import Pool
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from tqdm import tqdm
-
 from ..common.io import open_read_text
 from ..common.parallel import NPROC
+from ..common.tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
@@ -73,8 +72,8 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         img = img_id2img[img_id]
         size = ImageSize(width=img["width"], height=img["height"])
 
-        if "coco_url" in img:
-            url = img["coco_url"]
+        if "file_name" in img:
+            url: Optional[str] = img["file_name"]
         else:
             url = None
 
@@ -138,7 +137,7 @@ def run(args: argparse.Namespace) -> None:
 
     if vid_id2name is None:
         assert args.output.endswith(".json"), "output should be a json file"
-        save(args.output, scalabel, args.nproc)
+        save(args.output, scalabel)
     else:
         scalabels = group_and_sort(scalabel)
         if not os.path.isdir(args.output):

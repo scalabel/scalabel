@@ -10,6 +10,7 @@ import {
   IdType,
   INVALID_ID,
   LabelType,
+  ModeStatus,
   ShapeType,
   State
 } from "../../types/state"
@@ -272,8 +273,14 @@ export abstract class Label2D {
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
+   * @param {ModeStatus} sessionMode
    */
-  public abstract draw(canvas: Context2D, ratio: number, mode: DrawMode): void
+  public abstract draw(
+    canvas: Context2D,
+    ratio: number,
+    mode: DrawMode,
+    sessionMode: ModeStatus | undefined
+  ): void
 
   /**
    * Draw the label tag on viewing or control canvas
@@ -312,7 +319,7 @@ export abstract class Label2D {
       if (attribute.toolType === "switch") {
         if (attributes[Number(attributeId)][0] > 0) {
           abbr += "," + attribute.tagText
-          tw += 36
+          tw += 20
         }
       } else if (attribute.toolType === "list") {
         if (
@@ -324,7 +331,7 @@ export abstract class Label2D {
             attribute.tagText +
             ":" +
             attribute.tagSuffixes[attributes[Number(attributeId)][0]]
-          tw += 72
+          tw += 40
         }
       }
     }
@@ -334,6 +341,15 @@ export abstract class Label2D {
     ctx.fillStyle = "rgb(0,0,0)"
     ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, x * ratio + 6, y * ratio - 6)
+    if (config.tracking) {
+      if (this._label !== null) {
+        abbr = this._label?.track.substring(0, 3)
+      }
+      ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
+      ctx.fillRect(x * ratio, y * ratio, 60, TAG_HEIGHT)
+      ctx.fillStyle = "rgb(0,0,0)"
+      ctx.fillText(abbr, x * ratio + 6, y * ratio + TAG_HEIGHT - 6)
+    }
     ctx.restore()
   }
 

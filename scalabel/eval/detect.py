@@ -6,8 +6,8 @@ results are from the COCO toolkit.
 import argparse
 import copy
 import json
+from collections import OrderedDict
 from functools import partial
-from logging import Logger
 from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
 
@@ -16,7 +16,7 @@ from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval  # type: ignore
 
 from ..common.io import open_write_text
-from ..common.logger import logger as scalabel_logger
+from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
@@ -58,8 +58,31 @@ class DetResult(Result):
             for category, score in scores.items():
                 if category == OVERALL:
                     continue
-                summary_dict["{}/{}".format("AP", category)] = score
+                summary_dict[f"AP/{category}"] = score
         return summary_dict
+
+    @classmethod
+    def empty(cls, coco_gt: "COCOV2") -> "DetResult":
+        """Return empty results."""
+        metrics = cls.__fields__.keys()
+        cat_names = OrderedDict(
+            [
+                (cat_id, cat_name["name"])
+                for cat_id, cat_name in coco_gt.cats.items()
+            ]
+        )
+        cat_ids_in = set(ann["category_id"] for ann in coco_gt.anns.values())
+        empty_scores = {
+            metric: [
+                {
+                    cat: 0.0 if cat_id in cat_ids_in else np.nan
+                    for cat_id, cat in cat_names.items()
+                },
+                {OVERALL: 0.0 if len(cat_ids_in) > 0 else np.nan},
+            ]
+            for metric in metrics
+        }
+        return cls(**empty_scores)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -77,9 +100,7 @@ class COCOV2(COCO):  # type: ignore
         if annotation_file is None:
             assert isinstance(
                 annotations, dict
-            ), "annotation file format {} not supported".format(
-                type(annotations)
-            )
+            ), f"annotation file format {type(annotations)} not supported"
             self.dataset = annotations
             self.createIndex()
 
@@ -275,7 +296,6 @@ def evaluate_det(
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-    logger: Logger = scalabel_logger,
 ) -> DetResult:
     """Load the ground truth and prediction results.
 
@@ -284,7 +304,6 @@ def evaluate_det(
         pred_frames: the prediction results in Scalabel format.
         config: Metadata config.
         nproc: the number of process.
-        logger: the logger to be used. Default as the scalabel's logger
 
     Returns:
         DetResult: rendered eval results.
@@ -305,6 +324,8 @@ def evaluate_det(
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
     pred_res = scalabel2coco_detection(pred_frames, config)["annotations"]
+    if not pred_res:
+        return DetResult.empty(coco_gt)
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()
@@ -352,12 +373,6 @@ def parse_arguments() -> argparse.Namespace:
         default=NPROC,
         help="number of processes for detection evaluation",
     )
-    parser.add_argument(
-        "--quiet",
-        "-q",
-        action="store_true",
-        help="without logging",
-    )
     return parser.parse_args()
 
 
@@ -368,10 +383,14 @@ if __name__ == "__main__":
     preds = load(args.result).frames
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     eval_result = evaluate_det(gts, preds, cfg, args.nproc)
-    scalabel_logger.info(eval_result)
-    scalabel_logger.info(eval_result.summary())
+    logger.info(eval_result)
+    logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump(eval_result.json(), fp)
