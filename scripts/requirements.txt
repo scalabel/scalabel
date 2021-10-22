@@ -6,6 +6,7 @@ isort
 joblib
 motmetrics
 mypy
+nanoid
 numpy
 pandas
 Pillow

@@ -90,6 +90,8 @@ def _get_node_color(node: Node, graph_type: Optional[str] = "") -> List[float]:
     if not graph_type:
         return [0.0, 0.0, 0.0]
     if graph_type.startswith("Pose2D"):
+        if graph_type.endswith("Pred"):
+            return [1.0, 1.0, 0.0]
         if node.visibility == "V":  # visible keypoints
             color = [1.0, 1.0, 0.0]
         elif node.visibility == "N":  # not visible keypoints
