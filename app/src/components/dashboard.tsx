@@ -185,9 +185,12 @@ class Dashboard extends React.Component<DashboardProps, DashboardState> {
   }
 
   /**
-   * cao
+   * Update the dashboard contents on the fly
    */
   componentDidMount(): void {
+    if (this.state.taskKeys === undefined) {
+      return
+    }
     for (let index = 0; index < this.state.taskMetaDatas.length; index++) {
       this.getTaskMetaData(
         this.state.projectMetaData.name,
