@@ -13,7 +13,9 @@ import {
 import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
+  ExtrinsicsType,
   IdType,
+  IntrinsicsType,
   ItemType,
   LabelIdMap,
   LabelType,
@@ -60,12 +62,26 @@ export function convertItemToImport(
   tracking: boolean
 ): ItemType {
   const urls: { [id: number]: string } = {}
+  const names: { [id: number]: string } = {}
+  const intrinsics: { [id: number]: IntrinsicsType } = {}
+  const extrinsics: { [id: number]: ExtrinsicsType } = {}
 
   const labels: LabelIdMap = {}
   const shapes: ShapeIdMap = {}
   for (const key of Object.keys(itemExportMap)) {
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
+    if (itemExportMap[sensorId].name !== undefined) {
+      names[sensorId] = itemExportMap[sensorId].name as string
+    }
+    if (itemExportMap[sensorId].intrinsics !== undefined) {
+      intrinsics[sensorId] = itemExportMap[sensorId]
+        .intrinsics as IntrinsicsType
+    }
+    if (itemExportMap[sensorId].extrinsics !== undefined) {
+      extrinsics[sensorId] = itemExportMap[sensorId]
+        .extrinsics as ExtrinsicsType
+    }
     let labelsExport = itemExportMap[sensorId].labels
     const itemAttributes = itemExportMap[sensorId].attributes
     let isTagging = false
@@ -129,13 +145,16 @@ export function convertItemToImport(
 
   return makeItem(
     {
+      names,
       urls,
       index: itemIndex,
       id: itemId.toString(),
       timestamp,
       videoName,
       labels,
-      shapes
+      shapes,
+      intrinsics: Object.keys(intrinsics).length > 0 ? intrinsics : undefined,
+      extrinsics: Object.keys(extrinsics).length > 0 ? extrinsics : undefined
     },
     true
   )

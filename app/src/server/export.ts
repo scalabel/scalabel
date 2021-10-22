@@ -66,14 +66,22 @@ export function convertItemToExport(
     const url = item.urls[sensor]
     const videoName = item.videoName
     const timestamp = item.timestamp
+    let name = url
+    if (item.names !== undefined && Object.keys(item.names).includes(key)) {
+      name = item.names[sensor]
+    }
     itemExports[sensor] = {
-      name: url,
+      name: name,
       url,
       videoName,
       timestamp,
       attributes: {},
       labels: [],
-      sensor
+      sensor,
+      intrinsics:
+        item.intrinsics !== undefined ? item.intrinsics[sensor] : undefined,
+      extrinsics:
+        item.extrinsics !== undefined ? item.extrinsics[sensor] : undefined
     }
   }
   // TODO: Clean up the export code for naming and modularity
