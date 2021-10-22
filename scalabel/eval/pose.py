@@ -44,6 +44,19 @@ class PoseResult(Result):
         """Check whether two instances are equal."""
         return super().__eq__(other)
 
+    @classmethod
+    def empty(cls, coco_gt: "COCOV2") -> "PoseResult":
+        """Return empty results."""
+        metrics = cls.__fields__.keys()
+        cat_ids_in = set(ann["category_id"] for ann in coco_gt.anns.values())
+        empty_scores = {
+            metric: [
+                {OVERALL: 0.0 if len(cat_ids_in) > 0 else np.nan},
+            ]
+            for metric in metrics
+        }
+        return cls(**empty_scores)
+
 
 class ParamsV2(Params):  # type: ignore
     """Modify COCO API params to set the keypoint OKS sigmas."""
@@ -249,6 +262,8 @@ def evaluate_pose(
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
     pred_res = scalabel2coco_pose(pred_frames, config)["annotations"]
+    if not pred_res:
+        return PoseResult.empty(coco_gt)
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()

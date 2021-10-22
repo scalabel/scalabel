@@ -6,6 +6,7 @@ results are from the COCO toolkit.
 import argparse
 import copy
 import json
+from collections import OrderedDict
 from functools import partial
 from multiprocessing import Pool
 from typing import AbstractSet, Callable, Dict, List, Optional
@@ -59,6 +60,29 @@ class DetResult(Result):
                     continue
                 summary_dict[f"AP/{category}"] = score
         return summary_dict
+
+    @classmethod
+    def empty(cls, coco_gt: "COCOV2") -> "DetResult":
+        """Return empty results."""
+        metrics = cls.__fields__.keys()
+        cat_names = OrderedDict(
+            [
+                (cat_id, cat_name["name"])
+                for cat_id, cat_name in coco_gt.cats.items()
+            ]
+        )
+        cat_ids_in = set(ann["category_id"] for ann in coco_gt.anns.values())
+        empty_scores = {
+            metric: [
+                {
+                    cat: 0.0 if cat_id in cat_ids_in else np.nan
+                    for cat_id, cat in cat_names.items()
+                },
+                {OVERALL: 0.0 if len(cat_ids_in) > 0 else np.nan},
+            ]
+            for metric in metrics
+        }
+        return cls(**empty_scores)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -300,6 +324,8 @@ def evaluate_det(
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
     pred_res = scalabel2coco_detection(pred_frames, config)["annotations"]
+    if not pred_res:
+        return DetResult.empty(coco_gt)
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()

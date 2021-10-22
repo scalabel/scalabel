@@ -72,3 +72,55 @@ class TestBDD100KPoseEval(unittest.TestCase):
             if np.isnan(score):
                 score = np.nan_to_num(score, nan=-1.0)
             self.assertAlmostEqual(score, overall_reference[name])
+
+
+class TestBDD100KPoseEvalEmpty(unittest.TestCase):
+    """Test cases for BDD100K pose estimation on empty test cases."""
+
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    gts_path = f"{cur_dir}/testcases/pose_sample.json"
+    preds_path = f"{cur_dir}/testcases/pose_preds_empty.json"
+    gts = load(gts_path).frames
+    preds = load(preds_path).frames
+    config = load_label_config(get_test_file("pose_configs.toml"))
+    result = evaluate_pose(gts, preds, config, nproc=1)
+
+    def test_frame(self) -> None:
+        """Test case for the function frame()."""
+        data_frame = self.result.pd_frame()
+        categories = set(["OVERALL"])
+        self.assertSetEqual(categories, set(data_frame.index.values))
+
+        data_arr = data_frame.to_numpy()
+        APs = np.array([0.0])  # pylint: disable=invalid-name
+        self.assertTrue(
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+        )
+
+        overall_scores = np.array([0.0] * 10)
+        self.assertTrue(
+            np.isclose(
+                np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
+            ).all()
+        )
+
+    def test_summary(self) -> None:
+        """Check evaluation scores' correctness."""
+        summary = self.result.summary()
+        overall_reference = {
+            "AP": 0.0,
+            "AP50": 0.0,
+            "AP75": 0.0,
+            "APm": 0.0,
+            "APl": 0.0,
+            "AR": 0.0,
+            "AR50": 0.0,
+            "AR75": 0.0,
+            "ARm": 0.0,
+            "ARl": 0.0,
+        }
+        self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
+        for name, score in summary.items():
+            if np.isnan(score):
+                score = np.nan_to_num(score, nan=-1.0)
+            self.assertAlmostEqual(score, overall_reference[name])
