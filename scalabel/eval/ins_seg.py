@@ -53,6 +53,8 @@ def evaluate_ins_seg(
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
     pred_res = scalabel2coco_ins_seg(pred_frames, config)["annotations"]
+    if not pred_res:
+        return DetResult.empty(coco_gt)
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()

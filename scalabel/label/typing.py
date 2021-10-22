@@ -48,6 +48,7 @@ class Node(BaseModel):
     category: str
     visibility: Optional[str] = None
     type: Optional[str] = None
+    score: Optional[float] = None
     id: str
 
 
@@ -169,6 +170,7 @@ class Config(BaseModel):
     imageSize: Optional[ImageSize]
     attributes: Optional[List[Attribute]]
     categories: List[Category]
+    poseSigmas: Optional[List[float]]
 
 
 class FrameGroup(Frame):

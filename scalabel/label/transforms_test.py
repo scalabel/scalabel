@@ -10,7 +10,9 @@ from ..unittest.util import get_test_file
 from .transforms import (
     bbox_to_box2d,
     box2d_to_bbox,
+    keypoints_to_nodes,
     mask_to_box2d,
+    nodes_to_edges,
     poly2ds_to_mask,
     polygon_to_poly2ds,
 )
@@ -55,6 +57,36 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
             self.assertAlmostEqual(vertice[1], polygon[0][2 * i + 1])
         for c in types:
             self.assertEqual(c, "L")
+
+    def test_keypoints_to_nodes(self) -> None:
+        """Check the function for keypoints to Nodes."""
+        keypoints = []
+        for i in range(14):
+            keypoints.extend([i, i + 50, i / 42.0])
+        nodes = keypoints_to_nodes(keypoints)
+        self.assertEqual(len(nodes), 14)
+        for i, node in enumerate(nodes):
+            self.assertEqual(len(node.id), 16)
+            self.assertEqual(node.category, "coco_kpt")
+            self.assertEqual(node.location, (float(i), float(i + 50)))
+            self.assertEqual(node.score, i / 42.0)
+        nodes = keypoints_to_nodes(keypoints, [str(i) for i in range(14)])
+        for i, node in enumerate(nodes):
+            self.assertEqual(node.category, str(i))
+
+    def test_nodes_to_edges(self) -> None:
+        """Check the function for Nodes to Edges."""
+        keypoints = []
+        for i in range(14):
+            keypoints.extend([i, i + 50, i / 42.0])
+        nodes = keypoints_to_nodes(keypoints)
+        edge_map = {i: ([i + 1], str(i)) for i in range(13)}
+        edges = nodes_to_edges(nodes, edge_map)
+        self.assertEqual(len(edges), 13)
+        for i, edge in enumerate(edges):
+            self.assertEqual(edge.source, nodes[i].id)
+            self.assertEqual(edge.target, nodes[i + 1].id)
+            self.assertEqual(edge.type, str(i))
 
 
 class TestScalabel2COCOFuncs(unittest.TestCase):

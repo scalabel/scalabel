@@ -36,7 +36,7 @@ Available arguments:
 
 
 Instance Segmentation
------------------
+-----------------------
 The instance segmentation evaluation also uses the AP metric and follows the protocol defined
 in the COCO dataset. You can start the evaluation by running, e.g.:
 
@@ -59,7 +59,36 @@ Available arguments:
     --config CFG_PATH, -c CFG_PATH
                             Config path. Contains metadata like available categories.
     --out-dir OUT_DIR, -o OUT_DIR
-                            Output path for detection evaluation results.
+                            Output path for instance segmentation evaluation results.
+    --nproc NUM_PROCS, -p NUM_PROCS
+                            Number of processes for detection evaluation.
+
+
+Pose Estimation
+-----------------
+The pose estimation evaluation also uses the AP metric and follows the protocol defined
+in the COCO dataset. You can start the evaluation by running, e.g.:
+
+.. code-block:: bash
+
+    python3 -m scalabel.eval.pose \
+        --gt scalabel/eval/testcases/pose_sample.json \
+        --result scalabel/eval/testcases/pose_preds.json \
+        --config scalabel/eval/testcases/pose_configs.toml
+
+
+Available arguments:
+
+.. code-block:: bash
+
+    --gt GT_PATH, -g GT_PATH
+                            path to ground truth annotations.
+    --result RESULT_PATH, -r RESULT_PATH
+                            path to results to be evaluated.
+    --config CFG_PATH, -c CFG_PATH
+                            Config path. Contains metadata like available categories.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            Output path for pose estimation evaluation results.
     --nproc NUM_PROCS, -p NUM_PROCS
                             Number of processes for detection evaluation.
 

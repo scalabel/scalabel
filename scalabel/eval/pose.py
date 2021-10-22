@@ -1,4 +1,4 @@
-"""Detection evaluation code.
+"""Pose estimation evaluation code.
 
 The prediction and ground truth are expected in scalabel format. The evaluation
 results are from the COCO toolkit.
@@ -6,14 +6,13 @@ results are from the COCO toolkit.
 import argparse
 import copy
 import json
-from collections import OrderedDict
 from functools import partial
 from multiprocessing import Pool
-from typing import AbstractSet, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval  # type: ignore
+from pycocotools.cocoeval import COCOeval, Params  # type: ignore
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -21,24 +20,22 @@ from ..common.parallel import NPROC
 from ..common.typing import DictStrAny
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
-from ..label.to_coco import scalabel2coco_detection
+from ..label.to_coco import scalabel2coco_pose
 from ..label.typing import Config, Frame
-from .result import OVERALL, Result, Scores
+from .result import OVERALL, Result
 
 
-class DetResult(Result):
-    """The class for bounding box detection evaluation results."""
+class PoseResult(Result):
+    """The class for pose estimation evaluation results."""
 
     AP: List[Dict[str, float]]
     AP50: List[Dict[str, float]]
     AP75: List[Dict[str, float]]
-    APs: List[Dict[str, float]]
     APm: List[Dict[str, float]]
     APl: List[Dict[str, float]]
-    AR1: List[Dict[str, float]]
-    AR10: List[Dict[str, float]]
-    AR100: List[Dict[str, float]]
-    ARs: List[Dict[str, float]]
+    AR: List[Dict[str, float]]
+    AR50: List[Dict[str, float]]
+    AR75: List[Dict[str, float]]
     ARm: List[Dict[str, float]]
     ARl: List[Dict[str, float]]
 
@@ -47,42 +44,31 @@ class DetResult(Result):
         """Check whether two instances are equal."""
         return super().__eq__(other)
 
-    def summary(
-        self,
-        include: Optional[AbstractSet[str]] = None,
-        exclude: Optional[AbstractSet[str]] = None,
-    ) -> Scores:
-        """Convert the data into a flattened dict as the summary."""
-        summary_dict = super().summary(include, exclude)
-        for scores in self.AP:
-            for category, score in scores.items():
-                if category == OVERALL:
-                    continue
-                summary_dict[f"AP/{category}"] = score
-        return summary_dict
-
     @classmethod
-    def empty(cls, coco_gt: "COCOV2") -> "DetResult":
+    def empty(cls, coco_gt: "COCOV2") -> "PoseResult":
         """Return empty results."""
         metrics = cls.__fields__.keys()
-        cat_names = OrderedDict(
-            [
-                (cat_id, cat_name["name"])
-                for cat_id, cat_name in coco_gt.cats.items()
-            ]
-        )
         cat_ids_in = set(ann["category_id"] for ann in coco_gt.anns.values())
         empty_scores = {
             metric: [
-                {
-                    cat: 0.0 if cat_id in cat_ids_in else np.nan
-                    for cat_id, cat in cat_names.items()
-                },
                 {OVERALL: 0.0 if len(cat_ids_in) > 0 else np.nan},
             ]
             for metric in metrics
         }
         return cls(**empty_scores)
+
+
+class ParamsV2(Params):  # type: ignore
+    """Modify COCO API params to set the keypoint OKS sigmas."""
+
+    def __init__(
+        self, iouType: str = "keypoints", sigmas: Optional[List[float]] = None
+    ):
+        """Init."""
+        super().__init__(iouType)
+        self.maxDets = [20]
+        if sigmas is not None:
+            self.kpt_oks_sigmas = np.array(sigmas)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -113,80 +99,39 @@ class COCOevalV2(COCOeval):  # type: ignore
         cat_names: List[str],
         cocoGt: Optional[COCO] = None,
         cocoDt: Optional[COCO] = None,
-        iouType: str = "segm",
+        iouType: str = "keypoints",
+        sigmas: Optional[List[float]] = None,
         nproc: int = NPROC,
     ):
         """Init."""
         super().__init__(cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType)
+        cat_ids = self.params.catIds  # type: ignore
+        self.params = ParamsV2(iouType, sigmas)
+        self.params.catIds = cat_ids
         self.cat_names = cat_names
         self.nproc = nproc
 
-        max_dets = self.params.maxDets  # type: ignore
         self.get_score_funcs: Dict[
             str, Callable[[Optional[int]], float]
         ] = dict(
             AP=self.get_score,
-            AP50=partial(
-                self.get_score,
-                metric="precision",
-                iou_thr=0.5,
-                max_dets=max_dets[2],
-            ),
-            AP75=partial(
-                self.get_score,
-                metric="precision",
-                iou_thr=0.75,
-                max_dets=max_dets[2],
-            ),
-            APs=partial(
-                self.get_score,
-                metric="precision",
-                area_rng="small",
-                max_dets=max_dets[2],
-            ),
-            APm=partial(
-                self.get_score,
-                metric="precision",
-                area_rng="medium",
-                max_dets=max_dets[2],
-            ),
-            APl=partial(
-                self.get_score,
-                metric="precision",
-                area_rng="large",
-                max_dets=max_dets[2],
-            ),
-            AR1=partial(self.get_score, metric="recall", max_dets=max_dets[0]),
-            AR10=partial(
-                self.get_score, metric="recall", max_dets=max_dets[1]
-            ),
-            AR100=partial(
-                self.get_score, metric="recall", max_dets=max_dets[2]
-            ),
-            ARs=partial(
-                self.get_score,
-                metric="recall",
-                area_rng="small",
-                max_dets=max_dets[2],
-            ),
-            ARm=partial(
-                self.get_score,
-                metric="recall",
-                area_rng="medium",
-                max_dets=max_dets[2],
-            ),
-            ARl=partial(
-                self.get_score,
-                metric="recall",
-                area_rng="large",
-                max_dets=max_dets[2],
-            ),
+            AP50=partial(self.get_score, iou_thr=0.5),
+            AP75=partial(self.get_score, iou_thr=0.75),
+            APm=partial(self.get_score, area_rng="medium"),
+            APl=partial(self.get_score, area_rng="large"),
+            AR=partial(self.get_score, metric="recall"),
+            AR50=partial(self.get_score, metric="recall", iou_thr=0.5),
+            AR75=partial(self.get_score, metric="recall", iou_thr=0.75),
+            ARm=partial(self.get_score, metric="recall", area_rng="medium"),
+            ARl=partial(self.get_score, metric="recall", area_rng="large"),
         )
+
+        # useSegm is deprecated
+        assert self.params.useSegm is None
 
     def evaluate(self) -> None:
         """Run per image evaluation on given images."""
-        p = self.params  # type: ignore
-        # add backward compatibility if useSegm is specified in params
+        p = self.params
         p.imgIds = list(np.unique(p.imgIds))
         if p.useCats:
             p.catIds = list(np.unique(p.catIds))
@@ -198,7 +143,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         cat_ids = p.catIds if p.useCats else [-1]
 
         self.ious = {
-            (imgId, catId): self.computeIoU(imgId, catId)
+            (imgId, catId): self.computeOks(imgId, catId)
             for imgId in p.imgIds
             for catId in cat_ids
         }
@@ -238,11 +183,11 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def get_score(
         self,
-        cat_id: Optional[int],
+        cat_id: Optional[int] = None,
         metric: str = "precision",
         iou_thr: Optional[float] = None,
         area_rng: str = "all",
-        max_dets: int = 100,
+        max_dets: int = 20,
     ) -> float:
         """Extract the score according the metric and category."""
         p = self.params
@@ -275,28 +220,21 @@ class COCOevalV2(COCOeval):  # type: ignore
             mean_s = np.mean(s[s > -1])
         return mean_s * 100
 
-    def summarize(self) -> DetResult:
+    def summarize(self) -> PoseResult:
         """Compute summary metrics for evaluation results."""
-        cat_ids = self.params.catIds + [None]
         res_dict = {
-            metric: [
-                {
-                    cat_name: get_score_func(cat_id)
-                    for cat_name, cat_id in zip(self.cat_names, cat_ids)
-                },
-                {OVERALL: get_score_func(None)},
-            ]
+            metric: [{OVERALL: get_score_func(None)}]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(**res_dict)
+        return PoseResult(**res_dict)
 
 
-def evaluate_det(
+def evaluate_pose(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
     config: Config,
     nproc: int = NPROC,
-) -> DetResult:
+) -> PoseResult:
     """Load the ground truth and prediction results.
 
     Args:
@@ -318,22 +256,24 @@ def evaluate_det(
     """
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
-    ann_coco = scalabel2coco_detection(ann_frames, config)
+    ann_coco = scalabel2coco_pose(ann_frames, config)
     coco_gt = COCOV2(None, ann_coco)
 
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
-    pred_res = scalabel2coco_detection(pred_frames, config)["annotations"]
+    pred_res = scalabel2coco_pose(pred_frames, config)["annotations"]
     if not pred_res:
-        return DetResult.empty(coco_gt)
+        return PoseResult.empty(coco_gt)
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()
     cat_names = [cat["name"] for cat in coco_dt.loadCats(cat_ids)]
 
     img_ids = sorted(coco_gt.getImgIds())
-    ann_type = "bbox"
-    coco_eval = COCOevalV2(cat_names, coco_gt, coco_dt, ann_type, nproc)
+    ann_type = "keypoints"
+    coco_eval = COCOevalV2(
+        cat_names, coco_gt, coco_dt, ann_type, config.poseSigmas, nproc
+    )
     coco_eval.params.imgIds = img_ids
 
     logger.info("evaluating...")
@@ -346,12 +286,12 @@ def evaluate_det(
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="Detection evaluation.")
+    parser = argparse.ArgumentParser(description="Pose evaluation.")
     parser.add_argument(
-        "--gt", "-g", required=True, help="path to detection ground truth"
+        "--gt", "-g", required=True, help="path to pose ground truth"
     )
     parser.add_argument(
-        "--result", "-r", required=True, help="path to detection results"
+        "--result", "-r", required=True, help="path to pose results"
     )
     parser.add_argument(
         "--config",
@@ -364,14 +304,14 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--out-file",
         default="",
-        help="Output file for detection evaluation results.",
+        help="Output file for pose evaluation results.",
     )
     parser.add_argument(
         "--nproc",
         "-p",
         type=int,
         default=NPROC,
-        help="number of processes for detection evaluation",
+        help="number of processes for pose evaluation",
     )
     return parser.parse_args()
 
@@ -383,14 +323,10 @@ if __name__ == "__main__":
     preds = load(args.result).frames
     if args.config is not None:
         cfg = load_label_config(args.config)
-    if cfg is None:
-        raise ValueError(
-            "Dataset config is not specified. Please use --config"
-            " to specify a config for this dataset."
-        )
-    eval_result = evaluate_det(gts, preds, cfg, args.nproc)
+    assert cfg is not None
+    eval_result = evaluate_pose(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
-            json.dump(eval_result.json(), fp)
+            json.dump(eval_result.dict(), fp, indent=2)
