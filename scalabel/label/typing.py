@@ -32,6 +32,13 @@ class Poly2D(BaseModel):
     closed: bool
 
 
+class RLE(BaseModel):
+    """Bitmask in RLE format."""
+
+    counts: str
+    size: Tuple[int, int]
+
+
 class Node(BaseModel):
     """Node of a graph."""
 
@@ -73,6 +80,7 @@ class Label(BaseModel):
     box2d: Optional[Box2D]
     box3d: Optional[Box3D]
     poly2d: Optional[List[Poly2D]]
+    rle: Optional[RLE]
     graph: Optional[Graph]
 
     def __init__(self, **data: Any) -> None:  # type: ignore
@@ -144,11 +152,13 @@ Category.update_forward_refs()
 
 
 class Attribute(BaseModel):
-    """Define Scalabel category type."""
+    """Define Scalabel attribute type."""
 
     name: str
     type: str
-    tag: str
+    tag: Optional[str]
+    tagPrefix: Optional[str]
+    tagSuffixes: Optional[List[str]]
     values: Optional[List[str]]
 
 
