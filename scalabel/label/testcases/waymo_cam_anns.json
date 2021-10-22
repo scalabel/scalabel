@@ -1,8 +1,9 @@
 {
   "frames": [
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000000.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front",
+      "name": "3132521568089292927_2220_000_2240_000_front_0000000.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT/3132521568089292927_2220_000_2240_000_0000000.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2060.5623623603283,
@@ -12,7 +13,9 @@
           947.4602731024576,
           634.3692534969996
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -21,17 +24,18 @@
           -43.31028949145427
         ],
         "rotation": [
-          -0.03769370191035993,
-          -0.022569319928684273,
-          1.0045936022892092
+          -1.548210969405996,
+          -0.037684097670881433,
+          -0.5670537763979541
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "10"
+        "camera_vehicle_counts": "10"
       },
+      "timestamp": null,
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -40,89 +44,154 @@
       "labels": [
         {
           "id": "4fb8d8de-59a8-4b98-aa23-61ff54cd370b",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 743.38143,
             "y1": 637.27431,
             "x2": 761.06595,
             "y2": 658.74837
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "6259f8f9-249e-4189-ae7d-0a45a138aaf6",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 211.58265,
             "y1": 338.848035,
             "x2": 752.22369,
             "y2": 882.647025
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "6fc0c344-8c87-4ebe-b6e5-1faad2ebf646",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 724.117935,
             "y1": 640.1164650000001,
             "x2": 731.065425,
             "y2": 655.906215
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "765baafc-c52d-4329-bda0-70f2da05ab96",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 843.1725552283299,
             "y1": 632.8529272755463,
             "x2": 889.2786252283299,
             "y2": 668.2219672755464
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "8343e79e-2a1e-4ca6-82f5-3938e3e7733d",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 797.5401935236082,
             "y1": 642.3265561416497,
             "x2": 809.8560405708247,
             "y2": 664.4324588661034
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "dd6af871-faaf-4f2e-87b3-2df1df813e1a",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 862.1203500000001,
             "y1": 647.063955,
             "x2": 964.43793,
             "y2": 719.6968049999999
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "e8d1bfa2-f9ea-4803-bc52-21076723ae86",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 819.1721836659476,
             "y1": 629.1686424403692,
             "x2": 859.5939436659476,
             "y2": 666.4324524403692
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "ee204ad5-3f0f-4027-8959-2f80804d4d3b",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 764.8554899999999,
             "y1": 637.2740572755463,
             "x2": 800.22453,
             "y2": 663.8008372755464
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000000.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front_left",
+      "name": "3132521568089292927_2220_000_2240_000_front_left_0000000.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT_LEFT/3132521568089292927_2220_000_2240_000_0000000.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2067.719432051605,
@@ -132,7 +201,9 @@
           972.7608310241679,
           650.5428504675285
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -141,17 +212,18 @@
           -43.31530192227939
         ],
         "rotation": [
-          -0.05514890447778119,
-          0.014891473345858719,
-          1.7724726676144995
+          -1.5857104709900993,
+          -0.05514278358555491,
+          0.2024983922885112
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "10"
+        "camera_vehicle_counts": "10"
       },
+      "timestamp": null,
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -160,19 +232,28 @@
       "labels": [
         {
           "id": "69d175c1-bab1-4e51-82ed-0a5ee4e508a6",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 616.43184,
             "y1": 355.269375,
             "x2": 807.17202,
             "y2": 411.480885
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000000.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front_right",
+      "name": "3132521568089292927_2220_000_2240_000_front_right_0000000.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT_RIGHT/3132521568089292927_2220_000_2240_000_0000000.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2055.7147139434246,
@@ -182,7 +263,9 @@
           947.6418393340983,
           650.3196794203282
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -191,26 +274,29 @@
           -43.30963239549823
         ],
         "rotation": [
-          -0.007040964977378455,
-          -0.03252439214171976,
-          0.22497558306538765
+          -1.538271129003564,
+          -0.007037241150758433,
+          -1.3460497102426972
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "10"
+        "camera_vehicle_counts": "10"
       },
+      "timestamp": null,
       "frameIndex": 0,
       "size": {
         "width": 1920,
         "height": 1280
-      }
+      },
+      "labels": []
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000000.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_side_left",
+      "name": "3132521568089292927_2220_000_2240_000_side_left_0000000.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/SIDE_LEFT/3132521568089292927_2220_000_2240_000_0000000.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2059.2436295351845,
@@ -220,7 +306,9 @@
           972.7713939947818,
           257.7142036660382
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -229,26 +317,29 @@
           -43.317819000847976
         ],
         "rotation": [
-          -0.034681448564971754,
-          0.052406456143028635,
-          2.56334335330154
+          -1.623234258303084,
+          -0.03463381520325903,
+          0.9943644532049933
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "10"
+        "camera_vehicle_counts": "10"
       },
+      "timestamp": null,
       "frameIndex": 0,
       "size": {
         "width": 1920,
         "height": 886
-      }
+      },
+      "labels": []
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000000.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_side_right",
+      "name": "3132521568089292927_2220_000_2240_000_side_right_0000000.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/SIDE_RIGHT/3132521568089292927_2220_000_2240_000_0000000.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2053.653046355678,
@@ -258,7 +349,9 @@
           968.7736965158531,
           252.6750221353916
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -267,17 +360,18 @@
           -43.311020450972606
         ],
         "rotation": [
-          0.026453513315520524,
-          -0.017401993218687073,
-          -0.5679893450571987
+          -1.5533882441743045,
+          0.02644950703189286,
+          -2.138325243853488
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "10"
+        "camera_vehicle_counts": "10"
       },
+      "timestamp": null,
       "frameIndex": 0,
       "size": {
         "width": 1920,
@@ -286,19 +380,28 @@
       "labels": [
         {
           "id": "e0cf4636-eb96-4dc1-ad08-daeccb9dc632",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 559.5887399999999,
             "y1": 306.005355,
             "x2": 823.5933600000001,
             "y2": 368.5327649999999
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front",
+      "name": "3132521568089292927_2220_000_2240_000_front_0000001.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT/3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2060.5623623603283,
@@ -308,7 +411,9 @@
           947.4602731024576,
           634.3692534969996
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -317,17 +422,18 @@
           -43.25347186983993
         ],
         "rotation": [
-          -0.03741813944466755,
-          -0.025159215974322358,
-          1.0064178588135275
+          -1.545619495058351,
+          -0.0374062919601732,
+          -0.5653202190028029
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "11"
+        "camera_vehicle_counts": "11"
       },
+      "timestamp": null,
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -336,89 +442,154 @@
       "labels": [
         {
           "id": "4fb8d8de-59a8-4b98-aa23-61ff54cd370b",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 745.2762,
             "y1": 643.2744150000001,
             "x2": 762.96072,
             "y2": 662.8537050000002
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "6259f8f9-249e-4189-ae7d-0a45a138aaf6",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 182.21371499999998,
             "y1": 335.69008499999995,
             "x2": 747.486765,
             "y2": 897.173595
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "6fc0c344-8c87-4ebe-b6e5-1faad2ebf646",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 718.1178299999999,
             "y1": 644.2218,
             "x2": 730.74963,
             "y2": 661.90632
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "765baafc-c52d-4329-bda0-70f2da05ab96",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 844.1200349999999,
             "y1": 635.37954,
             "x2": 890.226105,
             "y2": 670.7485800000001
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "8343e79e-2a1e-4ca6-82f5-3938e3e7733d",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 798.32976,
             "y1": 647.0639550000001,
             "x2": 812.22474,
             "y2": 666.6432450000002
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "dd6af871-faaf-4f2e-87b3-2df1df813e1a",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 862.1203500000001,
             "y1": 653.0640599999999,
             "x2": 964.43793,
             "y2": 723.80214
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "e8d1bfa2-f9ea-4803-bc52-21076723ae86",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 819.8038536974927,
             "y1": 632.7481059524589,
             "x2": 860.2256136974927,
             "y2": 670.0119159524588
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "ee204ad5-3f0f-4027-8959-2f80804d4d3b",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 764.8554899999999,
             "y1": 639.8006700000001,
             "x2": 800.22453,
             "y2": 666.3274500000002
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front_left",
+      "name": "3132521568089292927_2220_000_2240_000_front_left_0000001.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT_LEFT/3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2067.719432051605,
@@ -428,7 +599,9 @@
           972.7608310241679,
           650.5428504675285
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -437,17 +610,18 @@
           -43.25857221059693
         ],
         "rotation": [
-          -0.05674983311067088,
-          0.012836972445582795,
-          1.774281304679923
+          -1.5836539957502391,
+          -0.05674515230769184,
+          0.20421423683030304
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "11"
+        "camera_vehicle_counts": "11"
       },
+      "timestamp": null,
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -456,29 +630,46 @@
       "labels": [
         {
           "id": "69d175c1-bab1-4e51-82ed-0a5ee4e508a6",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 362.84845500000006,
             "y1": 315.479205,
             "x2": 555.483405,
             "y2": 380.53297499999996
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         },
         {
           "id": "71df3aec-9b67-4a7d-8e43-caa4a2b1bed8",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 1883.7171749999998,
             "y1": 733.9075799999998,
             "x2": 1917.1914449999995,
             "y2": 898.1209799999999
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_front_right",
+      "name": "3132521568089292927_2220_000_2240_000_front_right_0000001.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/FRONT_RIGHT/3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2055.7147139434246,
@@ -488,7 +679,9 @@
           947.6418393340983,
           650.3196794203282
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -497,26 +690,29 @@
           -43.252959528482336
         ],
         "rotation": [
-          -0.005023156765695505,
-          -0.034172551795001116,
-          0.22673913667327206
+          -1.5366233442082387,
+          -0.005020224097402881,
+          -1.3442288122415482
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "11"
+        "camera_vehicle_counts": "11"
       },
+      "timestamp": null,
       "frameIndex": 1,
       "size": {
         "width": 1920,
         "height": 1280
-      }
+      },
+      "labels": []
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_side_left",
+      "name": "3132521568089292927_2220_000_2240_000_side_left_0000001.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/SIDE_LEFT/3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2059.2436295351845,
@@ -526,7 +722,9 @@
           972.7713939947818,
           257.7142036660382
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -535,26 +733,29 @@
           -43.26124314579485
         ],
         "rotation": [
-          -0.0372713532758538,
-          0.05209962683141711,
-          2.565038916403966
+          -1.6229320962263043,
+          -0.037220757191371634,
+          0.996184431669899
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "11"
+        "camera_vehicle_counts": "11"
       },
+      "timestamp": null,
       "frameIndex": 1,
       "size": {
         "width": 1920,
         "height": 886
-      }
+      },
+      "labels": []
     },
     {
-      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
-      "videoName": "3132521568089292927_2220_000_2240_000_side_right",
+      "name": "3132521568089292927_2220_000_2240_000_side_right_0000001.jpg",
+      "url": "3132521568089292927_2220_000_2240_000/SIDE_RIGHT/3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "videoName": "3132521568089292927_2220_000_2240_000",
       "intrinsics": {
         "focal": [
           2053.653046355678,
@@ -564,7 +765,9 @@
           968.7736965158531,
           252.6750221353916
         ],
-        "skew": 0
+        "skew": 0,
+        "radial": null,
+        "tangential": null
       },
       "extrinsics": {
         "location": [
@@ -573,17 +776,18 @@
           -43.2545127605681
         ],
         "rotation": [
-          0.02904329351095761,
-          -0.017121832900372835,
-          -0.5662032154208696
+          -1.5536672715248165,
+          0.029039035293117355,
+          -2.136502152275163
         ]
       },
       "attributes": {
-        "timeOfDay": "Day",
+        "time_of_day": "Day",
         "weather": "rain",
         "location": "location_sf",
-        "cameraVehicleCounts": "11"
+        "camera_vehicle_counts": "11"
       },
+      "timestamp": null,
       "frameIndex": 1,
       "size": {
         "width": 1920,
@@ -592,16 +796,228 @@
       "labels": [
         {
           "id": "e0cf4636-eb96-4dc1-ad08-daeccb9dc632",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
           "category": "vehicle",
           "box2d": {
             "x1": 564.957255,
             "y1": 308.84751000000006,
             "x2": 832.119825,
             "y2": 370.74333
-          }
+          },
+          "box3d": null,
+          "poly2d": null,
+          "graph": null
         }
       ]
     }
   ],
-  "config": null
+  "groups": [
+    {
+      "name": "3132521568089292927_2220_000_2240_000_0000001.jpg",
+      "url": "segment-3132521568089292927_2220_000_2240_000_with_camera_labels.tfrecord",
+      "videoName": "3132521568089292927_2220_000_2240_000",
+      "intrinsics": null,
+      "extrinsics": {
+        "location": [
+          -25422.788836770385,
+          37225.549206177595,
+          -43.189452801891726
+        ],
+        "rotation": [
+          0.008294131445379539,
+          0.044911401340475,
+          -2.6868766392651104
+        ]
+      },
+      "attributes": null,
+      "timestamp": null,
+      "frameIndex": null,
+      "size": null,
+      "labels": [
+        {
+          "id": "12qZ9yP4eItS8nfuEiWJlg",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
+          "category": "vehicle",
+          "box2d": null,
+          "box3d": {
+            "alpha": -1.5637875811321145,
+            "orientation": [
+              0.0,
+              3.140790928848268,
+              0.0
+            ],
+            "location": [
+              -13.676948077475506,
+              -12.535640797414938,
+              -0.1068255704319041
+            ],
+            "dimension": [
+              4.039999999999964,
+              3.012477058304427,
+              11.014560502752715
+            ]
+          },
+          "poly2d": null,
+          "graph": null
+        },
+        {
+          "id": "OL5e4NOlAximN4ZFSu1LtA",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
+          "category": "vehicle",
+          "box2d": null,
+          "box3d": {
+            "alpha": 1.5479939662957358,
+            "orientation": [
+              0.0,
+              3.1406000669131533,
+              0.0
+            ],
+            "location": [
+              49.15786644259475,
+              20.167537847228186,
+              -1.0722919717970916
+            ],
+            "dimension": [
+              1.980000000000004,
+              2.522029231648367,
+              5.306949276976631
+            ]
+          },
+          "poly2d": null,
+          "graph": null
+        },
+        {
+          "id": "RwDQD5fwr_YPPazILZyK5Q",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
+          "category": "vehicle",
+          "box2d": null,
+          "box3d": {
+            "alpha": -1.5262010847877816,
+            "orientation": [
+              0.0,
+              3.140814031931153,
+              0.0
+            ],
+            "location": [
+              -36.042139805423034,
+              -23.037665641378027,
+              -1.636494356637587
+            ],
+            "dimension": [
+              1.4400000000000048,
+              2.031444694733978,
+              4.51961877209187
+            ]
+          },
+          "poly2d": null,
+          "graph": null
+        },
+        {
+          "id": "T05NVBlKWepJ70SIEuTbJA",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
+          "category": "vehicle",
+          "box2d": null,
+          "box3d": {
+            "alpha": 1.5141634257273253,
+            "orientation": [
+              0.0,
+              3.1406622740034904,
+              0.0
+            ],
+            "location": [
+              23.707594642762345,
+              5.770966807900121,
+              -1.3219403087274124
+            ],
+            "dimension": [
+              1.6200000000000045,
+              2.302327946032733,
+              5.196909870723061
+            ]
+          },
+          "poly2d": null,
+          "graph": null
+        },
+        {
+          "id": "Vf2WjBeEQaDyDlUMEuw4UQ",
+          "index": null,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": null,
+          "attributes": null,
+          "category": "vehicle",
+          "box2d": null,
+          "box3d": {
+            "alpha": 1.5007038665128882,
+            "orientation": [
+              0.0,
+              3.140593815724777,
+              0.0
+            ],
+            "location": [
+              18.979813271660085,
+              10.766457378968727,
+              -1.3134748623492105
+            ],
+            "dimension": [
+              1.5852443256354505,
+              1.877164243465566,
+              4.027805368779809
+            ]
+          },
+          "poly2d": null,
+          "graph": null
+        }
+      ],
+      "frames": [
+        "3132521568089292927_2220_000_2240_000_front_0000001.jpg",
+        "3132521568089292927_2220_000_2240_000_front_left_0000001.jpg",
+        "3132521568089292927_2220_000_2240_000_front_right_0000001.jpg",
+        "3132521568089292927_2220_000_2240_000_side_left_0000001.jpg",
+        "3132521568089292927_2220_000_2240_000_side_right_0000001.jpg"
+      ]
+    }
+  ],
+  "config": {
+    "imageSize": null,
+    "attributes": null,
+    "categories": [
+      {
+        "name": "vehicle",
+        "subcategories": null
+      },
+      {
+        "name": "pedestrian",
+        "subcategories": null
+      },
+      {
+        "name": "cyclist",
+        "subcategories": null
+      },
+      {
+        "name": "sign",
+        "subcategories": null
+      }
+    ]
+  }
 }

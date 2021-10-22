@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install --ignore-installed -r scripts/requirements.txt
+          python3 -m pip install --ignore-installed -r doc/requirements.txt
       - name: test website build
         run: |
           cd doc
@@ -36,4 +36,4 @@ jobs:
           AWS_S3_BUCKET: doc.scalabel.ai
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: "doc/_build/html/"
+          SOURCE_DIR: "doc/_build/src/html/"

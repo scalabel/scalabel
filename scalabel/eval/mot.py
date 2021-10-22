@@ -12,7 +12,7 @@ import numpy as np
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayF64, NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32, NDArrayU8
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -175,7 +175,7 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps = np.ones(pred_bboxes_c.shape[0]).astype(bool)
+                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0]).astype(bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
@@ -478,7 +478,11 @@ if __name__ == "__main__":
     gt_frames, cfg = dataset.frames, dataset.config
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     eval_result = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),

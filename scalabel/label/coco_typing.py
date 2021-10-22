@@ -1,7 +1,7 @@
 """Type definitions for the COCO format."""
 
 import sys
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict  # pylint: disable=no-name-in-module
@@ -21,8 +21,8 @@ class CatType(TypedDict):
 class RLEType(TypedDict):
     """Defines types of polygons in GT."""
 
-    counts: List[int]
-    size: List[int]
+    counts: str
+    size: Tuple[int, int]
 
 
 class AnnType(TypedDict, total=False):
@@ -39,6 +39,8 @@ class AnnType(TypedDict, total=False):
     bbox: Optional[List[float]]
     area: Optional[float]
     segmentation: Optional[Union[PolygonType, RLEType]]
+    keypoints: Optional[List[float]]
+    num_keypoints: Optional[int]
 
 
 class ImgType(TypedDict, total=False):
