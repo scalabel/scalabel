@@ -11,6 +11,7 @@ import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
   BotData,
+  ModelKillMessageType,
   ModelRegisterMessageType,
   ModelRequest,
   ModelRequestMessageType,
@@ -209,6 +210,11 @@ export class Bot {
    * Close any external resources
    */
   public kill(): void {
+    const modelKillMessage: ModelKillMessageType = {
+      projectName: this.projectName,
+      taskId: index2str(this.taskIndex)
+    }
+    this.publisher.publishEvent(RedisChannel.MODEL_KILL, modelKillMessage)
     this.socket.disconnect()
   }
 

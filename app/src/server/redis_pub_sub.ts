@@ -1,6 +1,7 @@
 import Logger from "./logger"
 import { RedisConfig } from "../types/config"
 import {
+  ModelKillMessageType,
   ModelRegisterMessageType,
   ModelRequestMessageType,
   RegisterMessageType
@@ -36,6 +37,7 @@ export class RedisPubSub {
       | RegisterMessageType
       | ModelRegisterMessageType
       | ModelRequestMessageType
+      | ModelKillMessageType
   ): void {
     switch (channel) {
       case RedisChannel.REGISTER_EVENT:

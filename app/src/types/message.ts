@@ -43,6 +43,14 @@ export interface ModelRegisterMessageType {
   items: ItemType[]
 }
 
+/** model register message type */
+export interface ModelKillMessageType {
+  /** Project name */
+  projectName: string
+  /** Task Id. It is supposed to be index2str(taskIndex) */
+  taskId: string
+}
+
 /** model request message type */
 export interface ModelRequestMessageType {
   /** Request type */

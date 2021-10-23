@@ -1,15 +1,20 @@
 import os
+import requests
+from io import BytesIO
+from PIL import Image
+import numpy as np
 import logging
 import redis
 import json
 import time
+import torch
 import torch.multiprocessing as mp
 
 import ray
 from ray import serve
 
 from detectron2 import model_zoo
-from detectron2.config import get_cfg
+from detectron2.config import get_cfg, CfgNode
 from detectron2.modeling import build_model
 from detectron2.checkpoint import DetectionCheckpointer
 
@@ -22,62 +27,100 @@ serve.start(http_options={"port": 8001})
 
 
 class RayModelServerScheduler(object):
-    def __init__(self, server_config, model_config, logger):
+    def __init__(self, server_config, model_registry_config, logger):
         self.logger = logger
 
         self.server_config = server_config
-        self.model_config = model_config
+        self.model_registry_config = model_registry_config
 
         self.redis = redis.Redis(host=server_config["redis_host"], port=server_config["redis_port"])
 
         self.model_register_channel = RedisConsts.REDIS_CHANNELS["modelRegister"]
         self.model_request_channel = RedisConsts.REDIS_CHANNELS["modelRequest"]
         self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
+        self.model_kill_channel = RedisConsts.REDIS_CHANNELS["modelKill"]
 
-        self.tasks = {}
+        self.task_configs = {}
+        self.task_models = {}
+        self.task_images = {}
+
         self.threads = {}
-
-        self.models = {}
-        self.load_models()
 
         self.verbose = False
 
+        self.restore()
         self.logger.info("Model server launched.")
-
-    def load_models(self):
-        valid_tasks = self.model_config["tasks"]
-        for task in valid_tasks:
-            if task in self.model_config:
-                valid_models = self.model_config[task]["models"]
-                for model_name in valid_models:
-                    cfg = get_cfg()
-                    cfg.merge_from_file(model_zoo.get_config_file(valid_models[model_name]))
-                    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-                    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(valid_models[model_name])
-                    cfg.MODEL.DEVICE = "cpu"
-
-                    model = build_model(cfg)
-                    checkpointer = DetectionCheckpointer(model)
-                    checkpointer.load(cfg.MODEL.WEIGHTS)
-                    self.models[f"{task}_{model_name}"] = {
-                        "config": cfg,
-                        "model": model
-                    }
 
     # restore when server restarts, connects to redis channels.
     def restore(self):
-        pass
+        task_names = self.redis.smembers("ModelServerTasks")
+        for task_name in task_names:
+            task_name = task_name.decode()
+            task_config = json.loads(self.redis.get(task_name))
+            if task_config["active"]:
+                self.restore_model(task_name, task_config)
+                self.restore_image(task_name, task_config)
+            self.task_configs[task_name] = task_config
+
+            model_request_channel = self.model_request_channel % task_name
+            model_request_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
+            model_request_subscriber.subscribe(**{model_request_channel: self.request_handler})
+            thread = model_request_subscriber.run_in_thread(sleep_time=0.001)
+            self.threads[model_request_channel] = thread
+
+    def restore_model(self, task_name, task_config):
+        model_dir = task_config["model_dir"]
+        model_cfg = task_config["model_cfg"]
+        cfg = CfgNode(model_cfg)
+        cfg.MODEL.WEIGHTS = model_dir
+
+        num_replicas = task_config["deploy_config"]["num_replicas"]
+        RayModel.options(name=task_name, num_replicas=num_replicas).deploy(
+            cfg,
+            self.logger,
+        )
+
+        deploy_model = serve.get_deployment(task_name).get_handle()
+        self.task_models[task_name] = deploy_model
+
+    def restore_image(self, task_name, task_config):
+        image_dir = task_config["image_dir"]
+        self.task_images[task_name] = torch.load(image_dir)
 
     # save the loaded tasks
-    def save(self):
-        pass
+    def save(self, task_name):
+        self.save_config(task_name)
+        self.save_model(task_name)
+        self.save_image(task_name)
+
+    def save_config(self, task_name):
+        task_config = json.dumps(self.task_configs[task_name])
+        self.redis.set(task_name, task_config)
+
+    def save_model(self, task_name):
+        task_config = self.task_configs[task_name]
+        task_model = self.task_models[task_name]
+
+        task_model.save.remote(task_config["model_dir"])
+
+    def save_image(self, task_name):
+        task_config = self.task_configs[task_name]
+        task_images = self.task_images[task_name]
+
+        torch.save(task_images, task_config["image_dir"])
 
     def listen(self):
         model_register_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
         model_register_subscriber.subscribe(**{self.model_register_channel: self.register_handler})
-        thread = model_register_subscriber.run_in_thread(sleep_time=0.001)
+        thread_register = model_register_subscriber.run_in_thread(sleep_time=0.001)
 
-        self.threads[self.model_register_channel] = thread
+        self.threads[self.model_register_channel] = thread_register
+
+        model_kill_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
+        model_kill_subscriber.subscribe(**{self.model_kill_channel: self.kill_handler})
+        thread_kill = model_kill_subscriber.run_in_thread(sleep_time=0.001)
+
+        self.threads[self.model_kill_channel] = thread_kill
 
     def register_handler(self, register_message):
         register_message = json.loads(register_message["data"])
@@ -116,46 +159,75 @@ class RayModelServerScheduler(object):
 
             self.calc_time("save data to query list")
 
-            model = self.tasks[f'{project_name}_{task_id}']["model"]
-            model.remote(request_data, request_type)
+            task_images = self.task_images[f'{project_name}_{task_id}']
+            inputs = [task_images[item["url"]] for item in request_data["items"]]
+
+            model = self.task_models[f'{project_name}_{task_id}']
+            model.remote(inputs, request_data, request_type)
+
+    def kill_handler(self, kill_message):
+        kill_message = json.loads(kill_message["data"])
+        project_name = kill_message["projectName"]
+        task_id = kill_message["taskId"]
+        name = f'{project_name}_{task_id}'
+
+        self.task_configs[name]["active"] = False
+        model = self.task_models[name]["model"]
+        model.kill.remote()
 
     def register_task(self, task_type, project_name, task_id, item_list):
-        deploy_name = f"{project_name}_{task_id}"
-        if self.tasks[deploy_name]["active"]:
+        task_name = f"{project_name}_{task_id}"
+        if task_name in self.task_configs:
+            if not self.task_configs[task_name]["active"]:
+                self.task_configs[task_name]["active"] = True
+                self.task_models[task_name]["model"].activate()
+                self.save(task_name)
             return
+        elif self.redis.smembers("ModelServerTasks") != None and task_name in self.redis.smembers("ModelServerTasks"):
+            self.task_configs[task_name] = json.loads(self.redis.get(task_name))
+            self.task_configs[task_name]["active"] = True
+        else:
+            model_registry_config = self.model_registry_config[task_type]
 
-        model_config = self.model_config[task_type]
+            model_name = model_registry_config["models"][model_registry_config["defaults"]["model"]]
+            deploy_config = model_registry_config["defaults"]["config"]
 
-        model_name = model_config["defaults"]["model"]
-        deploy_config = model_config["defaults"]["config"]
+            self.initialize(task_name, model_name, deploy_config, item_list)
 
-        model = self.models[f"{task_type}_{model_name}"]["model"]
-        config = self.models[f"{task_type}_{model_name}"]["config"]
+            self.redis.sadd("ModelServerTasks", task_name)
+            self.save(task_name)
 
-        self.setup_model(deploy_name, model, config, deploy_config, item_list)
-
-        model_request_channel = self.model_request_channel % deploy_name
+        model_request_channel = self.model_request_channel % task_name
         model_request_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
         model_request_subscriber.subscribe(**{model_request_channel: self.request_handler})
         thread = model_request_subscriber.run_in_thread(sleep_time=0.001)
         self.threads[model_request_channel] = thread
 
-    def setup_model(self, name, model, config, deploy_config, item_list):
+    def initialize(self, task_name, model_name, deploy_config, item_list):
+        cfg = get_cfg()
+        cfg.merge_from_file(model_zoo.get_config_file(model_name))
+        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+        cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_name)
+
         num_replicas = deploy_config["num_replicas"]
-        RayModel.options(name=name, num_replicas=num_replicas).deploy(
-            model,
-            config,
-            item_list,
+        RayModel.options(name=task_name, num_replicas=num_replicas).deploy(
+            cfg,
             self.logger,
         )
 
-        deploy_model = serve.get_deployment(name).get_handle()
-        self.tasks[name] = {
-            "name": name,
-            "model": deploy_model,
-            "config": deploy_config,
+        deploy_model = serve.get_deployment(task_name).get_handle()
+        self.task_configs[task_name] = {
+            "task_name": task_name,
+            "deploy_config": deploy_config,
+            "item_list": item_list,
+            "model_cfg": cfg,
+            "model_dir": task_name + ".pth",
+            "image_dir": task_name + "_image.pkl",
             "active": True
         }
+        self.task_models[task_name] = deploy_model
+
+        self.task_images[task_name] = ray.get(deploy_model.load_inputs.remote(item_list))
 
     def close(self):
         for thread_name, thread in self.threads.items():
@@ -188,7 +260,7 @@ def launch() -> None:
         "redis_host": RedisConsts.REDIS_HOST,
         "redis_port": RedisConsts.REDIS_PORT
     }
-    model_config = {
+    model_registry_config = {
         "tasks": ["OD", "Polygon", "Mask"],
         "OD": {
             "models": {
@@ -207,7 +279,7 @@ def launch() -> None:
         }
     }
 
-    scheduler = RayModelServerScheduler(server_config, model_config, logger)
+    scheduler = RayModelServerScheduler(server_config, model_registry_config, logger)
     scheduler.listen()
 
 
