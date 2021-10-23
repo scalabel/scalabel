@@ -27,6 +27,7 @@ __all__ = [
     "poly2ds_to_mask",
     "polygon_to_poly2ds",
     "keypoints_to_nodes",
+    "rle_to_box2d",
 ]
 
 TOLERANCE = 1.0
@@ -208,6 +209,12 @@ def frame_to_rles(
     else:
         masks = [poly2ds_to_mask(shape, poly2d) for poly2d in poly2ds]
     return [mask_to_rle(mask) for mask in masks]
+
+
+def rle_to_box2d(rle: RLE) -> Box2D:
+    """Converting RLE to Box2D."""
+    bbox = mask_utils.toBbox(rle.dict()).tolist()
+    return bbox_to_box2d(bbox)
 
 
 def keypoints_to_nodes(

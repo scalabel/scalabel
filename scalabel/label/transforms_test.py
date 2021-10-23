@@ -19,6 +19,7 @@ from .transforms import (
     nodes_to_edges,
     poly2ds_to_mask,
     polygon_to_poly2ds,
+    rle_to_box2d,
 )
 from .typing import Box2D, ImageSize, Poly2D
 
@@ -115,6 +116,10 @@ class TestScalabel2COCOFuncs(unittest.TestCase):
         mask = poly2ds_to_mask(SHAPE, poly2ds).tolist()
         self.assertListEqual(mask, gt_mask)
 
+
+class TestScalabelPoly2D2RLEFuncs(unittest.TestCase):
+    """Test cases for conversion functions from Poly2Ds to RLE."""
+
     def test_frame_to_rles(self) -> None:
         """Check the Frame to RLE conversion."""
         json_file = get_test_file("scalabel_ins_seg.json")
@@ -137,3 +142,16 @@ class TestScalabel2COCOFuncs(unittest.TestCase):
             rles_dt = frame_to_rles(SHAPE, poly2ds)
             for dt, gt in zip(rles_dt, rles_gt):
                 self.assertEqual(dt, gt)
+
+    def test_rle_to_box2d(self) -> None:
+        """Check the RLE to Box2D conversion."""
+        json_file = get_test_file("scalabel_ins_seg.json")
+        frames = load(json_file).frames
+        for frame in frames:
+            if frame.labels is None:
+                continue
+            for label in frame.labels:
+                if label.rle is None:
+                    continue
+                box2d = rle_to_box2d(label.rle)
+                self.assertEqual(box2d, label.box2d)
