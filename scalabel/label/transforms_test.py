@@ -7,11 +7,15 @@ import numpy as np
 
 from ..common.io import open_read_text
 from ..unittest.util import get_test_file
+from .io import load
 from .transforms import (
     bbox_to_box2d,
     box2d_to_bbox,
+    frame_to_masks,
+    frame_to_rles,
     keypoints_to_nodes,
     mask_to_box2d,
+    mask_to_rle,
     nodes_to_edges,
     poly2ds_to_mask,
     polygon_to_poly2ds,
@@ -110,3 +114,26 @@ class TestScalabel2COCOFuncs(unittest.TestCase):
         poly2ds = [Poly2D(**poly) for poly in polys]
         mask = poly2ds_to_mask(SHAPE, poly2ds).tolist()
         self.assertListEqual(mask, gt_mask)
+
+    def test_frame_to_rles(self) -> None:
+        """Check the Frame to RLE conversion."""
+        json_file = get_test_file("scalabel_ins_seg.json")
+        frames = load(json_file).frames
+        for frame in frames:
+            if frame.labels is None:
+                continue
+            poly2ds = [
+                label.poly2d
+                for label in frame.labels
+                if label.poly2d is not None
+            ]
+            masks = frame_to_masks(SHAPE, poly2ds)
+            rles_dt = [mask_to_rle(mask) for mask in masks]
+            rles_gt = [
+                label.rle for label in frame.labels if label.rle is not None
+            ]
+            for dt, gt in zip(rles_dt, rles_gt):
+                self.assertEqual(dt, gt)
+            rles_dt = frame_to_rles(SHAPE, poly2ds)
+            for dt, gt in zip(rles_dt, rles_gt):
+                self.assertEqual(dt, gt)
