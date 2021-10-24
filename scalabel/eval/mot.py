@@ -441,7 +441,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--out-file",
-        default="none",
+        default="",
         help="Output path for mot evaluation results.",
     )
     parser.add_argument(
@@ -497,4 +497,4 @@ if __name__ == "__main__":
     logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
-            json.dump((eval_result.json()), fp)
+            json.dump(eval_result.dict(), fp, indent=2)
