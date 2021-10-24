@@ -14,12 +14,14 @@ class TestBDD100KMotsEval(unittest.TestCase):
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts = group_and_sort(
-        load(f"{cur_dir}/testcases/seg_track_sample.json").frames
+        load(f"{cur_dir}/testcases/seg_track/seg_track_sample.json").frames
     )
     preds = group_and_sort(
-        load(f"{cur_dir}/testcases/seg_track_preds.json").frames
+        load(f"{cur_dir}/testcases/seg_track/seg_track_preds.json").frames
     )
-    config = load_label_config(get_test_file("seg_track_configs.toml"))
+    config = load_label_config(
+        get_test_file("seg_track/seg_track_configs.toml")
+    )
     result = evaluate_seg_track(acc_single_video_mots, gts, preds, config)
 
     def test_frame(self) -> None:
