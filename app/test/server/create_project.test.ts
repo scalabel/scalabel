@@ -74,7 +74,7 @@ describe("test project.json creation", () => {
 
 describe("test task.json creation", () => {
   test("task non-tracking creation", async () => {
-    const tasks = await createTasks(sampleProjectImage)
+    const tasks = await createTasks(sampleProjectImage, undefined, 0, 0, true)
     expect(tasks).toEqual(sampleTasksImage)
   })
 
@@ -91,7 +91,13 @@ describe("test task.json creation", () => {
 
 describe("create with auto labels", () => {
   test("import then export", async () => {
-    return await createTasks(sampleProjectAutolabel).then((tasks) => {
+    return await createTasks(
+      sampleProjectAutolabel,
+      undefined,
+      0,
+      0,
+      true
+    ).then((tasks) => {
       // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]
@@ -101,7 +107,13 @@ describe("create with auto labels", () => {
     })
   })
   test("import then export for polygon", async () => {
-    return await createTasks(sampleProjectAutolabelPolygon).then((tasks) => {
+    return await createTasks(
+      sampleProjectAutolabelPolygon,
+      undefined,
+      0,
+      0,
+      true
+    ).then((tasks) => {
       // Only 1 task should be created
       const state: Partial<State> = {
         task: tasks[0]
