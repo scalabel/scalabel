@@ -41,7 +41,7 @@ export class BotManager {
     if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
-      this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
+      this.pollTime = 1000 * 30 // 5 minutes in ms
     }
   }
 

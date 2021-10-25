@@ -60,6 +60,8 @@ class RayModelServerScheduler(object):
             if task_config["active"]:
                 self.restore_model(task_name, task_config)
                 self.restore_image(task_name, task_config)
+            else:
+                continue
             self.task_configs[task_name] = task_config
 
             model_request_channel = self.model_request_channel % task_name
@@ -67,6 +69,8 @@ class RayModelServerScheduler(object):
             model_request_subscriber.subscribe(**{model_request_channel: self.request_handler})
             thread = model_request_subscriber.run_in_thread(sleep_time=0.001)
             self.threads[model_request_channel] = thread
+
+            self.logger.info(f"Restore model for {task_name}")
 
     def restore_model(self, task_name, task_config):
         model_dir = task_config["model_dir"]
@@ -169,23 +173,30 @@ class RayModelServerScheduler(object):
         kill_message = json.loads(kill_message["data"])
         project_name = kill_message["projectName"]
         task_id = kill_message["taskId"]
-        name = f'{project_name}_{task_id}'
+        task_name = f'{project_name}_{task_id}'
 
-        self.task_configs[name]["active"] = False
-        model = self.task_models[name]["model"]
-        model.kill.remote()
+        self.task_configs[task_name]["active"] = False
+        self.save_config(task_name)
+
+        model = self.task_models[task_name]
+        model.idle.remote()
+
+        self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
 
     def register_task(self, task_type, project_name, task_id, item_list):
         task_name = f"{project_name}_{task_id}"
         if task_name in self.task_configs:
             if not self.task_configs[task_name]["active"]:
                 self.task_configs[task_name]["active"] = True
-                self.task_models[task_name]["model"].activate()
+                self.task_models[task_name].activate.remote()
                 self.save(task_name)
             return
         elif self.redis.smembers("ModelServerTasks") != None and task_name in self.redis.smembers("ModelServerTasks"):
             self.task_configs[task_name] = json.loads(self.redis.get(task_name))
             self.task_configs[task_name]["active"] = True
+
+            self.restore_model(task_name, self.task_configs[task_name])
+            self.restore_image(task_name, self.task_configs[task_name])
         else:
             model_registry_config = self.model_registry_config[task_type]
 

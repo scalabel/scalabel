@@ -57,6 +57,11 @@ export class RedisPubSub {
         this.client.publish(channel, JSON.stringify(data))
         break
       }
+      case RedisChannel.MODEL_KILL: {
+        data = data as ModelKillMessageType
+        this.client.publish(channel, JSON.stringify(data))
+        break
+      }
       default:
         Logger.info(`Channel ${channel} is not valid!`)
     }
