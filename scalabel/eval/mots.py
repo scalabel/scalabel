@@ -25,7 +25,7 @@ from ..label.utils import (
 )
 from .mot import (
     METRIC_MAPS,
-    BoxTrackResult,
+    TrackResult,
     Video,
     aggregate_accs,
     evaluate_single_class,
@@ -169,7 +169,7 @@ def evaluate_seg_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-) -> BoxTrackResult:
+) -> TrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
     Args:
@@ -184,7 +184,7 @@ def evaluate_seg_track(
         nproc: processes number for loading files
 
     Returns:
-        BoxTrackResult: rendered eval results.
+        TrackResult: rendered eval results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()

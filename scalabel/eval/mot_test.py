@@ -76,7 +76,7 @@ class TestBDD100KMotEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        MOTAs = np.array(  # pylint: disable=invalid-name
+        motas = np.array(
             [
                 36.12565445,
                 43.69747899,
@@ -94,7 +94,7 @@ class TestBDD100KMotEval(unittest.TestCase):
             ]
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), MOTAs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), motas).all()
         )
 
         overall_scores = np.array(

@@ -45,7 +45,7 @@ METRIC_MAPS = {
 METRIC_TO_AVERAGE = set(["IDF1", "MOTA", "MOTP"])
 
 
-class BoxTrackResult(Result):
+class TrackResult(Result):
     """The class for bounding box tracking evaluation results."""
 
     mMOTA: float
@@ -300,7 +300,7 @@ def generate_results(
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> BoxTrackResult:
+) -> TrackResult:
     """Compute summary metrics for evaluation results."""
     ave_dict = compute_average(flat_dicts, metrics, classes)
     class_names.insert(len(flat_dicts) - 1, AVERAGE)
@@ -335,7 +335,7 @@ def generate_results(
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
-    return BoxTrackResult(**res_dict)
+    return TrackResult(**res_dict)
 
 
 def evaluate_track(
@@ -347,7 +347,7 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-) -> BoxTrackResult:
+) -> TrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
     Args:
@@ -362,7 +362,7 @@ def evaluate_track(
         nproc: processes number for loading files
 
     Returns:
-        BoxTrackResult: rendered eval results.
+        TrackResult: rendered eval results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()

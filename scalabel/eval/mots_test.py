@@ -47,41 +47,41 @@ class TestBDD100KMotsEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        MOTAs = np.array(  # pylint: disable=invalid-name
+        motas = np.array(
             [
-                15.6462585,
-                -3.38983051,
-                75.4674978,
-                39.2405063,
-                0.0,
                 -1.0,
-                11.8644068,
+                -6.06060606,
+                77.73224044,
+                39.24050633,
                 -1.0,
-                7.16981132,
-                73.9502999,
-                4.23728814,
-                17.3536049,
-                64.4092749,
+                -1.0,
+                14.14141414,
+                -1.0,
+                -44.03669725,
+                75.76150356,
+                5.05050505,
+                -36.86830564,
+                64.30611079,
             ]
         )
         data_arr_mota = data_arr[:, 0]
         data_arr_mota[np.abs(data_arr_mota) > 100] = np.nan
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr_mota, nan=-1.0), MOTAs).all()
+            np.isclose(np.nan_to_num(data_arr_mota, nan=-1.0), motas).all()
         )
 
         overall_scores = np.array(
             [
-                64.40927494,
-                83.48730786,
-                75.74533564,
-                352.0,
-                587.0,
-                28.0,
-                82.0,
-                23.0,
-                22.0,
-                73.0,
+                64.30611079,
+                83.57249803,
+                74.5157385,
+                201.0,
+                399.0,
+                25.0,
+                56.0,
+                19.0,
+                11.0,
+                42.0,
             ]
         )
         self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
@@ -89,20 +89,21 @@ class TestBDD100KMotsEval(unittest.TestCase):
     def test_summary(self) -> None:
         """Check evaluation scores' correctness."""
         summary = self.result.summary()
+        print(summary)
         overall_reference = {
-            "IDF1": 75.74533564146951,
-            "MOTA": 64.40927493559072,
-            "MOTP": 83.48730785942826,
-            "FP": 352,
-            "FN": 587,
-            "IDSw": 28,
-            "MT": 82,
-            "PT": 23,
-            "ML": 22,
-            "FM": 73,
-            "mIDF1": 32.189803601228505,
-            "mMOTA": 17.35360485969023,
-            "mMOTP": 46.1394286831572,
+            "IDF1": 74.51573849878935,
+            "MOTA": 64.30611079383209,
+            "MOTP": 83.57249803157146,
+            "FP": 201,
+            "FN": 399,
+            "IDSw": 25,
+            "MT": 56,
+            "PT": 19,
+            "ML": 11,
+            "FM": 42,
+            "mIDF1": 26.458539514581545,
+            "mMOTA": -36.86830564411494,
+            "mMOTP": 45.791906065134405,
         }
         self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
         for name, score in overall_reference.items():
