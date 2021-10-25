@@ -9,6 +9,7 @@ from .io import load, load_label_config
 from .to_coco import (
     scalabel2coco_detection,
     scalabel2coco_ins_seg,
+    scalabel2coco_pose,
     set_seg_object_geometry,
 )
 
@@ -84,6 +85,37 @@ class TestScalabelToCOCOInsSeg(unittest.TestCase):
             [
                 len(item.labels)
                 for item in self.scalabel
+                if item.labels is not None
+            ]
+        )
+        len_coco = len(self.coco["annotations"])
+        self.assertEqual(len_scalabel, len_coco)
+
+
+class TestScalabelToCOCOPose(unittest.TestCase):
+    """Test cases for converting Scalabel pose to COCO format."""
+
+    scalabel = load(get_test_file("scalabel_pose.json"))
+    config = scalabel.config
+    if not config:
+        config = load_label_config(get_test_file("pose_configs.toml"))
+    coco = scalabel2coco_pose(scalabel.frames, config)
+
+    def test_type(self) -> None:
+        """Check coco format type."""
+        self.assertTrue(isinstance(self.coco, dict))
+        self.assertEqual(len(self.coco), 3)
+
+    def test_num_images(self) -> None:
+        """Check the number of images is unchanged."""
+        self.assertEqual(len(self.scalabel.frames), len(self.coco["images"]))
+
+    def test_num_anns(self) -> None:
+        """Check the number of annotations is unchanged."""
+        len_scalabel = sum(
+            [
+                len(item.labels)
+                for item in self.scalabel.frames
                 if item.labels is not None
             ]
         )

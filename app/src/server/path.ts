@@ -173,6 +173,15 @@ export function getProjectKey(projectName: string): string {
 }
 
 /**
+ * Gets key of file with project data info, excludes the label info to reduce the loading time
+ *
+ * @param projectName
+ */
+export function getProjectInfoKey(projectName: string): string {
+  return path.join(StorageStructure.PROJECT, projectName, "project_info")
+}
+
+/**
  * Gets key of file with task data
  *
  * @param projectName

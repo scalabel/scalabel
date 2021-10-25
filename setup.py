@@ -34,6 +34,7 @@ setuptools.setup(
         "joblib",
         "matplotlib",
         "motmetrics",
+        "nanoid",
         "numpy",
         "pandas",
         "Pillow",

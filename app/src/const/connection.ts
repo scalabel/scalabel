@@ -11,6 +11,7 @@ export const enum Endpoint {
   GET_PROJECT_NAMES = "/getProjectNames",
   EXPORT = "/getExport",
   DASHBOARD = "/getDashboardContents",
+  GET_TASK_METADATA = "/getTaskMetaData",
   POST_TASKS = "/postTasks",
   CALLBACK = "/callback",
   STATS = "/stats",
