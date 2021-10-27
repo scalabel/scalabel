@@ -92,15 +92,21 @@ function startHTTPServer(
     listeners.dashboardHandler.bind(listeners)
   )
   app.get(
+    Endpoint.GET_TASK_METADATA,
+    authMiddleWare,
+    listeners.taskMetaDataHandler.bind(listeners)
+  )
+  app.get(
     Endpoint.DELETE_PROJECT,
     authMiddleWare,
     listeners.deleteProjectHandler.bind(listeners)
   )
 
+  const maxFileSize = 1000 * 1024 * 1024 // 1G
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    formidable(),
+    formidable({ maxFileSize: maxFileSize }),
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(

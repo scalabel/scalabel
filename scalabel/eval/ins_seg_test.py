@@ -13,11 +13,11 @@ class TestBDD100KInsSegEval(unittest.TestCase):
     """Test cases for BDD100K instance segmentation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/ins_seg_rle_sample.json"
-    preds_path = f"{cur_dir}/testcases/ins_seg_preds.json"
+    gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
+    preds_path = f"{cur_dir}/testcases/ins_seg/ins_seg_preds.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("ins_seg_configs.toml"))
+    config = load_label_config(get_test_file("ins_seg/ins_seg_configs.toml"))
     result = evaluate_ins_seg(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
@@ -114,11 +114,11 @@ class TestBDD100KInsSegEvalEmpty(unittest.TestCase):
     """Test cases for BDD100K instance segmentation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/ins_seg_rle_sample.json"
-    preds_path = f"{cur_dir}/testcases/ins_seg_preds_empty.json"
+    gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
+    preds_path = f"{cur_dir}/testcases/ins_seg/ins_seg_preds_empty.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("ins_seg_configs.toml"))
+    config = load_label_config(get_test_file("ins_seg/ins_seg_configs.toml"))
     result = evaluate_ins_seg(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
