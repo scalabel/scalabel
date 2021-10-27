@@ -115,11 +115,11 @@ def frame_to_mask(
     ignore_label: int = 255,
 ) -> NDArrayU8:
     """Convert list of labels to a mask."""
-    out_mask = (
+    out_mask: NDArrayU8 = (  # type: ignore
         np.ones((image_size.height, image_size.width)) * ignore_label
     ).astype(np.uint8)
     if frame.labels is None:
-        return out_mask  # type: ignore
+        return out_mask
     for label in frame.labels:
         if label.category not in categories:
             continue
@@ -131,7 +131,7 @@ def frame_to_mask(
         elif label.poly2d is not None:
             mask = poly2ds_to_mask(image_size, label.poly2d)
         out_mask[mask > 0] = cat_id
-    return out_mask  # type: ignore
+    return out_mask
 
 
 def per_image_hist(
@@ -149,8 +149,6 @@ def per_image_hist(
     gt = gt.copy()
     gt[gt == ignore_label] = num_classes - 1
     gt_id_set = set(np.unique(gt).tolist())
-    for idx in gt_id_set:
-        print(np.sum(gt == idx))
 
     # remove `ignored`
     if num_classes - 1 in gt_id_set:
