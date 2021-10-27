@@ -20,7 +20,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
-        default=".'",
+        default="./annotations_scalabel.json",
         help="Output filename for Scalabel format annotations.",
     )
     return parser.parse_args()
