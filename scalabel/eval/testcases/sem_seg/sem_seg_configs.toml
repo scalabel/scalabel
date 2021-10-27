@@ -1,0 +1,418 @@
+ignoreLabel = 255
+
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "None"
+
+[[labelTypes]]
+name = "unlabeled"
+id = 0
+trainId = 255
+category = "void"
+categoryId = "0"
+hasInstances = false
+ignoreInEval = true
+color = [0, 0, 0]
+
+[[labelTypes]]
+name = "dynamic"
+id = 1
+trainId = 255
+category = "void"
+categoryId = "0"
+hasInstances = false
+ignoreInEval = true
+color = [111, 74, 0]
+
+[[labelTypes]]
+name = "ego vehicle"
+id = 2
+trainId = 255
+category = "void"
+categoryId = "0"
+hasInstances = false
+ignoreInEval = true
+color = [0, 0, 0]
+
+[[labelTypes]]
+name = "ground"
+id = 3
+trainId = 255
+category = "void"
+categoryId = "0"
+hasInstances = false
+ignoreInEval = true
+color = [81, 0, 81]
+
+[[labelTypes]]
+name = "static"
+id = 4
+trainId = 255
+category = "void"
+categoryId = "0"
+hasInstances = false
+ignoreInEval = true
+color = [0, 0, 0]
+
+[[labelTypes]]
+name = "parking"
+id = 5
+trainId = 255
+category = "flat"
+categoryId = "1"
+hasInstances = false
+ignoreInEval = true
+color = [250, 170, 160]
+
+[[labelTypes]]
+name = "rail track"
+id = 6
+trainId = 255
+category = "flat"
+categoryId = "1"
+hasInstances = false
+ignoreInEval = true
+color = [230, 150, 140]
+
+[[labelTypes]]
+name = "road"
+id = 7
+trainId = 0
+category = "flat"
+categoryId = "1"
+hasInstances = false
+ignoreInEval = false
+color = [128, 64, 128]
+
+[[labelTypes]]
+name = "sidewalk"
+id = 8
+trainId = 1
+category = "flat"
+categoryId = "1"
+hasInstances = false
+ignoreInEval = false
+color = [244, 35, 232]
+
+[[labelTypes]]
+name = "bridge"
+id = 9
+trainId = 255
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = true
+color = [150, 100, 100]
+
+[[labelTypes]]
+name = "building"
+id = 10
+trainId = 2
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = false
+color = [70, 70, 70]
+
+[[labelTypes]]
+name = "fence"
+id = 11
+trainId = 4
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = false
+color = [190, 153, 153]
+
+[[labelTypes]]
+name = "garage"
+id = 12
+trainId = 255
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = true
+color = [180, 100, 180]
+
+[[labelTypes]]
+name = "guard rail"
+id = 13
+trainId = 255
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = true
+color = [180, 165, 180]
+
+[[labelTypes]]
+name = "tunnel"
+id = 14
+trainId = 255
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = true
+color = [150, 120, 90]
+
+[[labelTypes]]
+name = "wall"
+id = 15
+trainId = 3
+category = "construction"
+categoryId = "2"
+hasInstances = false
+ignoreInEval = false
+color = [102, 102, 156]
+
+[[labelTypes]]
+name = "banner"
+id = 16
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [250, 170, 100]
+
+[[labelTypes]]
+name = "billboard"
+id = 17
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [220, 220, 250]
+
+[[labelTypes]]
+name = "lane divider"
+id = 18
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [255, 165, 0]
+
+[[labelTypes]]
+name = "parking sign"
+id = 19
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = false
+color = [220, 20, 60]
+
+[[labelTypes]]
+name = "pole"
+id = 20
+trainId = 5
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = false
+color = [153, 153, 153]
+
+[[labelTypes]]
+name = "polegroup"
+id = 21
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [153, 153, 153]
+
+[[labelTypes]]
+name = "street light"
+id = 22
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [220, 220, 100]
+
+[[labelTypes]]
+name = "traffic cone"
+id = 23
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [255, 70, 0]
+
+[[labelTypes]]
+name = "traffic device"
+id = 24
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [220, 220, 220]
+
+[[labelTypes]]
+name = "traffic light"
+id = 25
+trainId = 6
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = false
+color = [250, 170, 30]
+
+[[labelTypes]]
+name = "traffic sign"
+id = 26
+trainId = 7
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = false
+color = [220, 220, 0]
+
+[[labelTypes]]
+name = "traffic sign frame"
+id = 27
+trainId = 255
+category = "object"
+categoryId = "3"
+hasInstances = false
+ignoreInEval = true
+color = [250, 170, 250]
+
+[[labelTypes]]
+name = "terrain"
+id = 28
+trainId = 9
+category = "nature"
+categoryId = "4"
+hasInstances = false
+ignoreInEval = false
+color = [152, 251, 152]
+
+[[labelTypes]]
+name = "vegetation"
+id = 29
+trainId = 8
+category = "nature"
+categoryId = "4"
+hasInstances = false
+ignoreInEval = false
+color = [107, 142, 35]
+
+[[labelTypes]]
+name = "sky"
+id = 30
+trainId = 10
+category = "sky"
+categoryId = "5"
+hasInstances = false
+ignoreInEval = false
+color = [70, 130, 180]
+
+[[labelTypes]]
+name = "person"
+id = 31
+trainId = 11
+category = "human"
+categoryId = "6"
+hasInstances = true
+ignoreInEval = false
+color = [220, 20, 60]
+
+[[labelTypes]]
+name = "rider"
+id = 32
+trainId = 12
+category = "human"
+categoryId = "6"
+hasInstances = true
+ignoreInEval = false
+color = [255, 0, 0]
+
+[[labelTypes]]
+name = "bicycle"
+id = 33
+trainId = 18
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [119, 11, 32]
+
+[[labelTypes]]
+name = "bus"
+id = 34
+trainId = 15
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [0, 60, 100]
+
+[[labelTypes]]
+name = "car"
+id = 35
+trainId = 13
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [0, 0, 142]
+
+[[labelTypes]]
+name = "caravan"
+id = 36
+trainId = 255
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = true
+color = [0, 0, 90]
+
+[[labelTypes]]
+name = "motorcycle"
+id = 37
+trainId = 17
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [0, 0, 230]
+
+[[labelTypes]]
+name = "trailer"
+id = 38
+trainId = 255
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = true
+color = [0, 0, 110]
+
+[[labelTypes]]
+name = "train"
+id = 39
+trainId = 16
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [0, 80, 100]
+
+[[labelTypes]]
+name = "truck"
+id = 40
+trainId = 14
+category = "vehicle"
+categoryId = "7"
+hasInstances = true
+ignoreInEval = false
+color = [0, 0, 70]
