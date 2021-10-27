@@ -185,16 +185,9 @@ def evaluate_sem_seg(
         )
     """
     assert (
-        config.labelTypes is not None
-    ), "Segmentation evaluation requires labelTypes to be defined in config"
-    assert (
         config.imageSize is not None
     ), "Segmentation evaluation requires imageSize to be defined in config"
-    categories = {
-        label.name: label.trainId
-        for label in config.labelTypes
-        if label.trainId != 255
-    }
+    categories = {cat.name: id for id, cat in enumerate(config.categories)}
     ignore_label = (
         config.ignoreLabel if config.ignoreLabel is not None else 255
     )

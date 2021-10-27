@@ -50,7 +50,7 @@ class TestBDD100KSemSegEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
+        aps = np.array(
             [
                 99.54405124,
                 87.67803909,
@@ -75,7 +75,7 @@ class TestBDD100KSemSegEval(unittest.TestCase):
             ]
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
         overall_scores = np.array([77.69367703, 85.08073851])
@@ -142,9 +142,9 @@ class TestBDD100KSemSegEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array([0.0] * 20)  # pylint: disable=invalid-name
+        aps = np.array([0.0] * 20)
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
         overall_scores = np.array([0.0] * 2)

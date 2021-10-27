@@ -161,19 +161,6 @@ class Attribute(BaseModel):
     values: Optional[List[str]]
 
 
-class LabelType(BaseModel):
-    """Define label type for segmentation tasks."""
-
-    name: str
-    id: int
-    trainId: int
-    category: str
-    categoryId: int
-    hasInstances: bool = False
-    ignoreInEval: bool = False
-    color: Tuple[int, int, int]
-
-
 class Config(BaseModel):
     """Define metadata of the dataset."""
 
@@ -182,7 +169,6 @@ class Config(BaseModel):
     attributes: Optional[List[Attribute]]
     categories: List[Category]
     poseSigmas: Optional[List[float]]
-    labelTypes: Optional[List[LabelType]]
     ignoreLabel: Optional[int]
 
 
