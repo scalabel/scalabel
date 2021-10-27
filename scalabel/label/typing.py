@@ -169,7 +169,6 @@ class Config(BaseModel):
     attributes: Optional[List[Attribute]]
     categories: List[Category]
     poseSigmas: Optional[List[float]]
-    ignoreLabel: Optional[int]
 
 
 class FrameGroup(Frame):

@@ -31,8 +31,6 @@ __all__ = [
     "rle_to_mask",
 ]
 
-TOLERANCE = 1.0
-
 
 def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""

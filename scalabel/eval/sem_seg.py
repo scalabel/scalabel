@@ -188,9 +188,7 @@ def evaluate_sem_seg(
         config.imageSize is not None
     ), "Segmentation evaluation requires imageSize to be defined in config"
     categories = {cat.name: id for id, cat in enumerate(config.categories)}
-    ignore_label = (
-        config.ignoreLabel if config.ignoreLabel is not None else 255
-    )
+    ignore_label = 255
 
     logger.info("evaluating...")
     if nproc > 1:
