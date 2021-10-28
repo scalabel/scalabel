@@ -139,7 +139,7 @@ class LabelPane extends Component<Props> {
             const newConfig = makeDefaultViewerConfig(
               e.target.value as types.ViewerConfigTypeName,
               viewerConfig.pane,
-              -1
+              0
             )
             if (newConfig !== null) {
               dispatch(changeViewerConfig(pane.viewerId, newConfig))
@@ -294,7 +294,7 @@ class LabelPane extends Component<Props> {
 
       const configBar = (
         <Grid
-          key={`paneMenu${pane.id}`}
+          key={`configMenu${pane.id}`}
           justify={"flex-end"}
           container
           direction="row"
@@ -302,16 +302,28 @@ class LabelPane extends Component<Props> {
             container: this.props.classes.viewer_container_bar
           }}
         >
+          {paneControl}
+        </Grid>
+      )
+
+      const paneBar = (
+        <Grid
+          key={`paneMenu${pane.id}`}
+          justify={"flex-start"}
+          alignItems={"flex-end"}
+          container
+          direction="row"
+        >
           <div hidden={pane.hide}>
             {numSensors > 1 ? viewerTypeMenu : null}
             {numSensors > 1 ? viewerIdMenu : null}
           </div>
-          {paneControl}
         </Grid>
       )
       // Leaf, render viewer container
       return (
         <div>
+          {paneBar}
           {configBar}
           <div hidden={pane.hide}>
             {viewerFactory(viewerConfig, pane.viewerId)}
