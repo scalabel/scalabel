@@ -648,13 +648,17 @@ function partitionItemsIntoTasks(
  * Task and item start number are used if other tasks/items already exist
  *
  * @param project
+ * @param projectStore
  * @param taskStartNum
  * @param itemStartNum
+ * @param returnTask
  */
 export async function createTasks(
   project: Project,
+  projectStore?: ProjectStore,
   taskStartNum: number = 0,
-  itemStartNum: number = 0
+  itemStartNum: number = 0,
+  returnTask: boolean = false
 ): Promise<TaskType[]> {
   const sensors = project.sensors
   const { itemType, taskSize, tracking } = project.config
@@ -791,7 +795,13 @@ export async function createTasks(
       tracks: trackMap
     }
     const task = makeTask(partialTask)
-    tasks.push(task)
+    if (projectStore !== undefined) {
+      await projectStore.saveTasks([task])
+    }
+
+    if (returnTask) {
+      tasks.push(task)
+    }
   }
   return Promise.resolve(tasks)
 }

@@ -1,0 +1,33 @@
+{
+  "frames": [
+    {
+      "name": "80985724-bc3fece0.jpg",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": null,
+      "frameIndex": null,
+      "size": null,
+      "labels": [
+        {
+          "id": "1632",
+          "index": 1,
+          "manualShape": null,
+          "manualAttributes": null,
+          "score": 0.9980953335762024,
+          "attributes": null,
+          "category": "pedestrian",
+          "box2d": null,
+          "box3d": null,
+          "poly2d": null,
+          "rle": null,
+          "graph": null
+        }
+      ]
+    }
+  ],
+  "groups": null,
+  "config": null
+}

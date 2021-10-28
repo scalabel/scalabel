@@ -15,7 +15,7 @@ import { checkboxStyle, uploadStyle } from "../styles/create"
 import UploadButton from "./upload_button"
 
 // Submission timeout
-export const submissionTimeout = 5000
+export const submissionTimeout = 600000
 interface ClassType {
   /** root class */
   root: string
@@ -148,10 +148,10 @@ export default class CreateForm extends React.Component<Props, State> {
               <option value={ItemTypeName.IMAGE}>Image</option>
               <option value={ItemTypeName.VIDEO}>Video Tracking</option>
               <option value={ItemTypeName.POINT_CLOUD}>Point Cloud</option>
-              <option value={ItemTypeName.POINT_CLOUD_TRACKING}>
-                Point Cloud Tracking
-              </option>
-              <option value={ItemTypeName.FUSION}>Fusion</option>
+              {/* <option value={ItemTypeName.POINT_CLOUD_TRACKING}>*/}
+              {/*  Point Cloud Tracking*/}
+              {/* </option>*/}
+              {/* <option value={ItemTypeName.FUSION}>Fusion</option>*/}
             </TextField>
             <TextField
               value={this.state.labelType}
@@ -176,7 +176,7 @@ export default class CreateForm extends React.Component<Props, State> {
               <option value={LabelTypeName.POLYGON_2D}>Polygon</option>
               <option value={LabelTypeName.POLYLINE_2D}>Polyline</option>
               <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
-              <option value={LabelTypeName.CUSTOM_2D}>Custom</option>
+              {/* <option value={LabelTypeName.CUSTOM_2D}>Custom</option>*/}
             </TextField>
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>

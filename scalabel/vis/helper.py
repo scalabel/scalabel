@@ -170,6 +170,7 @@ def gen_graph_point(
             node.location,
             radius=radius,
             color=color,
+            alpha=0.5,
         )
     ]
 
@@ -193,5 +194,6 @@ def gen_graph_edge(
             "data",
             color=color,
             linewidth=linewidth,
+            alpha=0.5,
         )
     ]

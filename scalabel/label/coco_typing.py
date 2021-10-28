@@ -39,6 +39,8 @@ class AnnType(TypedDict, total=False):
     bbox: Optional[List[float]]
     area: Optional[float]
     segmentation: Optional[Union[PolygonType, RLEType]]
+    keypoints: Optional[List[float]]
+    num_keypoints: Optional[int]
 
 
 class ImgType(TypedDict, total=False):
