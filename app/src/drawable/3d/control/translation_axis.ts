@@ -210,7 +210,7 @@ export class TranslationAxis extends THREE.Group implements ControlUnit {
     if (this.parent !== null) {
       const direction = new THREE.Vector3()
       direction.copy(this._direction)
-      // Direction.applyQuaternion(worldQuaternion.invert())
+      // Direction.applyQuaternion(worldQuaternion.inverse())
 
       const newScale = (Math.abs(direction.dot(worldScale)) * 3) / 4
 

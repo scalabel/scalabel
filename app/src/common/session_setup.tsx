@@ -7,7 +7,6 @@ import * as THREE from "three"
 
 import {
   addViewerConfig,
-  changeViewerConfig,
   initSessionAction,
   loadItem,
   splitPane,
@@ -31,7 +30,6 @@ import {
 import Session from "./session"
 import { DispatchFunc, GetStateFunc } from "./simple_store"
 import { Track } from "./track"
-import * as types from "../const/common"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -248,7 +246,6 @@ function initViewerConfigs(
       paneIds.length === 1
     ) {
       dispatch(splitPane(Number(paneIds[0]), SplitType.HORIZONTAL, 0))
-
       state = getState()
       let config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
       dispatch(
@@ -264,7 +261,7 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
-      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize: "25%" }))
+      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize: "33%" }))
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -288,9 +285,6 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
-      dispatch(
-        updatePane(state.user.layout.maxPaneId, { primarySize: "33.33%" })
-      )
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -307,34 +301,6 @@ function initViewerConfigs(
           2
         )
       )
-      dispatch(
-        splitPane(
-          state.user.layout.maxPaneId,
-          SplitType.VERTICAL,
-          state.user.layout.maxViewerConfigId
-        )
-      )
-
-      state = getState()
-      config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
-      dispatch(
-        toggleSelectionLock(
-          state.user.layout.maxViewerConfigId,
-          config as PointCloudViewerConfigType
-        )
-      )
-
-      // Change last pane to image view
-      const newConfig = makeDefaultViewerConfig(
-        types.ViewerConfigTypeName.IMAGE,
-        state.user.layout.maxPaneId,
-        1
-      )
-      if (newConfig !== null) {
-        dispatch(
-          changeViewerConfig(state.user.layout.maxViewerConfigId, newConfig)
-        )
-      }
     }
   }
 }

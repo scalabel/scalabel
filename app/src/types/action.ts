@@ -186,7 +186,7 @@ export interface SplitPaneAction extends BaseAction {
 }
 
 export interface DeletePaneAction extends BaseAction {
-  /** ID of pane to delete */
+  /** ID of pane to split */
   pane: number
   /** ID of corresponding viewer config */
   viewerId: number

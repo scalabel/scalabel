@@ -340,9 +340,7 @@ export class PLYLoader {
         )
       }
 
-      if (geometry.boundingSphere === null) {
-        geometry.computeBoundingSphere()
-      }
+      geometry.computeBoundingSphere()
       return geometry
     }
 
