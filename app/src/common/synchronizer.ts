@@ -278,7 +278,10 @@ export class Synchronizer {
       // ActionLog matches backend action ordering
       this.actionLog.push(action)
       if (action.sessionId !== sessionId) {
-        if (actionConsts.isTaskAction(action)) {
+        if (
+          actionConsts.isTaskAction(action) ||
+          actionConsts.isModelStatusAction(action)
+        ) {
           // Dispatch any task actions broadcasted from other sessions
           actions.push(action)
         }

@@ -7,6 +7,7 @@ import {
   DeepPartialState,
   IdType,
   LabelType,
+  ModelStatus,
   ModeStatus,
   PaneType,
   Select,
@@ -72,6 +73,11 @@ export interface UpdateStateAction extends BaseAction {
 export interface UpdateSessionStatusAction extends BaseAction {
   /** New status of the session */
   newStatus: ConnectionStatus
+}
+
+export interface UpdateModelStatusAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ModelStatus
 }
 
 export interface ChangeSessionModeAction extends BaseAction {

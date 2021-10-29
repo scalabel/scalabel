@@ -89,6 +89,11 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.ChangeSessionModeAction
       )
+    case actionConsts.UPDATE_MODEL_STATUS:
+      return common.updateModelStatus(
+        state,
+        action as actionTypes.UpdateModelStatusAction
+      )
     case actionConsts.NULL:
       return state
     default:

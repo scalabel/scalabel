@@ -122,16 +122,23 @@ function startHTTPServer(
  * Starts a bot manager if config says to
  *
  * @param config
+ * @param publisher
  * @param subscriber
  * @param cacheClient
  */
 async function makeBotManager(
   config: ServerConfig,
+  publisher: RedisPubSub,
   subscriber: RedisPubSub,
   cacheClient: RedisClient
 ): Promise<void> {
   if (config.bot.on) {
-    const botManager = new BotManager(config, subscriber, cacheClient)
+    const botManager = new BotManager(
+      config,
+      publisher,
+      subscriber,
+      cacheClient
+    )
     await botManager.listen()
   }
 }
@@ -253,6 +260,11 @@ async function main(): Promise<void> {
   await launchRedisServer(config)
   if (config.bot.on) {
     await launchModelServer()
+    // This sleep is to ensure the model server is successfully created.
+    const sleep = async (ms: number): Promise<unknown> => {
+      return await new Promise((resolve) => setTimeout(resolve, ms))
+    }
+    await sleep(15000)
   }
 
   /**
@@ -269,7 +281,7 @@ async function main(): Promise<void> {
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 
-  await makeBotManager(config, subscriber, cacheClient)
+  await makeBotManager(config, publisher, subscriber, cacheClient)
   await startServers(config, projectStore, userManager, publisher)
 }
 

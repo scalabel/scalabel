@@ -1,7 +1,7 @@
 import Logger from "./logger"
 import { RedisConfig } from "../types/config"
 import {
-  ModelKillMessageType,
+  ModelStatusMessageType,
   ModelRegisterMessageType,
   ModelRequestMessageType,
   RegisterMessageType
@@ -37,7 +37,7 @@ export class RedisPubSub {
       | RegisterMessageType
       | ModelRegisterMessageType
       | ModelRequestMessageType
-      | ModelKillMessageType
+      | ModelStatusMessageType
   ): void {
     switch (channel) {
       case RedisChannel.REGISTER_EVENT:
@@ -57,8 +57,8 @@ export class RedisPubSub {
         this.client.publish(channel, JSON.stringify(data))
         break
       }
-      case RedisChannel.MODEL_KILL: {
-        data = data as ModelKillMessageType
+      case RedisChannel.MODEL_STATUS: {
+        data = data as ModelStatusMessageType
         this.client.publish(channel, JSON.stringify(data))
         break
       }

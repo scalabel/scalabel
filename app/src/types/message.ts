@@ -44,11 +44,13 @@ export interface ModelRegisterMessageType {
 }
 
 /** model register message type */
-export interface ModelKillMessageType {
+export interface ModelStatusMessageType {
   /** Project name */
   projectName: string
   /** Task Id. It is supposed to be index2str(taskIndex) */
   taskId: string
+  /** if true, set to active, else to inactive */
+  active: boolean
 }
 
 /** model request message type */

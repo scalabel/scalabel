@@ -21,6 +21,7 @@ from detectron2.checkpoint import DetectionCheckpointer
 from scalabel.automatic.models.ray_model_new import RayModel
 import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
+from scalabel.automatic.consts import ModelStatus
 
 ray.init()
 serve.start(http_options={"port": 8001})
@@ -38,7 +39,8 @@ class RayModelServerScheduler(object):
         self.model_register_channel = RedisConsts.REDIS_CHANNELS["modelRegister"]
         self.model_request_channel = RedisConsts.REDIS_CHANNELS["modelRequest"]
         self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
-        self.model_kill_channel = RedisConsts.REDIS_CHANNELS["modelKill"]
+        self.model_status_channel = RedisConsts.REDIS_CHANNELS["modelStatus"]
+        self.model_notify_channel = RedisConsts.REDIS_CHANNELS["modelNotify"]
 
         self.task_configs = {}
         self.task_models = {}
@@ -46,10 +48,14 @@ class RayModelServerScheduler(object):
 
         self.threads = {}
 
-        self.verbose = False
-
-        self.restore()
         self.logger.info("Model server launched.")
+        self.restore()
+
+    def setup_handler_for_channel(self, channel, handler):
+        subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
+        subscriber.subscribe(**{channel: handler})
+        thread = subscriber.run_in_thread(sleep_time=0.001)
+        self.threads[channel] = thread
 
     # restore when server restarts, connects to redis channels.
     def restore(self):
@@ -57,25 +63,35 @@ class RayModelServerScheduler(object):
         for task_name in task_names:
             task_name = task_name.decode()
             task_config = json.loads(self.redis.get(task_name))
-            if task_config["active"]:
-                self.restore_model(task_name, task_config)
-                self.restore_image(task_name, task_config)
-            else:
+
+            # if it is not a active task, do not restore it
+            if not task_config["active"]:
                 continue
+            if task_name in self.task_configs:
+                continue
+
+            # send notification message to let them know the model is loading
+            model_notify_channel = self.model_notify_channel % task_name
+            self.redis.publish(model_notify_channel, ModelStatus.LOADING.value)
+
+            self.logger.info(f"Restoring model for task: {task_name}")
+            self.restore_model(task_name, task_config)
+            self.restore_image(task_name, task_config)
             self.task_configs[task_name] = task_config
 
             model_request_channel = self.model_request_channel % task_name
-            model_request_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
-            model_request_subscriber.subscribe(**{model_request_channel: self.request_handler})
-            thread = model_request_subscriber.run_in_thread(sleep_time=0.001)
-            self.threads[model_request_channel] = thread
+            self.setup_handler_for_channel(model_request_channel, self.request_handler)
 
-            self.logger.info(f"Restore model for {task_name}")
+            # send notification message to let them know the model is ready
+            self.redis.publish(model_notify_channel, ModelStatus.READY.value)
+            self.logger.info(f"Restored model for task: {task_name}")
 
     def restore_model(self, task_name, task_config):
         model_dir = task_config["model_dir"]
         model_cfg = task_config["model_cfg"]
         cfg = CfgNode(model_cfg)
+        # TODO: need to judge whether model_dir exists or not
+        # if not, use the original config
         cfg.MODEL.WEIGHTS = model_dir
 
         num_replicas = task_config["deploy_config"]["num_replicas"]
@@ -91,11 +107,13 @@ class RayModelServerScheduler(object):
         image_dir = task_config["image_dir"]
         self.task_images[task_name] = torch.load(image_dir)
 
-    # save the loaded tasks
+    # save the task
     def save(self, task_name):
-        self.save_config(task_name)
+        # save model and images first, then save the config
+        # this is for fault tolerance
         self.save_model(task_name)
         self.save_image(task_name)
+        self.save_config(task_name)
 
     def save_config(self, task_name):
         task_config = json.dumps(self.task_configs[task_name])
@@ -105,7 +123,10 @@ class RayModelServerScheduler(object):
         task_config = self.task_configs[task_name]
         task_model = self.task_models[task_name]
 
-        task_model.save.remote(task_config["model_dir"])
+        # use ray.get to block, ensure return when model is successfully saved
+        ray.get(task_model.save.remote(task_config["model_dir"]))
+
+        # TODO: save to a folder, with the functionality of lastest checkpoint
 
     def save_image(self, task_name):
         task_config = self.task_configs[task_name]
@@ -114,21 +135,12 @@ class RayModelServerScheduler(object):
         torch.save(task_images, task_config["image_dir"])
 
     def listen(self):
-        model_register_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
-        model_register_subscriber.subscribe(**{self.model_register_channel: self.register_handler})
-        thread_register = model_register_subscriber.run_in_thread(sleep_time=0.001)
-
-        self.threads[self.model_register_channel] = thread_register
-
-        model_kill_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
-        model_kill_subscriber.subscribe(**{self.model_kill_channel: self.kill_handler})
-        thread_kill = model_kill_subscriber.run_in_thread(sleep_time=0.001)
-
-        self.threads[self.model_kill_channel] = thread_kill
+        self.setup_handler_for_channel(self.model_register_channel, self.register_handler)
+        self.setup_handler_for_channel(self.model_status_channel, self.status_handler)
 
     def register_handler(self, register_message):
+        # decode message (do we need to put all the decode process to another file to keep here cleaner?)
         register_message = json.loads(register_message["data"])
-
         task_type = "OD"
         if "taskType" in register_message:
             task_type = register_message["taskType"]
@@ -140,9 +152,41 @@ class RayModelServerScheduler(object):
 
         self.logger.info(f"Set up model inference for {project_name}: {task_id}.")
 
-    def request_handler(self, request_message):
-        self.calc_time(init=True)
+    def status_handler(self, status_message):
+        # decode message
+        status_message = json.loads(status_message["data"])
+        project_name = status_message["projectName"]
+        task_id = status_message["taskId"]
+        active = status_message["active"]
 
+        task_name = f'{project_name}_{task_id}'
+
+        model_notify_channel = self.model_notify_channel % task_name
+        # if the corresponding task does not exist, return INVALID
+        if task_name not in self.task_configs:
+            self.redis.publish(model_notify_channel, ModelStatus.INVALID.value)
+            return
+
+        # if it does not change the current status, return (happens when a new seesion is created)
+        if self.task_configs[task_name]["active"] == active:
+            return
+
+        # change the status according to the message, and save the change
+        self.task_configs[task_name]["active"] = active
+        self.save_config(task_name)
+
+        model = self.task_models[task_name]
+
+        if active:
+            model.activate.remote()
+            self.redis.publish(model_notify_channel, ModelStatus.READY.value)
+            self.logger.info(f"{task_name} reset to active.")
+        else:
+            model.idle.remote()
+            self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
+            self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
+
+    def request_handler(self, request_message):
         # decode request message
         request_message = json.loads(request_message["data"])
         project_name = request_message["projectName"]
@@ -161,58 +205,57 @@ class RayModelServerScheduler(object):
                 "request_type": request_type
             }
 
-            self.calc_time("save data to query list")
-
             task_images = self.task_images[f'{project_name}_{task_id}']
             inputs = [task_images[item["url"]] for item in request_data["items"]]
 
             model = self.task_models[f'{project_name}_{task_id}']
             model.remote(inputs, request_data, request_type)
 
-    def kill_handler(self, kill_message):
-        kill_message = json.loads(kill_message["data"])
-        project_name = kill_message["projectName"]
-        task_id = kill_message["taskId"]
-        task_name = f'{project_name}_{task_id}'
-
-        self.task_configs[task_name]["active"] = False
-        self.save_config(task_name)
-
-        model = self.task_models[task_name]
-        model.idle.remote()
-
-        self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
-
     def register_task(self, task_type, project_name, task_id, item_list):
+        # register task
         task_name = f"{project_name}_{task_id}"
+        model_notify_channel = self.model_notify_channel % task_name
+
+        # if current task name is in configs, just check whether it is active no
         if task_name in self.task_configs:
             if not self.task_configs[task_name]["active"]:
                 self.task_configs[task_name]["active"] = True
                 self.task_models[task_name].activate.remote()
-                self.save(task_name)
+                # refresh the config, ensure correctness when restart
+                self.save_config(task_name)
+
+            self.redis.publish(model_notify_channel, ModelStatus.READY.value)
             return
-        elif self.redis.smembers("ModelServerTasks") != None and task_name in self.redis.smembers("ModelServerTasks"):
+        # if current task name is not in configs, check redis
+        elif task_name.encode() in self.redis.smembers("ModelServerTasks"):
+            self.logger.info(self.redis.smembers("ModelServerTasks"))
+            self.redis.publish(model_notify_channel, ModelStatus.LOADING.value)
+
             self.task_configs[task_name] = json.loads(self.redis.get(task_name))
             self.task_configs[task_name]["active"] = True
 
+            self.save_config(task_name)
+
             self.restore_model(task_name, self.task_configs[task_name])
             self.restore_image(task_name, self.task_configs[task_name])
+        # if it is a new task, register it
         else:
+            self.redis.publish(model_notify_channel, ModelStatus.LOADING.value)
+
             model_registry_config = self.model_registry_config[task_type]
 
             model_name = model_registry_config["models"][model_registry_config["defaults"]["model"]]
-            deploy_config = model_registry_config["defaults"]["config"]
+            deploy_config = model_registry_config["defaults"]["deploy_config"]
 
             self.initialize(task_name, model_name, deploy_config, item_list)
 
-            self.redis.sadd("ModelServerTasks", task_name)
             self.save(task_name)
+            self.redis.sadd("ModelServerTasks", task_name)
 
         model_request_channel = self.model_request_channel % task_name
-        model_request_subscriber = self.redis.pubsub(ignore_subscribe_messages=True)
-        model_request_subscriber.subscribe(**{model_request_channel: self.request_handler})
-        thread = model_request_subscriber.run_in_thread(sleep_time=0.001)
-        self.threads[model_request_channel] = thread
+        self.setup_handler_for_channel(model_request_channel, self.request_handler)
+
+        self.redis.publish(model_notify_channel, ModelStatus.READY.value)
 
     def initialize(self, task_name, model_name, deploy_config, item_list):
         cfg = get_cfg()
@@ -238,20 +281,11 @@ class RayModelServerScheduler(object):
         }
         self.task_models[task_name] = deploy_model
 
+        # TODO: change this to multi-processing
         self.task_images[task_name] = ray.get(deploy_model.load_inputs.remote(item_list))
 
-    def close(self):
-        for thread_name, thread in self.threads.items():
-            thread.stop()
-
-    def calc_time(self, message="", init=False):
-        if not self.verbose:
-            return
-        if init:
-            self.start_time = time.time()
-        else:
-            self.logger.info(message + ": {}s".format(time.time() - self.start_time))
-            self.start_time = time.time()
+    def close(self, tash_name):
+        self.threads[tash_name].stop()
 
 
 def launch() -> None:
@@ -266,7 +300,6 @@ def launch() -> None:
     # logger.addHandler(fh)
 
     # scheduler config
-    # create scheduler
     server_config = {
         "redis_host": RedisConsts.REDIS_HOST,
         "redis_port": RedisConsts.REDIS_PORT
@@ -280,16 +313,18 @@ def launch() -> None:
             },
             "defaults": {
                 "model": "R50-FPN",
-                "config": {
+                "deploy_config": {
                     "bs_infer": 1,
                     "bs_train": 1,
                     "batch_wait_time": 1,  # second
+                    # above are currently useless
                     "num_replicas": 1
                 }
             }
         }
     }
 
+    # create scheduler
     scheduler = RayModelServerScheduler(server_config, model_registry_config, logger)
     scheduler.listen()
 

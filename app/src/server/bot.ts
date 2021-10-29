@@ -5,13 +5,18 @@ import { uid } from "../common/uid"
 import { index2str } from "../common/util"
 import { PREDICT } from "../const/action"
 import { EventName, RedisChannel } from "../const/connection"
-import { AddLabelsAction, BaseAction, PredictionAction } from "../types/action"
+import {
+  AddLabelsAction,
+  BaseAction,
+  PredictionAction,
+  UpdateModelStatusAction
+} from "../types/action"
 import { RedisConfig } from "../types/config"
 import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
   BotData,
-  ModelKillMessageType,
+  ModelStatusMessageType,
   ModelRegisterMessageType,
   ModelRequest,
   ModelRequestMessageType,
@@ -19,11 +24,12 @@ import {
   SyncActionMessageType
 } from "../types/message"
 import { ReduxStore } from "../types/redux"
-import { State } from "../types/state"
+import { ModelStatus, State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
 import { makeRedisPubSub, RedisPubSub } from "./redis_pub_sub"
 import { ModelRequestType } from "../const/common"
+import { updateModelStatus } from "../action/common"
 
 /**
  * Manages virtual sessions for a single bot
@@ -54,7 +60,9 @@ export class Bot {
   /** the redis message broker */
   protected publisher: RedisPubSub
   /** the redis message broker */
-  protected subscriber: RedisPubSub
+  protected responseSubscriber: RedisPubSub
+  /** the redis message broker */
+  protected notifySubscriber: RedisPubSub
   /** Number of actions received via broadcast */
   private actionCount: number
 
@@ -79,7 +87,8 @@ export class Bot {
     this.sessionId = uid()
 
     this.publisher = makeRedisPubSub(redisConfig)
-    this.subscriber = makeRedisPubSub(redisConfig)
+    this.responseSubscriber = makeRedisPubSub(redisConfig)
+    this.notifySubscriber = makeRedisPubSub(redisConfig)
 
     this.actionCount = 0
 
@@ -114,10 +123,15 @@ export class Bot {
   public async listen(): Promise<void> {
     const projectName = this.projectName
     const taskId = index2str(this.taskIndex)
-    const channel = `${RedisChannel.MODEL_RESPONSE}_${projectName}_${taskId}`
-    await this.subscriber.subscribeEvent(
-      channel,
+    const responseChannel = `${RedisChannel.MODEL_RESPONSE}_${projectName}_${taskId}`
+    const notifyChannel = `${RedisChannel.MODEL_NOTIFY}_${projectName}_${taskId}`
+    await this.responseSubscriber.subscribeEvent(
+      responseChannel,
       this.modelResponseHandler.bind(this)
+    )
+    await this.notifySubscriber.subscribeEvent(
+      notifyChannel,
+      this.modelNotificationHandler.bind(this)
     )
   }
 
@@ -190,7 +204,7 @@ export class Bot {
    * @param actions
    * @param triggerId
    */
-  public broadcastActions(actions: AddLabelsAction[], triggerId: string): void {
+  public broadcastActions(actions: BaseAction[], triggerId?: string): void {
     const actionPacket: ActionPacketType = {
       actions,
       id: uid(),
@@ -208,14 +222,16 @@ export class Bot {
 
   /**
    * Close any external resources
+   *
+   * @param active
    */
-  public kill(): void {
-    const modelKillMessage: ModelKillMessageType = {
+  public setActivate(active: boolean): void {
+    const modelStatusMessage: ModelStatusMessageType = {
       projectName: this.projectName,
-      taskId: index2str(this.taskIndex)
+      taskId: index2str(this.taskIndex),
+      active: active
     }
-    this.publisher.publishEvent(RedisChannel.MODEL_KILL, modelKillMessage)
-    this.socket.disconnect()
+    this.publisher.publishEvent(RedisChannel.MODEL_STATUS, modelStatusMessage)
   }
 
   /**
@@ -364,5 +380,21 @@ export class Bot {
     if (actions.length > 0) {
       this.broadcastActions(actions, actionPacketId)
     }
+  }
+
+  /**
+   * returned fields of model response
+   *
+   * @param _channel
+   * @param modelStatus
+   */
+  private modelNotificationHandler(
+    _channel: string,
+    modelStatus: string
+  ): void {
+    const action: UpdateModelStatusAction = updateModelStatus(
+      Number(modelStatus) as ModelStatus
+    )
+    this.broadcastActions([action])
   }
 }

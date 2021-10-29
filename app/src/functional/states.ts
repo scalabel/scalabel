@@ -20,6 +20,7 @@ import {
   ItemType,
   LabelType,
   LayoutType,
+  ModelStatus,
   ModeStatus,
   Node2DType,
   PaneType,
@@ -637,6 +638,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     trackLinking: false,
     status: ConnectionStatus.UNSAVED,
     mode: ModeStatus.ANNOTATING,
+    modelStatus: ModelStatus.INVALID,
     numUpdates: 0,
     ...params
   }

@@ -142,6 +142,9 @@ export class Hub {
     const taskActions = actions.filter((action) => {
       return actionConsts.isTaskAction(action)
     })
+    const modelStatusActions = actions.filter((action) => {
+      return actionConsts.isModelStatusAction(action)
+    })
     const actionTypes = Array.from(new Set(actions.map((a) => a.type)).values())
 
     Logger.debug(
@@ -182,11 +185,12 @@ export class Hub {
       }
     }
 
-    if (taskActions.length > 0) {
+    if (taskActions.length > 0 || modelStatusActions.length > 0) {
       // Broadcast task actions to all other sessions in room
       const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)
+      const toBroadcastActions = taskActions.concat(modelStatusActions)
       taskActionMsg.actions = {
-        actions: taskActions,
+        actions: toBroadcastActions,
         id: actionPacketId,
         triggerId
       }

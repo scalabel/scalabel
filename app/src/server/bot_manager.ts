@@ -1,12 +1,17 @@
 import { uid } from "../common/uid"
 import { RedisChannel } from "../const/connection"
 import { ServerConfig } from "../types/config"
-import { BotData, RegisterMessageType } from "../types/message"
+import {
+  BotData,
+  ModelStatusMessageType,
+  RegisterMessageType
+} from "../types/message"
 import { Bot } from "./bot"
 import Logger from "./logger"
 import { getRedisBotKey, getRedisBotSet } from "./path"
 import { RedisClient } from "./redis_client"
 import { RedisPubSub } from "./redis_pub_sub"
+import { index2str } from "../common/util"
 
 /**
  * Watches redis and spawns virtual sessions as needed
@@ -14,6 +19,8 @@ import { RedisPubSub } from "./redis_pub_sub"
 export class BotManager {
   /** env variables */
   protected config: ServerConfig
+  /** the redis message broker */
+  protected publisher: RedisPubSub
   /** the redis message broker */
   protected subscriber: RedisPubSub
   /** the redis client for storage */
@@ -25,23 +32,26 @@ export class BotManager {
    * Constructor
    *
    * @param config
+   * @param publisher
    * @param subscriber
    * @param redisClient
    * @param pollTime
    */
   constructor(
     config: ServerConfig,
+    publisher: RedisPubSub,
     subscriber: RedisPubSub,
     redisClient: RedisClient,
     pollTime?: number
   ) {
     this.config = config
+    this.publisher = publisher
     this.subscriber = subscriber
     this.redisClient = redisClient
     if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
-      this.pollTime = 1000 * 30 // 5 minutes in ms
+      this.pollTime = 5 * 1000 * 60 // 5 minutes in ms
     }
   }
 
@@ -92,6 +102,12 @@ export class BotManager {
     }
 
     if (data.bot || (await this.checkBotExists(botData))) {
+      const modelStatusMessage: ModelStatusMessageType = {
+        projectName: botData.projectName,
+        taskId: index2str(botData.taskIndex),
+        active: true
+      }
+      this.publisher.publishEvent(RedisChannel.MODEL_STATUS, modelStatusMessage)
       return botData
     }
     botData.botId = uid()
@@ -196,7 +212,7 @@ export class BotManager {
     } else {
       clearInterval(pollId)
       await this.deleteBot(bot.getData())
-      bot.kill()
+      bot.setActivate(false)
     }
   }
 }

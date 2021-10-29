@@ -45,8 +45,6 @@ class RayModel(object):
         self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
         self.redis = redis.Redis(host=RedisConsts.REDIS_HOST, port=RedisConsts.REDIS_PORT)
 
-        self.verbose = False
-
     @staticmethod
     def url_to_img(url, aug):
         img_response = requests.get(url)
@@ -69,12 +67,10 @@ class RayModel(object):
     async def handle_batch(self, inputs):
         with torch.no_grad():
             predictions = self.model(inputs)
-            self.calc_time("model inference time")
             return predictions
 
     # 0 for inference, 1 for training
     async def __call__(self, inputs, request_data, request_type):
-        self.calc_time(init=True)
         # inference
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
             results = await self.handle_batch(inputs[0])
@@ -96,14 +92,4 @@ class RayModel(object):
         self.model.cuda()
 
     def save(self, dir):
-        # self.checkpointer.save(dir)
         torch.save({"model": self.model.state_dict()}, dir)
-
-    def calc_time(self, message="", init=False):
-        if not self.verbose:
-            return
-        if init:
-            self.start_time = time.time()
-        else:
-            self.logger.info(message + ": {}s".format(time.time() - self.start_time))
-            self.start_time = time.time()

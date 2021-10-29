@@ -505,6 +505,13 @@ export const enum ModeStatus {
   SELECTING
 }
 
+export const enum ModelStatus {
+  INVALID,
+  LOADING,
+  READY,
+  IDLE
+}
+
 /**
  * Information for this particular session
  */
@@ -525,6 +532,8 @@ export interface SessionType {
   status: ConnectionStatus
   /** Current mode */
   mode: ModeStatus
+  /** Current model status */
+  modelStatus: ModelStatus
   /** Number of time status has changed */
   numUpdates: number
 }

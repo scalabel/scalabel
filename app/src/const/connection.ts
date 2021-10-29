@@ -34,5 +34,6 @@ export const enum RedisChannel {
   MODEL_REGISTER = "modelRegister",
   MODEL_REQUEST = "modelRequest",
   MODEL_RESPONSE = "modelResponse",
-  MODEL_KILL = "modelKill"
+  MODEL_STATUS = "modelStatus",
+  MODEL_NOTIFY = "modelNotify"
 }
