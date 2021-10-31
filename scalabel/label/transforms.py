@@ -28,9 +28,8 @@ __all__ = [
     "polygon_to_poly2ds",
     "keypoints_to_nodes",
     "rle_to_box2d",
+    "rle_to_mask",
 ]
-
-TOLERANCE = 1.0
 
 
 def get_coco_categories(config: Config) -> List[CatType]:
@@ -209,6 +208,11 @@ def frame_to_rles(
     else:
         masks = [poly2ds_to_mask(shape, poly2d) for poly2d in poly2ds]
     return [mask_to_rle(mask) for mask in masks]
+
+
+def rle_to_mask(rle: RLE) -> NDArrayU8:
+    """Converting RLE to mask."""
+    return mask_utils.decode(dict(rle))  # type: ignore
 
 
 def rle_to_box2d(rle: RLE) -> Box2D:
