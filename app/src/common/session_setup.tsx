@@ -230,7 +230,25 @@ function initViewerConfigs(
     const sensorIds = Object.keys(state.task.sensors)
       .map((key) => Number(key))
       .sort((a, b) => a - b)
-    const id0 = sensorIds[0]
+    let id0 = sensorIds[0]
+    let minImageSensorId = -1 // useful when showing image in point cloud pane
+    if (
+      sensorIds.length > 1 &&
+      state.task.config.itemType === ItemTypeName.POINT_CLOUD
+    ) {
+      for (const sensorId of sensorIds) {
+        if (state.task.sensors[sensorId].type === ItemTypeName.POINT_CLOUD) {
+          id0 = sensorId
+          break
+        }
+      }
+      for (const sensorId of sensorIds) {
+        if (state.task.sensors[sensorId].type === ItemTypeName.IMAGE) {
+          minImageSensorId = sensorId
+          break
+        }
+      }
+    }
     const sensor0 = state.task.sensors[id0]
     const config0 = makeDefaultViewerConfig(
       sensor0.type as ViewerConfigTypeName,
@@ -248,7 +266,6 @@ function initViewerConfigs(
       paneIds.length === 1
     ) {
       dispatch(splitPane(Number(paneIds[0]), SplitType.HORIZONTAL, 0))
-
       state = getState()
       let config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
       dispatch(
@@ -264,7 +281,13 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
-      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize: "25%" }))
+      let primarySize = "33%"
+      if (minImageSensorId >= 0) {
+        primarySize = "25%"
+      }
+      dispatch(
+        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
+      )
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -288,8 +311,12 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
+      primarySize = "50%"
+      if (minImageSensorId >= 0) {
+        primarySize = "33%"
+      }
       dispatch(
-        updatePane(state.user.layout.maxPaneId, { primarySize: "33.33%" })
+        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
       )
 
       state = getState()
@@ -307,33 +334,28 @@ function initViewerConfigs(
           2
         )
       )
-      dispatch(
-        splitPane(
-          state.user.layout.maxPaneId,
-          SplitType.VERTICAL,
-          state.user.layout.maxViewerConfigId
-        )
-      )
-
-      state = getState()
-      config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
-      dispatch(
-        toggleSelectionLock(
-          state.user.layout.maxViewerConfigId,
-          config as PointCloudViewerConfigType
-        )
-      )
-
-      // Change last pane to image view
-      const newConfig = makeDefaultViewerConfig(
-        types.ViewerConfigTypeName.IMAGE,
-        state.user.layout.maxPaneId,
-        1
-      )
-      if (newConfig !== null) {
+      if (minImageSensorId >= 0) {
         dispatch(
-          changeViewerConfig(state.user.layout.maxViewerConfigId, newConfig)
+          splitPane(
+            state.user.layout.maxPaneId,
+            SplitType.VERTICAL,
+            state.user.layout.maxViewerConfigId
+          )
         )
+
+        state = getState()
+
+        // Change last pane to image view if frame group contains image
+        const newConfig = makeDefaultViewerConfig(
+          types.ViewerConfigTypeName.IMAGE,
+          state.user.layout.maxPaneId,
+          minImageSensorId
+        )
+        if (newConfig !== null) {
+          dispatch(
+            changeViewerConfig(state.user.layout.maxViewerConfigId, newConfig)
+          )
+        }
       }
     }
   }
