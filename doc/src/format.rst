@@ -84,12 +84,16 @@ to each label in images. Fields of item are given below.
             - vertices: [][]float (list of 2-tuples [x, y])
             - types: string
             - closed: boolean
+        - rle:
+            - counts: str
+            - size: (height, width)
         - graph: (optional)
             - nodes [ ]:
                 - location: [x, y] or [x, y, z]
                 - category: string
                 - visibility: string (optional)
                 - type: string (optional)
+                - score: float (optional)
                 - id: string
             - edges [ ]:
                 - source: string
@@ -132,6 +136,7 @@ More details about the fields
             * category: Either joint name or type of segmentation (see closed in `poly2d`).
             * visibility: Visibility of joint for pose.
             * type: Type of vertex for segmentation (see type in `poly2d`).
+            * score: Confidence score during prediction.
             * id: Unique ID.
 
         * edges

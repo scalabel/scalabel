@@ -15,7 +15,7 @@ import { checkboxStyle, uploadStyle } from "../styles/create"
 import UploadButton from "./upload_button"
 
 // Submission timeout
-export const submissionTimeout = 5000
+export const submissionTimeout = 600000
 interface ClassType {
   /** root class */
   root: string

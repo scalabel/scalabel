@@ -1,0 +1,60 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "road"
+
+[[categories]]
+name = "sidewalk"
+
+[[categories]]
+name = "building"
+
+[[categories]]
+name = "wall"
+
+[[categories]]
+name = "fence"
+
+[[categories]]
+name = "pole"
+
+[[categories]]
+name = "traffic light"
+
+[[categories]]
+name = "traffic sign"
+
+[[categories]]
+name = "vegetation"
+
+[[categories]]
+name = "terrain"
+
+[[categories]]
+name = "sky"
+
+[[categories]]
+name = "person"
+
+[[categories]]
+name = "rider"
+
+[[categories]]
+name = "car"
+
+[[categories]]
+name = "bicycle"
+
+[[categories]]
+name = "bus"
+
+[[categories]]
+name = "motorcycle"
+
+[[categories]]
+name = "train"
+
+[[categories]]
+name = "truck"
