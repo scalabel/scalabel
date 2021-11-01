@@ -73,8 +73,8 @@ export const polyline2DCategories = polyline2DCategoriesList.map(
 export const box2DAttributes = [
   // {
   //   name: "Occluded",
-  //   toolType: AttributeToolType.SWITCH,
-  //   tagText: "o",
+  //   type: AttributeToolType.SWITCH,
+  //   tag: "o",
   //   tagSuffixes: [],
   //   tagPrefix: "",
   //   values: [],
@@ -82,8 +82,8 @@ export const box2DAttributes = [
   // },
   // {
   //   name: "Truncated",
-  //   toolType: AttributeToolType.SWITCH,
-  //   tagText: "t",
+  //   type: AttributeToolType.SWITCH,
+  //   tag: "t",
   //   tagSuffixes: [],
   //   tagPrefix: "",
   //   values: [],
@@ -91,8 +91,8 @@ export const box2DAttributes = [
   // },
   // {
   //   name: "Traffic Color Light",
-  //   toolType: AttributeToolType.LIST,
-  //   tagText: "t",
+  //   type: AttributeToolType.LIST,
+  //   tag: "t",
   //   tagSuffixes: ["", "g", "y", "r"],
   //   tagPrefix: "",
   //   values: ["NA", "G", "Y", "R"],
@@ -104,8 +104,8 @@ export const box2DAttributes = [
 export const dummyAttributes = [
   // {
   //   name: "",
-  //   toolType: AttributeToolType.NONE,
-  //   tagText: "",
+  //   type: AttributeToolType.NONE,
+  //   tag: "",
   //   tagSuffixes: [],
   //   values: [],
   //   tagPrefix: "",

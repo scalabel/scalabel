@@ -43,7 +43,7 @@ export interface ItemExport {
   /** extrinsics, overrides data source if present */
   extrinsics?: ExtrinsicsType
   /** item attributes */
-  attributes: { [key: string]: string[] }
+  attributes: { [key: string]: string | string[] }
   /** submitted timestamp */
   timestamp: number
   /** item labels */
@@ -105,7 +105,7 @@ export interface LabelExport {
   /** category */
   category: string
   /** label attributes- can be list or switch type */
-  attributes: { [key: string]: string[] | boolean }
+  attributes: { [key: string]: string | string[] | boolean }
   /** if shape was manual */
   manualShape: boolean
   /** box2d label */
@@ -115,9 +115,9 @@ export interface LabelExport {
   /** box3d label */
   box3d: Box3DType | null
   /** plane3d label */
-  plane3d: Plane3DType | null
+  plane3d?: Plane3DType | null
   /** custom labels */
-  customs: { [name: string]: CustomExportType }
+  customs?: { [name: string]: CustomExportType }
 }
 
 export interface ConfigExport {

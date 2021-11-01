@@ -22,9 +22,7 @@ export const sampleItemExportImage: ItemExport = {
         y2: 400.88642659279776
       },
       poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     },
     {
       id: "2",
@@ -38,9 +36,7 @@ export const sampleItemExportImage: ItemExport = {
         y2: 294.1828254847645
       },
       poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     },
     {
       id: "longLabelId",
@@ -54,9 +50,7 @@ export const sampleItemExportImage: ItemExport = {
         y2: 411.85595567867034
       },
       poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     }
   ]
 }
@@ -84,9 +78,7 @@ export const sampleStateExportImage: ItemExport[] = [
           y2: 400.88642659279776
         },
         poly2d: null,
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       },
       {
         id: "2",
@@ -100,9 +92,7 @@ export const sampleStateExportImage: ItemExport[] = [
           y2: 294.1828254847645
         },
         poly2d: null,
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       },
       {
         id: "longLabelId",
@@ -116,9 +106,7 @@ export const sampleStateExportImage: ItemExport[] = [
           y2: 411.85595567867034
         },
         poly2d: null,
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       }
     ]
   },
@@ -195,9 +183,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
           closed: true
         }
       ],
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     },
     {
       id: "1",
@@ -220,9 +206,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
           closed: true
         }
       ],
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     },
     {
       id: "longPolyLabelId",
@@ -243,9 +227,7 @@ export const sampleItemExportImagePolygon: ItemExport = {
           closed: true
         }
       ],
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     }
   ]
 }
@@ -278,9 +260,7 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
             closed: true
           }
         ],
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       },
       {
         id: "1",
@@ -303,9 +283,7 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
             closed: true
           }
         ],
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       },
       {
         id: "longPolyLabelId",
@@ -326,9 +304,7 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
             closed: true
           }
         ],
-        box3d: null,
-        plane3d: null,
-        customs: {}
+        box3d: null
       }
     ]
   },
@@ -377,3 +353,19 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     sensor: -1
   }
 ]
+
+export const sampleItemExportImageTagging: ItemExport = {
+  name:
+    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  url:
+    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  videoName: "",
+  attributes: {
+    Weather: "Rainy",
+    Scene: "City Street",
+    Timeofday: "Night"
+  },
+  timestamp: 0,
+  sensor: -1,
+  labels: []
+}
