@@ -1,18 +1,18 @@
 -
   name: Occluded
-  toolType: switch
-  tagText: o
+  type: switch
+  tag: o
 -
   name: Truncated
-  toolType: switch
-  tagText: t
+  type: switch
+  tag: t
 -
   name: Crowd
-  toolType: switch
-  tagText: c
+  type: switch
+  tag: c
 -
   name: Traffic Light Color
-  toolType: list
+  type: list
   values:
     - NA
     - G
@@ -24,8 +24,3 @@
     - g
     - y
     - r
-  buttonColors:
-    - white
-    - green
-    - yellow
-    - red

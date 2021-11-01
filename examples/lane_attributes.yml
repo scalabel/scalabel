@@ -1,6 +1,6 @@
 -
   name: Type
-  toolType: list
+  type: list
   values:
     - NA
     - Single
@@ -10,14 +10,10 @@
     - ""
     - s
     - d
-  buttonColors:
-    - white
-    - white
-    - white
 
 -
   name: Continuity
-  toolType: list
+  type: list
   values:
     - NA
     - Full
@@ -27,14 +23,10 @@
     - ""
     - f
     - d
-  buttonColors:
-    - white
-    - white
-    - white
 
 -
   name: Direction
-  toolType: list
+  type: list
   values:
     - NA
     - Parallel
@@ -44,7 +36,3 @@
     - ""
     - p
     - v
-  buttonColors:
-    - white
-    - white
-    - white

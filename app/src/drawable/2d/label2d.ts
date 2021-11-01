@@ -316,19 +316,19 @@ export abstract class Label2D {
 
     for (const attributeId of Object.keys(attributes)) {
       const attribute = config.attributes[Number(attributeId)]
-      if (attribute.toolType === "switch") {
+      if (attribute.type === "switch") {
         if (attributes[Number(attributeId)][0] > 0) {
-          abbr += "," + attribute.tagText
+          abbr += "," + attribute.tag
           tw += 20
         }
-      } else if (attribute.toolType === "list") {
+      } else if (attribute.type === "list") {
         if (
           Number(attributeId) in Object.keys(attribute.tagSuffixes) &&
           attributes[Number(attributeId)][0] > 0
         ) {
           abbr +=
             "," +
-            attribute.tagText +
+            attribute.tag +
             ":" +
             attribute.tagSuffixes[attributes[Number(attributeId)][0]]
           tw += 40

@@ -153,11 +153,13 @@ Category.update_forward_refs()
 
 
 class Attribute(BaseModel):
-    """Define Scalabel category type."""
+    """Define Scalabel attribute type."""
 
     name: str
     type: str
-    tag: str
+    tag: Optional[str]
+    tagPrefix: Optional[str]
+    tagSuffixes: Optional[List[str]]
     values: Optional[List[str]]
 
 
