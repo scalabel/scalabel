@@ -13,11 +13,11 @@ class TestBDD100KDetectEval(unittest.TestCase):
     """Test cases for BDD100K detection evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/track_sample_anns.json"
-    preds_path = f"{cur_dir}/testcases/bbox_predictions.json"
+    gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
+    preds_path = f"{cur_dir}/testcases/det/bbox_predictions.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("det_configs.toml"))
+    config = load_label_config(get_test_file("det/det_configs.toml"))
     result = evaluate_det(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
@@ -120,11 +120,11 @@ class TestBDD100KDetectEvalEmpty(unittest.TestCase):
     """Test cases for BDD100K detection evaluation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/track_sample_anns.json"
-    preds_path = f"{cur_dir}/testcases/bbox_predictions_empty.json"
+    gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
+    preds_path = f"{cur_dir}/testcases/det/bbox_predictions_empty.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("det_configs.toml"))
+    config = load_label_config(get_test_file("det/det_configs.toml"))
     result = evaluate_det(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:

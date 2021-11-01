@@ -53,8 +53,13 @@ def evaluate_ins_seg(
     # Load results and convert the predictions
     pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
     pred_res = scalabel2coco_ins_seg(pred_frames, config)["annotations"]
+    # Handle empty predictions
     if not pred_res:
         return DetResult.empty(coco_gt)
+    # Removing bbox so pycocotools will use mask to compute area
+    for ann in pred_res:
+        if "bbox" in ann:
+            ann.pop("bbox")
     coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()

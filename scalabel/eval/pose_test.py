@@ -13,11 +13,11 @@ class TestBDD100KPoseEval(unittest.TestCase):
     """Test cases for BDD100K pose estimation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/pose_sample.json"
-    preds_path = f"{cur_dir}/testcases/pose_preds.json"
+    gts_path = f"{cur_dir}/testcases/pose/pose_sample.json"
+    preds_path = f"{cur_dir}/testcases/pose/pose_preds.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("pose_configs.toml"))
+    config = load_label_config(get_test_file("pose/pose_configs.toml"))
     result = evaluate_pose(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
@@ -78,11 +78,11 @@ class TestBDD100KPoseEvalEmpty(unittest.TestCase):
     """Test cases for BDD100K pose estimation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/pose_sample.json"
-    preds_path = f"{cur_dir}/testcases/pose_preds_empty.json"
+    gts_path = f"{cur_dir}/testcases/pose/pose_sample.json"
+    preds_path = f"{cur_dir}/testcases/pose/pose_preds_empty.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("pose_configs.toml"))
+    config = load_label_config(get_test_file("pose/pose_configs.toml"))
     result = evaluate_pose(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
