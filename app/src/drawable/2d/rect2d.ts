@@ -169,6 +169,21 @@ export class Rect2D {
     const real = this.vector().scale(ratio)
     context.rect(real[0], real[1], real[2], real[3])
     if (mode === DrawMode.VIEW) {
+      // Display box dimensions if text fits
+      if (real[2] >= 280 && real[3] >= 50) {
+        context.fillStyle = "#000000"
+        context.font = "36px Arial"
+        context.textAlign = "center"
+        context.textBaseline = "middle"
+        context.fillText(
+          `W: ${Math.round(real[2])}, H: ${Math.round(real[3])}`,
+          real[0] + real[2] / 2,
+          real[1] + real[3] / 2
+        )
+        // Reset alignment to defaults
+        context.textAlign = "start"
+        context.textBaseline = "alphabetic"
+      }
       context.fillStyle = toCssColor(style.color.concat(OPACITY))
     } else {
       context.fillStyle = toCssColor(style.color)
