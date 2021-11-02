@@ -66,14 +66,22 @@ export function convertItemToExport(
     const url = item.urls[sensor]
     const videoName = item.videoName
     const timestamp = item.timestamp
+    let name = url
+    if (item.names !== undefined && Object.keys(item.names).includes(key)) {
+      name = item.names[sensor]
+    }
     itemExports[sensor] = {
-      name: url,
+      name: name,
       url,
       videoName,
       timestamp,
       attributes: {},
       labels: [],
-      sensor
+      sensor,
+      intrinsics:
+        item.intrinsics !== undefined ? item.intrinsics[sensor] : undefined,
+      extrinsics:
+        item.extrinsics !== undefined ? item.extrinsics[sensor] : undefined
     }
   }
   // TODO: Clean up the export code for naming and modularity
@@ -86,9 +94,7 @@ export function convertItemToExport(
       manualShape: label.manual,
       box2d: null,
       poly2d: null,
-      box3d: null,
-      plane3d: null,
-      customs: {}
+      box3d: null
     }
     if (label.shapes.length > 0) {
       const shapeId0 = label.shapes[0]
@@ -121,15 +127,6 @@ export function convertItemToExport(
               names.push(node.name)
               hidden.push(Boolean(node.hidden))
             }
-
-            const template = config.label2DTemplates[label.type]
-
-            labelExport.customs[template.name] = {
-              points,
-              names,
-              hidden,
-              edges: template.edges
-            }
           }
       }
     }
@@ -138,7 +135,14 @@ export function convertItemToExport(
       labelExport.id = label.track
     }
     for (const sensor of label.sensors) {
-      itemExports[sensor].labels.push(labelExport)
+      if (label.type === LabelTypeName.TAG) {
+        itemExports[sensor].attributes = parseLabelAttributes(
+          label.attributes,
+          config.attributes
+        ) as { [key: string]: string | string[] }
+      } else {
+        itemExports[sensor].labels.push(labelExport)
+      }
     }
   }
   return Object.values(itemExports)
@@ -153,14 +157,14 @@ export function convertItemToExport(
 function parseLabelAttributes(
   labelAttributes: { [key: number]: number[] },
   configAttributes: Attribute[]
-): { [key: string]: string[] | boolean } {
-  const exportAttributes: { [key: string]: string[] | boolean } = {}
+): { [key: string]: string | string[] | boolean } {
+  const exportAttributes: { [key: string]: string | string[] | boolean } = {}
   Object.entries(labelAttributes).forEach(([key, attributeList]) => {
     const index = parseInt(key, 10)
     const attribute = configAttributes[index]
     if (
-      attribute.toolType === AttributeToolType.LIST ||
-      attribute.toolType === AttributeToolType.LONG_LIST
+      attribute.type === AttributeToolType.LIST ||
+      attribute.type === AttributeToolType.LONG_LIST
     ) {
       // List attribute case- check whether each value is applied
       const selectedValues: string[] = []
@@ -169,8 +173,12 @@ function parseLabelAttributes(
           selectedValues.push(attribute.values[valueIndex])
         }
       })
-      exportAttributes[attribute.name] = selectedValues
-    } else if (attribute.toolType === AttributeToolType.SWITCH) {
+      if (selectedValues.length === 1) {
+        exportAttributes[attribute.name] = selectedValues[0]
+      } else {
+        exportAttributes[attribute.name] = selectedValues
+      }
+    } else if (attribute.type === AttributeToolType.SWITCH) {
       // Boolean attribute case- should be a single boolean in the list
       let value = false
       if (attributeList.length > 0) {

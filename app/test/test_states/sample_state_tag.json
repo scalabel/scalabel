@@ -1,0 +1,244 @@
+{
+  "task": {
+    "config": {
+      "projectName": "test_tag",
+      "itemType": "image",
+      "labelTypes": ["tag"],
+      "label2DTemplates": {},
+      "taskSize": 5,
+      "handlerUrl": "label",
+      "pageTitle": "Image Tagging",
+      "instructionPage": "",
+      "bundleFile": "image_v2.js",
+      "categories": [],
+      "treeCategories": [],
+      "attributes": [
+        {
+          "name": "Weather",
+          "type": "list",
+          "values": [
+            "NA",
+            "Rainy",
+            "Snowy",
+            "Clear",
+            "Overcast",
+            "Partly Cloudy",
+            "Foggy"
+          ],
+          "tagPrefix": "w",
+          "tagSuffixes": [
+            "",
+            "r",
+            "s",
+            "c",
+            "o",
+            "p",
+            "f"
+          ]
+        },
+        {
+          "name": "Scene",
+          "type": "list",
+          "values": [
+            "NA",
+            "Tunnel",
+            "Residential",
+            "Parking Lot",
+            "City Street",
+            "Gas Stations",
+            "Highway"
+          ],
+          "tagPrefix": "s",
+          "tagSuffixes": [
+            "",
+            "t",
+            "r",
+            "p",
+            "c",
+            "g",
+            "h"
+          ]
+        },
+        {
+          "name": "Timeofday",
+          "type": "list",
+          "values": [
+            "NA",
+            "Daytime",
+            "Night",
+            "Dawn/Dusk"
+          ],
+          "tagPrefix": "t",
+          "tagSuffixes": [
+            "",
+            "day",
+            "n",
+            "daw"
+          ]
+        }
+      ],
+      "taskId": "000000",
+      "tracking": false,
+      "policyTypes": [],
+      "demoMode": false,
+      "autosave": true,
+      "bots": false
+    },
+    "status": {
+      "maxOrder": 1
+    },
+    "items": [
+      {
+        "id": "0",
+        "index": 0,
+        "videoName": "",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
+        },
+        "labels": {
+          "J7t1cBmJbV0OS7Th": {
+            "id": "J7t1cBmJbV0OS7Th",
+            "item": 0,
+            "sensors": [
+              -1
+            ],
+            "type": "tag",
+            "category": [],
+            "attributes": {
+              "0": [
+                1
+              ],
+              "1": [
+                4
+              ],
+              "2": [
+                2
+              ]
+            },
+            "parent": "",
+            "children": [],
+            "shapes": [],
+            "track": "",
+            "order": 1,
+            "manual": true,
+            "changed": false
+          }
+        },
+        "shapes": {},
+        "timestamp": 0
+      },
+      {
+        "id": "1",
+        "index": 1,
+        "videoName": "",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "timestamp": 0
+      },
+      {
+        "id": "2",
+        "index": 2,
+        "videoName": "",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "timestamp": 0
+      },
+      {
+        "id": "3",
+        "index": 3,
+        "videoName": "",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "timestamp": 0
+      },
+      {
+        "id": "4",
+        "index": 4,
+        "videoName": "",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
+        },
+        "labels": {},
+        "shapes": {},
+        "timestamp": 0
+      }
+    ],
+    "tracks": {},
+    "sensors": {
+      "-1": {
+        "id": -1,
+        "name": "default",
+        "type": "image"
+      }
+    }
+  },
+  "user": {
+    "id": "",
+    "select": {
+      "item": 0,
+      "labels": [],
+      "shapes": {},
+      "category": 0,
+      "attributes": {},
+      "labelType": 0,
+      "policyType": 0
+    },
+    "layout": {
+      "toolbarWidth": 200,
+      "maxViewerConfigId": 0,
+      "maxPaneId": 0,
+      "rootPane": 0,
+      "panes": {
+        "0": {
+          "id": 0,
+          "viewerId": 0,
+          "parent": -1,
+          "hide": false,
+          "numHorizontalChildren": 0,
+          "numVerticalChildren": 0
+        }
+      }
+    },
+    "viewerConfigs": []
+  },
+  "session": {
+    "id": "",
+    "startTime": 0,
+    "itemStatuses": [
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      },
+      {
+        "sensorDataLoaded": {
+          "-1": false
+        }
+      }
+    ]
+  }
+}

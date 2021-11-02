@@ -83,11 +83,9 @@ export class Tag2D extends Label2D {
         if (this.attributes[key][0] !== -1) {
           const selectedIndex = this.attributes[key][0]
           const selectedAttribute = this.configAttributes[key]
-          if (selectedAttribute.toolType === AttributeToolType.SWITCH) {
+          if (selectedAttribute.type === AttributeToolType.SWITCH) {
             if (selectedIndex === 1) {
-              abbr.push(
-                ` ${selectedAttribute.name}: ${selectedAttribute.tagText}`
-              )
+              abbr.push(` ${selectedAttribute.name}: ${selectedAttribute.tag}`)
             }
           } else {
             abbr.push(

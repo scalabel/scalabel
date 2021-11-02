@@ -67,8 +67,8 @@ export const testJson: DeepPartialState = {
       attributes: [
         {
           name: "Weather",
-          toolType: AttributeToolType.LIST,
-          tagText: "",
+          type: AttributeToolType.LIST,
+          tag: "",
           tagPrefix: "w",
           tagSuffixes: ["", "r", "s", "c", "o", "p", "f"],
           values: [
@@ -92,8 +92,8 @@ export const testJson: DeepPartialState = {
         },
         {
           name: "Scene",
-          toolType: AttributeToolType.LIST,
-          tagText: "",
+          type: AttributeToolType.LIST,
+          tag: "",
           tagPrefix: "s",
           tagSuffixes: ["", "t", "r", "p", "c", "g", "h"],
           values: [
@@ -117,8 +117,8 @@ export const testJson: DeepPartialState = {
         },
         {
           name: "Timeofday",
-          toolType: AttributeToolType.LIST,
-          tagText: "",
+          type: AttributeToolType.LIST,
+          tag: "",
           tagPrefix: "t",
           tagSuffixes: ["", "day", "n", "daw"],
           values: ["NA", "Daytime", "Night", "Dawn/Dusk"],
