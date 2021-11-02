@@ -9,6 +9,7 @@ import {
   ViewerConfigType
 } from "../types/state"
 import { makeItem } from "./states"
+import * as types from "../const/common"
 
 // TODO- move these to selector file and use hierarchical structure
 
@@ -259,4 +260,32 @@ export function getSelectedTracks(state: State): TrackType[] {
   }
 
   return tracks
+}
+
+/**
+ * Get set of sensor types
+ *
+ * @param state
+ */
+export function getSensorTypes(state: State): Set<types.ViewerConfigTypeName> {
+  const sensors = Object.entries(state.task.sensors).map(([key, val]) => {
+    if (key === undefined) {
+      throw new Error("Sensor key is undefined")
+    } else {
+      switch (val.type) {
+        case "image":
+          return types.ViewerConfigTypeName.IMAGE
+        case "pointcloud":
+          return types.ViewerConfigTypeName.POINT_CLOUD
+        case "image3d":
+          return types.ViewerConfigTypeName.IMAGE_3D
+        case "homography":
+          return types.ViewerConfigTypeName.HOMOGRAPHY
+        default:
+          return types.ViewerConfigTypeName.UNKNOWN
+      }
+    }
+  })
+
+  return new Set(sensors)
 }

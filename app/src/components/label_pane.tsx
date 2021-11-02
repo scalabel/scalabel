@@ -19,6 +19,7 @@ import {
 import { dispatch } from "../common/session"
 import * as types from "../const/common"
 import { makeDefaultViewerConfig } from "../functional/states"
+import { getSensorTypes } from "../functional/state_util"
 import { paneBarStyles, resizerStyles } from "../styles/split_pane"
 import { SplitType, ViewerConfigType } from "../types/state"
 import { Component } from "./component"
@@ -155,24 +156,42 @@ class LabelPane extends Component<Props> {
           <MenuItem
             key={`imageTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.IMAGE}
+            disabled={
+              !getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE)
+            }
           >
             Image
           </MenuItem>
           <MenuItem
             key={`pcTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.POINT_CLOUD}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.POINT_CLOUD
+              )
+            }
           >
             Point Cloud
           </MenuItem>
           <MenuItem
             key={`image3dTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.IMAGE_3D}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.IMAGE_3D
+              )
+            }
           >
             Image 3D
           </MenuItem>
           <MenuItem
             key={`homographyTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.HOMOGRAPHY}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.HOMOGRAPHY
+              )
+            }
           >
             Homography
           </MenuItem>
