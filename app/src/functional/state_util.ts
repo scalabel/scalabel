@@ -301,14 +301,11 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
     .sort((a, b) => a - b)
 
   const minSensorIds: { [type: string]: number } = {
-    [ItemTypeName.IMAGE]: sensorIds[0],
+    [ItemTypeName.IMAGE]: -1,
     [ItemTypeName.POINT_CLOUD]: -1
   }
 
-  if (
-    sensorIds.length > 1 &&
-    state.task.config.itemType === ItemTypeName.POINT_CLOUD
-  ) {
+  if (sensorIds.length > 1) {
     for (const sensorId of sensorIds) {
       if (state.task.sensors[sensorId].type === ItemTypeName.IMAGE) {
         minSensorIds[ViewerConfigTypeName.IMAGE] = sensorId

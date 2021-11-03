@@ -229,11 +229,11 @@ function initViewerConfigs(
   let state = getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const minSensorIds = getMinSensorIds(state)
-    const sensor0 = state.task.sensors[minSensorIds[ItemTypeName.POINT_CLOUD]]
+    const sensor0 = state.task.sensors[minSensorIds[state.task.config.itemType]]
     const config0 = makeDefaultViewerConfig(
       sensor0.type as ViewerConfigTypeName,
       0,
-      minSensorIds[ItemTypeName.POINT_CLOUD]
+      minSensorIds[state.task.config.itemType]
     )
     if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
