@@ -19,7 +19,7 @@ import {
 import { dispatch } from "../common/session"
 import * as types from "../const/common"
 import { makeDefaultViewerConfig } from "../functional/states"
-import { getSensorTypes } from "../functional/state_util"
+import { getSensorTypes, getMinSensorIds } from "../functional/state_util"
 import { paneBarStyles, resizerStyles } from "../styles/split_pane"
 import { SplitType, ViewerConfigType } from "../types/state"
 import { Component } from "./component"
@@ -132,6 +132,7 @@ class LabelPane extends Component<Props> {
     const pane = this.state.user.layout.panes[this.props.pane]
     if (pane.viewerId >= 0) {
       const viewerConfig = this.state.user.viewerConfigs[pane.viewerId]
+      const minSensorIds = getMinSensorIds(this.state)
       const viewerTypeMenu = (
         <Select
           key={`viewerTypeMenu${pane.id}`}
@@ -140,7 +141,7 @@ class LabelPane extends Component<Props> {
             const newConfig = makeDefaultViewerConfig(
               e.target.value as types.ViewerConfigTypeName,
               viewerConfig.pane,
-              0
+              minSensorIds[e.target.value as types.ViewerConfigTypeName]
             )
             if (newConfig !== null) {
               dispatch(changeViewerConfig(pane.viewerId, newConfig))

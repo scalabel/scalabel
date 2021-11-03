@@ -18,6 +18,7 @@ import {
 import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import { getMinSensorIds } from "../functional/state_util"
 import { makeDefaultViewerConfig } from "../functional/states"
 import { scalabelTheme } from "../styles/theme"
 import { PLYLoader } from "../thirdparty/PLYLoader"
@@ -227,33 +228,12 @@ function initViewerConfigs(
 ): void {
   let state = getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
-    const sensorIds = Object.keys(state.task.sensors)
-      .map((key) => Number(key))
-      .sort((a, b) => a - b)
-    let id0 = sensorIds[0]
-    let minImageSensorId = -1 // useful when showing image in point cloud pane
-    if (
-      sensorIds.length > 1 &&
-      state.task.config.itemType === ItemTypeName.POINT_CLOUD
-    ) {
-      for (const sensorId of sensorIds) {
-        if (state.task.sensors[sensorId].type === ItemTypeName.POINT_CLOUD) {
-          id0 = sensorId
-          break
-        }
-      }
-      for (const sensorId of sensorIds) {
-        if (state.task.sensors[sensorId].type === ItemTypeName.IMAGE) {
-          minImageSensorId = sensorId
-          break
-        }
-      }
-    }
-    const sensor0 = state.task.sensors[id0]
+    const minSensorIds = getMinSensorIds(state)
+    const sensor0 = state.task.sensors[minSensorIds[ItemTypeName.POINT_CLOUD]]
     const config0 = makeDefaultViewerConfig(
       sensor0.type as ViewerConfigTypeName,
       0,
-      id0
+      minSensorIds[ItemTypeName.POINT_CLOUD]
     )
     if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
@@ -282,7 +262,7 @@ function initViewerConfigs(
         )
       )
       let primarySize = "33%"
-      if (minImageSensorId >= 0) {
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
         primarySize = "25%"
       }
       dispatch(
@@ -312,7 +292,7 @@ function initViewerConfigs(
         )
       )
       primarySize = "50%"
-      if (minImageSensorId >= 0) {
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
         primarySize = "33%"
       }
       dispatch(
@@ -334,7 +314,7 @@ function initViewerConfigs(
           2
         )
       )
-      if (minImageSensorId >= 0) {
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
         dispatch(
           splitPane(
             state.user.layout.maxPaneId,
@@ -349,7 +329,7 @@ function initViewerConfigs(
         const newConfig = makeDefaultViewerConfig(
           types.ViewerConfigTypeName.IMAGE,
           state.user.layout.maxPaneId,
-          minImageSensorId
+          minSensorIds[ItemTypeName.IMAGE]
         )
         if (newConfig !== null) {
           dispatch(
