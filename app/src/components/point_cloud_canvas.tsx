@@ -71,6 +71,20 @@ const fragmentShader = `
         testPoint.y < halfSize.y &&
         testPoint.z < halfSize.z;
     }
+    
+    bool pointInNearby(vec3 point) {
+      vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
+      vec3 halfSize = selectionSize / 2.;
+      float expandX = min(halfSize.x, 0.5);
+      float expandY = min(halfSize.y, 0.5);
+      float expandZ = min(halfSize.z, 0.5);
+      return (testPoint.x < halfSize.x + expandX && 
+              testPoint.y < halfSize.y + expandY && 
+              testPoint.z < halfSize.z + expandZ) &&
+             (testPoint.x > halfSize.x || 
+              testPoint.y > halfSize.y || 
+              testPoint.z > halfSize.z);
+    }
 
     void main() {
       float alpha = 0.5;
@@ -82,7 +96,12 @@ const fragmentShader = `
           alpha = 1.0;
           color.x *= 2.0;
           color.yz *= 0.5;
-        }
+        } else if (pointInNearby(worldPosition)) {
+          alpha = 1.0;
+          color.x = 0.0;
+          color.y = 256.0;
+          color.z = 0.0;
+        };
       } else {
         alpha = 1.0;
       }

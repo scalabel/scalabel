@@ -309,4 +309,18 @@ export class Box3D extends Label3D {
       label.shapes[0]
     )
   }
+
+  /**
+   * copy the label
+   *
+   * @param shape
+   */
+  public setShape(shape: ShapeType): void {
+    if (shape.id !== this._shape.shapeId) {
+      this.labelList.clearHistShapes()
+      return
+    }
+    super.setShape(shape)
+    this._shape.updateState(shape, this._shape.shapeId)
+  }
 }
