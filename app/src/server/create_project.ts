@@ -418,7 +418,7 @@ function getAttributeMaps(
     // Map attribute name to its index and its value
     attributeNameMap[configAttribute.name] = [attrInd, configAttribute]
     // Map attribute values to their indices (if its a list)
-    if (configAttribute.toolType === "list") {
+    if (configAttribute.type === "list") {
       const values = configAttribute.values
       for (let valueInd = 0; valueInd < values.length; valueInd++) {
         const value = values[valueInd]
