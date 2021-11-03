@@ -220,18 +220,18 @@ export function updateCanvasScale(
   // Resize canvas
   const item = getCurrentItem(state)
   const image = Session.images[item.index][config.sensor]
-  const ratio = image.width / image.height
+  const ratio = image?.width / image?.height
   let canvasHeight
   let canvasWidth
   let displayToImageRatio
   if (displayRect.width / displayRect.height > ratio) {
     canvasHeight = displayRect.height * config.viewScale
     canvasWidth = canvasHeight * ratio
-    displayToImageRatio = canvasHeight / image.height
+    displayToImageRatio = canvasHeight / image?.height
   } else {
     canvasWidth = displayRect.width * config.viewScale
     canvasHeight = canvasWidth / ratio
-    displayToImageRatio = canvasWidth / image.width
+    displayToImageRatio = canvasWidth / image?.width
   }
 
   // Set canvas resolution
