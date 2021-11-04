@@ -148,9 +148,9 @@ export default class CreateForm extends React.Component<Props, State> {
               <option value={ItemTypeName.IMAGE}>Image</option>
               <option value={ItemTypeName.VIDEO}>Video Tracking</option>
               <option value={ItemTypeName.POINT_CLOUD}>Point Cloud</option>
-              {/* <option value={ItemTypeName.POINT_CLOUD_TRACKING}>*/}
-              {/*  Point Cloud Tracking*/}
-              {/* </option>*/}
+              <option value={ItemTypeName.POINT_CLOUD_TRACKING}>
+                Point Cloud Tracking
+              </option>
               {/* <option value={ItemTypeName.FUSION}>Fusion</option>*/}
             </TextField>
             <TextField
