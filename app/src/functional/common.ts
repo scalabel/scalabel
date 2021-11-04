@@ -364,7 +364,11 @@ export function addTrack(
 function mergeTracksInItems(
   tracks: TrackType[],
   items: ItemType[]
-): [TrackType, ItemType[]] {
+): [TrackType, ItemType[]] | [null, []] {
+  if (tracks.length === 0) {
+    return [null, []]
+  }
+
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
   const props: Array<Array<Partial<LabelType>>> = _.range(
@@ -406,8 +410,14 @@ export function mergeTracks(
   const mergedTracks = action.trackIds.map((trackId) => task.tracks[trackId])
   const tracks = removeObjectFields(task.tracks, action.trackIds)
   const [track, items] = mergeTracksInItems(mergedTracks, task.items)
-  tracks[track.id] = track
-  task = updateObject(task, { items, tracks })
+
+  if (track !== null && items.length > 0) {
+    tracks[track.id] = track
+    task = updateObject(task, { items, tracks })
+  } else {
+    window.alert("No tracks currently selected.")
+  }
+
   session = updateObject(session, { trackLinking: false })
   return { ...state, task, session }
 }

@@ -392,9 +392,13 @@ export class ToolBar extends Component<Props> {
   private unlinkSelectedTrack(state: State): void {
     const select = this.state.user.select
     const track = getSelectedTracks(state)[0]
-    const newTrackId = makeTrack().id
 
-    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    if (track !== undefined) {
+      const newTrackId = makeTrack().id
+      Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    } else {
+      window.alert("No tracks currently selected.")
+    }
   }
 
   /**
