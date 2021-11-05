@@ -174,10 +174,6 @@ class RayModelServerScheduler(object):
             self.redis.publish(model_notify_channel, ModelStatus.INVALID.value)
             return
 
-        # if it does not change the current status, return (happens when a new seesion is created)
-        if self.task_configs[task_name]["active"] == active:
-            return
-
         # change the status according to the message, and save the change
         self.task_configs[task_name]["active"] = active
         self.save_config(task_name)
@@ -185,11 +181,13 @@ class RayModelServerScheduler(object):
         model = self.task_models[task_name]
 
         if active:
-            model.activate.remote()
+            if self.task_configs[task_name]["active"] != active:
+                model.activate.remote()
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
             self.logger.info(f"{task_name} reset to active.")
         else:
-            model.idle.remote()
+            if self.task_configs[task_name]["active"] != active:
+                model.idle.remote()
             self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
             self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
 
