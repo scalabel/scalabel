@@ -316,22 +316,22 @@ export abstract class Label2D {
 
     for (const attributeId of Object.keys(attributes)) {
       const attribute = config.attributes[Number(attributeId)]
-      if (attribute.toolType === "switch") {
+      if (attribute.type === "switch") {
         if (attributes[Number(attributeId)][0] > 0) {
-          abbr += "," + attribute.tagText
-          tw += 36
+          abbr += "," + attribute.tag
+          tw += 20
         }
-      } else if (attribute.toolType === "list") {
+      } else if (attribute.type === "list") {
         if (
           Number(attributeId) in Object.keys(attribute.tagSuffixes) &&
           attributes[Number(attributeId)][0] > 0
         ) {
           abbr +=
             "," +
-            attribute.tagText +
+            attribute.tag +
             ":" +
             attribute.tagSuffixes[attributes[Number(attributeId)][0]]
-          tw += 72
+          tw += 40
         }
       }
     }
@@ -341,6 +341,15 @@ export abstract class Label2D {
     ctx.fillStyle = "rgb(0,0,0)"
     ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, x * ratio + 6, y * ratio - 6)
+    if (config.tracking) {
+      if (this._label !== null) {
+        abbr = this._label?.track.substring(0, 3)
+      }
+      ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
+      ctx.fillRect(x * ratio, y * ratio, 60, TAG_HEIGHT)
+      ctx.fillStyle = "rgb(0,0,0)"
+      ctx.fillText(abbr, x * ratio + 6, y * ratio + TAG_HEIGHT - 6)
+    }
     ctx.restore()
   }
 

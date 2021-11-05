@@ -81,6 +81,9 @@ export enum Key {
   ENTER = "Enter",
   PERIOD = ".",
   SLASH = "/",
+  EQUAL = "=",
+  PLUS = "+",
+  MINUS = "-",
   DOWN = "Down",
   UP = "Up",
   LEFT = "Left",
@@ -158,5 +161,6 @@ export enum AttributeToolType {
 export enum QueryArg {
   PROJECT_NAME = "project_name",
   TASK_INDEX = "task_index",
+  TASK_ID = "task_id",
   DEV_MODE = "dev"
 }

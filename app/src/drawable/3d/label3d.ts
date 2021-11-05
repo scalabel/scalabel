@@ -341,6 +341,15 @@ export abstract class Label3D {
       this.selected = false
     }
   }
+
+  /**
+   * copy the label
+   *
+   * @param _shape
+   */
+  public setShape(_shape: ShapeType): void {
+    this._labelList.addUpdatedLabel(this)
+  }
 }
 
 export default Label3D

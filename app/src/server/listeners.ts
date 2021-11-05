@@ -1,21 +1,20 @@
 import { NextFunction, Request, Response } from "express"
 import { File } from "formidable"
 import { filterXSS } from "xss"
-import _ from "lodash"
 
-import { DashboardContents } from "../components/dashboard"
+import { DashboardContents, TaskOptions } from "../components/dashboard"
 import { getSubmissionTime } from "../components/util"
 import { FormField } from "../const/project"
 import { DatasetExport, ItemExport } from "../types/export"
 import { Project } from "../types/project"
-import { TaskType } from "../types/state"
 import {
   createProject,
   createTasks,
   parseFiles,
   parseSingleFile,
   parseForm,
-  readConfig
+  readConfig,
+  filterIntersectedPolygonsInProject
 } from "./create_project"
 import { convertStateToExport } from "./export"
 import { FileStorage } from "./file_storage"
@@ -23,10 +22,16 @@ import Logger from "./logger"
 import { getExportName } from "./path"
 import { ProjectStore } from "./project_store"
 import { S3Storage } from "./s3_storage"
-import { getProjectOptions, getProjectStats, getTaskOptions } from "./stats"
+import {
+  getDefaultTaskOptions,
+  getProjectOptions,
+  getProjectStats,
+  getTaskOptions
+} from "./stats"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { parseProjectName } from "./util"
+import { QueryArg } from "../const/common"
 
 /**
  * Wraps HTTP listeners
@@ -340,8 +345,7 @@ export class Listeners {
     project.items = items
     const oldTasks = await this.projectStore.getTasksInProject(projectName)
     const taskStartNum = oldTasks.length
-    const tasks = await createTasks(project, taskStartNum, itemStartNum)
-    await this.projectStore.saveTasks(tasks)
+    await createTasks(project, this.projectStore, taskStartNum, itemStartNum)
 
     res.sendStatus(200)
   }
@@ -382,16 +386,21 @@ export class Listeners {
     try {
       const projectName = req.query.name as string
 
-      const project = await this.projectStore.loadProject(projectName)
+      const project = await this.projectStore.loadProjectInfo(projectName)
       const projectMetaData = getProjectOptions(project)
 
-      const savedTasks = await this.projectStore.loadTaskStates(projectName)
-      const taskOptions = _.map(savedTasks, getTaskOptions)
+      const taskKeys = await this.projectStore.getTaskKeysInProject(projectName)
+
+      let taskOptions: TaskOptions[] = []
+      taskKeys.forEach((_taskKey: string) => {
+        taskOptions = taskOptions.concat(getDefaultTaskOptions(project.config))
+      })
 
       const numUsers = await this.userManager.countUsers(projectName)
       const contents: DashboardContents = {
         projectMetaData,
         taskMetaDatas: taskOptions,
+        taskKeys,
         numUsers
       }
 
@@ -424,6 +433,32 @@ export class Listeners {
   }
 
   /**
+   * Return task metadata
+   *
+   * @param req
+   * @param res
+   */
+  public async taskMetaDataHandler(req: Request, res: Response): Promise<void> {
+    if (this.checkInvalidGet(req, res)) {
+      return
+    }
+
+    try {
+      const projectName = req.query[QueryArg.PROJECT_NAME] as string
+      const taskId = req.query[QueryArg.TASK_ID] as string
+
+      const savedState = await this.projectStore.loadState(projectName, taskId)
+      const savedTask = savedState.task
+      const taskOption = getTaskOptions(savedTask)
+
+      res.send(JSON.stringify(taskOption))
+    } catch (err) {
+      Logger.error(err)
+      res.send(filterXSS(err.message))
+    }
+  }
+
+  /**
    * Finishes project creation using processed dicts
    *
    * @param storage
@@ -447,15 +482,14 @@ export class Listeners {
           : await parseSingleFile(storage, form.labelType, files)
       // Create the project from the form data
       const project = await createProject(form, formFileData)
+      const [filteredProject, msg] = filterIntersectedPolygonsInProject(project)
+
       await Promise.all([
-        this.projectStore.saveProject(project),
+        this.projectStore.saveProject(filteredProject),
         // Create tasks then save them
-        createTasks(project).then(
-          async (tasks: TaskType[]) => await this.projectStore.saveTasks(tasks)
-        )
-        // Save the project
+        createTasks(filteredProject, this.projectStore)
       ])
-      res.send()
+      res.send(filterXSS(msg))
     } catch (err) {
       Logger.error(err)
       // Alert the user that something failed

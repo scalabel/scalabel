@@ -28,13 +28,13 @@ export const testJson: DeepPartialState = {
       attributes: [
         {
           name: "Occluded",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "o"
+          type: AttributeToolType.SWITCH,
+          tag: "o"
         },
         {
           name: "Truncated",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "t"
+          type: AttributeToolType.SWITCH,
+          tag: "t"
         }
       ],
       taskId: "000000"

@@ -40,8 +40,8 @@ export const testJson: DeepPartialState = {
       attributes: [
         {
           name: "Occluded",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "o",
+          type: AttributeToolType.SWITCH,
+          tag: "o",
           tagSuffixes: [],
           tagPrefix: "",
           values: [],
@@ -49,8 +49,8 @@ export const testJson: DeepPartialState = {
         },
         {
           name: "Truncated",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "t",
+          type: AttributeToolType.SWITCH,
+          tag: "t",
           tagSuffixes: [],
           tagPrefix: "",
           values: [],
@@ -58,8 +58,8 @@ export const testJson: DeepPartialState = {
         },
         {
           name: "Traffic Light Color",
-          toolType: AttributeToolType.LIST,
-          tagText: "t",
+          type: AttributeToolType.LIST,
+          tag: "t",
           tagSuffixes: ["", "g", "y", "r"],
           tagPrefix: "",
           values: ["NA", "G", "Y", "R"],
@@ -712,8 +712,8 @@ export const emptyTrackingTask: DeepPartialState = {
       attributes: [
         {
           name: "Occluded",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "o",
+          type: AttributeToolType.SWITCH,
+          tag: "o",
           tagSuffixes: [],
           tagPrefix: "",
           values: [],
@@ -721,8 +721,8 @@ export const emptyTrackingTask: DeepPartialState = {
         },
         {
           name: "Truncated",
-          toolType: AttributeToolType.SWITCH,
-          tagText: "t",
+          type: AttributeToolType.SWITCH,
+          tag: "t",
           tagSuffixes: [],
           tagPrefix: "",
           values: [],
@@ -730,8 +730,8 @@ export const emptyTrackingTask: DeepPartialState = {
         },
         {
           name: "Traffic Color Light",
-          toolType: AttributeToolType.LIST,
-          tagText: "t",
+          type: AttributeToolType.LIST,
+          tag: "t",
           tagSuffixes: ["", "g", "y", "r"],
           tagPrefix: "",
           values: ["NA", "G", "Y", "R"],

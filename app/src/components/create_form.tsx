@@ -15,7 +15,7 @@ import { checkboxStyle, uploadStyle } from "../styles/create"
 import UploadButton from "./upload_button"
 
 // Submission timeout
-export const submissionTimeout = 5000
+export const submissionTimeout = 600000
 interface ClassType {
   /** root class */
   root: string
@@ -147,11 +147,11 @@ export default class CreateForm extends React.Component<Props, State> {
               <option />
               <option value={ItemTypeName.IMAGE}>Image</option>
               <option value={ItemTypeName.VIDEO}>Video Tracking</option>
-              {/* <option value={ItemTypeName.POINT_CLOUD}>Point Cloud</option>
-              <option value={ItemTypeName.POINT_CLOUD_TRACKING}>
-                Point Cloud Tracking
-              </option>
-              <option value={ItemTypeName.FUSION}>Fusion</option> */}
+              <option value={ItemTypeName.POINT_CLOUD}>Point Cloud</option>
+              {/* <option value={ItemTypeName.POINT_CLOUD_TRACKING}>*/}
+              {/*  Point Cloud Tracking*/}
+              {/* </option>*/}
+              {/* <option value={ItemTypeName.FUSION}>Fusion</option>*/}
             </TextField>
             <TextField
               value={this.state.labelType}
@@ -175,8 +175,8 @@ export default class CreateForm extends React.Component<Props, State> {
               <option value={LabelTypeName.BOX_2D}>Bounding Box</option>
               <option value={LabelTypeName.POLYGON_2D}>Polygon</option>
               <option value={LabelTypeName.POLYLINE_2D}>Polyline</option>
-              {/* <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
-              <option value={LabelTypeName.CUSTOM_2D}>Custom</option> */}
+              <option value={LabelTypeName.BOX_3D}>3D Bounding Box</option>
+              {/* <option value={LabelTypeName.CUSTOM_2D}>Custom</option>*/}
             </TextField>
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
@@ -248,12 +248,12 @@ export default class CreateForm extends React.Component<Props, State> {
                 form_id={FormField.LABEL_SPEC}
                 with_json
               />
-              {/* <StyledUpload
+              <StyledUpload
                 required={false}
                 label={"Sensors"}
                 form_id={FormField.SENSORS}
                 with_json
-              /> */}
+              />
             </FormGroup>
           )}
           <FormGroup row={true} className={classes.formGroup}>
@@ -384,25 +384,24 @@ export default class CreateForm extends React.Component<Props, State> {
     x.timeout = submissionTimeout
     x.onreadystatechange = () => {
       if (x.readyState === 4) {
+        this.setState((prevState: State) => ({
+          projectName: prevState.projectName.replace(/\s/g, "_")
+        }))
+        this.setState((prevState: State) => ({
+          dashboardUrl: "./dashboard?project_name=" + prevState.projectName
+        }))
+        this.setState((prevState: State) => ({
+          vendorUrl: "./vendor?project_name=" + prevState.projectName
+        }))
+        if (this.props.projectReloadCallback !== undefined) {
+          this.props.projectReloadCallback()
+        }
+        if (!this.state.hasSubmitted) {
+          this.setState({ hasSubmitted: true })
+        }
         // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         if (x.response) {
           alert(x.response)
-        } else {
-          this.setState((prevState: State) => ({
-            projectName: prevState.projectName.replace(/\s/g, "_")
-          }))
-          this.setState((prevState: State) => ({
-            dashboardUrl: "./dashboard?project_name=" + prevState.projectName
-          }))
-          this.setState((prevState: State) => ({
-            vendorUrl: "./vendor?project_name=" + prevState.projectName
-          }))
-          if (this.props.projectReloadCallback !== undefined) {
-            this.props.projectReloadCallback()
-          }
-          if (!this.state.hasSubmitted) {
-            this.setState({ hasSubmitted: true })
-          }
         }
       }
     }

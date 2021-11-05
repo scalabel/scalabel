@@ -1,4 +1,4 @@
-import { ItemExport } from "./export"
+import { ItemExport, ItemGroupExport } from "./export"
 import {
   Attribute,
   Category,
@@ -13,6 +13,8 @@ import {
 export interface Project {
   /** array of items */
   items: Array<Partial<ItemExport>>
+  /** array of item groups */
+  itemGroups?: Array<Partial<ItemGroupExport>>
   /** frontend config */
   config: ConfigType
   /** map between data source id and data sources */
@@ -51,6 +53,8 @@ export interface FormFileData {
   attributes: Attribute[]
   /** items parsed from form file (may be incomplete) */
   items: Array<Partial<ItemExport>>
+  /** item groups */
+  itemGroups?: Array<Partial<ItemGroupExport>>
 }
 
 /** metadata associated with a state */

@@ -15,7 +15,12 @@ import {
   makeTask,
   makeTrack
 } from "../functional/states"
-import { DatasetExport, ItemExport } from "../types/export"
+import {
+  DatasetExport,
+  ItemExport,
+  ItemGroupExport,
+  LabelExport
+} from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
   Attribute,
@@ -33,6 +38,8 @@ import { convertItemToImport } from "./import"
 import { ProjectStore } from "./project_store"
 import { Storage } from "./storage"
 import * as util from "./util"
+import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
+import Logger from "./logger"
 
 /**
  * convert fields to form and validate input
@@ -142,7 +149,7 @@ export async function parseFiles(
   ]).then(
     (
       result: [
-        Array<Partial<ItemExport>>,
+        [Array<Partial<ItemExport>>, Array<Partial<ItemGroupExport>>],
         SensorType[],
         Label2DTemplateType[],
         Attribute[],
@@ -150,7 +157,8 @@ export async function parseFiles(
       ]
     ) => {
       return {
-        items: result[0],
+        items: result[0][0],
+        itemGroups: result[0][1],
         sensors: result[1],
         templates: result[2],
         attributes: result[3],
@@ -184,7 +192,9 @@ export async function parseSingleFile(
     )
     return {
       items: dataset.frames as Array<Partial<ItemExport>>,
-      sensors: [],
+      itemGroups: dataset.frameGroups !== undefined ? dataset.frameGroups : [],
+      sensors:
+        dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
       attributes: dataset.config.attributes as Attribute[],
       categories: categories
@@ -277,22 +287,26 @@ export async function parseItems(
   storage: Storage,
   files: { [key: string]: string },
   itemsRequired: boolean
-): Promise<Array<Partial<ItemExport>>> {
+): Promise<[Array<Partial<ItemExport>>, Array<Partial<ItemGroupExport>>]> {
   if (FormField.ITEMS in files) {
     let items = await readConfig<Array<Partial<ItemExport>> | DatasetExport>(
       storage,
       files[FormField.ITEMS],
       []
     )
+    let itemGroups: Array<Partial<ItemGroupExport>> = []
+    if ("frameGroups" in items) {
+      itemGroups = items.frameGroups as Array<Partial<ItemGroupExport>>
+    }
     if ("frames" in items) {
       items = items.frames
     }
-    return items
+    return [items, itemGroups]
   } else {
     if (itemsRequired) {
       throw new Error("No item file.")
     } else {
-      return []
+      return [[], []]
     }
   }
 }
@@ -362,6 +376,7 @@ export async function createProject(
   const project: Project = {
     config,
     items: projectItems,
+    itemGroups: formFileData.itemGroups,
     sensors
   }
   return Promise.resolve(project)
@@ -403,7 +418,7 @@ function getAttributeMaps(
     // Map attribute name to its index and its value
     attributeNameMap[configAttribute.name] = [attrInd, configAttribute]
     // Map attribute values to their indices (if its a list)
-    if (configAttribute.toolType === "list") {
+    if (configAttribute.type === "list") {
       const values = configAttribute.values
       for (let valueInd = 0; valueInd < values.length; valueInd++) {
         const value = values[valueInd]
@@ -428,6 +443,26 @@ function getCategoryMap(configCategories: string[]): { [key: string]: number } {
     categoryNameMap[category] = catInd
   }
   return categoryNameMap
+}
+
+/**
+ * Create a map for quick lookup of items by their name
+ *
+ * @param items
+ */
+function getItemNameMap(
+  items: Array<Partial<ItemExport>>
+): { [key: string]: number } {
+  const itemNameMap: { [key: string]: number } = {}
+  for (let itemInd = 0; itemInd < items.length; itemInd++) {
+    const item = items[itemInd]
+    let itemName: string = ""
+    item.name !== undefined
+      ? (itemName = item.name)
+      : (itemName = item.url as string)
+    itemNameMap[itemName] = itemInd
+  }
+  return itemNameMap
 }
 
 /**
@@ -459,59 +494,152 @@ function filterInvalidItems(
 }
 
 /**
+ * Make item groups
+ *
+ * @param items
+ * @param itemGroups
+ */
+function makeItemGroups(
+  items: Array<Partial<ItemExport>>,
+  itemGroups?: Array<Partial<ItemGroupExport>>
+): Array<Partial<ItemGroupExport>> {
+  if (itemGroups !== undefined && itemGroups.length > 0) {
+    return itemGroups
+  } else {
+    const newItemGroups: Array<Partial<ItemGroupExport>> = []
+    for (const item of items) {
+      const itemSensor = item.sensor as number
+      let itemName = item.url as string
+      if (item.name !== undefined) {
+        itemName = item.name
+      }
+      const newItemGroup: Partial<ItemGroupExport> = {
+        timestamp: util.getItemTimestamp(item),
+        frames: { [itemSensor]: itemName },
+        videoName: item.videoName
+      }
+      newItemGroups.push(newItemGroup)
+    }
+    return newItemGroups
+  }
+}
+
+/**
+ * If the imported items have polygon annotations,
+ * check whether the polygon have intersections. Filter them and throw a warning
+ *
+ * @param project
+ */
+export function filterIntersectedPolygonsInProject(
+  project: Project
+): [Project, string] {
+  const items = project.items
+  let msg: string = ""
+  let numberOfIntersections = 0
+
+  const newItems = items.map((item) => {
+    let newItem: Partial<ItemExport> = item
+    if (item.labels !== undefined) {
+      const filteredLabels: LabelExport[] = []
+      item.labels.forEach((label) => {
+        if (label.poly2d !== undefined && label.poly2d !== null) {
+          label.poly2d.forEach((poly) => {
+            // If it is a polyline label, do not check intersection
+            if (!poly.closed) {
+              filteredLabels.push(label)
+            } else {
+              // This is a workaround for importing bdd100k labels.
+              // Its polygon may contain vertices that is very close (<1)
+              // And the intersection there always appear under this situation
+              // So we merge them first to avoid intersection
+              poly.vertices = mergeNearbyVertices(poly.vertices, 1)
+              // Check whether the polygon have intersections
+              const intersectionData = polyIsComplex(poly.vertices)
+              if (intersectionData.length > 0) {
+                numberOfIntersections += intersectionData.length
+                intersectionData.forEach((seg) => {
+                  msg = `Image url: ${
+                    item.url !== undefined ? item.url.toString() : ""
+                  }\n`
+                  msg += `polygon ID: ${label.id.toString()}\n`
+                  msg += `Segment1: (${seg[0]}, ${seg[1]}, ${seg[2]}, ${seg[3]})\n`
+                  msg += `Segment2: (${seg[4]}, ${seg[5]}, ${seg[6]}, ${seg[7]})\n`
+                  msg += `\n`
+                })
+              } else {
+                filteredLabels.push(label)
+              }
+            }
+          })
+        } else {
+          filteredLabels.push(label)
+        }
+      })
+      newItem = {
+        ...newItem,
+        labels: filteredLabels
+      }
+    }
+    return newItem
+  })
+
+  if (numberOfIntersections > 0) {
+    msg =
+      `Found and filtered${numberOfIntersections} polygon intersection(s)!\n` +
+      msg +
+      "Please check your data."
+    Logger.warning(msg)
+  }
+
+  project.items = newItems
+  return [project, msg]
+}
+
+/**
  * Partitions the item into tasks
  * Returns list of task indices in format [start, stop) for every task
  *
- * @param items
+ * @param itemGroups
  * @param tracking
  * @param taskSize
  */
 function partitionItemsIntoTasks(
-  items: Array<Partial<ItemExport>>,
+  itemGroups: Array<Partial<ItemGroupExport>>,
   tracking: boolean,
   taskSize: number
 ): number[] {
-  const taskIndices: number[] = []
+  const taskGroupIndices: number[] = []
   if (tracking) {
     // Partition by video name
     let prevVideoName: string
-    items.forEach((value, index) => {
+    itemGroups.forEach((value, index) => {
       if (value.videoName !== undefined) {
         if (value.videoName !== prevVideoName) {
-          taskIndices.push(index)
+          taskGroupIndices.push(index)
           prevVideoName = value.videoName
         }
       }
     })
+    taskGroupIndices.push(itemGroups.length)
   } else {
-    // Partition uniformly
-    for (let i = 0; i < items.length; i += taskSize) {
-      taskIndices.push(i)
-    }
-  }
-  taskIndices.push(items.length)
-  return taskIndices
-}
-
-/**
- * Map from data source id to list of items
- *
- * @param items
- */
-function mapSensorToItems(
-  items: Array<Partial<ItemExport>>
-): { [id: number]: Array<Partial<ItemExport>> } {
-  const itemsBySensor: { [id: number]: Array<Partial<ItemExport>> } = {}
-  for (const item of items) {
-    const sensorId = item.sensor
-    if (sensorId !== undefined) {
-      if (!(sensorId in itemsBySensor)) {
-        itemsBySensor[sensorId] = []
+    // If we have multiple sensors,
+    // we should make those belong to the same group into the same task
+    let currentSize = 0
+    taskGroupIndices.push(0)
+    for (let i = 0; i < itemGroups.length; i += 1) {
+      currentSize += Object.keys(
+        itemGroups[i].frames as { [id: number]: string }
+      ).length
+      if (currentSize >= taskSize) {
+        taskGroupIndices.push(i + 1)
+        currentSize = 0
       }
-      itemsBySensor[sensorId].push(item)
+    }
+    if (currentSize > 0) {
+      taskGroupIndices.push(itemGroups.length)
     }
   }
-  return itemsBySensor
+  return taskGroupIndices
 }
 
 /**
@@ -520,13 +648,17 @@ function mapSensorToItems(
  * Task and item start number are used if other tasks/items already exist
  *
  * @param project
+ * @param projectStore
  * @param taskStartNum
  * @param itemStartNum
+ * @param returnTask
  */
 export async function createTasks(
   project: Project,
+  projectStore?: ProjectStore,
   taskStartNum: number = 0,
-  itemStartNum: number = 0
+  itemStartNum: number = 0,
+  returnTask: boolean = false
 ): Promise<TaskType[]> {
   const sensors = project.sensors
   const { itemType, taskSize, tracking } = project.config
@@ -535,7 +667,9 @@ export async function createTasks(
 
   // Update sensor info
   if (itemType !== ItemTypeName.FUSION) {
-    sensors[-1] = makeSensor(-1, "default", itemType)
+    if (Object.keys(sensors).length === 0) {
+      sensors[-1] = makeSensor(-1, "default", itemType)
+    }
     let maxSensorId = Math.max(
       ...Object.keys(sensors).map((key) => Number(key))
     )
@@ -560,7 +694,12 @@ export async function createTasks(
     }
   }
 
-  const itemIndices = partitionItemsIntoTasks(items, tracking, taskSize)
+  const itemGroups = makeItemGroups(items, project.itemGroups)
+  const itemGroupIndices = partitionItemsIntoTasks(
+    itemGroups,
+    tracking,
+    taskSize
+  )
 
   /* create quick lookup dicts for conversion from export type
    * to external type for attributes/categories
@@ -571,26 +710,20 @@ export async function createTasks(
   const categoryNameMap = getCategoryMap(project.config.categories)
   const tasks: TaskType[] = []
 
-  for (let taskIndex = 0; taskIndex < itemIndices.length - 1; taskIndex++) {
-    const itemStartIndex = itemIndices[taskIndex]
-    const itemEndIndex = itemIndices[taskIndex + 1]
-    const taskItems = items.slice(itemStartIndex, itemEndIndex)
-    const itemsBySensor = mapSensorToItems(taskItems)
-    const sensorIds = Object.keys(itemsBySensor).map(Number)
+  const itemNameMap = getItemNameMap(items)
+  for (
+    let taskIndex = 0;
+    taskIndex < itemGroupIndices.length - 1;
+    taskIndex++
+  ) {
+    const itemGroupStartIndex = itemGroupIndices[taskIndex]
+    const itemGroupEndIndex = itemGroupIndices[taskIndex + 1]
+    const taskItemGroups = itemGroups.slice(
+      itemGroupStartIndex,
+      itemGroupEndIndex
+    )
 
-    let realTaskSize = 0
-    let largestSensor = -1
-    const sensorMatchingIndices: { [id: number]: number } = {}
-    for (const sensorId of sensorIds) {
-      itemsBySensor[sensorId] = _.sortBy(itemsBySensor[sensorId], [
-        (itemExport) => util.getItemTimestamp(itemExport)
-      ])
-      realTaskSize = Math.max(realTaskSize, itemsBySensor[sensorId].length)
-      if (realTaskSize === itemsBySensor[sensorId].length) {
-        largestSensor = sensorId
-      }
-      sensorMatchingIndices[sensorId] = 0
-    }
+    const realTaskSize = taskItemGroups.length
 
     /* assign task id,
      and update task size in case there aren't enough items */
@@ -608,34 +741,21 @@ export async function createTasks(
     const itemsForTask: ItemType[] = []
     const trackMap: TrackIdMap = {}
     for (let itemInd = 0; itemInd < realTaskSize; itemInd += 1) {
-      const timestampToMatch = itemsBySensor[largestSensor][
-        sensorMatchingIndices[largestSensor]
-      ].timestamp as number
       const itemExportMap: { [id: number]: Partial<ItemExport> } = {}
-      for (const key of Object.keys(sensorMatchingIndices)) {
+      const taskItemGroup = taskItemGroups[itemInd]
+      const taskItemDict = taskItemGroup.frames as { [id: number]: string }
+      for (const key of Object.keys(taskItemDict)) {
         const sensorId = Number(key)
-        let newIndex = sensorMatchingIndices[sensorId]
-        const itemExports = itemsBySensor[sensorId]
-        while (
-          newIndex < itemExports.length - 1 &&
-          Math.abs(
-            (itemExports[newIndex + 1].timestamp as number) - timestampToMatch
-          ) <
-            Math.abs(
-              (itemExports[newIndex].timestamp as number) - timestampToMatch
-            )
-        ) {
-          newIndex++
-        }
-        sensorMatchingIndices[sensorId] = newIndex
-        itemExportMap[sensorId] = itemExports[newIndex]
+        const taskItemName = taskItemDict[sensorId]
+        const taskItemInd = itemNameMap[taskItemName]
+        itemExportMap[sensorId] = items[taskItemInd]
       }
 
       // Id is not relative to task, unlike index
-      const itemId = itemStartIndex + itemInd + itemStartNum
-      const timestamp = util.getItemTimestamp(itemExportMap[largestSensor])
+      const itemId = itemGroupStartIndex + itemInd + itemStartNum
+      const timestamp = util.getItemTimestamp(taskItemGroup)
       const newItem = convertItemToImport(
-        itemExportMap[largestSensor].videoName as string,
+        taskItemGroup.videoName as string,
         timestamp,
         itemExportMap,
         itemInd,
@@ -660,8 +780,6 @@ export async function createTasks(
       maxOrder += Object.keys(newItem.labels).length
 
       itemsForTask.push(newItem)
-
-      sensorMatchingIndices[largestSensor]++
     }
 
     // Update the num labels/shapes based on imports
@@ -677,7 +795,13 @@ export async function createTasks(
       tracks: trackMap
     }
     const task = makeTask(partialTask)
-    tasks.push(task)
+    if (projectStore !== undefined) {
+      await projectStore.saveTasks([task])
+    }
+
+    if (returnTask) {
+      tasks.push(task)
+    }
   }
   return Promise.resolve(tasks)
 }

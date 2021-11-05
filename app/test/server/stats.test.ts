@@ -22,7 +22,7 @@ beforeAll(() => {
       }),
       makers.makeAttribute({
         name: "Traffic light color",
-        toolType: AttributeToolType.LIST,
+        type: AttributeToolType.LIST,
         values: ["N/A", "G", "Y", "R"]
       })
     ]

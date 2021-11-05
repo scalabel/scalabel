@@ -12,7 +12,7 @@ import numpy as np
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayF64, NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32, NDArrayU8
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
 from ..label.typing import Category, Config, Frame, Label
@@ -45,7 +45,7 @@ METRIC_MAPS = {
 METRIC_TO_AVERAGE = set(["IDF1", "MOTA", "MOTP"])
 
 
-class BoxTrackResult(Result):
+class TrackResult(Result):
     """The class for bounding box tracking evaluation results."""
 
     mMOTA: float
@@ -175,7 +175,7 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps = np.ones(pred_bboxes_c.shape[0]).astype(bool)
+                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0]).astype(bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
@@ -300,7 +300,7 @@ def generate_results(
     metrics: List[str],
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> BoxTrackResult:
+) -> TrackResult:
     """Compute summary metrics for evaluation results."""
     ave_dict = compute_average(flat_dicts, metrics, classes)
     class_names.insert(len(flat_dicts) - 1, AVERAGE)
@@ -335,7 +335,7 @@ def generate_results(
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
-    return BoxTrackResult(**res_dict)
+    return TrackResult(**res_dict)
 
 
 def evaluate_track(
@@ -347,7 +347,7 @@ def evaluate_track(
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
-) -> BoxTrackResult:
+) -> TrackResult:
     """Evaluate CLEAR MOT metrics for a Scalabel format dataset.
 
     Args:
@@ -362,7 +362,7 @@ def evaluate_track(
         nproc: processes number for loading files
 
     Returns:
-        BoxTrackResult: rendered eval results.
+        TrackResult: rendered eval results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
@@ -441,7 +441,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--out-file",
-        default="none",
+        default="",
         help="Output path for mot evaluation results.",
     )
     parser.add_argument(
@@ -478,7 +478,11 @@ if __name__ == "__main__":
     gt_frames, cfg = dataset.frames, dataset.config
     if args.config is not None:
         cfg = load_label_config(args.config)
-    assert cfg is not None
+    if cfg is None:
+        raise ValueError(
+            "Dataset config is not specified. Please use --config"
+            " to specify a config for this dataset."
+        )
     eval_result = evaluate_track(
         acc_single_video_mot,
         group_and_sort(gt_frames),
@@ -493,4 +497,4 @@ if __name__ == "__main__":
     logger.info(eval_result.summary())
     if args.out_file:
         with open_write_text(args.out_file) as fp:
-            json.dump((eval_result.json()), fp)
+            json.dump(eval_result.dict(), fp, indent=2)
