@@ -9,6 +9,7 @@ import {
   ViewerConfigType
 } from "../types/state"
 import { makeItem } from "./states"
+import { ItemTypeName, ViewerConfigTypeName } from "../const/common"
 
 // TODO- move these to selector file and use hierarchical structure
 
@@ -259,4 +260,65 @@ export function getSelectedTracks(state: State): TrackType[] {
   }
 
   return tracks
+}
+
+/**
+ * Get set of sensor types
+ *
+ * @param state
+ */
+export function getSensorTypes(state: State): Set<ViewerConfigTypeName> {
+  const sensors = Object.entries(state.task.sensors).map(([key, val]) => {
+    if (key === undefined) {
+      throw new Error("Sensor key is undefined")
+    } else {
+      switch (val.type) {
+        case "image":
+          return ViewerConfigTypeName.IMAGE
+        case "pointcloud":
+          return ViewerConfigTypeName.POINT_CLOUD
+        case "image3d":
+          return ViewerConfigTypeName.IMAGE_3D
+        case "homography":
+          return ViewerConfigTypeName.HOMOGRAPHY
+        default:
+          return ViewerConfigTypeName.UNKNOWN
+      }
+    }
+  })
+
+  return new Set(sensors)
+}
+
+/**
+ * Get minimum sensor ids for each item type
+ *
+ * @param state
+ */
+export function getMinSensorIds(state: State): { [type: string]: number } {
+  const sensorIds = Object.keys(state.task.sensors)
+    .map((key) => Number(key))
+    .sort((a, b) => a - b)
+
+  const minSensorIds: { [type: string]: number } = {
+    [ItemTypeName.IMAGE]: -1,
+    [ItemTypeName.POINT_CLOUD]: -1
+  }
+
+  if (sensorIds.length > 1) {
+    for (const sensorId of sensorIds) {
+      if (state.task.sensors[sensorId].type === ItemTypeName.IMAGE) {
+        minSensorIds[ViewerConfigTypeName.IMAGE] = sensorId
+        break
+      }
+    }
+    for (const sensorId of sensorIds) {
+      if (state.task.sensors[sensorId].type === ItemTypeName.POINT_CLOUD) {
+        minSensorIds[ViewerConfigTypeName.POINT_CLOUD] = sensorId
+        break
+      }
+    }
+  }
+
+  return minSensorIds
 }

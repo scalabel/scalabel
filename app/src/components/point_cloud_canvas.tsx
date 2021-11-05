@@ -168,7 +168,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       transparent: true
     })
 
-    this.pointCloud = new THREE.Points(undefined, material)
+    this.pointCloud = new THREE.Points(new THREE.BufferGeometry(), material)
   }
 
   /** mount callback */
