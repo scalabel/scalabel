@@ -552,13 +552,13 @@ export function filterIntersectedPolygonsInProject(
               // Its polygon may contain vertices that is very close (<1)
               // And the intersection there always appear under this situation
               // So we merge them first to avoid intersection
-              poly.vertices = mergeNearbyVertices(poly.vertices, 1)
+              poly.vertices = mergeNearbyVertices(poly.vertices, 2)
               // Check whether the polygon have intersections
               const intersectionData = polyIsComplex(poly.vertices)
               if (intersectionData.length > 0) {
                 numberOfIntersections += intersectionData.length
                 intersectionData.forEach((seg) => {
-                  msg = `Image url: ${
+                  msg += `Image url: ${
                     item.url !== undefined ? item.url.toString() : ""
                   }\n`
                   msg += `polygon ID: ${label.id.toString()}\n`
@@ -585,7 +585,7 @@ export function filterIntersectedPolygonsInProject(
 
   if (numberOfIntersections > 0) {
     msg =
-      `Found and filtered${numberOfIntersections} polygon intersection(s)!\n` +
+      `Found and filtered ${numberOfIntersections} polygon intersection(s)!\n` +
       msg +
       "Please check your data."
     Logger.warning(msg)

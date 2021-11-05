@@ -36,6 +36,30 @@ export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
   vertices.push(vertices[0])
   for (let i = 0; i < vertices.length - 1; i++) {
     for (let j = i + 1; j < vertices.length - 1; j++) {
+      if (
+        vertices[i][0] === vertices[j][0] &&
+        vertices[i][1] === vertices[j][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i][0] === vertices[j + 1][0] &&
+        vertices[i][1] === vertices[j + 1][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i + 1][0] === vertices[j][0] &&
+        vertices[i + 1][1] === vertices[j][1]
+      ) {
+        continue
+      }
+      if (
+        vertices[i + 1][0] === vertices[j + 1][0] &&
+        vertices[i + 1][1] === vertices[j + 1][1]
+      ) {
+        continue
+      }
       if (j - i === 1 || j - i === vertices.length - 2) {
         continue
       }
