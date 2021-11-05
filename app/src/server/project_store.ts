@@ -20,6 +20,7 @@ import {
   makeUserMetadata,
   safeParseJSON
 } from "./util"
+import { ItemExport } from "../types/export"
 
 /**
  * Wraps redis cache and storage basic functionality
@@ -180,14 +181,41 @@ export class ProjectStore {
   }
 
   /**
+   * Loads the project except all the labels to decrease the loading time
+   *
+   * @param projectName
+   */
+  public async loadProjectInfo(projectName: string): Promise<Project> {
+    let key = path.getProjectInfoKey(projectName)
+    if (!(await this.storage.hasKey(key))) {
+      key = path.getProjectKey(projectName)
+    }
+    const fields = await this.storage.load(key)
+    const loadedProject = safeParseJSON(fields) as Project
+    return loadedProject
+  }
+
+  /**
    * Saves the project
    *
    * @param project
    */
   public async saveProject(project: Project): Promise<void> {
     const key = path.getProjectKey(project.config.projectName)
-    const data = JSON.stringify(project, null, 2)
+    let data = JSON.stringify(project, null)
     await this.save(key, data)
+
+    const toSaveProjectItems: Array<Partial<ItemExport>> = []
+    for (const item of project.items) {
+      const toSaveProjectItem: Partial<ItemExport> = {
+        ...item,
+        labels: []
+      }
+      toSaveProjectItems.push(toSaveProjectItem)
+    }
+    const toSaveProject = { ...project, items: toSaveProjectItems }
+    data = JSON.stringify(toSaveProject, null, 2)
+    await this.save(key + "_info", data)
   }
 
   /**
@@ -216,6 +244,20 @@ export class ProjectStore {
   }
 
   /**
+   * gets all task keys in project sorted by index
+   *
+   * @param projectName
+   */
+  public async getTaskKeysInProject(projectName: string): Promise<string[]> {
+    const taskDir = path.getTaskDir(projectName)
+    const keys = await this.storage.listKeys(taskDir, false)
+    keys.sort((a: string, b: string) => {
+      return parseInt(a, 10) - parseInt(b, 10)
+    })
+    return keys
+  }
+
+  /**
    * Get the latest state for each task in the project
    * Check redis first, then memory
    * If there is no saved state for a task, returns the initial task
@@ -241,13 +283,11 @@ export class ProjectStore {
    * @param tasks
    */
   public async saveTasks(tasks: TaskType[]): Promise<void> {
-    const promises: Array<Promise<void>> = []
     for (const task of tasks) {
       const key = path.getTaskKey(task.config.projectName, task.config.taskId)
       const data = JSON.stringify(task, null, 2)
-      promises.push(this.save(key, data))
+      await this.save(key, data)
     }
-    await Promise.all(promises)
   }
 
   /**

@@ -1325,6 +1325,8 @@ function updateSplitCounts(
         parent.numVerticalChildren++
       }
       panes[parent.id] = parent
+    } else {
+      break
     }
     pane = parent
     paneId = pane.id

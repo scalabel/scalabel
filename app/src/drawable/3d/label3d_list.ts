@@ -1,9 +1,10 @@
+import _ from "lodash"
 import * as THREE from "three"
 
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
 import { makeState } from "../../functional/states"
-import { IdType, State } from "../../types/state"
+import { IdType, ShapeType, State } from "../../types/state"
 import { Box3D } from "./box3d"
 import { TransformationControl } from "./control/transformation_control"
 import { Label3D, labelTypeFromString } from "./label3d"
@@ -52,6 +53,8 @@ export class Label3DList {
   private readonly _callbacks: Array<() => void>
   /** New labels to be committed */
   private readonly _updatedLabels: Set<Label3D>
+  /** History shapes */
+  private readonly _histShapes: ShapeType[]
 
   /**
    * Constructor
@@ -69,6 +72,7 @@ export class Label3DList {
     this._state = makeState()
     this._callbacks = []
     this._updatedLabels = new Set()
+    this._histShapes = []
   }
 
   /**
@@ -300,5 +304,50 @@ export class Label3DList {
   /** Clear uncommitted label list */
   public clearUpdatedLabels(): void {
     this._updatedLabels.clear()
+  }
+
+  /**
+   * push new shape to the history shape list
+   *
+   * @param shape
+   */
+  public addShapeToHistShapes(shape: ShapeType): void {
+    if (
+      this._histShapes.length > 0 &&
+      shape.id !== this._histShapes[this._histShapes.length - 1].id
+    ) {
+      this.clearHistShapes()
+    }
+    this._histShapes.push(shape)
+  }
+
+  /**
+   * reset label to previous status
+   */
+  public getLastShape(): ShapeType | null {
+    if (this._histShapes.length > 0) {
+      const shape = this._histShapes[this._histShapes.length - 1]
+      this._histShapes.splice(this._histShapes.length - 1, 1)
+      return shape
+    }
+    return null
+  }
+
+  /**
+   * clear the history label list
+   */
+  public clearHistShapes(): void {
+    this._histShapes.splice(0, this._histShapes.length)
+  }
+
+  /**
+   * return current selected object's shape
+   */
+  public getCurrentShape(): ShapeType {
+    const state = this._state
+    const item = state.task.items[state.user.select.item]
+    const label =
+      item.labels[state.user.select.labels[state.user.select.item][0]]
+    return _.cloneDeep(item.shapes[label.shapes[0]])
   }
 }

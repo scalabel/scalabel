@@ -264,6 +264,8 @@ export interface SensorMapType {
 }
 
 export interface ItemType {
+  /** project name */
+  names?: { [id: number]: string }
   /** The ID of the item */
   id: IdType
   /** The index of the item */
@@ -278,6 +280,10 @@ export interface ItemType {
   timestamp: number
   /** video item belongs to */
   videoName: string
+  /** intrinsics, overrides data source if present */
+  intrinsics?: { [id: number]: IntrinsicsType }
+  /** extrinsics, overrides data source if present */
+  extrinsics?: { [id: number]: ExtrinsicsType }
 }
 
 export interface Node2DType extends Vector2Type, ShapeType {
@@ -309,19 +315,19 @@ export interface Category {
 
 export interface Attribute {
   /** Attribute tool type */
-  toolType: AttributeToolType
+  type: AttributeToolType
   /** Attribute name */
   name: string
   /** Values of attribute */
   values: string[]
   /** Tag text */
-  tagText: string
+  tag: string
   /** Tag prefix */
   tagPrefix: string
   /** Tag suffixes */
   tagSuffixes: string[]
   /** button colors */
-  buttonColors: string[]
+  buttonColors?: string[]
 }
 
 /*

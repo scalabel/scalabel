@@ -1,6 +1,6 @@
 -
   name: Weather
-  toolType: list
+  type: list
   values:
     - NA
     - Rainy
@@ -18,18 +18,10 @@
     - o
     - p
     - f
-  buttonColors:
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
 
 -
   name: Scene
-  toolType: list
+  type: list
   values:
     - NA
     - Tunnel
@@ -47,18 +39,10 @@
     - c
     - g
     - h
-  buttonColors:
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
-    - white
 
 -
   name: Timeofday
-  toolType: list
+  type: list
   values:
     - NA
     - Daytime
@@ -70,8 +54,3 @@
     - day
     - n
     - daw
-  buttonColors:
-    - white
-    - white
-    - white
-    - white

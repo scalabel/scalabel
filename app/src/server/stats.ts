@@ -3,7 +3,7 @@ import _ from "lodash"
 import { ProjectOptions, TaskOptions } from "../components/dashboard"
 import { AttributeToolType } from "../const/common"
 import { Project } from "../types/project"
-import { Attribute, LabelType, TaskType } from "../types/state"
+import { Attribute, ConfigType, LabelType, TaskType } from "../types/state"
 
 /**
  * Extract ProjectOption from a Project
@@ -77,6 +77,20 @@ export function getTaskOptions(task: TaskType): TaskOptions {
 }
 
 /**
+ * Get default TaskOptions from a Task
+ *
+ * @param config
+ */
+export function getDefaultTaskOptions(config: ConfigType): TaskOptions {
+  return {
+    numLabeledItems: "-1",
+    numLabels: "-1",
+    submissions: [{ time: -1, user: "" }],
+    handlerUrl: config.handlerUrl
+  }
+}
+
+/**
  * Get the total number of items across all tasks
  *
  * @param tasks
@@ -107,7 +121,7 @@ export function getNumSubmissions(tasks: TaskType[]): number {
 function initAttributeStats(attributes: Attribute[]): AttributeStats {
   const attributesByName = _.keyBy(attributes, (attribute) => attribute.name)
   return _.mapValues(attributesByName, (attribute) => {
-    if (attribute.toolType === AttributeToolType.SWITCH) {
+    if (attribute.type === AttributeToolType.SWITCH) {
       return {
         false: 0,
         true: 0
@@ -147,7 +161,7 @@ function initCategoryStats(
  * @param index
  */
 function getAttributeValue(attribute: Attribute, index: number): string {
-  if (attribute.toolType === AttributeToolType.SWITCH) {
+  if (attribute.type === AttributeToolType.SWITCH) {
     return index === 1 ? "true" : "false"
   }
   return attribute.values[index]

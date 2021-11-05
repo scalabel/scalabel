@@ -32,6 +32,7 @@ import {
 import Label3dCanvas from "./label3d_canvas"
 import PointCloudCanvas from "./point_cloud_canvas"
 import Tag3dCanvas from "./tag_3d_canvas"
+import { isCurrentItemLoaded } from "../functional/state_util"
 
 interface ClassType extends ViewerClassTypes {
   /** camera z lock */
@@ -146,6 +147,10 @@ class Viewer3D extends DrawableViewer<Props> {
 
   /** Called when component updates */
   public componentDidUpdate(): void {
+    const state = this.state
+    if (!isCurrentItemLoaded(state)) {
+      return
+    }
     if (this._viewerConfig !== undefined) {
       this.updateCamera(this._viewerConfig as PointCloudViewerConfigType)
 
@@ -204,6 +209,7 @@ class Viewer3D extends DrawableViewer<Props> {
       const config = this._viewerConfig as PointCloudViewerConfigType
       const yLockButton = (
         <IconButton
+          key={`yLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.Y_LOCKED)}
           className={this.props.classes.viewer_button}
         >
@@ -217,6 +223,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const xLockButton = (
         <IconButton
+          key={`xLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.X_LOCKED)}
           className={this.props.classes.viewer_button}
           edge={"start"}
@@ -231,6 +238,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const xAxisButton = (
         <IconButton
+          key={`xAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 0))
@@ -245,6 +253,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const yAxisButton = (
         <IconButton
+          key={`yAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 1))
@@ -258,6 +267,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const zAxisButton = (
         <IconButton
+          key={`zAxis${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 2))
@@ -271,6 +281,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const flipButton = (
         <IconButton
+          key={`flipButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -285,6 +296,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const synchronizationButton = (
         <IconButton
+          key={`synchronizationButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleSynchronization(this._viewerId, config))
@@ -295,6 +307,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const selectionLockButton = (
         <IconButton
+          key={`selectionLockButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this._viewerId, config))
@@ -305,6 +318,7 @@ class Viewer3D extends DrawableViewer<Props> {
       )
       const originButton = (
         <IconButton
+          key={`originButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -321,6 +335,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
       const viewerConfigButton = (
         <IconButton
+          key={`viewerConfigButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this.props.id, config))
@@ -358,6 +373,10 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected onMouseEnter(e: React.MouseEvent): void {
     super.onMouseEnter(e)
+    const state = this.state
+    if (!isCurrentItemLoaded(state)) {
+      return
+    }
     Session.label3dList.setActiveCamera(this._camera)
   }
 
@@ -728,7 +747,7 @@ class Viewer3D extends DrawableViewer<Props> {
     offset.setFromSpherical(spherical)
 
     // Rotate back to original coordinate space
-    const quatInverse = rotVertQuat.clone().inverse()
+    const quatInverse = rotVertQuat.clone().invert()
     offset.applyQuaternion(quatInverse)
     offset.add(target)
 
