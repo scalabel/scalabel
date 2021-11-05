@@ -113,6 +113,10 @@ export class Label3DHandler {
   public onMouseDown(x: number, y: number): boolean {
     if (Session.label3dList.control.highlighted) {
       this._mouseDownOnSelection = true
+      if (Session.label3dList.selectedLabel !== null) {
+        const shape = Session.label3dList.getCurrentShape()
+        Session.label3dList.addShapeToHistShapes(shape)
+      }
       Session.label3dList.control.onMouseDown(this._camera)
       return false
     }
@@ -121,6 +125,10 @@ export class Label3DHandler {
       const consumed = this._highlightedLabel.onMouseDown(x, y, this._camera)
       if (consumed) {
         this._mouseDownOnSelection = true
+        if (Session.label3dList.selectedLabel !== null) {
+          const shape = Session.label3dList.getCurrentShape()
+          Session.label3dList.addShapeToHistShapes(shape)
+        }
         return false
       }
     }
@@ -259,6 +267,9 @@ export class Label3DHandler {
       case Key.T_LOW:
         if (this.isKeyDown(Key.SHIFT)) {
           if (Session.label3dList.selectedLabel !== null) {
+            const shape = Session.label3dList.getCurrentShape()
+            Session.label3dList.addShapeToHistShapes(shape)
+
             const target = (this._viewerConfig as PointCloudViewerConfigType)
               .target
             Session.label3dList.selectedLabel.move(
@@ -272,10 +283,41 @@ export class Label3DHandler {
           }
         }
         break
+      case Key.F_UP:
+      case Key.F_LOW:
+        if (Session.label3dList.selectedLabel !== null) {
+          const shape = Session.label3dList.getCurrentShape()
+          Session.label3dList.addShapeToHistShapes(shape)
+
+          const quaternionInverse = Session.label3dList.selectedLabel.orientation
+            .clone()
+            .invert()
+          Session.label3dList.selectedLabel.rotate(quaternionInverse)
+          commitLabels(
+            [...Session.label3dList.updatedLabels.values()],
+            this._tracking
+          )
+        }
+        break
+      case Key.Z_UP:
+      case Key.Z_LOW:
+        if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {
+          const shape = Session.label3dList.getLastShape()
+          if (shape !== null && Session.label3dList.selectedLabel !== null) {
+            Session.label3dList.selectedLabel.setShape(shape)
+            commitLabels(
+              [...Session.label3dList.updatedLabels.values()],
+              this._tracking
+            )
+          }
+        }
     }
     if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
       if (consumed) {
+        const shape = Session.label3dList.getCurrentShape()
+        Session.label3dList.addShapeToHistShapes(shape)
+
         this._keyDownMap[e.key] = true
         if (this._keyThrottleTimer !== null) {
           window.clearTimeout(this._keyThrottleTimer)

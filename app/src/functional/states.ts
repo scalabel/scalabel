@@ -403,10 +403,10 @@ export function makeDefaultViewerConfig(
  */
 export function makeAttribute(params: Partial<Attribute> = {}): Attribute {
   return {
-    toolType: types.AttributeToolType.SWITCH,
+    type: types.AttributeToolType.SWITCH,
     name: "",
     values: [],
-    tagText: "",
+    tag: "",
     tagPrefix: "",
     tagSuffixes: [],
     buttonColors: [],
@@ -469,7 +469,7 @@ export function makeLabelExport(
   params: Partial<LabelExport> = {}
 ): LabelExport {
   return {
-    id: INVALID_ID,
+    id: genLabelId(),
     category: "",
     attributes: {},
     manualShape: true,

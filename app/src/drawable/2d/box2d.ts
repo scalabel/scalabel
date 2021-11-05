@@ -410,12 +410,17 @@ export class Box2D extends Label2D {
    */
   protected initTempLabel(state: State, start: Vector2D): LabelType {
     const itemIndex = state.user.select.item
+    let sensor = -1
+    if (state.user.viewerConfigs[0] !== undefined) {
+      sensor = state.user.viewerConfigs[0].sensor
+    }
     const label = makeLabel({
       type: LabelTypeName.BOX_2D,
       item: itemIndex,
       category: [state.user.select.category],
       attributes: state.user.select.attributes,
-      order: this._order
+      order: this._order,
+      sensors: [sensor]
     })
     const rect = makeRect({
       x1: start.x,

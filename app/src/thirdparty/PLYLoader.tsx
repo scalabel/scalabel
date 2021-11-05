@@ -341,6 +341,10 @@ export class PLYLoader {
       }
 
       geometry.computeBoundingSphere()
+      if (geometry.boundingSphere === undefined) {
+        geometry.boundingSphere = new THREE.Sphere()
+      }
+
       return geometry
     }
 

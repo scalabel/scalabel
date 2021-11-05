@@ -578,6 +578,10 @@ export class Polygon2D extends Label2D {
     this.editing = true
     this._state = Polygon2DState.DRAW
     const itemIndex = state.user.select.item
+    let sensor = -1
+    if (state.user.viewerConfigs[0] !== undefined) {
+      sensor = state.user.viewerConfigs[0].sensor
+    }
     const labelType = this._closed
       ? LabelTypeName.POLYGON_2D
       : LabelTypeName.POLYLINE_2D
@@ -585,7 +589,8 @@ export class Polygon2D extends Label2D {
       type: labelType,
       item: itemIndex,
       category: [state.user.select.category],
-      order: this._order
+      order: this._order,
+      sensors: [sensor]
     })
     this._highlightedHandle = 1
     return label

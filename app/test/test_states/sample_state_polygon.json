@@ -24,17 +24,17 @@
       "attributes": [
         {
           "name": "Occluded",
-          "toolType": "switch",
+          "type": "switch",
           "tagText": "o"
         },
         {
           "name": "Truncated",
-          "toolType": "switch",
+          "type": "switch",
           "tagText": "t"
         },
         {
           "name": "Traffic Light Color",
-          "toolType": "list",
+          "type": "list",
           "values": ["NA", "G", "Y", "R"],
           "tagPrefix": "t",
           "tagSuffixes": ["", "g", "y", "r"],

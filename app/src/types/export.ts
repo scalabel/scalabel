@@ -4,6 +4,7 @@ import {
   ExtrinsicsType,
   IntrinsicsType,
   ItemType,
+  SensorType,
   TaskStatus,
   TrackType,
   Vector3Type
@@ -23,6 +24,8 @@ export interface TaskData {
 export interface DatasetExport {
   /** items in dataset */
   frames: ItemExport[]
+  /** items group, contain multi-sensor information */
+  frameGroups?: ItemGroupExport[]
   /** shared fields for frames */
   config: ConfigExport
 }
@@ -43,11 +46,16 @@ export interface ItemExport {
   /** extrinsics, overrides data source if present */
   extrinsics?: ExtrinsicsType
   /** item attributes */
-  attributes: { [key: string]: string[] }
+  attributes: { [key: string]: string | string[] }
   /** submitted timestamp */
   timestamp: number
   /** item labels */
   labels: LabelExport[]
+}
+
+export interface ItemGroupExport extends ItemExport {
+  /** name of frames, the key is the id of the corresponding sensor*/
+  frames: { [id: number]: string }
 }
 
 export interface PolygonExportType {
@@ -105,7 +113,7 @@ export interface LabelExport {
   /** category */
   category: string
   /** label attributes- can be list or switch type */
-  attributes: { [key: string]: string[] | boolean }
+  attributes: { [key: string]: string | string[] | boolean }
   /** if shape was manual */
   manualShape: boolean
   /** box2d label */
@@ -115,9 +123,9 @@ export interface LabelExport {
   /** box3d label */
   box3d: Box3DType | null
   /** plane3d label */
-  plane3d: Plane3DType | null
+  plane3d?: Plane3DType | null
   /** custom labels */
-  customs: { [name: string]: CustomExportType }
+  customs?: { [name: string]: CustomExportType }
 }
 
 export interface ConfigExport {
@@ -127,6 +135,8 @@ export interface ConfigExport {
   attributes?: Attribute[]
   /** categories */
   categories: string[]
+  /** sensors */
+  sensors?: SensorType[]
 }
 
 export interface ImageSizeType {

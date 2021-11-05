@@ -149,15 +149,15 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
         for (const attributeId of Object.keys(attributes)) {
           const attribute = this._config.attributes[Number(attributeId)]
-          if (attribute.toolType === "switch") {
+          if (attribute.type === "switch") {
             if (attributes[Number(attributeId)][0] > 0) {
-              tag += "," + attribute.tagText
+              tag += "," + attribute.tag
             }
-          } else if (attribute.toolType === "list") {
+          } else if (attribute.type === "list") {
             if (attributes[Number(attributeId)][0] > 0) {
               tag +=
                 "," +
-                attribute.tagText +
+                attribute.tag +
                 ":" +
                 attribute.tagSuffixes[attributes[Number(attributeId)][0]]
             }

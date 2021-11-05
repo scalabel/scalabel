@@ -244,10 +244,10 @@ def evaluate_pose(
         nproc: the number of process.
 
     Returns:
-        DetResult: rendered eval results.
+        PoseResult: rendered eval results.
 
     Example usage:
-        evaluate_det(
+        evaluate_pose(
             "/path/to/gts",
             "/path/to/results",
             "/path/to/cfg",

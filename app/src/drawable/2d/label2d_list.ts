@@ -195,24 +195,36 @@ export class Label2DList {
     this._labelTemplates = state.task.config.label2DTemplates
     const itemIndex = state.user.select.item
     const item = state.task.items[itemIndex]
+    let sensor = -1
+    if (state.user.viewerConfigs[0] !== undefined) {
+      sensor = state.user.viewerConfigs[0].sensor
+    }
     // Remove any label not in the state
     this._labels = Object.assign({}, _.pick(this._labels, _.keys(item.labels)))
+    for (const key of Object.keys(this._labels)) {
+      if (!this._labels[key].label.sensors.includes(sensor)) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete this._labels[key]
+      }
+    }
     // Update drawable label values
     _.forEach(item.labels, (label, labelId) => {
-      if (!(labelId in this._labels)) {
-        const newLabel = makeDrawableLabel2D(
-          this,
-          label.type,
-          this._labelTemplates
-        )
-        if (newLabel !== null) {
-          this._labels[labelId] = newLabel
+      if (label.sensors.includes(sensor)) {
+        if (!(labelId in this._labels)) {
+          const newLabel = makeDrawableLabel2D(
+            this,
+            label.type,
+            this._labelTemplates
+          )
+          if (newLabel !== null) {
+            this._labels[labelId] = newLabel
+          }
         }
-      }
-      if (labelId in this._labels) {
-        const drawableLabel = this._labels[labelId]
-        if (!drawableLabel.editing) {
-          drawableLabel.updateState(state, itemIndex, labelId)
+        if (labelId in this._labels) {
+          const drawableLabel = this._labels[labelId]
+          if (!drawableLabel.editing) {
+            drawableLabel.updateState(state, itemIndex, labelId)
+          }
         }
       }
     })

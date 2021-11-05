@@ -167,7 +167,7 @@ export class ToolBar extends Component<Props> {
           {attributes.map((element: Attribute) => (
             <React.Fragment key={element.name}>
               {renderTemplate(
-                element.toolType,
+                element.type,
                 this.handleToggle,
                 this.handleAttributeToggle,
                 this.getAlignmentIndex,
