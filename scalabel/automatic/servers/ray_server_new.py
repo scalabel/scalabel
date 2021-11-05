@@ -183,13 +183,13 @@ class RayModelServerScheduler(object):
         if active:
             if self.task_configs[task_name]["active"] != active:
                 model.activate.remote()
+                self.logger.info(f"{task_name} reset to active.")
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
-            self.logger.info(f"{task_name} reset to active.")
         else:
             if self.task_configs[task_name]["active"] != active:
                 model.idle.remote()
+                self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
             self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
-            self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
 
     def request_handler(self, request_message):
         # decode request message
