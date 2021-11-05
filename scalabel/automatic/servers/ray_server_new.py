@@ -57,17 +57,24 @@ class RayModelServerScheduler(object):
         thread = subscriber.run_in_thread(sleep_time=0.001)
         self.threads[channel] = thread
 
+    # get task names in redis
+    @property
+    def redis_task_names(self):
+        return list(map(lambda x: x.decode(), self.redis.smembers("ModelServerTasks")))
+
+    def get_task_config(self, task_name):
+        if task_name in self.task_configs:
+            return self.task_configs[task_name]
+        else:
+            return json.loads(self.redis.get(task_name))
+
     # restore when server restarts, connects to redis channels.
     def restore(self):
-        task_names = self.redis.smembers("ModelServerTasks")
-        for task_name in task_names:
-            task_name = task_name.decode()
-            task_config = json.loads(self.redis.get(task_name))
+        for task_name in self.redis_task_names:
+            task_config = self.get_task_config(task_name)
 
             # if it is not a active task, do not restore it
-            if not task_config["active"]:
-                continue
-            if task_name in self.task_configs:
+            if not task_config["active"] or task_name in self.task_configs:
                 continue
 
             # send notification message to let them know the model is loading
@@ -227,11 +234,10 @@ class RayModelServerScheduler(object):
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
             return
         # if current task name is not in configs, check redis
-        elif task_name.encode() in self.redis.smembers("ModelServerTasks"):
-            self.logger.info(self.redis.smembers("ModelServerTasks"))
+        elif task_name in self.redis_task_names:
             self.redis.publish(model_notify_channel, ModelStatus.LOADING.value)
 
-            self.task_configs[task_name] = json.loads(self.redis.get(task_name))
+            self.task_configs[task_name] = self.get_task_config(task_name)
             self.task_configs[task_name]["active"] = True
 
             self.save_config(task_name)
