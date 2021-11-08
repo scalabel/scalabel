@@ -7,7 +7,7 @@ import scalabel.automatic.consts.redis_consts as RedisConsts
 
 def setup_task():
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    state_path = "{}/../testcases/test_task_state.json".format(cur_dir)
+    state_path = "{}/../testcases/test_task_state_polygon.json".format(cur_dir)
     with open(state_path, "r") as fp:
         register_message = json.dumps(json.load(fp))
 

@@ -23,6 +23,8 @@ import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
 from scalabel.automatic.consts import ModelStatus
 
+from scalabel.automatic.model_repo import add_general_config, add_polyrnnpp_config
+
 ray.init()
 serve.start(http_options={"port": 8001})
 
@@ -200,6 +202,11 @@ class RayModelServerScheduler(object):
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
         request_type = request_message["type"]
+        if "metaData" in request_message:
+            meta_data = request_message["metaData"]
+            # for polygon task, meta_data = {"bbox": [x1, y1, x2, y2]}
+        else:
+            meta_data = None
 
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
             request_data = {
@@ -214,7 +221,7 @@ class RayModelServerScheduler(object):
             inputs = [task_images[item["url"]] for item in request_data["items"]]
 
             model = self.task_models[f'{project_name}_{task_id}']
-            model.remote(inputs, request_data, request_type)
+            model.remote(inputs, meta_data, request_data, request_type)
 
     def register_task(self, task_type, project_name, task_id, item_list):
         # register task
@@ -251,7 +258,7 @@ class RayModelServerScheduler(object):
             model_name = model_registry_config["models"][model_registry_config["defaults"]["model"]]
             deploy_config = model_registry_config["defaults"]["deploy_config"]
 
-            self.initialize(task_name, model_name, deploy_config, item_list)
+            self.initialize(task_type, task_name, model_name, deploy_config, item_list)
 
             self.save(task_name)
             self.redis.sadd("ModelServerTasks", task_name)
@@ -261,11 +268,19 @@ class RayModelServerScheduler(object):
 
         self.redis.publish(model_notify_channel, ModelStatus.READY.value)
 
-    def initialize(self, task_name, model_name, deploy_config, item_list):
+    def initialize(self, task_type, task_name, model_name, deploy_config, item_list):
         cfg = get_cfg()
-        cfg.merge_from_file(model_zoo.get_config_file(model_name))
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
-        cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_name)
+        add_general_config(cfg)
+        if task_type == "OD":
+            cfg.merge_from_file(model_zoo.get_config_file(model_name))
+            cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
+            cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_name)
+        elif task_type == "Polygon":
+            cfg.TASK_TYPE = "Polygon"
+            add_polyrnnpp_config(cfg)
+            cfg.merge_from_file(model_name)
+        else:
+            raise NotImplementedError
 
         num_replicas = deploy_config["num_replicas"]
         RayModel.options(name=task_name, num_replicas=num_replicas).deploy(
@@ -287,6 +302,7 @@ class RayModelServerScheduler(object):
 
         # TODO: change this to multi-processing
         self.task_images[task_name] = ray.get(deploy_model.load_inputs.remote(item_list))
+        self.logger.info(list(self.task_images[task_name].values())[0]["image"].shape)
 
     def close(self, tash_name):
         self.threads[tash_name].stop()
@@ -322,6 +338,17 @@ def launch() -> None:
                     "bs_train": 1,
                     "batch_wait_time": 1,  # second
                     # above are currently useless
+                    "num_replicas": 1
+                }
+            }
+        },
+        "Polygon": {
+            "models": {
+                "POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"
+            },
+            "defaults": {
+                "model": "POLYRNN-PP",
+                "deploy_config": {
                     "num_replicas": 1
                 }
             }

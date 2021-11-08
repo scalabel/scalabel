@@ -38,9 +38,12 @@ class RayModel(object):
         checkpointer.load(cfg.MODEL.WEIGHTS)
         self.model.cuda().eval()
 
-        self.aug = T.ResizeShortestEdge(
-            [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
-        )
+        if self.cfg.TASK_TYPE == "OD":
+            self.aug = T.ResizeShortestEdge(
+                [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
+            )
+        else:
+            self.aug = None
 
         self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
         self.redis = redis.Redis(host=RedisConsts.REDIS_HOST, port=RedisConsts.REDIS_PORT)
@@ -48,9 +51,11 @@ class RayModel(object):
     @staticmethod
     def url_to_img(url, aug):
         img_response = requests.get(url)
+        # TODO: convert to bgr
         img = np.array(Image.open(BytesIO(img_response.content)))
         height, width = img.shape[:2]
-        img = aug.get_transform(img).apply_image(img)
+        if aug is not None:
+            img = aug.get_transform(img).apply_image(img)
         img = torch.as_tensor(img.astype("float32").transpose(2, 0, 1))
         return {"image": img, "height": height, "width": width}
 
@@ -64,25 +69,38 @@ class RayModel(object):
         return image_dict
 
     @serve.batch(max_batch_size=1)
-    async def handle_batch(self, inputs):
+    async def handle_batch_detection(self, inputs):
         with torch.no_grad():
             predictions = self.model(inputs)
             return predictions
 
-    # 0 for inference, 1 for training
-    async def __call__(self, inputs, request_data, request_type):
-        # inference
-        if request_type == QueryConsts.QUERY_TYPES["inference"]:
-            results = await self.handle_batch(inputs[0])
+    @serve.batch(max_batch_size=1)
+    async def handle_batch_polygon(self, inputs, meta_data):
+        with torch.no_grad():
+            predictions = self.model(inputs, meta_data)
+            return predictions
 
-            model_response_channel = self.model_response_channel % request_data["name"]
-            pred_boxes = []
-            for box in results["instances"].pred_boxes:
-                box = box.cpu().numpy()
-                pred_boxes.append(box.tolist())
-            item_indices = request_data["item_indices"]
-            action_packet_id = request_data["action_packet_id"]
-            self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+    # 0 for inference, 1 for training
+    async def __call__(self, inputs, meta_data, request_data, request_type):
+        # inference
+        if self.cfg.TASK_TYPE == "OD":
+            if request_type == QueryConsts.QUERY_TYPES["inference"]:
+                results = await self.handle_batch_detection(inputs[0])
+
+                model_response_channel = self.model_response_channel % request_data["name"]
+
+                pred_boxes = []
+                for box in results["instances"].pred_boxes:
+                    box = box.cpu().numpy()
+                    pred_boxes.append(box.tolist())
+                item_indices = request_data["item_indices"]
+                action_packet_id = request_data["action_packet_id"]
+                self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+        else:
+            if request_type == QueryConsts.QUERY_TYPES["inference"]:
+                results = await self.handle_batch_polygon(inputs[0], meta_data)
+
+                model_response_channel = self.model_response_channel % request_data["name"]
 
     def idle(self):
         self.model.cpu()
