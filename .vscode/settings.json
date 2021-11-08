@@ -28,7 +28,8 @@
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascript]": {
     "editor.tabSize": 2,
@@ -50,7 +51,7 @@
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2
-},
+  },
   "python.formatting.provider": "black",
   "python.linting.pylintEnabled": true,
   "python.linting.mypyEnabled": true,

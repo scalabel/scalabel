@@ -232,6 +232,10 @@ export class Label3DHandler {
                 center.fromState(this._sensor.extrinsics.translation)
                 center.add(new Vector3D().fromThree(worldDirection))
               }
+              break
+            case ViewerConfigTypeName.IMAGE:
+              center.fromState({ x: 0, y: 0, z: -10 })
+              break
           }
           label.init(
             this._selectedItemIndex,
