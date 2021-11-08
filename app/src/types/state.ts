@@ -112,7 +112,7 @@ export interface Vector4Type {
   z: number
 }
 
-export interface CubeType extends ShapeType {
+export interface SimpleCube {
   /** Center of the cube */
   center: Vector3Type
   /** size */
@@ -122,6 +122,8 @@ export interface CubeType extends ShapeType {
   /** Anchor corner index for reshaping */
   anchorIndex: number
 }
+
+export interface CubeType extends ShapeType, SimpleCube {}
 
 export type Point2DType = Vector2Type
 
