@@ -455,37 +455,37 @@ export class Polygon2D extends Label2D {
           lines.push([this._points[l], this._points[0]])
         }
       }
-      for (let i = 0; i < lines.length; i++) {
-        for (let j = i + 1; j < lines.length; j++) {
-          if (
-            lines[i][0].x === lines[j][0].x &&
-            lines[i][0].y === lines[j][0].y
-          ) {
-            continue
-          }
-          if (
-            lines[i][0].x === lines[j][1].x &&
-            lines[i][0].y === lines[j][1].y
-          ) {
-            continue
-          }
-          if (
-            lines[i][1].x === lines[j][0].x &&
-            lines[i][1].y === lines[j][0].y
-          ) {
-            continue
-          }
-          if (
-            lines[i][1].x === lines[j][1].x &&
-            lines[i][1].y === lines[j][1].y
-          ) {
-            continue
-          }
-          if (this.intersect(lines[i], lines[j])) {
-            return false
-          }
-        }
-      }
+      // for (let i = 0; i < lines.length; i++) {
+      //   for (let j = i + 1; j < lines.length; j++) {
+      //     if (
+      //       lines[i][0].x === lines[j][0].x &&
+      //       lines[i][0].y === lines[j][0].y
+      //     ) {
+      //       continue
+      //     }
+      //     if (
+      //       lines[i][0].x === lines[j][1].x &&
+      //       lines[i][0].y === lines[j][1].y
+      //     ) {
+      //       continue
+      //     }
+      //     if (
+      //       lines[i][1].x === lines[j][0].x &&
+      //       lines[i][1].y === lines[j][0].y
+      //     ) {
+      //       continue
+      //     }
+      //     if (
+      //       lines[i][1].x === lines[j][1].x &&
+      //       lines[i][1].y === lines[j][1].y
+      //     ) {
+      //       continue
+      //     }
+      //     if (this.intersect(lines[i], lines[j])) {
+      //       return false
+      //     }
+      //   }
+      // }
     } else {
       // TODO: check polyline validation
       if (this._points.length <= 1) {
@@ -1011,7 +1011,7 @@ export class Polygon2D extends Label2D {
    * @param a
    * @param b
    */
-  private intersect(a: PathPoint2D[], b: PathPoint2D[]): boolean {
+  public intersect(a: PathPoint2D[], b: PathPoint2D[]): boolean {
     const p1 = a[0]
     const q1 = a[1]
     const p2 = b[0]

@@ -13,8 +13,8 @@ import {
   parseFiles,
   parseSingleFile,
   parseForm,
-  readConfig,
-  filterIntersectedPolygonsInProject
+  readConfig
+  // filterIntersectedPolygonsInProject
 } from "./create_project"
 import { convertStateToExport } from "./export"
 import { FileStorage } from "./file_storage"
@@ -482,14 +482,14 @@ export class Listeners {
           : await parseSingleFile(storage, form.labelType, files)
       // Create the project from the form data
       const project = await createProject(form, formFileData)
-      const [filteredProject, msg] = filterIntersectedPolygonsInProject(project)
+      // const [filteredProject, msg] = filterIntersectedPolygonsInProject(project)
 
       await Promise.all([
-        this.projectStore.saveProject(filteredProject),
+        this.projectStore.saveProject(project),
         // Create tasks then save them
-        createTasks(filteredProject, this.projectStore)
+        createTasks(project, this.projectStore)
       ])
-      res.send(filterXSS(msg))
+      res.send()
     } catch (err) {
       Logger.error(err)
       // Alert the user that something failed
