@@ -63,21 +63,26 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
           id={this.props.id}
         />
       )
-      views.push(
-        <Label2dCanvas
-          key={`label2dCanvas${this.props.id}`}
-          display={this._container}
-          id={this.props.id}
-        />
-      )
-      views.push(
-        <Label3dCanvas
-          key={`label3dCanvas${this.props.id}`}
-          display={this._container}
-          id={this.props.id}
-          camera={new THREE.PerspectiveCamera(45, 1, 0.2, 1000)}
-        />
-      )
+      if (
+        this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
+      ) {
+        views.push(
+          <Label3dCanvas
+            key={`label3dCanvas${this.props.id}`}
+            display={this._container}
+            id={this.props.id}
+            camera={new THREE.PerspectiveCamera(45, 1, 0.2, 1000)}
+          />
+        )
+      } else {
+        views.push(
+          <Label2dCanvas
+            key={`label2dCanvas${this.props.id}`}
+            display={this._container}
+            id={this.props.id}
+          />
+        )
+      }
     }
 
     return views
