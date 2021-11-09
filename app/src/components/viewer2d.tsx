@@ -26,6 +26,7 @@ import {
 import ImageCanvas from "./image_canvas"
 import Label2dCanvas from "./label2d_canvas"
 import Label3dCanvas from "./label3d_canvas"
+import Tag3dCanvas from "./tag_3d_canvas"
 
 interface ClassType extends ViewerClassTypes {
   /** buttons */
@@ -66,12 +67,21 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       if (
         this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
       ) {
+        const cam = new THREE.PerspectiveCamera(45, 1, 0.2, 1000)
         views.push(
           <Label3dCanvas
             key={`label3dCanvas${this.props.id}`}
             display={this._container}
             id={this.props.id}
-            camera={new THREE.PerspectiveCamera(45, 1, 0.2, 1000)}
+            camera={cam}
+          />
+        )
+        views.push(
+          <Tag3dCanvas
+            key={`tag3dCanvas${this.props.id}`}
+            display={this._container}
+            id={this.props.id}
+            camera={cam}
           />
         )
       } else {
