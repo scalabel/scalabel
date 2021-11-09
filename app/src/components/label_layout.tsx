@@ -1,11 +1,14 @@
 import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
+import { Stack } from "@mui/material"
 import * as React from "react"
 import SplitPane from "react-split-pane"
 import Session from "../common/session"
 import { LayoutStyles } from "../styles/label"
 import LabelPane from "./label_pane"
 import PlayerControl from "./player_control"
+import { CustomAlert } from "../components/alert"
+import { Severity } from "../types/common"
 
 /**
  * Check whether a react node is empty
@@ -31,6 +34,8 @@ interface ClassType {
   interfaceContainer: string
   /** pane container */
   paneContainer: string
+  /** alerts */
+  alerts: string
 }
 
 interface Props {
@@ -162,6 +167,28 @@ class LabelLayout extends React.Component<Props, LayoutState> {
     )
   }
 
+  /** Return alerts */
+  protected getAlerts(): [] | JSX.Element[] {
+    const alerts: React.ReactElement[] = []
+    const state = Session.getState()
+    if (state.session.alerts !== []) {
+      state.session.alerts.forEach((alert) => {
+        alerts.push(
+          <CustomAlert
+            key={`alert${alert.id}`}
+            id={alert.id}
+            severity={alert.severity as Severity}
+            msg={alert.message}
+          />
+        )
+      })
+
+      return alerts
+    }
+
+    return []
+  }
+
   /**
    * Render function
    *
@@ -212,6 +239,9 @@ class LabelLayout extends React.Component<Props, LayoutState> {
       <React.Fragment>
         <CssBaseline />
         <div className={classes.titleBar}>{titleBar}</div>
+        <div className={classes.alerts}>
+          <Stack spacing={2}>{this.getAlerts()}</Stack>
+        </div>
         <main className={classes.main}>
           {this.split(
             "vertical",

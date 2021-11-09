@@ -31,6 +31,8 @@ import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -380,7 +382,7 @@ export class ToolBar extends Component<Props> {
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     } else {
-      window.alert("Selected tracks have overlapping frames.")
+      alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
   }
 
@@ -397,7 +399,7 @@ export class ToolBar extends Component<Props> {
       const newTrackId = makeTrack().id
       Session.dispatch(splitTrack(track.id, newTrackId, select.item))
     } else {
-      window.alert("No tracks currently selected.")
+      alert(Severity.WARNING, "No tracks currently selected.")
     }
   }
 

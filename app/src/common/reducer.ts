@@ -89,6 +89,10 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.ChangeSessionModeAction
       )
+    case actionConsts.ADD_ALERT:
+      return common.addAlert(state, action as actionTypes.AddAlertAction)
+    case actionConsts.CLOSE_ALERT:
+      return common.closeAlert(state, action as actionTypes.CloseAlertAction)
     case actionConsts.NULL:
       return state
     default:

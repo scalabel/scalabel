@@ -275,7 +275,7 @@ export const playerControlStyles = (): StyleRules<
   })
 
 export const LayoutStyles = (): StyleRules<
-  "titleBar" | "main" | "interfaceContainer" | "paneContainer",
+  "titleBar" | "main" | "interfaceContainer" | "paneContainer" | "alerts",
   {}
 > =>
   createStyles({
@@ -303,5 +303,13 @@ export const LayoutStyles = (): StyleRules<
       position: "absolute",
       top: 0,
       left: 0
+    },
+    alerts: {
+      display: "block",
+      left: "50%",
+      position: "absolute",
+      width: "auto",
+      height: "auto",
+      zIndex: 10
     }
   })

@@ -415,7 +415,7 @@ export function mergeTracks(
     tracks[track.id] = track
     task = updateObject(task, { items, tracks })
   } else {
-    window.alert("No tracks currently selected.")
+    alert("No tracks currently selected.")
   }
 
   session = updateObject(session, { trackLinking: false })
@@ -1564,6 +1564,51 @@ export function changeSessionMode(
 
   const newSession = updateObject(oldSession, {
     mode: newMode
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Add alert to state
+ *
+ * @param state
+ * @param action
+ */
+export function addAlert(
+  state: State,
+  action: actionTypes.AddAlertAction
+): State {
+  const oldSession = state.session
+  const newAlerts = oldSession.alerts
+  newAlerts.push(action.alert)
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    alerts: newAlerts
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Remove alert from state
+ *
+ * @param state
+ * @param action
+ */
+export function closeAlert(
+  state: State,
+  action: actionTypes.CloseAlertAction
+): State {
+  const oldSession = state.session
+  const newAlerts = oldSession.alerts.filter(
+    (alert) => alert.id !== action.alertId
+  )
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    alerts: newAlerts
   })
   return updateObject(state, {
     session: newSession

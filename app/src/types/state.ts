@@ -513,6 +513,17 @@ export const enum ModeStatus {
   SELECTING
 }
 
+export interface AlertType {
+  /** alert id */
+  id: string
+  /** alert message */
+  message: string
+  /** alert severity */
+  severity: string
+  /** alert timeout */
+  timeout: number
+}
+
 /**
  * Information for this particular session
  */
@@ -535,6 +546,8 @@ export interface SessionType {
   mode: ModeStatus
   /** Number of time status has changed */
   numUpdates: number
+  /** Alerts */
+  alerts: AlertType[]
 }
 
 export interface State {
@@ -555,7 +568,7 @@ type RecursivePartial<T> = {
 }
 
 /**
- * State where all properties are optiona
+ * State where all properties are optional
  * Used for initialization with test objects
  */
 export type DeepPartialState = RecursivePartial<State>
