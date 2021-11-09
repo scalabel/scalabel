@@ -119,10 +119,13 @@ export class Track {
     for (const item of items) {
       const labelId = this._track.labels[item]
       const label = state.task.items[item].labels[labelId]
-      this._labels[item] = label
-      this._shapes[item] = label.shapes.map(
-        (shapeId) => state.task.items[item].shapes[shapeId]
-      )
+
+      if (label !== undefined) {
+        this._labels[item] = label
+        this._shapes[item] = label.shapes.map(
+          (shapeId) => state.task.items[item].shapes[shapeId]
+        )
+      }
     }
   }
 
