@@ -152,50 +152,26 @@ def yaw_to_quaternion(yaw: float) -> Quaternion:
     ).elements
 
 
-def transform_boxes(
-    boxes: List[Box], ego_pose: DictStrAny, car_from_sensor: DictStrAny
-) -> None:
-    """Move boxes from world space to given sensor frame.
-
-    Note: mutates input boxes.
-    """
-    translation_car = -np.array(ego_pose["translation"])
-    rotation_car = Quaternion(ego_pose["rotation"]).inverse
-    translation_sensor = -np.array(car_from_sensor["translation"])
-    rotation_sensor = Quaternion(car_from_sensor["rotation"]).inverse
-    for box in boxes:
-        box.translate(translation_car)
-        box.rotate(rotation_car)
-        box.translate(translation_sensor)
-        box.rotate(rotation_sensor)
-
-
 def parse_labels(
     data: NuScenes,
     boxes: List[Box],
-    ego_pose: DictStrAny,
     calib_sensor: DictStrAny,
-    img_size: Optional[Tuple[int, int]] = None,
+    in_image_frame: bool = True,
 ) -> Optional[List[Label]]:
     """Parse NuScenes labels into sensor frame."""
     if len(boxes):
         labels = []
-        # transform into the sensor coord system
-        transform_boxes(boxes, ego_pose, calib_sensor)
         intrinsic_matrix = np.array(calib_sensor["camera_intrinsic"])
         for box in boxes:
             box_class = category_to_detection_name(box.name)
-            in_image = True
-            if img_size is not None:
-                in_image = box_in_image(box, intrinsic_matrix, img_size)
 
-            if in_image and box_class is not None:
+            if box_class is not None:
                 xyz = tuple(box.center.tolist())
                 w, l, h = box.wlh
-                roty = quaternion_to_yaw(box.orientation)
+                roty = quaternion_to_yaw(box.orientation, in_image_frame)
 
                 box2d = None
-                if img_size is not None:
+                if in_image_frame:
                     # Project 3d box to 2d.
                     corners = box.corners()
                     corner_coords = (
@@ -258,7 +234,6 @@ def parse_frame(
     scene_name: str,
     frame_index: int,
     cam_token: str,
-    boxes: Optional[List[Box]] = None,
 ) -> Tuple[Frame, Optional[str]]:
     """Parse a single camera frame."""
     cam_data = data.get("sample_data", cam_token)
@@ -268,11 +243,10 @@ def parse_frame(
     calibration_cam = data.get(
         "calibrated_sensor", cam_data["calibrated_sensor_token"]
     )
+    _, boxes_cam, _ = data.get_sample_data(cam_token)
     labels: Optional[List[Label]] = None
-    if boxes is not None:
-        labels = parse_labels(
-            data, boxes, ego_pose_cam, calibration_cam, img_wh
-        )
+    if boxes_cam:
+        labels = parse_labels(data, boxes_cam, calibration_cam, True)
 
     frame = Frame(
         name=os.path.basename(cam_filepath),
@@ -315,15 +289,15 @@ def parse_sequence(
         next_nonkey_frames = []
         for cam in cams:
             cam_token = sample["data"][cam]
-            boxes = data.get_boxes(lidar_token)
             frame, next_token = parse_frame(
-                data, scene_name, frame_index, cam_token, boxes
+                data, scene_name, frame_index, cam_token
             )
             frame_names.append(frame.name)
             frames.append(frame)
             if add_nonkey_frames and next_token is not None:
                 next_nonkey_frames.append(next_token)
 
+        _, boxes_lidar, _ = data.get_sample_data(lidar_token)
         group = FrameGroup(
             name=sample_token,
             videoName=scene_name,
@@ -332,9 +306,7 @@ def parse_sequence(
             extrinsics=get_extrinsics(ego_pose, calibration_lidar),
             timestamp=timestamp,
             frames=frame_names,
-            labels=parse_labels(
-                data, data.get_boxes(lidar_token), ego_pose, calibration_lidar
-            ),
+            labels=parse_labels(data, boxes_lidar, calibration_lidar, False),
         )
         groups.append(group)
         frame_index += 1
