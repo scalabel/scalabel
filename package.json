@@ -67,6 +67,8 @@
     "@babel/node": "^7.13.13",
     "@babel/preset-env": "^7.14.0",
     "@babel/preset-react": "^7.13.13",
+    "@emotion/react": "^11.5.0",
+    "@emotion/styled": "^11.3.0",
     "@fingerprintjs/fingerprintjs": "^3.1.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
@@ -75,6 +77,7 @@
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
+    "@mui/material": "^5.1.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@types/amazon-cognito-auth-js": "^1.2.2",
@@ -179,10 +182,5 @@
     "winston": "^3.3.3",
     "xss": "^1.0.8",
     "yargs": "^17.0.0"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@emotion/styled": "^11.3.0",
-    "@mui/material": "^5.1.0"
   }
 }
