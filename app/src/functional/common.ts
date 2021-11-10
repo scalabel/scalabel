@@ -414,8 +414,6 @@ export function mergeTracks(
   if (track !== null && items.length > 0) {
     tracks[track.id] = track
     task = updateObject(task, { items, tracks })
-  } else {
-    alert("No tracks currently selected.")
   }
 
   session = updateObject(session, { trackLinking: false })
@@ -1598,9 +1596,9 @@ export function addAlert(
  * @param state
  * @param action
  */
-export function closeAlert(
+export function removeAlert(
   state: State,
-  action: actionTypes.CloseAlertAction
+  action: actionTypes.RemoveAlertAction
 ): State {
   const oldSession = state.session
   const newAlerts = oldSession.alerts.filter(

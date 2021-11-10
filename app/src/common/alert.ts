@@ -14,7 +14,7 @@ export function alert(severity: Severity, msg: string): void {
     id: uid(),
     severity: severity,
     message: msg,
-    timeout: 10000
+    timeout: 12000
   }
   Session.dispatch(addAlert(alert))
 }

@@ -179,6 +179,7 @@ class LabelLayout extends React.Component<Props, LayoutState> {
             id={alert.id}
             severity={alert.severity as Severity}
             msg={alert.message}
+            timeout={alert.timeout}
           />
         )
       })
@@ -240,7 +241,7 @@ class LabelLayout extends React.Component<Props, LayoutState> {
         <CssBaseline />
         <div className={classes.titleBar}>{titleBar}</div>
         <div className={classes.alerts}>
-          <Stack spacing={2}>{this.getAlerts()}</Stack>
+          <Stack spacing={1}>{this.getAlerts()}</Stack>
         </div>
         <main className={classes.main}>
           {this.split(

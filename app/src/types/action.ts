@@ -219,7 +219,7 @@ export interface AddAlertAction extends BaseAction {
   alert: AlertType
 }
 
-export interface CloseAlertAction extends BaseAction {
+export interface RemoveAlertAction extends BaseAction {
   /** id of the alert to close */
   alertId: string
 }
@@ -242,7 +242,7 @@ export type SessionActionType =
   | UpdateStateAction
   | UpdateSessionStatusAction
   | AddAlertAction
-  | CloseAlertAction
+  | RemoveAlertAction
   | SyncActionType
 
 export type UserActionType =

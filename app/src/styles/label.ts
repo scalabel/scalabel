@@ -306,8 +306,8 @@ export const LayoutStyles = (): StyleRules<
     },
     alerts: {
       display: "block",
-      left: "50%",
       position: "absolute",
+      right: "3%",
       width: "auto",
       height: "auto",
       zIndex: 10

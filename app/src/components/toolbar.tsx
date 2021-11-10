@@ -379,6 +379,10 @@ export class ToolBar extends Component<Props> {
   private linkSelectedTracks(state: State): void {
     const tracks = getSelectedTracks(state)
 
+    if (tracks.length === 0) {
+      alert(Severity.WARNING, "No tracks currently selected.")
+    }
+
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     } else {

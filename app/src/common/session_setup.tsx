@@ -33,6 +33,8 @@ import Session from "./session"
 import { DispatchFunc, GetStateFunc } from "./simple_store"
 import { Track } from "./track"
 import * as types from "../const/common"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -155,7 +157,7 @@ function loadImages(
             image.src = `${url}#${new Date().getTime()}`
             attemptsMap[sensorId]++
           } else {
-            alert(`Failed to load image at ${url}`)
+            alert(Severity.ERROR, `Failed to load image at ${url}`)
           }
         }
         image.src = url
@@ -205,7 +207,7 @@ function loadPointClouds(
         const onError = (): void => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
-            alert(`Point cloud at ${url} was not found.`)
+            alert(Severity.ERROR, `Point cloud at ${url} was not found.`)
           } else {
             loader.load(url, onLoad, () => null, onError)
           }

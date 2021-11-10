@@ -806,7 +806,7 @@ export function addAlert(alert: AlertType): actionTypes.AddAlertAction {
  *
  * @param alertId
  */
-export function closeAlert(alertId: string): actionTypes.CloseAlertAction {
+export function removeAlert(alertId: string): actionTypes.RemoveAlertAction {
   return {
     ...makeBaseAction(actionConsts.CLOSE_ALERT),
     alertId
