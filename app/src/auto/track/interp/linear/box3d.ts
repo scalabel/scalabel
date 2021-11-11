@@ -58,7 +58,7 @@ function linearInterp3DBoxes(
     shape.center.x = diff.center.x * dist + first.center.x
     shape.center.y = diff.center.y * dist + first.center.y
     shape.center.z = diff.center.z * dist + first.center.z
-    shape.size.x = diff.size.x * dist + first.center.x
+    shape.size.x = diff.size.x * dist + first.size.x
     shape.size.y = diff.size.y * dist + first.size.y
     shape.size.z = diff.size.z * dist + first.size.z
     shape.orientation.x = diff.orientation.x * dist + first.orientation.x

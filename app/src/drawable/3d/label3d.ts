@@ -341,6 +341,7 @@ export abstract class Label3D {
     } else {
       this.selected = false
     }
+    this._temporary = false
   }
 
   /**
