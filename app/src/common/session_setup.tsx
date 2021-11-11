@@ -17,7 +17,12 @@ import {
 } from "../action/common"
 import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
-import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import {
+  DataType,
+  ItemTypeName,
+  LabelTypeName,
+  ViewerConfigTypeName
+} from "../const/common"
 import { getMinSensorIds } from "../functional/state_util"
 import { makeDefaultViewerConfig } from "../functional/states"
 import { scalabelTheme } from "../styles/theme"
@@ -217,6 +222,25 @@ function loadPointClouds(
 }
 
 /**
+ * Return viewer type required for given sensor and label types
+ *
+ * @param sensorType
+ * @param labelTypes
+ */
+function getViewerType(
+  sensorType: ViewerConfigTypeName,
+  labelTypes: LabelTypeName[]
+): ViewerConfigTypeName {
+  if (
+    sensorType === ViewerConfigTypeName.IMAGE &&
+    labelTypes.includes(LabelTypeName.BOX_3D)
+  ) {
+    return ViewerConfigTypeName.IMAGE_3D
+  }
+  return sensorType
+}
+
+/**
  * Create default viewer configs if none exist
  *
  * @param getState
@@ -230,8 +254,12 @@ function initViewerConfigs(
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const minSensorIds = getMinSensorIds(state)
     const sensor0 = state.task.sensors[minSensorIds[state.task.config.itemType]]
-    const config0 = makeDefaultViewerConfig(
+    const viewerType = getViewerType(
       sensor0.type as ViewerConfigTypeName,
+      state.task.config.labelTypes as LabelTypeName[]
+    )
+    const config0 = makeDefaultViewerConfig(
+      viewerType,
       0,
       minSensorIds[state.task.config.itemType]
     )
@@ -327,7 +355,10 @@ function initViewerConfigs(
 
         // Change last pane to image view if frame group contains image
         const newConfig = makeDefaultViewerConfig(
-          types.ViewerConfigTypeName.IMAGE,
+          getViewerType(
+            types.ViewerConfigTypeName.IMAGE,
+            state.task.config.labelTypes as LabelTypeName[]
+          ),
           state.user.layout.maxPaneId,
           minSensorIds[ItemTypeName.IMAGE]
         )

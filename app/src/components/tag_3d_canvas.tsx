@@ -206,8 +206,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
 
     if (
       viewerConfig.type === ViewerConfigTypeName.IMAGE_3D ||
-      viewerConfig.type === ViewerConfigTypeName.HOMOGRAPHY ||
-      viewerConfig.type === ViewerConfigTypeName.IMAGE
+      viewerConfig.type === ViewerConfigTypeName.HOMOGRAPHY
     ) {
       this.data2d = true
     } else {
