@@ -1,4 +1,6 @@
 import { IconButton } from "@material-ui/core"
+import Tooltip from "@mui/material/Tooltip"
+import Fade from "@mui/material/Fade"
 import FindReplaceIcon from "@material-ui/icons/FindReplace"
 import ZoomInIcon from "@material-ui/icons/ZoomIn"
 import ZoomOutIcon from "@material-ui/icons/ZoomOut"
@@ -81,70 +83,94 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
   protected getMenuComponents(): JSX.Element[] | [] {
     if (this._viewerConfig !== undefined) {
       const zoomInButton = (
-        <IconButton
+        <Tooltip
           key={`zoomIn2dButton${this.props.id}`}
-          onClick={() => {
-            if (this._container !== null) {
-              const rect = this._container.getBoundingClientRect()
-              let zoomRatio = SCROLL_ZOOM_RATIO
-              if (
-                this.isKeyDown(types.Key.META) ||
-                this.isKeyDown(types.Key.CONTROL)
-              ) {
-                zoomRatio = ZOOM_RATIO
-              }
-              this.zoom(
-                zoomRatio,
-                new Vector2D(rect.width / 2, rect.height / 2)
-              )
-            }
-          }}
-          className={this.props.classes.viewer_button}
+          title="Zoom in"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ZoomInIcon />
-        </IconButton>
+          <IconButton
+            onClick={() => {
+              if (this._container !== null) {
+                const rect = this._container.getBoundingClientRect()
+                let zoomRatio = SCROLL_ZOOM_RATIO
+                if (
+                  this.isKeyDown(types.Key.META) ||
+                  this.isKeyDown(types.Key.CONTROL)
+                ) {
+                  zoomRatio = ZOOM_RATIO
+                }
+                this.zoom(
+                  zoomRatio,
+                  new Vector2D(rect.width / 2, rect.height / 2)
+                )
+              }
+            }}
+            className={this.props.classes.viewer_button}
+          >
+            <ZoomInIcon />
+          </IconButton>
+        </Tooltip>
       )
       const zoomOutButton = (
-        <IconButton
+        <Tooltip
           key={`zoomOut2dButton${this.props.id}`}
-          onClick={() => {
-            if (this._container !== null) {
-              const rect = this._container.getBoundingClientRect()
-              let zoomRatio = 1 / SCROLL_ZOOM_RATIO
-              if (
-                this.isKeyDown(types.Key.META) ||
-                this.isKeyDown(types.Key.CONTROL)
-              ) {
-                zoomRatio = 1 / ZOOM_RATIO
-              }
-              this.zoom(
-                zoomRatio,
-                new Vector2D(rect.width / 2, rect.height / 2)
-              )
-            }
-          }}
-          className={this.props.classes.viewer_button}
-          edge={"start"}
+          title="Zoom out"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ZoomOutIcon />
-        </IconButton>
+          <IconButton
+            onClick={() => {
+              if (this._container !== null) {
+                const rect = this._container.getBoundingClientRect()
+                let zoomRatio = 1 / SCROLL_ZOOM_RATIO
+                if (
+                  this.isKeyDown(types.Key.META) ||
+                  this.isKeyDown(types.Key.CONTROL)
+                ) {
+                  zoomRatio = 1 / ZOOM_RATIO
+                }
+                this.zoom(
+                  zoomRatio,
+                  new Vector2D(rect.width / 2, rect.height / 2)
+                )
+              }
+            }}
+            className={this.props.classes.viewer_button}
+            edge={"start"}
+          >
+            <ZoomOutIcon />
+          </IconButton>
+        </Tooltip>
       )
       const resetZoomButton = (
-        <IconButton
+        <Tooltip
           key={`resetZoom2dButton${this.props.id}`}
-          onClick={() => {
-            const config = this._viewerConfig as ImageViewerConfigType
-            const newConfig = { ...config }
-            newConfig.displayLeft = 0
-            newConfig.displayTop = 0
-            newConfig.viewScale = 1
-            Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
-          }}
-          className={this.props.classes.viewer_button}
-          edge={"start"}
+          title="Reset zoom"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <FindReplaceIcon />
-        </IconButton>
+          <IconButton
+            onClick={() => {
+              const config = this._viewerConfig as ImageViewerConfigType
+              const newConfig = { ...config }
+              newConfig.displayLeft = 0
+              newConfig.displayTop = 0
+              newConfig.viewScale = 1
+              Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
+            }}
+            className={this.props.classes.viewer_button}
+            edge={"start"}
+          >
+            <FindReplaceIcon />
+          </IconButton>
+        </Tooltip>
       )
       return [zoomInButton, zoomOutButton, resetZoomButton]
     }
