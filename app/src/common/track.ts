@@ -258,7 +258,6 @@ export class Track {
    * Callback for when a label in the track is updated
    *
    * @param itemIndex
-   * @param newShapes
    * @param label
    */
   public update(itemIndex: number, label: Readonly<Label>): void {

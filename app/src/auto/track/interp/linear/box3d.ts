@@ -8,6 +8,7 @@ import {
   ShapeType
 } from "../../../../types/state"
 import { assignShapesInRange, getAutoLabelRange, TrackInterp } from "../interp"
+import * as THREE from "three"
 
 /**
  * Linearly interpolate the cubes from the first to the last in
@@ -39,15 +40,22 @@ function linearInterp3DBoxes(
     y: (last.size.y - first.size.y) / num,
     z: (last.size.z - first.size.z) / num
   }
-  const diffOrientation = {
-    x: (last.orientation.x - first.orientation.x) / num,
-    y: (last.orientation.y - first.orientation.y) / num,
-    z: (last.orientation.z - first.orientation.z) / num
-  }
+  const eulerFirst = new THREE.Euler().set(
+    first.orientation.x,
+    first.orientation.y,
+    first.orientation.z
+  )
+  const quaternionFirst = new THREE.Quaternion().setFromEuler(eulerFirst)
+  const eulerLast = new THREE.Euler().set(
+    last.orientation.x,
+    last.orientation.y,
+    last.orientation.z
+  )
+  const quaternionLast = new THREE.Quaternion().setFromEuler(eulerLast)
   const diff: SimpleCube = {
     center: diffCentre,
     size: diffSize,
-    orientation: diffOrientation,
+    orientation: first.orientation,
     anchorIndex: first.anchorIndex
   }
 
@@ -61,9 +69,15 @@ function linearInterp3DBoxes(
     shape.size.x = diff.size.x * dist + first.size.x
     shape.size.y = diff.size.y * dist + first.size.y
     shape.size.z = diff.size.z * dist + first.size.z
-    shape.orientation.x = diff.orientation.x * dist + first.orientation.x
-    shape.orientation.y = diff.orientation.y * dist + first.orientation.y
-    shape.orientation.z = diff.orientation.z * dist + first.orientation.z
+    const newQuaternion = new THREE.Quaternion().slerpQuaternions(
+      quaternionFirst,
+      quaternionLast,
+      dist / num
+    )
+    const newEuler = new THREE.Euler().setFromQuaternion(newQuaternion)
+    shape.orientation.x = newEuler.x
+    shape.orientation.y = newEuler.y
+    shape.orientation.z = newEuler.z
   }
   return newShapes
 }
