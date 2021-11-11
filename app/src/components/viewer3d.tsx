@@ -1,4 +1,6 @@
 import { Box, IconButton } from "@material-ui/core"
+import Tooltip from "@mui/material/Tooltip"
+import Fade from "@mui/material/Fade"
 import ImportExportIcon from "@material-ui/icons/ImportExport"
 import LockIcon from "@material-ui/icons/Lock"
 import SyncIcon from "@material-ui/icons/Sync"
@@ -207,9 +209,40 @@ class Viewer3D extends DrawableViewer<Props> {
   protected getMenuComponents(): [] | JSX.Element[] {
     if (this._viewerConfig !== undefined) {
       const config = this._viewerConfig as PointCloudViewerConfigType
-      const yLockButton = (
+
+      return [
+        this.getYLockButton(config),
+        this.getXLockButton(config),
+        this.getXAxisButton(config),
+        this.getYAxisButton(config),
+        this.getZAxisButton(config),
+        this.getFlipButton(config),
+        this.getSynchronizationButton(config),
+        this.getSelectionLockButton(config),
+        this.getOriginButton(config),
+        this.getViewerConfigButton(config)
+      ]
+    }
+
+    return []
+  }
+
+  /**
+   * y-axis lock button
+   *
+   * @param config
+   */
+  protected getYLockButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`yLockButton${this.props.id}`}
+        title="Lock Y-axis"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`yLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.Y_LOCKED)}
           className={this.props.classes.viewer_button}
         >
@@ -220,10 +253,26 @@ class Viewer3D extends DrawableViewer<Props> {
             config.lockStatus === CameraLockState.Y_LOCKED
           )}
         </IconButton>
-      )
-      const xLockButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * x-axis lock button
+   *
+   * @param config
+   */
+  protected getXLockButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`xLockButton${this.props.id}`}
+        title="Lock X-axis"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`xLockButton${this.props.id}`}
           onClick={() => this.toggleCameraLock(CameraLockState.X_LOCKED)}
           className={this.props.classes.viewer_button}
           edge={"start"}
@@ -235,10 +284,26 @@ class Viewer3D extends DrawableViewer<Props> {
             config.lockStatus === CameraLockState.X_LOCKED
           )}
         </IconButton>
-      )
-      const xAxisButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * snap to x-axis button
+   *
+   * @param config
+   */
+  protected getXAxisButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`xAxisButton${this.props.id}`}
+        title="Snap to X-axis"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`xAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 0))
@@ -250,10 +315,26 @@ class Viewer3D extends DrawableViewer<Props> {
             config.lockStatus === CameraLockState.SELECTION_X
           )}
         </IconButton>
-      )
-      const yAxisButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * snap to x-axis button
+   *
+   * @param config
+   */
+  protected getYAxisButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`yAxisButton${this.props.id}`}
+        title="Snap to Y-axis"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`yAxisButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 1))
@@ -264,10 +345,26 @@ class Viewer3D extends DrawableViewer<Props> {
             config.lockStatus === CameraLockState.SELECTION_Y
           )}
         </IconButton>
-      )
-      const zAxisButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * snap to x-axis button
+   *
+   * @param config
+   */
+  protected getZAxisButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`zAxis${this.props.id}`}
+        title="Snap to Z-axis"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`zAxis${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() =>
             Session.dispatch(alignToAxis(this.props.id, config, 2))
@@ -278,10 +375,26 @@ class Viewer3D extends DrawableViewer<Props> {
             config.lockStatus === CameraLockState.SELECTION_Z
           )}
         </IconButton>
-      )
-      const flipButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * flip button
+   *
+   * @param config
+   */
+  protected getFlipButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`flipButton${this.props.id}`}
+        title="Flip"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`flipButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -293,10 +406,28 @@ class Viewer3D extends DrawableViewer<Props> {
         >
           {underlineElement(<ImportExportIcon />, config.flipAxis)}
         </IconButton>
-      )
-      const synchronizationButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * synchronize views button
+   *
+   * @param config
+   */
+  protected getSynchronizationButton(
+    config: PointCloudViewerConfigType
+  ): JSX.Element {
+    return (
+      <Tooltip
+        key={`synchronizationButton${this.props.id}`}
+        title="Synchronize views"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`synchronizationButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleSynchronization(this._viewerId, config))
@@ -304,10 +435,28 @@ class Viewer3D extends DrawableViewer<Props> {
         >
           {underlineElement(<SyncIcon />, config.synchronized)}
         </IconButton>
-      )
-      const selectionLockButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * lock selection button
+   *
+   * @param config
+   */
+  protected getSelectionLockButton(
+    config: PointCloudViewerConfigType
+  ): JSX.Element {
+    return (
+      <Tooltip
+        key={`selectionLockButton${this.props.id}`}
+        title="Lock selection"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`selectionLockButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this._viewerId, config))
@@ -315,10 +464,26 @@ class Viewer3D extends DrawableViewer<Props> {
         >
           {underlineElement(<LockIcon />, lockedToSelection(config))}
         </IconButton>
-      )
-      const originButton = (
+      </Tooltip>
+    )
+  }
+
+  /**
+   * view origin button
+   *
+   * @param config
+   */
+  protected getOriginButton(config: PointCloudViewerConfigType): JSX.Element {
+    return (
+      <Tooltip
+        key={`originButton${this.props.id}`}
+        title="View origin"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`originButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             const newConfig = {
@@ -331,11 +496,28 @@ class Viewer3D extends DrawableViewer<Props> {
         >
           <TripOriginIcon />
         </IconButton>
-      )
+      </Tooltip>
+    )
+  }
 
-      const viewerConfigButton = (
+  /**
+   * viewer config button
+   *
+   * @param config
+   */
+  protected getViewerConfigButton(
+    config: PointCloudViewerConfigType
+  ): JSX.Element {
+    return (
+      <Tooltip
+        key={`viewerConfigButton${this.props.id}`}
+        title="Viewer config"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
         <IconButton
-          key={`viewerConfigButton${this.props.id}`}
           className={this.props.classes.viewer_button}
           onClick={() => {
             Session.dispatch(toggleRotation(this.props.id, config))
@@ -347,23 +529,8 @@ class Viewer3D extends DrawableViewer<Props> {
             config.cameraRotateDir === true
           )}
         </IconButton>
-      )
-
-      return [
-        yLockButton,
-        xLockButton,
-        xAxisButton,
-        yAxisButton,
-        zAxisButton,
-        flipButton,
-        synchronizationButton,
-        selectionLockButton,
-        originButton,
-        viewerConfigButton
-      ]
-    }
-
-    return []
+      </Tooltip>
+    )
   }
 
   /**
