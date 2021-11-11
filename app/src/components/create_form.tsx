@@ -475,7 +475,10 @@ export default class CreateForm extends React.Component<Props, State> {
     this.setState({ itemType: event.target.value })
     this.handlePageTitle(this.state.labelType, event.target.value)
 
-    if (event.target.value === "video") {
+    if (
+      event.target.value === "video" ||
+      event.target.value === "pointcloudtracking"
+    ) {
       this.setState({ showTaskSize: false })
     } else {
       this.setState({ showTaskSize: true })

@@ -71,7 +71,10 @@ export async function parseForm(
 
   // Task size is not required for videos
   let taskSize = 1 // Video case
-  if (fields[FormField.ITEM_TYPE] !== ItemTypeName.VIDEO) {
+  if (
+    fields[FormField.ITEM_TYPE] !== ItemTypeName.VIDEO &&
+    fields[FormField.ITEM_TYPE] !== ItemTypeName.POINT_CLOUD_TRACKING
+  ) {
     if (fields[FormField.TASK_SIZE] === "") {
       throw Error("Please specify a task size")
     } else {
