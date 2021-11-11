@@ -3,12 +3,10 @@ import _ from "lodash"
 import {
   LabelType,
   Vector3Type,
-  SimpleCube,
   CubeType,
   ShapeType
 } from "../../../../types/state"
 import { assignShapesInRange, getAutoLabelRange, TrackInterp } from "../interp"
-import * as THREE from "three"
 
 /**
  * Linearly interpolate the cubes from the first to the last in
@@ -30,7 +28,7 @@ function linearInterp3DBoxes(
   const num = labels[labels.length - 1].item - labels[0].item
 
   // calculate the offset for position and orientation
-  const diffCentre: Vector3Type = {
+  const diffCenter: Vector3Type = {
     x: (last.center.x - first.center.x) / num,
     y: (last.center.y - first.center.y) / num,
     z: (last.center.z - first.center.z) / num
@@ -40,44 +38,25 @@ function linearInterp3DBoxes(
     y: (last.size.y - first.size.y) / num,
     z: (last.size.z - first.size.z) / num
   }
-  const eulerFirst = new THREE.Euler().set(
-    first.orientation.x,
-    first.orientation.y,
-    first.orientation.z
-  )
-  const quaternionFirst = new THREE.Quaternion().setFromEuler(eulerFirst)
-  const eulerLast = new THREE.Euler().set(
-    last.orientation.x,
-    last.orientation.y,
-    last.orientation.z
-  )
-  const quaternionLast = new THREE.Quaternion().setFromEuler(eulerLast)
-  const diff: SimpleCube = {
-    center: diffCentre,
-    size: diffSize,
-    orientation: first.orientation,
-    anchorIndex: first.anchorIndex
+  const diffOrientation = {
+    x: (last.orientation.x - first.orientation.x) / num,
+    y: (last.orientation.y - first.orientation.y) / num,
+    z: (last.orientation.z - first.orientation.z) / num
   }
 
   // calculate final position and orientation
   for (let i = 1; i < newShapes.length - 1; i += 1) {
     const shape = newShapes[i]
     const dist = labels[i].item - labels[0].item
-    shape.center.x = diff.center.x * dist + first.center.x
-    shape.center.y = diff.center.y * dist + first.center.y
-    shape.center.z = diff.center.z * dist + first.center.z
-    shape.size.x = diff.size.x * dist + first.size.x
-    shape.size.y = diff.size.y * dist + first.size.y
-    shape.size.z = diff.size.z * dist + first.size.z
-    const newQuaternion = new THREE.Quaternion().slerpQuaternions(
-      quaternionFirst,
-      quaternionLast,
-      dist / num
-    )
-    const newEuler = new THREE.Euler().setFromQuaternion(newQuaternion)
-    shape.orientation.x = newEuler.x
-    shape.orientation.y = newEuler.y
-    shape.orientation.z = newEuler.z
+    shape.center.x = diffCenter.x * dist + first.center.x
+    shape.center.y = diffCenter.y * dist + first.center.y
+    shape.center.z = diffCenter.z * dist + first.center.z
+    shape.size.x = diffSize.x * dist + first.size.x
+    shape.size.y = diffSize.y * dist + first.size.y
+    shape.size.z = diffSize.z * dist + first.size.z
+    shape.orientation.x = diffOrientation.x * dist + first.orientation.x
+    shape.orientation.y = diffOrientation.y * dist + first.orientation.y
+    shape.orientation.z = diffOrientation.z * dist + first.orientation.z
   }
   return newShapes
 }
