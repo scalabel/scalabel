@@ -217,16 +217,19 @@ export class ToolBar extends Component<Props> {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
-      if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
-        if (!this.isKeyDown(Key.S_LOW)) {
-          Session.dispatch(terminateSelectedTracks(this.state, select.item))
+      const trackId = item.labels[Object.values(select.labels)[0][0]].track
+      if (trackId !== undefined) {
+        if (isValidId(trackId)) {
+          if (!this.isKeyDown(Key.S_LOW)) {
+            Session.dispatch(terminateSelectedTracks(this.state, select.item))
+          } else {
+            Session.dispatch(
+              deleteSelectedLabelsfromTracks(this.state, select.item)
+            )
+          }
         } else {
-          Session.dispatch(
-            deleteSelectedLabelsfromTracks(this.state, select.item)
-          )
+          Session.dispatch(deleteSelectedLabels(this.state))
         }
-      } else {
-        Session.dispatch(deleteSelectedLabels(this.state))
       }
     }
   }
