@@ -4,7 +4,6 @@ import ZoomInIcon from "@material-ui/icons/ZoomIn"
 import ZoomOutIcon from "@material-ui/icons/ZoomOut"
 import { withStyles } from "@material-ui/styles"
 import React from "react"
-import * as THREE from "three"
 
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
@@ -25,8 +24,6 @@ import {
 } from "./drawable_viewer"
 import ImageCanvas from "./image_canvas"
 import Label2dCanvas from "./label2d_canvas"
-import Label3dCanvas from "./label3d_canvas"
-import Tag3dCanvas from "./tag_3d_canvas"
 
 interface ClassType extends ViewerClassTypes {
   /** buttons */
@@ -64,35 +61,13 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
           id={this.props.id}
         />
       )
-      if (
-        this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
-      ) {
-        const cam = new THREE.PerspectiveCamera(45, 1, 0.2, 1000)
-        views.push(
-          <Label3dCanvas
-            key={`label3dCanvas${this.props.id}`}
-            display={this._container}
-            id={this.props.id}
-            camera={cam}
-          />
-        )
-        views.push(
-          <Tag3dCanvas
-            key={`tag3dCanvas${this.props.id}`}
-            display={this._container}
-            id={this.props.id}
-            camera={cam}
-          />
-        )
-      } else {
-        views.push(
-          <Label2dCanvas
-            key={`label2dCanvas${this.props.id}`}
-            display={this._container}
-            id={this.props.id}
-          />
-        )
-      }
+      views.push(
+        <Label2dCanvas
+          key={`label2dCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+        />
+      )
     }
 
     return views
