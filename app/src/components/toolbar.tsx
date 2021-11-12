@@ -1,6 +1,6 @@
 import "react-toastify/dist/ReactToastify.css"
-import List from "@material-ui/core/List/List"
-// import ListItem from "@material-ui/core/ListItem"
+import List from "@mui/material/List/List"
+// import ListItem from "@mui/material/ListItem"
 import _ from "lodash"
 import React from "react"
 import { ToastContainer, toast, Slide } from "react-toastify"

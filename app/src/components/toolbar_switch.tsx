@@ -1,7 +1,7 @@
-import { ListItem, ListItemText } from "@material-ui/core"
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction"
-import { withStyles } from "@material-ui/core/styles"
-import Switch from "@material-ui/core/Switch"
+import { ListItem, ListItemText } from "@mui/material"
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction"
+import { withStyles } from "@mui/styles"
+import Switch from "@mui/material/Switch"
 import React from "react"
 
 import { switchStyle } from "../styles/label"

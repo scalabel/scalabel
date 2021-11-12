@@ -1,5 +1,5 @@
-import { StyleRules, withStyles } from "@material-ui/core/styles"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { StyleRules, withStyles } from "@mui/styles"
+import createStyles from "@mui/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
 import * as THREE from "three"
@@ -16,7 +16,9 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = (): StyleRules<"point_cloud_canvas", {}> =>
+type stylesKey = "point_cloud_canvas"
+
+const styles = (): StyleRules<{}, stylesKey> =>
   createStyles({
     point_cloud_canvas: {
       position: "absolute",
@@ -71,18 +73,18 @@ const fragmentShader = `
         testPoint.y < halfSize.y &&
         testPoint.z < halfSize.z;
     }
-    
+
     bool pointInNearby(vec3 point) {
       vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
       vec3 halfSize = selectionSize / 2.;
       float expandX = min(halfSize.x, 0.5);
       float expandY = min(halfSize.y, 0.5);
       float expandZ = min(halfSize.z, 0.5);
-      return (testPoint.x < halfSize.x + expandX && 
-              testPoint.y < halfSize.y + expandY && 
+      return (testPoint.x < halfSize.x + expandX &&
+              testPoint.y < halfSize.y + expandY &&
               testPoint.z < halfSize.z + expandZ) &&
-             (testPoint.x > halfSize.x || 
-              testPoint.y > halfSize.y || 
+             (testPoint.x > halfSize.x ||
+              testPoint.y > halfSize.y ||
               testPoint.z > halfSize.z);
     }
 

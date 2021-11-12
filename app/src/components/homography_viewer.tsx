@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/styles"
+import { withStyles } from "@mui/styles"
 import React from "react"
 
 import { changeViewerConfig } from "../action/common"

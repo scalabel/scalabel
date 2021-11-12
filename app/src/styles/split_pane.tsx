@@ -1,10 +1,10 @@
-import { StyleRules } from "@material-ui/core"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { StyleRules } from "@mui/styles"
+import createStyles from "@mui/styles/createStyles"
 
-export const paneBarStyles = (): StyleRules<
-  "icon" | "viewer_container_bar" | "select" | "icon90",
-  {}
-> =>
+type paneBarStylesKey = "icon" | "viewer_container_bar" | "select" | "icon90"
+type resizerStylesKey = "resizer"
+
+export const paneBarStyles = (): StyleRules<{}, paneBarStylesKey> =>
   createStyles({
     viewer_container_bar: {
       position: "absolute"
@@ -31,7 +31,7 @@ export const paneBarStyles = (): StyleRules<
     }
   })
 
-export const resizerStyles = (): StyleRules<"resizer", {}> =>
+export const resizerStyles = (): StyleRules<{}, resizerStylesKey> =>
   createStyles({
     resizer: {
       background: "rgba(150, 150, 150, 1)",

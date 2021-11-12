@@ -1,4 +1,5 @@
-import { Button, withStyles } from "@material-ui/core"
+import { Button } from "@mui/material"
+import { withStyles } from "@mui/styles"
 import React from "react"
 
 import { toolbarButtonStyle } from "../styles/label"

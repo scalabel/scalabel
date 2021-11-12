@@ -1,5 +1,5 @@
-import Drawer from "@material-ui/core/Drawer"
-import { withStyles } from "@material-ui/core/styles"
+import Drawer from "@mui/material/Drawer"
+import { withStyles } from "@mui/styles"
 import React, { ReactNode } from "react"
 
 import { dividedPageStyle } from "../styles/navigation_page"

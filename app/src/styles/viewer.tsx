@@ -1,4 +1,4 @@
-import { createStyles, StyleRules } from "@material-ui/core"
+import { createStyles, StyleRules } from "@mui/styles"
 
 type ClassKey =
   | "viewer_container"
@@ -9,7 +9,7 @@ type ClassKey =
 /**
  * Image viewer style
  */
-export const viewerStyles = (): StyleRules<ClassKey, {}> =>
+export const viewerStyles = (): StyleRules<{}, ClassKey> =>
   createStyles({
     viewer_container: {
       display: "block",

@@ -1,5 +1,5 @@
-import { StyleRules, withStyles } from "@material-ui/core/styles"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { StyleRules, withStyles } from "@mui/styles"
+import createStyles from "@mui/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
 import * as THREE from "three"
@@ -17,7 +17,9 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 
-const styles = (): StyleRules<"label3d_canvas", {}> =>
+type stylesKey = "label3d_canvas"
+
+const styles = (): StyleRules<{}, stylesKey> =>
   createStyles({
     label3d_canvas: {
       position: "absolute",

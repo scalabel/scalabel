@@ -1,14 +1,22 @@
-import { StyleRules, Theme } from "@material-ui/core/styles"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { createStyles, StyleRules } from "@mui/styles"
+import { Theme } from "@mui/material/styles"
 
 import { defaultAppBar, defaultHeader } from "./general"
 
 // Styles used in the create and dashboard navigation page
 export const drawerWidth = 240
 
+type headerPageStyleKey = "root" | "appBar"
+type dividedPageStyleKey =
+  | "content"
+  | "drawer"
+  | "drawerPaper"
+  | "drawerHeader"
+  | "appBarSpacer"
+
 export const headerPageStyle = (
   theme: Theme
-): StyleRules<"root" | "appBar", {}> =>
+): StyleRules<{}, headerPageStyleKey> =>
   createStyles({
     root: {
       display: "flex",
@@ -22,10 +30,7 @@ export const headerPageStyle = (
 
 export const dividedPageStyle = (
   theme: Theme
-): StyleRules<
-  "content" | "drawer" | "drawerPaper" | "drawerHeader" | "appBarSpacer",
-  {}
-> =>
+): StyleRules<{}, dividedPageStyleKey> =>
   createStyles({
     drawer: {
       width: drawerWidth,

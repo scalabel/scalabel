@@ -1,16 +1,11 @@
 import * as fa from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {
-  AppBar,
-  IconButton,
-  StyleRules,
-  Toolbar,
-  Tooltip
-} from "@material-ui/core"
-import Fade from "@material-ui/core/Fade"
-import { Theme, withStyles } from "@material-ui/core/styles"
-import createStyles from "@material-ui/core/styles/createStyles"
-import Typography from "@material-ui/core/Typography"
+import { AppBar, IconButton, Toolbar, Tooltip } from "@mui/material"
+import { StyleRules, withStyles } from "@mui/styles"
+import Fade from "@mui/material/Fade"
+import { Theme } from "@mui/material/styles"
+import createStyles from "@mui/styles/createStyles"
+import Typography from "@mui/material/Typography"
 import _ from "lodash"
 import React from "react"
 import { connect } from "react-redux"
@@ -217,9 +212,9 @@ const mapDispatchToProps = () => ({
   submit: () => Session.dispatch(submit())
 })
 
-const styles = (
-  theme: Theme
-): StyleRules<"appBar" | "grow" | "titleUnit", {}> =>
+type stylesKey = "appBar" | "grow" | "titleUnit"
+
+const styles = (theme: Theme): StyleRules<{}, stylesKey> =>
   createStyles({
     appBar: {
       ...defaultAppBar,
@@ -231,7 +226,7 @@ const styles = (
       flexGrow: 1
     },
     titleUnit: {
-      margin: theme.spacing(0) * 0.5
+      margin: Number.parseInt(theme.spacing(0)) * 0.5
     }
   })
 

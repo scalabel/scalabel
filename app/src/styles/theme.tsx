@@ -1,14 +1,13 @@
-import { Mixins, MixinsOptions } from "@material-ui/core/styles/createMixins"
-import createMuiTheme, { Theme } from "@material-ui/core/styles/createMuiTheme"
-import { Palette, PaletteOptions } from "@material-ui/core/styles/createPalette"
+import { Mixins, MixinsOptions } from "@mui/material/styles/createMixins"
+import { createTheme, Theme } from "@mui/material/styles"
+import { Palette, PaletteOptions } from "@mui/material/styles/createPalette"
 
 const titleBarHeight = 48
 
-declare module "@material-ui/core/styles/createMuiTheme" {
+declare module "@mui/material/styles" {
   interface Theme {
     /** Palette of Theme */
     palette: Palette
-
     /** Mixins of Theme */
     mixins: Mixins
   }
@@ -26,9 +25,9 @@ declare module "@material-ui/core/styles/createMuiTheme" {
  * that overwrites the primary main color
  */
 export default function createScalabelTheme(): Theme {
-  return createMuiTheme({
+  return createTheme({
     palette: {
-      type: "dark",
+      mode: "dark",
       primary: {
         main: "#1976d2" // blue 700
       },
@@ -54,40 +53,42 @@ export default function createScalabelTheme(): Theme {
         minHeight: titleBarHeight
       }
     },
-    overrides: {
+    components: {
       MuiCssBaseline: {
-        "@global": {
-          "*": {
-            "scrollbar-width": "thin",
-            "scrollbar-color": "#bdbdbd #0000"
-          },
-          ".MuiToggleButton-root": {
-            color: "rgba(255, 255, 255, 0.7) !important",
-            "&.Mui-selected": {
-              color: "rgba(255, 255, 255, 1) !important",
-              background: "rgba(25, 118, 210, 0.32) !important"
+        styleOverrides: {
+          "@global": {
+            "*": {
+              scrollbarWidth: "thin",
+              scrollbarColor: "#bdbdbd #0000"
             },
-            "&:hover": {
-              background: "rgba(25, 118, 210, 0.16)"
+            ".MuiToggleButton-root": {
+              color: "rgba(255, 255, 255, 0.7) !important",
+              "&.Mui-selected": {
+                color: "rgba(255, 255, 255, 1) !important",
+                background: "rgba(25, 118, 210, 0.32) !important"
+              },
+              "&:hover": {
+                background: "rgba(25, 118, 210, 0.16)"
+              },
+              "&:active": {
+                background: "rgba(25, 118, 210, 0.24) !important"
+              }
             },
-            "&:active": {
-              background: "rgba(25, 118, 210, 0.24) !important"
+            "*::-webkit-scrollbar": {
+              width: "5px"
+            },
+            /* Track */
+            "*::-webkit-scrollbar-track": {
+              background: "#0000"
+            },
+            /* Handle */
+            "*::-webkit-scrollbar-thumb": {
+              background: "#bdbdbd"
+            },
+            /* Handle on hover */
+            "*::-webkit-scrollbar-thumb:hover": {
+              background: "#757575"
             }
-          },
-          "*::-webkit-scrollbar": {
-            width: "5px"
-          },
-          /* Track */
-          "*::-webkit-scrollbar-track": {
-            background: "#0000"
-          },
-          /* Handle */
-          "*::-webkit-scrollbar-thumb": {
-            background: "#bdbdbd"
-          },
-          /* Handle on hover */
-          "*::-webkit-scrollbar-thumb:hover": {
-            background: "#757575"
           }
         }
       }

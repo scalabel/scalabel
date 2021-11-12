@@ -1,14 +1,14 @@
-import { IconButton, List, ListItem } from "@material-ui/core"
+import { IconButton, List, ListItem } from "@mui/material"
 import Tooltip from "@mui/material/Tooltip"
 import Fade from "@mui/material/Fade"
-import Grid from "@material-ui/core/Grid"
-import MenuItem from "@material-ui/core/MenuItem"
-import Select from "@material-ui/core/Select"
-import CloseIcon from "@material-ui/icons/Close"
-import ViewStreamIcon from "@material-ui/icons/ViewStream"
-import VisibilityIcon from "@material-ui/icons/Visibility"
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff"
-import { withStyles } from "@material-ui/styles"
+import Grid from "@mui/material/Grid"
+import MenuItem from "@mui/material/MenuItem"
+import Select from "@mui/material/Select"
+import CloseIcon from "@mui/icons-material/Close"
+import ViewStreamIcon from "@mui/icons-material/ViewStream"
+import VisibilityIcon from "@mui/icons-material/Visibility"
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff"
+import { withStyles } from "@mui/styles"
 import * as React from "react"
 import SplitPane from "react-split-pane"
 
@@ -350,7 +350,7 @@ class LabelPane extends Component<Props> {
       const configBar = (
         <Grid
           key={`configMenu${pane.id}`}
-          justify={"flex-end"}
+          justifyContent={"flex-end"}
           container
           direction="row"
           classes={{
@@ -364,7 +364,7 @@ class LabelPane extends Component<Props> {
       const paneBar = (
         <Grid
           key={`paneMenu${pane.id}`}
-          justify={"flex-start"}
+          justifyContent={"flex-start"}
           alignItems={"flex-end"}
           container
           direction="row"

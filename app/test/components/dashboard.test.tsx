@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@material-ui/core/styles"
+import { ThemeProvider } from "@mui/material/styles"
 import { cleanup, render } from "@testing-library/react"
 import React from "react"
 

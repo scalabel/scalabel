@@ -1,5 +1,5 @@
-import { CssBaseline } from "@material-ui/core"
-import { ThemeProvider } from "@material-ui/core/styles"
+import CssBaseline from "@mui/material/CssBaseline"
+import { ThemeProvider } from "@mui/material/styles"
 import React from "react"
 import ReactDOM from "react-dom"
 import { Provider } from "react-redux"

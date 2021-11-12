@@ -1,5 +1,5 @@
-import { ListItemText } from "@material-ui/core"
-import ToggleButton from "@material-ui/lab/ToggleButton"
+import { ListItemText } from "@mui/material"
+import ToggleButton from "@mui/material/ToggleButton"
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import _ from "lodash"
 import * as React from "react"

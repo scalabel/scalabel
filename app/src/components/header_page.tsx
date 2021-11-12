@@ -1,7 +1,7 @@
-import AppBar from "@material-ui/core/AppBar"
-import CssBaseline from "@material-ui/core/CssBaseline"
-import { withStyles } from "@material-ui/core/styles"
-import Toolbar from "@material-ui/core/Toolbar"
+import AppBar from "@mui/material/AppBar"
+import CssBaseline from "@mui/material/CssBaseline"
+import { withStyles } from "@mui/styles"
+import Toolbar from "@mui/material/Toolbar"
 import React, { ReactNode } from "react"
 
 import { headerPageStyle } from "../styles/navigation_page"

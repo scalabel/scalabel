@@ -1,7 +1,7 @@
-import { withStyles } from "@material-ui/core"
-import IconButton from "@material-ui/core/IconButton"
-import SvgIcon from "@material-ui/core/SvgIcon"
-import Typography from "@material-ui/core/Typography"
+import { withStyles } from "@mui/styles"
+import IconButton from "@mui/material/IconButton"
+import SvgIcon from "@mui/material/SvgIcon"
+import Typography from "@mui/material/Typography"
 import React from "react"
 
 import { logout } from "../common/service"

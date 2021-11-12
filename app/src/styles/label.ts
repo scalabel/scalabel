@@ -1,11 +1,7 @@
-import { blue, grey } from "@material-ui/core/colors"
-import { createStyles, StyleRules } from "@material-ui/core/styles"
+import { blue, grey } from "@mui/material/colors"
+import { createStyles, StyleRules } from "@mui/styles"
 
-/**
- * Category style
- */
-export const categoryStyle = (): // theme: Theme
-StyleRules<
+type categoryStyleKey =
   | "root"
   | "button"
   | "formControl"
@@ -18,9 +14,36 @@ StyleRules<
   | "treeItemGroup"
   | "treeItemLabel"
   | "treeItemLabelText"
-  | "treeItemOutline",
-  {}
-> =>
+  | "treeItemOutline"
+type switchStyleKey = "root" | "primary" | "switchBase" | "checked" | "track"
+type toolbarButtonStyleKey = "root" | "label"
+type toggleButtonStyleKey = "root" | "label"
+type listButtonStyleKey =
+  | "root"
+  | "toggleContainer"
+  | "buttonGroup"
+  | "primary"
+  | "toggleButton"
+type label2dViewStyleKey = "label2d_canvas" | "control_canvas" | "hair"
+type imageViewStyleKey = "image_canvas"
+type playerControlStyleKey =
+  | "button"
+  | "underline"
+  | "playerControl"
+  | "input"
+  | "slider"
+type LayoutStyleKey =
+  | "titleBar"
+  | "main"
+  | "interfaceContainer"
+  | "paneContainer"
+  | "alerts"
+
+/**
+ * Category style
+ */
+export const categoryStyle = (): // theme: Theme
+StyleRules<{}, categoryStyleKey> =>
   createStyles({
     root: {
       display: "flex",
@@ -92,10 +115,7 @@ StyleRules<
 /**
  * Switch style
  */
-export const switchStyle = (): StyleRules<
-  "root" | "primary" | "switchBase" | "checked" | "track",
-  {}
-> =>
+export const switchStyle = (): StyleRules<{}, switchStyleKey> =>
   createStyles({
     root: {
       width: "80%",
@@ -119,7 +139,7 @@ export const switchStyle = (): StyleRules<
     track: {}
   })
 
-export const toolbarButtonStyle = (): StyleRules<"root" | "label", {}> =>
+export const toolbarButtonStyle = (): StyleRules<{}, toolbarButtonStyleKey> =>
   createStyles({
     root: {
       // border: 0,
@@ -141,7 +161,7 @@ export const toolbarButtonStyle = (): StyleRules<"root" | "label", {}> =>
 /**
  * Toggle button style
  */
-export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
+export const toggleButtonStyle = (): StyleRules<{}, toggleButtonStyleKey> =>
   createStyles({
     root: {
       color: "rgba(0, 0, 0, 0.38)",
@@ -159,10 +179,7 @@ export const toggleButtonStyle = (): StyleRules<"root" | "label"> =>
 /**
  * List button style
  */
-export const listButtonStyle = (): StyleRules<
-  "root" | "toggleContainer" | "buttonGroup" | "primary" | "toggleButton",
-  {}
-> =>
+export const listButtonStyle = (): StyleRules<{}, listButtonStyleKey> =>
   createStyles({
     root: {
       padding: "0px",
@@ -198,10 +215,7 @@ export const listButtonStyle = (): StyleRules<
 /**
  * Label2d View style
  */
-export const label2dViewStyle = (): StyleRules<
-  "label2d_canvas" | "control_canvas" | "hair",
-  {}
-> =>
+export const label2dViewStyle = (): StyleRules<{}, label2dViewStyleKey> =>
   createStyles({
     label2d_canvas: {
       position: "absolute",
@@ -227,7 +241,7 @@ export const label2dViewStyle = (): StyleRules<
 /**
  * Image view style
  */
-export const imageViewStyle = (): StyleRules<"image_canvas", {}> =>
+export const imageViewStyle = (): StyleRules<{}, imageViewStyleKey> =>
   createStyles({
     image_canvas: {
       position: "absolute",
@@ -238,10 +252,7 @@ export const imageViewStyle = (): StyleRules<"image_canvas", {}> =>
 /**
  * Player control style
  */
-export const playerControlStyles = (): StyleRules<
-  "button" | "underline" | "playerControl" | "input" | "slider",
-  {}
-> =>
+export const playerControlStyles = (): StyleRules<{}, playerControlStyleKey> =>
   createStyles({
     button: {
       color: "#bbbbbb",
@@ -274,10 +285,7 @@ export const playerControlStyles = (): StyleRules<
     }
   })
 
-export const LayoutStyles = (): StyleRules<
-  "titleBar" | "main" | "interfaceContainer" | "paneContainer" | "alerts",
-  {}
-> =>
+export const LayoutStyles = (): StyleRules<{}, LayoutStyleKey> =>
   createStyles({
     titleBar: {
       height: "50px"

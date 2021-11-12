@@ -1,8 +1,8 @@
-import List from "@material-ui/core/List"
-import ListItem from "@material-ui/core/ListItem"
-import ListItemText from "@material-ui/core/ListItemText"
-import { withStyles } from "@material-ui/core/styles"
-import Typography from "@material-ui/core/Typography"
+import List from "@mui/material/List"
+import ListItem from "@mui/material/ListItem"
+import ListItemText from "@mui/material/ListItemText"
+import { withStyles } from "@mui/styles"
+import Typography from "@mui/material/Typography"
 import React, { ReactNode } from "react"
 
 import { createStyle, formStyle } from "../styles/create"

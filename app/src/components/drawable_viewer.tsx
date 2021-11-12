@@ -1,4 +1,4 @@
-import { Grid } from "@material-ui/core"
+import { Grid } from "@mui/material"
 import React from "react"
 
 import Session from "../common/session"
@@ -136,7 +136,7 @@ export abstract class DrawableViewer<
         >
           {this.getDrawableComponents()}
         </div>
-        <Grid justify={"flex-start"} container direction="row">
+        <Grid justifyContent={"flex-start"} container direction="row">
           {...this.getMenuComponents()}
         </Grid>
       </div>

@@ -1,4 +1,4 @@
-import { ThemeProvider, withStyles } from "@material-ui/styles"
+import { ThemeProvider, withStyles } from "@mui/styles"
 import { cleanup, fireEvent, render } from "@testing-library/react"
 import React from "react"
 

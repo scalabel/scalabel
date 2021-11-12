@@ -1,7 +1,7 @@
-import { Grid, Link } from "@material-ui/core"
-import ListItem from "@material-ui/core/ListItem"
-import CloseIcon from "@material-ui/icons/Close"
-import { withStyles } from "@material-ui/core/styles"
+import { Grid, Link } from "@mui/material"
+import ListItem from "@mui/material/ListItem"
+import CloseIcon from "@mui/icons-material/Close"
+import { withStyles } from "@mui/styles"
 import React from "react"
 
 import { getAuth, getProjects, toProject } from "../common/service"
@@ -58,7 +58,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
             alignItems="center"
             className={index % 2 === 0 ? classes.coloredListItem : ""}
           >
-            <Grid container justify="center">
+            <Grid container justifyContent="center">
               <Link
                 component="button"
                 variant="body2"

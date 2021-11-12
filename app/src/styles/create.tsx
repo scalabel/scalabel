@@ -1,10 +1,22 @@
-import { StyleRules, Theme } from "@material-ui/core/styles"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { createStyles, StyleRules } from "@mui/styles"
+import { Theme } from "@mui/material/styles"
 
 const fullWidth = 700
 
+type createStyleKey = "listRoot" | "listHeader"
+type projectListStyleKey = "coloredListItem"
+type formStyleKey =
+  | "hidden"
+  | "root"
+  | "fullWidthText"
+  | "halfWidthText"
+  | "formGroup"
+  | "selectEmpty"
+  | "submitButton"
+type checkboxStyleKey = "root" | "checked"
+
 // Styles for the create page
-export const createStyle = (): StyleRules<"listRoot" | "listHeader", {}> =>
+export const createStyle = (): StyleRules<{}, createStyleKey> =>
   createStyles({
     listRoot: {
       width: "90%",
@@ -19,7 +31,7 @@ export const createStyle = (): StyleRules<"listRoot" | "listHeader", {}> =>
 // Styles for sidebar project list
 export const projectListStyle = (
   theme: Theme
-): StyleRules<"coloredListItem", {}> =>
+): StyleRules<{}, projectListStyleKey> =>
   createStyles({
     coloredListItem: {
       backgroundColor: theme.palette.action.hover
@@ -27,18 +39,7 @@ export const projectListStyle = (
   })
 
 // Styles for the create form
-export const formStyle = (
-  theme: Theme
-): StyleRules<
-  | "hidden"
-  | "root"
-  | "fullWidthText"
-  | "halfWidthText"
-  | "formGroup"
-  | "selectEmpty"
-  | "submitButton",
-  {}
-> =>
+export const formStyle = (theme: Theme): StyleRules<{}, formStyleKey> =>
   createStyles({
     root: {
       paddingLeft: theme.spacing(3),
@@ -57,7 +58,7 @@ export const formStyle = (
     },
 
     selectEmpty: {
-      width: (fullWidth - theme.spacing(1)) / 2,
+      width: (fullWidth - Number.parseInt(theme.spacing(1))) / 2,
       marginRight: theme.spacing(1)
     },
 
@@ -105,9 +106,7 @@ export const attributeStyle = createStyles({
   }
 })
 
-export const checkboxStyle = (
-  theme: Theme
-): StyleRules<"root" | "checked", {}> =>
+export const checkboxStyle = (theme: Theme): StyleRules<{}, checkboxStyleKey> =>
   createStyles({
     root: {
       "&$checked": {

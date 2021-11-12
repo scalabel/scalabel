@@ -1,7 +1,7 @@
 import React from "react"
-import Alert, { Color } from "@material-ui/lab/Alert"
-import IconButton from "@material-ui/core/IconButton"
-import CloseIcon from "@material-ui/icons/Close"
+import Alert from "@mui/material/Alert"
+import IconButton from "@mui/material/IconButton"
+import CloseIcon from "@mui/icons-material/Close"
 import Session from "../common/session"
 import { removeAlert } from "../action/common"
 import { Severity } from "../types/common"
@@ -26,7 +26,7 @@ export class CustomAlert extends React.Component<Props> {
   public render(): React.ReactNode {
     return (
       <Alert
-        severity={this.props.severity as Color}
+        severity={this.props.severity}
         action={
           <IconButton
             aria-label="close"

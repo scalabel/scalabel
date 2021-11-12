@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core"
+import { withStyles } from "@mui/styles"
 import { readdir } from "fs"
 import * as fs from "fs-extra"
 import * as path from "path"

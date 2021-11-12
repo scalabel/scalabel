@@ -9,13 +9,13 @@ import {
   TableCell,
   TableHead,
   TableRow
-} from "@material-ui/core"
-import Chip from "@material-ui/core/Chip"
-import ListItemText from "@material-ui/core/ListItemText"
-import TableBody from "@material-ui/core/TableBody"
-import Typography from "@material-ui/core/Typography"
-import CloudDownloadIcon from "@material-ui/icons/CloudDownload"
-import { withStyles } from "@material-ui/styles"
+} from "@mui/material"
+import Chip from "@mui/material/Chip"
+import ListItemText from "@mui/material/ListItemText"
+import TableBody from "@mui/material/TableBody"
+import Typography from "@mui/material/Typography"
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload"
+import { withStyles } from "@mui/styles"
 import React from "react"
 
 import { QueryArg } from "../const/common"
@@ -488,7 +488,7 @@ function listEntry(props: ListEntryProps): JSX.Element {
       <Grid
         spacing={1}
         alignItems={"baseline"}
-        justify={"space-around"}
+        justifyContent={"space-around"}
         className={classes.listContainer}
         container
       >

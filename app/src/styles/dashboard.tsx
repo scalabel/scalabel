@@ -1,9 +1,32 @@
-import { StyleRules, Theme } from "@material-ui/core"
-import createStyles from "@material-ui/core/styles/createStyles"
+import { createStyles, StyleRules } from "@mui/styles"
+import { Theme } from "@mui/material/styles"
+
+type dashboardWindowStylesKey =
+  | "row"
+  | "root"
+  | "linkButton"
+  | "headerCell"
+  | "bodyCell"
+type headerStyleKey = "grow" | "chip"
+type sidebarStyleKey =
+  | "root"
+  | "listRoot"
+  | "listItem"
+  | "coloredListItem"
+  | "link"
+type listEntryStyleKey = "listTag" | "listEntry" | "listContainer"
+type dashboardStylesKey =
+  | "adminRoot"
+  | "workerRoot"
+  | "labelText"
+  | "appBarSpacer"
+type tableStylesKey = "row" | "root" | "headerCell"
+type tableCellStylesKey = "head" | "body"
+
 /* Dashboard window styles */
 export const dashboardWindowStyles = (
   theme: Theme
-): StyleRules<"row" | "root" | "linkButton" | "headerCell" | "bodyCell", {}> =>
+): StyleRules<{}, dashboardWindowStylesKey> =>
   createStyles({
     root: {
       paddingLeft: theme.spacing(2),
@@ -30,7 +53,7 @@ export const dashboardWindowStyles = (
       // background: theme.palette.background.default
     }
   })
-export const headerStyle = (theme: Theme): StyleRules<"grow" | "chip", {}> =>
+export const headerStyle = (theme: Theme): StyleRules<{}, headerStyleKey> =>
   createStyles({
     grow: {
       flexGrow: 1
@@ -40,12 +63,7 @@ export const headerStyle = (theme: Theme): StyleRules<"grow" | "chip", {}> =>
       marginLeft: theme.spacing(1)
     }
   })
-export const sidebarStyle = (
-  theme: Theme
-): StyleRules<
-  "root" | "listRoot" | "listItem" | "coloredListItem" | "link",
-  {}
-> =>
+export const sidebarStyle = (theme: Theme): StyleRules<{}, sidebarStyleKey> =>
   createStyles({
     root: {
       background: theme.palette.background.default
@@ -71,10 +89,7 @@ export const sidebarStyle = (
       marginLeft: "5%"
     }
   })
-export const listEntryStyle = (): StyleRules<
-  "listTag" | "listEntry" | "listContainer",
-  {}
-> =>
+export const listEntryStyle = (): StyleRules<{}, listEntryStyleKey> =>
   createStyles({
     listTag: {
       textAlign: "right",
@@ -90,7 +105,7 @@ export const listEntryStyle = (): StyleRules<
 /* Styles for worker and admin dashboard */
 export const dashboardStyles = (
   theme: Theme
-): StyleRules<"adminRoot" | "workerRoot" | "labelText" | "appBarSpacer", {}> =>
+): StyleRules<{}, dashboardStylesKey> =>
   createStyles({
     adminRoot: {
       paddingLeft: theme.spacing(3),
@@ -114,9 +129,7 @@ export const dashboardHeaderStyles = createStyles({
 })
 
 /* Table styles for the user dashboard */
-export const tableStyles = (
-  theme: Theme
-): StyleRules<"row" | "root" | "headerCell", {}> =>
+export const tableStyles = (theme: Theme): StyleRules<{}, tableStylesKey> =>
   createStyles({
     root: {},
     headerCell: {
@@ -131,7 +144,7 @@ export const tableStyles = (
 /* TableCellStyles */
 export const tableCellStyles = (
   theme: Theme
-): StyleRules<"head" | "body", {}> =>
+): StyleRules<{}, tableCellStylesKey> =>
   createStyles({
     head: {
       backgroundColor: theme.palette.background.default

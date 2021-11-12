@@ -1,5 +1,5 @@
-import CssBaseline from "@material-ui/core/CssBaseline"
-import { withStyles } from "@material-ui/core/styles"
+import CssBaseline from "@mui/material/CssBaseline"
+import { withStyles } from "@mui/styles"
 import { Stack } from "@mui/material"
 import * as React from "react"
 import SplitPane from "react-split-pane"

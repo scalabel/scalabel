@@ -1,11 +1,12 @@
 import * as fa from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { IconButton } from "@material-ui/core"
-import Grid from "@material-ui/core/Grid"
-import Input from "@material-ui/core/Input"
-import Slider from "@material-ui/core/Slider"
-import { withStyles } from "@material-ui/core/styles"
-import React, { ChangeEvent } from "react"
+import { IconButton } from "@mui/material"
+import Grid from "@mui/material/Grid"
+import Input from "@mui/material/Input"
+import Slider from "@mui/material/Slider"
+import { withStyles } from "@mui/styles"
+import React from "react"
+import { Event } from "three"
 
 import { goToItem } from "../action/common"
 import Session from "../common/session"
@@ -178,13 +179,10 @@ class PlayerControl extends Component<Props> {
   /**
    * Handler on slider change
    *
-   * @param {ChangeEvent<{}>} _event
+   * @param {Event} _event
    * @param {number | number[]} newValue
    */
-  private handleSliderChange(
-    _event: ChangeEvent<{}>,
-    newValue: number | number[]
-  ): void {
+  private handleSliderChange(_event: Event, newValue: number | number[]): void {
     if (Array.isArray(newValue)) {
       if (this.currentFrame !== newValue[0]) {
         this.currentFrame = newValue[0]

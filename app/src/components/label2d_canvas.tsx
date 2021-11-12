@@ -1,4 +1,4 @@
-import { withStyles } from "@material-ui/core/styles"
+import { withStyles } from "@mui/styles"
 import * as React from "react"
 import { connect } from "react-redux"
 
@@ -110,7 +110,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     this.display = this.props.display
     this._labelList = Session.label2dList
     this._labelHandler = new Label2DHandler(this._labelList)
-    this.crosshair = React.createRef()
+    this.crosshair = React.createRef<Crosshair2D>()
 
     this._keyUpListener = (e) => {
       this.onKeyUp(e)
@@ -197,13 +197,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         }}
       />
     )
-    const ch = (
-      <Crosshair
-        key="crosshair-canvas"
-        display={this.display}
-        innerRef={this.crosshair}
-      />
-    )
+    const ch = <Crosshair key="crosshair-canvas" display={this.display} />
     if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       controlCanvas = React.cloneElement(controlCanvas, {

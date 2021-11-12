@@ -1,4 +1,4 @@
-import ListItem from "@material-ui/core/ListItem/ListItem"
+import ListItem from "@mui/material/ListItem"
 import React from "react"
 
 import { ToolbarCategory } from "../components/toolbar_category"

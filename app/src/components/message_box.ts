@@ -1,5 +1,5 @@
-import { withStyles } from "@material-ui/core"
-import Box from "@material-ui/core/Box/Box"
+import { withStyles } from "@mui/styles"
+import Box from "@mui/material/Box/Box"
 
 export const StatusMessageBox = withStyles({
   root: {
