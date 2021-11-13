@@ -150,7 +150,7 @@ class RayModelServerScheduler(object):
     def register_handler(self, register_message):
         # decode message (do we need to put all the decode process to another file to keep here cleaner?)
         register_message = json.loads(register_message["data"])
-        task_type = "OD"
+        task_type = "Polygon"
         if "taskType" in register_message:
             task_type = register_message["taskType"]
         project_name = register_message["projectName"]
@@ -218,7 +218,7 @@ class RayModelServerScheduler(object):
             }
 
             task_images = self.task_images[f'{project_name}_{task_id}']
-            inputs = [task_images[item["url"]] for item in request_data["items"]]
+            inputs = [task_images[item["url"]] for item in request_data["items"]][0]
 
             model = self.task_models[f'{project_name}_{task_id}']
             model.remote(inputs, meta_data, request_data, request_type)

@@ -11,8 +11,8 @@ class SkipResnet50(nn.Module):
         super(SkipResnet50, self).__init__()
 
         # Default transform for all torchvision models
-        self.normalizer = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225])
+        self.normalizer = transforms.Normalize(mean=[0.485 * 255, 0.456 * 255, 0.406 * 255],
+            std=[0.229 * 255, 0.224 * 255, 0.225 * 255])
 
         self.concat_channels = concat_channels
         self.final_dim = final_dim

@@ -75,9 +75,9 @@ class RayModel(object):
             return predictions
 
     @serve.batch(max_batch_size=1)
-    async def handle_batch_polygon(self, inputs, meta_data):
+    async def handle_batch_polygon(self, inputs):
         with torch.no_grad():
-            predictions = self.model(inputs, meta_data)
+            predictions = self.model(inputs)
             return predictions
 
     # 0 for inference, 1 for training
@@ -85,7 +85,7 @@ class RayModel(object):
         # inference
         if self.cfg.TASK_TYPE == "OD":
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
-                results = await self.handle_batch_detection(inputs[0])
+                results = await self.handle_batch_detection(inputs)
 
                 model_response_channel = self.model_response_channel % request_data["name"]
 
@@ -98,9 +98,14 @@ class RayModel(object):
                 self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
         else:
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
-                results = await self.handle_batch_polygon(inputs[0], meta_data)
+                inputs.update(meta_data)
+                results = await self.handle_batch_polygon(inputs)
 
                 model_response_channel = self.model_response_channel % request_data["name"]
+
+                item_indices = request_data["item_indices"]
+                action_packet_id = request_data["action_packet_id"]
+                self.redis.publish(model_response_channel, json.dumps([results, item_indices, action_packet_id]))
 
     def idle(self):
         self.model.cpu()
