@@ -1,10 +1,10 @@
 import { Mixins, MixinsOptions } from "@mui/material/styles/createMixins"
-import { createTheme, Theme } from "@mui/material/styles"
+import createTheme, { Theme } from "@mui/material/styles/createTheme"
 import { Palette, PaletteOptions } from "@mui/material/styles/createPalette"
 
 const titleBarHeight = 48
 
-declare module "@mui/material/styles" {
+declare module "@mui/material/styles/createTheme" {
   interface Theme {
     /** Palette of Theme */
     palette: Palette
