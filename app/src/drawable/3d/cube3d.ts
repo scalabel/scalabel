@@ -55,11 +55,11 @@ export class Cube3D extends Shape3D {
    */
   constructor(label: Label3D) {
     super(label)
-    this._color = label.color
+    this._color = label.color.map((v) => v / 255)
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color().fromArray(this._color),
+        color: this.color3(),
         vertexColors: true,
         transparent: true,
         opacity: 0.35
@@ -71,7 +71,7 @@ export class Cube3D extends Shape3D {
     this._outline = new THREE.LineSegments(
       new THREE.EdgesGeometry(this._box.geometry),
       new THREE.LineBasicMaterial({
-        color: new THREE.Color().fromArray(this._color)
+        color: this.color3()
       })
     )
     this.add(this._outline)
@@ -85,7 +85,7 @@ export class Cube3D extends Shape3D {
         new THREE.Mesh(
           new THREE.SphereGeometry(0.05, 16, 12),
           new THREE.MeshBasicMaterial({
-            color: new THREE.Color().fromArray(this._color),
+            color: this.color3(),
             transparent: true,
             opacity: 0.3
           })
@@ -142,7 +142,7 @@ export class Cube3D extends Shape3D {
    * @param color
    */
   public set color(color: number[]) {
-    this._color = color.map((v) => v / 255)
+    this._color = color
   }
 
   /**
@@ -245,7 +245,7 @@ export class Cube3D extends Shape3D {
    */
   public updateState(shape: ShapeType, id: IdType): void {
     this._box.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color().fromArray(this._color),
+      color: this.color3(),
       vertexColors: true,
       transparent: true,
       opacity: 0.35
@@ -280,7 +280,7 @@ export class Cube3D extends Shape3D {
       ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
       ;(this._outline.material as THREE.LineBasicMaterial).color.set(
-        new THREE.Color().fromArray(this._color)
+        this.color3()
       )
       for (const sphere of this._controlSpheres) {
         sphere.visible = false
@@ -288,7 +288,7 @@ export class Cube3D extends Shape3D {
     }
 
     this._box.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color().fromArray(this._color),
+      color: this.color3(),
       vertexColors: true,
       transparent: true,
       opacity: 0.35
@@ -333,7 +333,7 @@ export class Cube3D extends Shape3D {
       }
     } else {
       ;(this._outline.material as THREE.LineBasicMaterial).color.set(
-        new THREE.Color().fromArray(this._color)
+        this.color3()
       )
       this._highlighted = false
 
@@ -683,5 +683,11 @@ export class Cube3D extends Shape3D {
       )
       this._controlSpheres[i].scale.multiplyScalar(scaleFactor)
     }
+  }
+
+  /** Convert color array to Three.js color */
+  public color3(): THREE.Color {
+    const color = new THREE.Color()
+    return color.fromArray(this.color)
   }
 }
