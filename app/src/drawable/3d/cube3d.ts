@@ -55,10 +55,11 @@ export class Cube3D extends Shape3D {
    */
   constructor(label: Label3D) {
     super(label)
+    this._color = label.color
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: new THREE.Color().fromArray(this._color),
         vertexColors: true,
         transparent: true,
         opacity: 0.35
@@ -69,11 +70,11 @@ export class Cube3D extends Shape3D {
 
     this._outline = new THREE.LineSegments(
       new THREE.EdgesGeometry(this._box.geometry),
-      new THREE.LineBasicMaterial({ color: 0xffffff })
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color().fromArray(this._color)
+      })
     )
     this.add(this._outline)
-
-    this._color = []
 
     this._anchorIndex = 0
 
@@ -84,7 +85,7 @@ export class Cube3D extends Shape3D {
         new THREE.Mesh(
           new THREE.SphereGeometry(0.05, 16, 12),
           new THREE.MeshBasicMaterial({
-            color: 0xffffff,
+            color: new THREE.Color().fromArray(this._color),
             transparent: true,
             opacity: 0.3
           })
@@ -278,7 +279,9 @@ export class Cube3D extends Shape3D {
     } else if (this._label.selected) {
       ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffff00)
     } else {
-      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(
+        new THREE.Color().fromArray(this._color)
+      )
       for (const sphere of this._controlSpheres) {
         sphere.visible = false
       }
@@ -329,7 +332,9 @@ export class Cube3D extends Shape3D {
         }
       }
     } else {
-      ;(this._outline.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._outline.material as THREE.LineBasicMaterial).color.set(
+        new THREE.Color().fromArray(this._color)
+      )
       this._highlighted = false
 
       for (const sphere of this._controlSpheres) {

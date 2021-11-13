@@ -62,7 +62,7 @@ export abstract class Label3D {
     this._label = makeLabel()
     this._selected = false
     this._highlighted = false
-    this._color = [0, 0, 0, 1]
+    this._color = getColorById(this.labelId, this.trackId)
     this._parent = null
     this._children = []
     this._temporary = true
@@ -139,6 +139,11 @@ export abstract class Label3D {
     }
 
     return false
+  }
+
+  /** returns label color */
+  public get color(): number[] {
+    return this._color
   }
 
   /** select the label */
