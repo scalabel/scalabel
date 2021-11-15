@@ -142,7 +142,7 @@ export class Cube3D extends Shape3D {
    * @param color
    */
   public set color(color: number[]) {
-    this._color = color
+    this._color = color.map((v) => v / 255)
   }
 
   /**

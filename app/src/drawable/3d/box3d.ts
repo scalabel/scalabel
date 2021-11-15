@@ -309,6 +309,7 @@ export class Box3D extends Label3D {
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     super.updateState(state, itemIndex, labelId)
     this._shape.color = this.color
+    this._shape.setHighlighted()
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
       state.task.items[itemIndex].shapes[label.shapes[0]],
