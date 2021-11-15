@@ -112,7 +112,7 @@ export interface Vector4Type {
   z: number
 }
 
-export interface CubeType extends ShapeType {
+export interface SimpleCube {
   /** Center of the cube */
   center: Vector3Type
   /** size */
@@ -122,6 +122,8 @@ export interface CubeType extends ShapeType {
   /** Anchor corner index for reshaping */
   anchorIndex: number
 }
+
+export interface CubeType extends ShapeType, SimpleCube {}
 
 export type Point2DType = Vector2Type
 
@@ -264,6 +266,8 @@ export interface SensorMapType {
 }
 
 export interface ItemType {
+  /** project name */
+  names?: { [id: number]: string }
   /** The ID of the item */
   id: IdType
   /** The index of the item */
@@ -278,6 +282,10 @@ export interface ItemType {
   timestamp: number
   /** video item belongs to */
   videoName: string
+  /** intrinsics, overrides data source if present */
+  intrinsics?: { [id: number]: IntrinsicsType }
+  /** extrinsics, overrides data source if present */
+  extrinsics?: { [id: number]: ExtrinsicsType }
 }
 
 export interface Node2DType extends Vector2Type, ShapeType {
@@ -309,19 +317,19 @@ export interface Category {
 
 export interface Attribute {
   /** Attribute tool type */
-  toolType: AttributeToolType
+  type: AttributeToolType
   /** Attribute name */
   name: string
   /** Values of attribute */
   values: string[]
   /** Tag text */
-  tagText: string
+  tag: string
   /** Tag prefix */
   tagPrefix: string
   /** Tag suffixes */
   tagSuffixes: string[]
   /** button colors */
-  buttonColors: string[]
+  buttonColors?: string[]
 }
 
 /*
@@ -505,6 +513,17 @@ export const enum ModeStatus {
   SELECTING
 }
 
+export interface AlertType {
+  /** alert id */
+  id: string
+  /** alert message */
+  message: string
+  /** alert severity */
+  severity: string
+  /** alert timeout */
+  timeout: number
+}
+
 /**
  * Information for this particular session
  */
@@ -527,6 +546,8 @@ export interface SessionType {
   mode: ModeStatus
   /** Number of time status has changed */
   numUpdates: number
+  /** Alerts */
+  alerts: AlertType[]
 }
 
 export interface State {
@@ -547,7 +568,7 @@ type RecursivePartial<T> = {
 }
 
 /**
- * State where all properties are optiona
+ * State where all properties are optional
  * Used for initialization with test objects
  */
 export type DeepPartialState = RecursivePartial<State>

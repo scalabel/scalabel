@@ -7,6 +7,7 @@ import * as actionTypes from "../types/action"
 import { SyncActionMessageType } from "../types/message"
 import { ThunkCreatorType } from "../types/redux"
 import {
+  AlertType,
   ConnectionStatus,
   DeepPartialState,
   IdType,
@@ -785,5 +786,29 @@ export function makeSequential(
   return {
     ...makeBaseAction(actionConsts.SEQUENTIAL),
     actions
+  }
+}
+
+/**
+ * Add alert
+ *
+ * @param alert
+ */
+export function addAlert(alert: AlertType): actionTypes.AddAlertAction {
+  return {
+    ...makeBaseAction(actionConsts.ADD_ALERT),
+    alert
+  }
+}
+
+/**
+ * Close alert
+ *
+ * @param alertId
+ */
+export function removeAlert(alertId: string): actionTypes.RemoveAlertAction {
+  return {
+    ...makeBaseAction(actionConsts.CLOSE_ALERT),
+    alertId
   }
 }

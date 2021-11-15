@@ -2,6 +2,7 @@ import _ from "lodash"
 
 import { TrackInterp } from "../auto/track/interp/interp"
 import { Box2DLinearInterp } from "../auto/track/interp/linear/box2d"
+import { Box3DLinearInterp } from "../auto/track/interp/linear/box3d"
 import { Points2DLinearInterp } from "../auto/track/interp/linear/points2d"
 import { LabelTypeName, TrackPolicyType } from "../const/common"
 import Label2D from "../drawable/2d/label2d"
@@ -55,6 +56,8 @@ function linearInterpolationPolicyFactory(type: string): TrackInterp {
   switch (type) {
     case LabelTypeName.BOX_2D:
       return new Box2DLinearInterp()
+    case LabelTypeName.BOX_3D:
+      return new Box3DLinearInterp()
     case LabelTypeName.POLYGON_2D:
     case LabelTypeName.POLYLINE_2D:
       return new Points2DLinearInterp()
@@ -116,10 +119,13 @@ export class Track {
     for (const item of items) {
       const labelId = this._track.labels[item]
       const label = state.task.items[item].labels[labelId]
-      this._labels[item] = label
-      this._shapes[item] = label.shapes.map(
-        (shapeId) => state.task.items[item].shapes[shapeId]
-      )
+
+      if (label !== undefined) {
+        this._labels[item] = label
+        this._shapes[item] = label.shapes.map(
+          (shapeId) => state.task.items[item].shapes[shapeId]
+        )
+      }
     }
   }
 
@@ -252,7 +258,6 @@ export class Track {
    * Callback for when a label in the track is updated
    *
    * @param itemIndex
-   * @param newShapes
    * @param label
    */
   public update(itemIndex: number, label: Readonly<Label>): void {

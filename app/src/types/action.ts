@@ -3,6 +3,7 @@
  */
 import { SyncActionMessageType } from "./message"
 import {
+  AlertType,
   ConnectionStatus,
   DeepPartialState,
   IdType,
@@ -186,7 +187,7 @@ export interface SplitPaneAction extends BaseAction {
 }
 
 export interface DeletePaneAction extends BaseAction {
-  /** ID of pane to split */
+  /** ID of pane to delete */
   pane: number
   /** ID of corresponding viewer config */
   viewerId: number
@@ -213,6 +214,16 @@ export interface SequentialAction extends BaseAction {
   actions: BaseAction[]
 }
 
+export interface AddAlertAction extends BaseAction {
+  /** id of the alert to close */
+  alert: AlertType
+}
+
+export interface RemoveAlertAction extends BaseAction {
+  /** id of the alert to close */
+  alertId: string
+}
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
@@ -230,6 +241,8 @@ export type SessionActionType =
   | UpdateTaskAction
   | UpdateStateAction
   | UpdateSessionStatusAction
+  | AddAlertAction
+  | RemoveAlertAction
   | SyncActionType
 
 export type UserActionType =

@@ -121,7 +121,7 @@ export function getNumSubmissions(tasks: TaskType[]): number {
 function initAttributeStats(attributes: Attribute[]): AttributeStats {
   const attributesByName = _.keyBy(attributes, (attribute) => attribute.name)
   return _.mapValues(attributesByName, (attribute) => {
-    if (attribute.toolType === AttributeToolType.SWITCH) {
+    if (attribute.type === AttributeToolType.SWITCH) {
       return {
         false: 0,
         true: 0
@@ -161,7 +161,7 @@ function initCategoryStats(
  * @param index
  */
 function getAttributeValue(attribute: Attribute, index: number): string {
-  if (attribute.toolType === AttributeToolType.SWITCH) {
+  if (attribute.type === AttributeToolType.SWITCH) {
     return index === 1 ? "true" : "false"
   }
   return attribute.values[index]

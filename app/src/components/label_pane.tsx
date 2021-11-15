@@ -1,4 +1,6 @@
 import { IconButton, List, ListItem } from "@material-ui/core"
+import Tooltip from "@mui/material/Tooltip"
+import Fade from "@mui/material/Fade"
 import Grid from "@material-ui/core/Grid"
 import MenuItem from "@material-ui/core/MenuItem"
 import Select from "@material-ui/core/Select"
@@ -19,6 +21,7 @@ import {
 import { dispatch } from "../common/session"
 import * as types from "../const/common"
 import { makeDefaultViewerConfig } from "../functional/states"
+import { getSensorTypes, getMinSensorIds } from "../functional/state_util"
 import { paneBarStyles, resizerStyles } from "../styles/split_pane"
 import { SplitType, ViewerConfigType } from "../types/state"
 import { Component } from "./component"
@@ -131,6 +134,7 @@ class LabelPane extends Component<Props> {
     const pane = this.state.user.layout.panes[this.props.pane]
     if (pane.viewerId >= 0) {
       const viewerConfig = this.state.user.viewerConfigs[pane.viewerId]
+      const minSensorIds = getMinSensorIds(this.state)
       const viewerTypeMenu = (
         <Select
           key={`viewerTypeMenu${pane.id}`}
@@ -139,7 +143,7 @@ class LabelPane extends Component<Props> {
             const newConfig = makeDefaultViewerConfig(
               e.target.value as types.ViewerConfigTypeName,
               viewerConfig.pane,
-              -1
+              minSensorIds[e.target.value as types.ViewerConfigTypeName]
             )
             if (newConfig !== null) {
               dispatch(changeViewerConfig(pane.viewerId, newConfig))
@@ -155,24 +159,42 @@ class LabelPane extends Component<Props> {
           <MenuItem
             key={`imageTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.IMAGE}
+            disabled={
+              !getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE)
+            }
           >
             Image
           </MenuItem>
           <MenuItem
             key={`pcTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.POINT_CLOUD}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.POINT_CLOUD
+              )
+            }
           >
             Point Cloud
           </MenuItem>
           <MenuItem
             key={`image3dTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.IMAGE_3D}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.IMAGE_3D
+              )
+            }
           >
             Image 3D
           </MenuItem>
           <MenuItem
             key={`homographyTypeMenuItem${pane.id}`}
             value={types.ViewerConfigTypeName.HOMOGRAPHY}
+            disabled={
+              !getSensorTypes(this.state).has(
+                types.ViewerConfigTypeName.HOMOGRAPHY
+              )
+            }
           >
             Homography
           </MenuItem>
@@ -217,54 +239,87 @@ class LabelPane extends Component<Props> {
       )
 
       const visibilityButton = (
-        <IconButton
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(updatePane(pane.id, { hide: !pane.hide }))
-          }}
+        <Tooltip
+          key={`visibilityButton${pane.id}`}
+          title={`${pane.hide ? "Show pane" : "Hide pane"}`}
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          {pane.hide ? (
-            <VisibilityIcon fontSize="small" />
-          ) : (
-            <VisibilityOffIcon fontSize="small" />
-          )}
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(updatePane(pane.id, { hide: !pane.hide }))
+            }}
+          >
+            {pane.hide ? (
+              <VisibilityIcon fontSize="small" />
+            ) : (
+              <VisibilityOffIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
       )
 
       const verticalSplitButton = (
-        <IconButton
+        <Tooltip
           key={`verticalSplitButton${pane.id}`}
-          className={this.props.classes.icon90}
-          onClick={() => {
-            dispatch(splitPane(pane.id, SplitType.VERTICAL, pane.viewerId))
-          }}
+          title="Split vertically"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ViewStreamIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon90}
+            onClick={() => {
+              dispatch(splitPane(pane.id, SplitType.VERTICAL, pane.viewerId))
+            }}
+          >
+            <ViewStreamIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const horizontalSplitButton = (
-        <IconButton
+        <Tooltip
           key={`horizontalSplitButton${pane.id}`}
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(splitPane(pane.id, SplitType.HORIZONTAL, pane.viewerId))
-          }}
+          title="Split horizontally"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ViewStreamIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(splitPane(pane.id, SplitType.HORIZONTAL, pane.viewerId))
+            }}
+          >
+            <ViewStreamIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const deleteButton = (
-        <IconButton
+        <Tooltip
           key={`deleteButton${pane.id}`}
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(deletePane(pane.id, pane.viewerId))
-          }}
+          title="Delete pane"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <CloseIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(deletePane(pane.id, pane.viewerId))
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
@@ -294,7 +349,7 @@ class LabelPane extends Component<Props> {
 
       const configBar = (
         <Grid
-          key={`paneMenu${pane.id}`}
+          key={`configMenu${pane.id}`}
           justify={"flex-end"}
           container
           direction="row"
@@ -302,16 +357,28 @@ class LabelPane extends Component<Props> {
             container: this.props.classes.viewer_container_bar
           }}
         >
+          {paneControl}
+        </Grid>
+      )
+
+      const paneBar = (
+        <Grid
+          key={`paneMenu${pane.id}`}
+          justify={"flex-start"}
+          alignItems={"flex-end"}
+          container
+          direction="row"
+        >
           <div hidden={pane.hide}>
             {numSensors > 1 ? viewerTypeMenu : null}
             {numSensors > 1 ? viewerIdMenu : null}
           </div>
-          {paneControl}
         </Grid>
       )
       // Leaf, render viewer container
       return (
         <div>
+          {paneBar}
           {configBar}
           <div hidden={pane.hide}>
             {viewerFactory(viewerConfig, pane.viewerId)}

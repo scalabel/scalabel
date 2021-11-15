@@ -1,7 +1,7 @@
 import * as THREE from "three"
 
 import { LabelTypeName } from "../../const/common"
-import { makeLabel } from "../../functional/states"
+import { makeLabel, makeTrack } from "../../functional/states"
 import { rotateScale } from "../../math/3d"
 import { Vector3D } from "../../math/vector3d"
 import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
@@ -37,13 +37,15 @@ export class Box3D extends Label3D {
    * @param center
    * @param sensors
    * @param temporary
+   * @param tracking
    */
   public init(
     itemIndex: number,
     category: number,
     center?: Vector3D,
     sensors?: number[],
-    temporary?: boolean
+    temporary?: boolean,
+    tracking?: boolean
   ): void {
     if (sensors === null || sensors === undefined || sensors.length === 0) {
       sensors = [-1]
@@ -57,6 +59,10 @@ export class Box3D extends Label3D {
       sensors,
       shapes: [this._shape.shapeId]
     })
+    if (tracking !== undefined && tracking) {
+      const track = makeTrack()
+      this._label.track = track.id
+    }
 
     if (center !== null && center !== undefined) {
       this._shape.position.copy(center.toThree())
@@ -302,11 +308,26 @@ export class Box3D extends Label3D {
    */
   public updateState(state: State, itemIndex: number, labelId: IdType): void {
     super.updateState(state, itemIndex, labelId)
-    this._shape.color = this._color
+    this._shape.color = this.color
+    this._shape.setHighlighted()
     const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
       state.task.items[itemIndex].shapes[label.shapes[0]],
       label.shapes[0]
     )
+  }
+
+  /**
+   * copy the label
+   *
+   * @param shape
+   */
+  public setShape(shape: ShapeType): void {
+    if (shape.id !== this._shape.shapeId) {
+      this.labelList.clearHistShapes()
+      return
+    }
+    super.setShape(shape)
+    this._shape.updateState(shape, this._shape.shapeId)
   }
 }

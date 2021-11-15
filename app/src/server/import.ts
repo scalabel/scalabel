@@ -5,6 +5,7 @@ import {
   makeCube,
   makeItem,
   makeLabel,
+  makeLabelExport,
   makePathPoint2D,
   makePlane,
   makeRect
@@ -12,7 +13,9 @@ import {
 import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
+  ExtrinsicsType,
   IdType,
+  IntrinsicsType,
   ItemType,
   LabelIdMap,
   LabelType,
@@ -20,6 +23,19 @@ import {
   ShapeIdMap,
   ShapeType
 } from "../types/state"
+
+/**
+ * Convert the attributes to label to ensure the format consistency
+ *
+ * @param attributes
+ */
+function convertAttributeToLabel(attributes: {
+  [key: string]: string | string[]
+}): LabelExport {
+  return makeLabelExport({
+    attributes: attributes
+  })
+}
 
 /**
  * Converts single exported item to frontend state format
@@ -46,13 +62,41 @@ export function convertItemToImport(
   tracking: boolean
 ): ItemType {
   const urls: { [id: number]: string } = {}
+  const names: { [id: number]: string } = {}
+  const intrinsics: { [id: number]: IntrinsicsType } = {}
+  const extrinsics: { [id: number]: ExtrinsicsType } = {}
 
   const labels: LabelIdMap = {}
   const shapes: ShapeIdMap = {}
   for (const key of Object.keys(itemExportMap)) {
     const sensorId = Number(key)
     urls[sensorId] = itemExportMap[sensorId].url as string
-    const labelsExport = itemExportMap[sensorId].labels
+    if (itemExportMap[sensorId].name !== undefined) {
+      names[sensorId] = itemExportMap[sensorId].name as string
+    }
+    if (itemExportMap[sensorId].intrinsics !== undefined) {
+      intrinsics[sensorId] = itemExportMap[sensorId]
+        .intrinsics as IntrinsicsType
+    }
+    if (itemExportMap[sensorId].extrinsics !== undefined) {
+      extrinsics[sensorId] = itemExportMap[sensorId]
+        .extrinsics as ExtrinsicsType
+    }
+    let labelsExport = itemExportMap[sensorId].labels
+    const itemAttributes = itemExportMap[sensorId].attributes
+    let isTagging = false
+    if (
+      itemAttributes !== undefined &&
+      Object.keys(itemAttributes).length > 0
+    ) {
+      if (labelsExport === undefined) {
+        labelsExport = []
+      }
+      labelsExport = labelsExport.concat(
+        convertAttributeToLabel(itemAttributes)
+      )
+      isTagging = true
+    }
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
         const labelId = labelExport.id.toString()
@@ -83,6 +127,9 @@ export function convertItemToImport(
           categories,
           attributes
         )
+        if (isTagging) {
+          importedLabel.type = "tag"
+        }
 
         if (tracking) {
           importedLabel.track = labelExport.id.toString()
@@ -98,13 +145,16 @@ export function convertItemToImport(
 
   return makeItem(
     {
+      names,
       urls,
       index: itemIndex,
       id: itemId.toString(),
       timestamp,
       videoName,
       labels,
-      shapes
+      shapes,
+      intrinsics: Object.keys(intrinsics).length > 0 ? intrinsics : undefined,
+      extrinsics: Object.keys(extrinsics).length > 0 ? extrinsics : undefined
     },
     true
   )
@@ -119,17 +169,20 @@ export function convertItemToImport(
  * @param attributeValueMap look up an attribute value's index
  */
 function parseExportAttributes(
-  attributesExport: { [key: string]: string[] | boolean },
+  attributesExport: { [key: string]: string | string[] | boolean },
   attributeNameMap: { [key: string]: [number, Attribute] },
   attributeValueMap: { [key: string]: number }
 ): { [key: number]: number[] } {
   const labelAttributes: { [key: number]: number[] } = {}
   Object.entries(attributesExport).forEach(([name, attributeList]) => {
     // Get the config attribute that matches the exported attribute name
+    if (typeof attributeList === "string") {
+      attributeList = [attributeList]
+    }
     if (name in attributeNameMap) {
       const [configIndex, currentAttribute] = attributeNameMap[name]
       // Load the attribute based on its type
-      if (currentAttribute.toolType === AttributeToolType.SWITCH) {
+      if (currentAttribute.type === AttributeToolType.SWITCH) {
         // Boolean attribute case- only two choices, not a list
         let value = 0
         const attributeVal = attributeList as boolean
@@ -138,8 +191,8 @@ function parseExportAttributes(
         }
         labelAttributes[configIndex] = [value]
       } else if (
-        currentAttribute.toolType === AttributeToolType.LIST ||
-        currentAttribute.toolType === AttributeToolType.LONG_LIST
+        currentAttribute.type === AttributeToolType.LIST ||
+        currentAttribute.type === AttributeToolType.LONG_LIST
       ) {
         // List attribute case- can choose multiple values
         const selectedIndices: number[] = []

@@ -7,6 +7,7 @@ import * as THREE from "three"
 
 import {
   addViewerConfig,
+  changeViewerConfig,
   initSessionAction,
   loadItem,
   splitPane,
@@ -17,6 +18,7 @@ import {
 import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import { getMinSensorIds } from "../functional/state_util"
 import { makeDefaultViewerConfig } from "../functional/states"
 import { scalabelTheme } from "../styles/theme"
 import { PLYLoader } from "../thirdparty/PLYLoader"
@@ -30,6 +32,9 @@ import {
 import Session from "./session"
 import { DispatchFunc, GetStateFunc } from "./simple_store"
 import { Track } from "./track"
+import * as types from "../const/common"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -152,7 +157,7 @@ function loadImages(
             image.src = `${url}#${new Date().getTime()}`
             attemptsMap[sensorId]++
           } else {
-            alert(`Failed to load image at ${url}`)
+            alert(Severity.ERROR, `Failed to load image at ${url}`)
           }
         }
         image.src = url
@@ -202,7 +207,7 @@ function loadPointClouds(
         const onError = (): void => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
-            alert(`Point cloud at ${url} was not found.`)
+            alert(Severity.ERROR, `Point cloud at ${url} was not found.`)
           } else {
             loader.load(url, onLoad, () => null, onError)
           }
@@ -225,15 +230,12 @@ function initViewerConfigs(
 ): void {
   let state = getState()
   if (Object.keys(state.user.viewerConfigs).length === 0) {
-    const sensorIds = Object.keys(state.task.sensors)
-      .map((key) => Number(key))
-      .sort((a, b) => a - b)
-    const id0 = sensorIds[0]
-    const sensor0 = state.task.sensors[id0]
+    const minSensorIds = getMinSensorIds(state)
+    const sensor0 = state.task.sensors[minSensorIds[state.task.config.itemType]]
     const config0 = makeDefaultViewerConfig(
       sensor0.type as ViewerConfigTypeName,
       0,
-      id0
+      minSensorIds[state.task.config.itemType]
     )
     if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
@@ -261,7 +263,13 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
-      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize: "33%" }))
+      let primarySize = "33%"
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+        primarySize = "25%"
+      }
+      dispatch(
+        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
+      )
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -285,6 +293,13 @@ function initViewerConfigs(
           state.user.layout.maxViewerConfigId
         )
       )
+      primarySize = "50%"
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+        primarySize = "33%"
+      }
+      dispatch(
+        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
+      )
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -301,6 +316,29 @@ function initViewerConfigs(
           2
         )
       )
+      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+        dispatch(
+          splitPane(
+            state.user.layout.maxPaneId,
+            SplitType.VERTICAL,
+            state.user.layout.maxViewerConfigId
+          )
+        )
+
+        state = getState()
+
+        // Change last pane to image view if frame group contains image
+        const newConfig = makeDefaultViewerConfig(
+          types.ViewerConfigTypeName.IMAGE,
+          state.user.layout.maxPaneId,
+          minSensorIds[ItemTypeName.IMAGE]
+        )
+        if (newConfig !== null) {
+          dispatch(
+            changeViewerConfig(state.user.layout.maxViewerConfigId, newConfig)
+          )
+        }
+      }
     }
   }
 }
