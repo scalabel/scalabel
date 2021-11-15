@@ -106,14 +106,14 @@ def save_split_files(split_index: int, orig_ann_path: str) -> None:
             val_lines.append(",".join(gt) + "\n")
 
     with open(
-        orig_ann_path.replace("gt.txt", "gt_half_train.txt"),
+        orig_ann_path.replace(".txt", "_half_train.txt"),
         "w",
         encoding="utf-8",
     ) as f:
         f.writelines(train_lines)
 
     with open(
-        orig_ann_path.replace("gt.txt", "gt_half_val.txt"),
+        orig_ann_path.replace(".txt", "_half_val.txt"),
         "w",
         encoding="utf-8",
     ) as f:
