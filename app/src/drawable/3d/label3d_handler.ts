@@ -46,6 +46,8 @@ export class Label3DHandler {
   private _keyThrottleTimer: ReturnType<typeof setTimeout> | null
   /** Whether tracking is enabled */
   private readonly _tracking: boolean
+  /** Recorded state of last update */
+  private _state: State
 
   /**
    * Constructor
@@ -64,6 +66,7 @@ export class Label3DHandler {
     this._camera = camera
     this._keyThrottleTimer = null
     this._tracking = tracking
+    this._state = Session.getState()
   }
 
   /** Set camera */
@@ -86,6 +89,7 @@ export class Label3DHandler {
    * @param viewerId
    */
   public updateState(state: State, itemIndex: number, viewerId: number): void {
+    this._state = state
     this._selectedItemIndex = itemIndex
     this._viewerConfig = getCurrentViewerConfig(state, viewerId)
     this._sensorIds = Object.keys(state.task.sensors).map((key) => Number(key))
@@ -238,7 +242,9 @@ export class Label3DHandler {
             this._selectedItemIndex,
             Session.label3dList.currentCategory,
             center,
-            this._sensorIds
+            this._sensorIds,
+            undefined,
+            this._state.task.config.tracking
           )
           Session.label3dList.addUpdatedLabel(label)
           commitLabels(

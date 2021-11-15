@@ -112,7 +112,7 @@ export interface Vector4Type {
   z: number
 }
 
-export interface CubeType extends ShapeType {
+export interface SimpleCube {
   /** Center of the cube */
   center: Vector3Type
   /** size */
@@ -122,6 +122,8 @@ export interface CubeType extends ShapeType {
   /** Anchor corner index for reshaping */
   anchorIndex: number
 }
+
+export interface CubeType extends ShapeType, SimpleCube {}
 
 export type Point2DType = Vector2Type
 
@@ -511,6 +513,17 @@ export const enum ModeStatus {
   SELECTING
 }
 
+export interface AlertType {
+  /** alert id */
+  id: string
+  /** alert message */
+  message: string
+  /** alert severity */
+  severity: string
+  /** alert timeout */
+  timeout: number
+}
+
 /**
  * Information for this particular session
  */
@@ -533,6 +546,8 @@ export interface SessionType {
   mode: ModeStatus
   /** Number of time status has changed */
   numUpdates: number
+  /** Alerts */
+  alerts: AlertType[]
 }
 
 export interface State {
@@ -553,7 +568,7 @@ type RecursivePartial<T> = {
 }
 
 /**
- * State where all properties are optiona
+ * State where all properties are optional
  * Used for initialization with test objects
  */
 export type DeepPartialState = RecursivePartial<State>

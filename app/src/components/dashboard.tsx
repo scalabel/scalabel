@@ -352,9 +352,11 @@ class Dashboard extends React.Component<DashboardProps, DashboardState> {
     const xhr = new XMLHttpRequest()
     xhr.onreadystatechange = () => {
       const newTaskMetaData = this.state.taskMetaDatas
-      newTaskMetaData[index] = JSON.parse(xhr.responseText)
-      if (xhr.readyState === 4) {
-        this.setState({ taskMetaDatas: newTaskMetaData })
+      if (xhr.responseText !== "") {
+        newTaskMetaData[index] = JSON.parse(xhr.responseText)
+        if (xhr.readyState === 4) {
+          this.setState({ taskMetaDatas: newTaskMetaData })
+        }
       }
     }
     taskId = taskId.substring(taskId.length - 6)

@@ -364,7 +364,11 @@ export function addTrack(
 function mergeTracksInItems(
   tracks: TrackType[],
   items: ItemType[]
-): [TrackType, ItemType[]] {
+): [TrackType, ItemType[]] | [null, []] {
+  if (tracks.length === 0) {
+    return [null, []]
+  }
+
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
   const props: Array<Array<Partial<LabelType>>> = _.range(
@@ -406,8 +410,12 @@ export function mergeTracks(
   const mergedTracks = action.trackIds.map((trackId) => task.tracks[trackId])
   const tracks = removeObjectFields(task.tracks, action.trackIds)
   const [track, items] = mergeTracksInItems(mergedTracks, task.items)
-  tracks[track.id] = track
-  task = updateObject(task, { items, tracks })
+
+  if (track !== null && items.length > 0) {
+    tracks[track.id] = track
+    task = updateObject(task, { items, tracks })
+  }
+
   session = updateObject(session, { trackLinking: false })
   return { ...state, task, session }
 }
@@ -1554,6 +1562,51 @@ export function changeSessionMode(
 
   const newSession = updateObject(oldSession, {
     mode: newMode
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Add alert to state
+ *
+ * @param state
+ * @param action
+ */
+export function addAlert(
+  state: State,
+  action: actionTypes.AddAlertAction
+): State {
+  const oldSession = state.session
+  const newAlerts = oldSession.alerts
+  newAlerts.push(action.alert)
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    alerts: newAlerts
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Remove alert from state
+ *
+ * @param state
+ * @param action
+ */
+export function removeAlert(
+  state: State,
+  action: actionTypes.RemoveAlertAction
+): State {
+  const oldSession = state.session
+  const newAlerts = oldSession.alerts.filter(
+    (alert) => alert.id !== action.alertId
+  )
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    alerts: newAlerts
   })
   return updateObject(state, {
     session: newSession
