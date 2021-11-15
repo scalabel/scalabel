@@ -38,8 +38,9 @@ import Session from "./session"
 import { DispatchFunc, GetStateFunc } from "./simple_store"
 import { Track } from "./track"
 import * as types from "../const/common"
-import { alert } from "../common/alert"
+import { alert } from "./alert"
 import { Severity } from "../types/common"
+import { getViewerType } from "./util"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -147,7 +148,8 @@ function loadImages(
       const sensorId = Number(key)
       if (
         sensorId in state.task.sensors &&
-        state.task.sensors[sensorId].type === DataType.IMAGE
+        (state.task.sensors[sensorId].type === DataType.IMAGE ||
+          state.task.sensors[sensorId].type === DataType.IMAGE_3D)
       ) {
         attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
@@ -224,25 +226,6 @@ function loadPointClouds(
 }
 
 /**
- * Return viewer type required for given sensor and label types
- *
- * @param sensorType
- * @param labelTypes
- */
-function getViewerType(
-  sensorType: ViewerConfigTypeName,
-  labelTypes: LabelTypeName[]
-): ViewerConfigTypeName {
-  if (
-    sensorType === ViewerConfigTypeName.IMAGE &&
-    labelTypes.includes(LabelTypeName.BOX_3D)
-  ) {
-    return ViewerConfigTypeName.IMAGE_3D
-  }
-  return sensorType
-}
-
-/**
  * Create default viewer configs if none exist
  *
  * @param getState
@@ -256,14 +239,14 @@ function initViewerConfigs(
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const minSensorIds = getMinSensorIds(state)
     const sensor0 = state.task.sensors[minSensorIds[state.task.config.itemType]]
-    const viewerType = getViewerType(
+    let viewerType = getViewerType(
       sensor0.type as ViewerConfigTypeName,
       state.task.config.labelTypes as LabelTypeName[]
     )
     const config0 = makeDefaultViewerConfig(
       viewerType,
       0,
-      minSensorIds[state.task.config.itemType]
+      minSensorIds[viewerType]
     )
     if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
@@ -292,7 +275,7 @@ function initViewerConfigs(
         )
       )
       let primarySize = "33%"
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         primarySize = "25%"
       }
       dispatch(
@@ -322,7 +305,7 @@ function initViewerConfigs(
         )
       )
       primarySize = "50%"
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         primarySize = "33%"
       }
       dispatch(
@@ -344,7 +327,7 @@ function initViewerConfigs(
           2
         )
       )
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         dispatch(
           splitPane(
             state.user.layout.maxPaneId,
@@ -356,13 +339,14 @@ function initViewerConfigs(
         state = getState()
 
         // Change last pane to image view if frame group contains image
+        viewerType = getViewerType(
+          types.ViewerConfigTypeName.IMAGE,
+          state.task.config.labelTypes as LabelTypeName[]
+        )
         const newConfig = makeDefaultViewerConfig(
-          getViewerType(
-            types.ViewerConfigTypeName.IMAGE,
-            state.task.config.labelTypes as LabelTypeName[]
-          ),
+          viewerType,
           state.user.layout.maxPaneId,
-          minSensorIds[ItemTypeName.IMAGE]
+          minSensorIds[viewerType]
         )
         if (newConfig !== null) {
           dispatch(

@@ -44,6 +44,7 @@ export enum ShapeTypeName {
 
 export enum DataType {
   IMAGE = "image",
+  IMAGE_3D = "image_3d",
   POINT_CLOUD = "pointcloud"
 }
 
