@@ -1,3 +1,5 @@
+import { alert } from "../../common/alert"
+import { Severity } from "../../types/common"
 import {
   changeLabelsProps,
   linkLabels,
@@ -486,7 +488,7 @@ export class Label2DHandler {
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     } else {
-      window.alert("Selected tracks have overlapping frames.")
+      alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
   }
 

@@ -638,6 +638,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     status: ConnectionStatus.UNSAVED,
     mode: ModeStatus.ANNOTATING,
     numUpdates: 0,
+    alerts: [],
     ...params
   }
 }
