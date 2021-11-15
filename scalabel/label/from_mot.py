@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, Union
 from ..common.io import load_file_as_list
 from .io import save
 from .transforms import bbox_to_box2d
-from .typing import Category, Config, Dataset, Frame, Label
+from .typing import Category, Config, Dataset, Frame, Label, Box2D
 
 # Classes in MOT:
 #   1: 'pedestrian'
@@ -71,16 +71,15 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
         if class_id not in NAME_MAPPING:
             continue
         class_name = NAME_MAPPING[class_id]
-        frame_id, ins_id = map(int, gt[:2])
-        bbox = list(map(float, gt[2:6]))
-        box2d = bbox_to_box2d(bbox)
-        ignored = False
         if class_name in IGNORE:
-            ignored = True
-            class_name = "pedestrian"
-        attrs = dict(
-            visibility=float(gt[8]), ignored=ignored
-        )  # type: Dict[str, Union[bool, float, str]]
+            continue
+        frame_id, ins_id = map(int, gt[:2])
+        x1, y1, width, height = tuple(map(float, gt[2:6]))
+        x2, y2 = x1 + width, y1 + height
+        box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+        attrs: Dict[str, Union[bool, float, str]] = dict(
+            visibility=float(gt[8])
+        )
         ann = Label(
             category=class_name,
             id=ins_id,
