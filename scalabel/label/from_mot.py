@@ -6,8 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 from ..common.io import load_file_as_list
 from .io import save
-from .transforms import bbox_to_box2d
-from .typing import Category, Config, Dataset, Frame, Label, Box2D
+from .typing import Box2D, Category, Config, Dataset, Frame, Label
 
 # Classes in MOT:
 #   1: 'pedestrian'
@@ -90,6 +89,37 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
     return outputs
 
 
+def save_split_files(split_index: int, orig_ann_path: str) -> None:
+    """Save out half train / val gt annotations in original format.
+
+    Note: frame index starts with 1 in this file (0 in scalabel format).
+    Hence, frame_id == frameIndex + 1.
+    """
+    train_lines, val_lines = [], []
+    for line in load_file_as_list(orig_ann_path):
+        gt = line.strip().split(",")
+        frame_id, _ = map(int, gt[:2])
+        if frame_id <= split_index:
+            train_lines.append(line)
+        else:
+            gt[0] = str(frame_id - split_index)
+            val_lines.append(",".join(gt) + "\n")
+
+    with open(
+        orig_ann_path.replace("gt.txt", "gt_half_train.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        f.writelines(train_lines)
+
+    with open(
+        orig_ann_path.replace("gt.txt", "gt_half_val.txt"),
+        "w",
+        encoding="utf-8",
+    ) as f:
+        f.writelines(val_lines)
+
+
 def from_mot(
     data_path: str, split_val: bool = False
 ) -> Union[Dataset, Tuple[Dataset, Dataset]]:
@@ -117,6 +147,9 @@ def from_mot(
             video_frames.append(frame)
         if split_val:
             split_frame = len(img_names) // 2 + 1
+            save_split_files(
+                split_frame, os.path.join(data_path, video, "gt/gt.txt")
+            )
             frames.extend(video_frames[:split_frame])
             for val_frame in video_frames[split_frame:]:
                 assert val_frame.frameIndex is not None
