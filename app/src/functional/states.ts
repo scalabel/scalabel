@@ -640,6 +640,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     mode: ModeStatus.ANNOTATING,
     modelStatus: ModelStatus.INVALID,
     numUpdates: 0,
+    alerts: [],
     ...params
   }
 }

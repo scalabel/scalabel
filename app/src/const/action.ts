@@ -10,6 +10,8 @@ export const UPDATE_STATE = "UPDATE_STATE"
 export const SUBMIT = "SUBMIT"
 export const UPDATE_SESSION_STATUS = "UPDATE_SESSION_STATUS"
 export const UPDATE_MODEL_STATUS = "UPDATE_MODEL_STATUS"
+export const ADD_ALERT = "ADD_ALERT"
+export const CLOSE_ALERT = "CLOSE_ALERT"
 export const NULL = "NULL"
 export const PREDICT = "PREDICT"
 

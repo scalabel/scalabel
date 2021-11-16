@@ -62,7 +62,7 @@ export abstract class Label3D {
     this._label = makeLabel()
     this._selected = false
     this._highlighted = false
-    this._color = [0, 0, 0, 1]
+    this._color = getColorById(this.labelId, this.trackId)
     this._parent = null
     this._children = []
     this._temporary = true
@@ -139,6 +139,11 @@ export abstract class Label3D {
     }
 
     return false
+  }
+
+  /** returns label color */
+  public get color(): number[] {
+    return this._color
   }
 
   /** select the label */
@@ -312,7 +317,8 @@ export abstract class Label3D {
     category: number,
     center?: Vector3D,
     sensors?: number[],
-    temporary?: boolean
+    temporary?: boolean,
+    tracking?: boolean
   ): void
 
   /**
@@ -340,6 +346,7 @@ export abstract class Label3D {
     } else {
       this.selected = false
     }
+    this._temporary = false
   }
 
   /**

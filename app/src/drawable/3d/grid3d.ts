@@ -21,7 +21,12 @@ export class Grid3D extends Shape3D {
    */
   constructor(label: Label3D) {
     super(label)
-    this._lines = new THREE.GridHelper(1, 6, 0xffffff, 0xffffff)
+    this._lines = new THREE.GridHelper(
+      1,
+      6,
+      new THREE.Color().fromArray(label.color),
+      new THREE.Color().fromArray(label.color)
+    )
     this._lines.rotation.x = -Math.PI / 2
     this.add(this._lines)
     this.scale.x = 6
@@ -74,7 +79,9 @@ export class Grid3D extends Shape3D {
       ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xff0000)
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     } else {
-      ;(this._lines.material as THREE.LineBasicMaterial).color.set(0xffffff)
+      ;(this._lines.material as THREE.LineBasicMaterial).color.set(
+        new THREE.Color().fromArray(this.label.color)
+      )
       ;(this._lines.material as THREE.LineBasicMaterial).needsUpdate = true
     }
   }

@@ -32,6 +32,8 @@ import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -223,16 +225,19 @@ export class ToolBar extends Component<Props> {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
-      if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
-        if (!this.isKeyDown(Key.S_LOW)) {
-          Session.dispatch(terminateSelectedTracks(this.state, select.item))
+      const trackId = item.labels[Object.values(select.labels)[0][0]].track
+      if (trackId !== undefined) {
+        if (isValidId(trackId)) {
+          if (!this.isKeyDown(Key.S_LOW)) {
+            Session.dispatch(terminateSelectedTracks(this.state, select.item))
+          } else {
+            Session.dispatch(
+              deleteSelectedLabelsfromTracks(this.state, select.item)
+            )
+          }
         } else {
-          Session.dispatch(
-            deleteSelectedLabelsfromTracks(this.state, select.item)
-          )
+          Session.dispatch(deleteSelectedLabels(this.state))
         }
-      } else {
-        Session.dispatch(deleteSelectedLabels(this.state))
       }
     }
   }
@@ -385,10 +390,14 @@ export class ToolBar extends Component<Props> {
   private linkSelectedTracks(state: State): void {
     const tracks = getSelectedTracks(state)
 
+    if (tracks.length === 0) {
+      alert(Severity.WARNING, "No tracks currently selected.")
+    }
+
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     } else {
-      window.alert("Selected tracks have overlapping frames.")
+      alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
   }
 
@@ -400,9 +409,13 @@ export class ToolBar extends Component<Props> {
   private unlinkSelectedTrack(state: State): void {
     const select = this.state.user.select
     const track = getSelectedTracks(state)[0]
-    const newTrackId = makeTrack().id
 
-    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    if (track !== undefined) {
+      const newTrackId = makeTrack().id
+      Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    } else {
+      alert(Severity.WARNING, "No tracks currently selected.")
+    }
   }
 
   /**

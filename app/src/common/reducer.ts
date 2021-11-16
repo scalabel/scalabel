@@ -94,6 +94,10 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.UpdateModelStatusAction
       )
+    case actionConsts.ADD_ALERT:
+      return common.addAlert(state, action as actionTypes.AddAlertAction)
+    case actionConsts.CLOSE_ALERT:
+      return common.removeAlert(state, action as actionTypes.RemoveAlertAction)
     case actionConsts.NULL:
       return state
     default:
