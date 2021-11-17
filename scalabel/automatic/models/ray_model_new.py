@@ -81,7 +81,7 @@ class RayModel(object):
             return predictions
 
     # 0 for inference, 1 for training
-    async def __call__(self, inputs, meta_data, request_data, request_type):
+    async def __call__(self, inputs, request_data, request_type):
         # inference
         if self.cfg.TASK_TYPE == "OD":
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
@@ -98,7 +98,6 @@ class RayModel(object):
                 self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
         else:
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
-                inputs.update(meta_data)
                 results = await self.handle_batch_polygon(inputs)
 
                 model_response_channel = self.model_response_channel % request_data["name"]

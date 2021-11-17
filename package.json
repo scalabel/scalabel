@@ -18,6 +18,7 @@
     "build": "webpack --config webpack.config.js --mode=production",
     "watch-dev": "webpack --watch --config webpack.config.js --mode=development",
     "serve": "node --max-old-space-size=8192 app/dist/main.js --config ./local-data/scalabel/config.yml",
+    "bot-serve": "node --max-old-space-size=8192 app/dist/main.js --config ./local-data/scalabel/bot_config.yml",
     "lint": "eslint -c .eslintrc.json --ext .ts,.tsx app/src/ app/test",
     "test": "jest"
   },

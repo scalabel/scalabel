@@ -150,7 +150,7 @@ class RayModelServerScheduler(object):
     def register_handler(self, register_message):
         # decode message (do we need to put all the decode process to another file to keep here cleaner?)
         register_message = json.loads(register_message["data"])
-        task_type = "Polygon"
+        task_type = "OD"
         if "taskType" in register_message:
             task_type = register_message["taskType"]
         project_name = register_message["projectName"]
@@ -176,22 +176,21 @@ class RayModelServerScheduler(object):
             self.redis.publish(model_notify_channel, ModelStatus.INVALID.value)
             return
 
-        # change the status according to the message, and save the change
-        self.task_configs[task_name]["active"] = active
-        self.save_config(task_name)
-
         model = self.task_models[task_name]
 
-        if active:
-            if self.task_configs[task_name]["active"] != active:
+        if self.task_configs[task_name]["active"] != active:
+            # change the status according to the message, and save the change
+            self.task_configs[task_name]["active"] = active
+            self.save_config(task_name)
+
+            if active:
                 model.activate.remote()
+                self.redis.publish(model_notify_channel, ModelStatus.READY.value)
                 self.logger.info(f"{task_name} reset to active.")
-            self.redis.publish(model_notify_channel, ModelStatus.READY.value)
-        else:
-            if self.task_configs[task_name]["active"] != active:
+            else:
                 model.idle.remote()
+                self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
                 self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
-            self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
 
     def request_handler(self, request_message):
         # decode request message
@@ -219,9 +218,11 @@ class RayModelServerScheduler(object):
 
             task_images = self.task_images[f'{project_name}_{task_id}']
             inputs = [task_images[item["url"]] for item in request_data["items"]][0]
+            if meta_data is not None:
+                inputs.update(meta_data)
 
             model = self.task_models[f'{project_name}_{task_id}']
-            model.remote(inputs, meta_data, request_data, request_type)
+            model.remote(inputs, request_data, request_type)
 
     def register_task(self, task_type, project_name, task_id, item_list):
         # register task
@@ -232,9 +233,9 @@ class RayModelServerScheduler(object):
         if task_name in self.task_configs:
             if not self.task_configs[task_name]["active"]:
                 self.task_configs[task_name]["active"] = True
-                self.task_models[task_name].activate.remote()
-                # refresh the config, ensure correctness when restart
                 self.save_config(task_name)
+
+                self.task_models[task_name].activate.remote()
 
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
             return
@@ -302,7 +303,6 @@ class RayModelServerScheduler(object):
 
         # TODO: change this to multi-processing
         self.task_images[task_name] = ray.get(deploy_model.load_inputs.remote(item_list))
-        self.logger.info(list(self.task_images[task_name].values())[0]["image"].shape)
 
     def close(self, tash_name):
         self.threads[tash_name].stop()
