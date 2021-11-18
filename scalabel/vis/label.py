@@ -224,7 +224,7 @@ class LabelViewer:
         if title is not None:
             self.fig.canvas.manager.set_window_title(title)
         img = resize(img, (self.ui_cfg.height, self.ui_cfg.width))
-        self.ax.imshow(img)
+        self.ax.imshow(img, interpolation="bilinear", aspect="auto")
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
