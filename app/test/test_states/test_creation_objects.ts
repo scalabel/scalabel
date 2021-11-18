@@ -153,7 +153,8 @@ export const sampleFormEmpty: CreationForm = {
   pageTitle: "",
   taskSize: 0,
   instructionUrl: "",
-  demoMode: false
+  demoMode: false,
+  useModel: false
 }
 
 const sampleProjectName = "sampleName"
@@ -168,7 +169,8 @@ export const sampleFormImage: CreationForm = {
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
   instructionUrl: sampleInstructions,
-  demoMode: false
+  demoMode: false,
+  useModel: false
 }
 
 export const sampleFormVideo: CreationForm = {
@@ -178,7 +180,8 @@ export const sampleFormVideo: CreationForm = {
   pageTitle: sampleTitle,
   taskSize: sampleTaskSize,
   instructionUrl: sampleInstructions,
-  demoMode: true
+  demoMode: true,
+  useModel: false
 }
 
 export const sampleFormFileData: FormFileData = {

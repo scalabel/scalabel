@@ -38,7 +38,7 @@ class RayModel(object):
         checkpointer.load(cfg.MODEL.WEIGHTS)
         self.model.cuda().eval()
 
-        if self.cfg.TASK_TYPE == "OD":
+        if self.cfg.TASK_TYPE == "box2d":
             self.aug = T.ResizeShortestEdge(
                 [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
             )
@@ -83,7 +83,7 @@ class RayModel(object):
     # 0 for inference, 1 for training
     async def __call__(self, inputs, request_data, request_type):
         # inference
-        if self.cfg.TASK_TYPE == "OD":
+        if self.cfg.TASK_TYPE == "box2d":
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
                 results = await self.handle_batch_detection(inputs)
 
@@ -99,6 +99,8 @@ class RayModel(object):
         else:
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
                 results = await self.handle_batch_polygon(inputs)
+
+                self.logger.info(results)
 
                 model_response_channel = self.model_response_channel % request_data["name"]
 

@@ -43,11 +43,11 @@ export class ModelInterface {
    * @param url
    * @param itemIndex
    */
-  public makeRectQuery(
+  public makeRectRequest(
     rect: RectType,
     url: string,
     itemIndex: number
-  ): ModelQuery {
+  ): ModelRequest {
     const label = makeLabelExport({
       box2d: rect
     })
@@ -58,7 +58,6 @@ export class ModelInterface {
     })
     return {
       data: item,
-      endpoint: ModelEndpoint.PREDICT_POLY,
       itemIndex
     }
   }
@@ -91,25 +90,6 @@ export class ModelInterface {
       endpoint: ModelEndpoint.REFINE_POLY,
       itemIndex
     }
-  }
-
-  /**
-   * Translate polygon response to an action
-   *
-   * @param polyPoints
-   * @param itemIndex
-   */
-  public makePolyAction(
-    polyPoints: number[][],
-    itemIndex: number
-  ): AddLabelsAction {
-    const points = polyPoints.map((point: number[]) => {
-      return makeSimplePathPoint2D(point[0], point[1], PathPointType.LINE)
-    })
-
-    const action = addPolygon2dLabel(itemIndex, -1, [0], points, true, false)
-    action.sessionId = this.sessionId
-    return action
   }
 
   /**
@@ -146,6 +126,25 @@ export class ModelInterface {
       y2: predictedBox[3]
     }
     const action = addBox2dLabel(itemIndex, -1, [0], {}, box, false)
+    action.sessionId = this.sessionId
+    return action
+  }
+
+  /**
+   * Translate polygon response to an action
+   *
+   * @param polyPoints
+   * @param itemIndex
+   */
+  public makePolyAction(
+    polyPoints: number[][],
+    itemIndex: number
+  ): AddLabelsAction {
+    const points = polyPoints.map((point: number[]) => {
+      return makeSimplePathPoint2D(point[0], point[1], PathPointType.LINE)
+    })
+
+    const action = addPolygon2dLabel(itemIndex, -1, [0], points, true, false)
     action.sessionId = this.sessionId
     return action
   }

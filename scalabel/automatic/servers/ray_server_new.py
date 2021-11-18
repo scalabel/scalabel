@@ -150,7 +150,7 @@ class RayModelServerScheduler(object):
     def register_handler(self, register_message):
         # decode message (do we need to put all the decode process to another file to keep here cleaner?)
         register_message = json.loads(register_message["data"])
-        task_type = "OD"
+        task_type = "box2d"
         if "taskType" in register_message:
             task_type = register_message["taskType"]
         project_name = register_message["projectName"]
@@ -185,12 +185,15 @@ class RayModelServerScheduler(object):
 
             if active:
                 model.activate.remote()
-                self.redis.publish(model_notify_channel, ModelStatus.READY.value)
                 self.logger.info(f"{task_name} reset to active.")
             else:
                 model.idle.remote()
-                self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
                 self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
+
+        if active:
+            self.redis.publish(model_notify_channel, ModelStatus.READY.value)
+        else:
+            self.redis.publish(model_notify_channel, ModelStatus.IDLE.value)
 
     def request_handler(self, request_message):
         # decode request message
@@ -201,11 +204,6 @@ class RayModelServerScheduler(object):
         item_indices = request_message["itemIndices"]
         action_packet_id = request_message["actionPacketId"]
         request_type = request_message["type"]
-        if "metaData" in request_message:
-            meta_data = request_message["metaData"]
-            # for polygon task, meta_data = {"bbox": [x1, y1, x2, y2]}
-        else:
-            meta_data = None
 
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
             request_data = {
@@ -216,12 +214,21 @@ class RayModelServerScheduler(object):
                 "request_type": request_type
             }
 
-            task_images = self.task_images[f'{project_name}_{task_id}']
-            inputs = [task_images[item["url"]] for item in request_data["items"]][0]
-            if meta_data is not None:
-                inputs.update(meta_data)
+            task_name = f'{project_name}_{task_id}'
 
-            model = self.task_models[f'{project_name}_{task_id}']
+            task_config = self.task_configs[task_name]
+            task_images = self.task_images[task_name]
+            inputs = [task_images[item["url"]] for item in items][0]
+
+            # for polygon annotation
+            if task_config["task_type"] == "polygon2d":
+                inputs["poly"] = None
+                inputs["bbox"] = None
+                if items[0]["labels"][0]["box2d"] is not None:
+                    box = items[0]["labels"][0]["box2d"]
+                    inputs.update({"bbox": [box["x1"], box["y1"], box["x2"], box["y2"]]})
+
+            model = self.task_models[task_name]
             model.remote(inputs, request_data, request_type)
 
     def register_task(self, task_type, project_name, task_id, item_list):
@@ -272,12 +279,12 @@ class RayModelServerScheduler(object):
     def initialize(self, task_type, task_name, model_name, deploy_config, item_list):
         cfg = get_cfg()
         add_general_config(cfg)
-        if task_type == "OD":
+        if task_type == "box2d":
             cfg.merge_from_file(model_zoo.get_config_file(model_name))
             cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
             cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(model_name)
-        elif task_type == "Polygon":
-            cfg.TASK_TYPE = "Polygon"
+        elif task_type == "polygon2d":
+            cfg.TASK_TYPE = "polygon2d"
             add_polyrnnpp_config(cfg)
             cfg.merge_from_file(model_name)
         else:
@@ -291,6 +298,7 @@ class RayModelServerScheduler(object):
 
         deploy_model = serve.get_deployment(task_name).get_handle()
         self.task_configs[task_name] = {
+            "task_type": task_type,
             "task_name": task_name,
             "deploy_config": deploy_config,
             "item_list": item_list,
@@ -325,8 +333,8 @@ def launch() -> None:
         "redis_port": RedisConsts.REDIS_PORT
     }
     model_registry_config = {
-        "tasks": ["OD", "Polygon", "Mask"],
-        "OD": {
+        "tasks": ["box2d", "polygon2d", "Mask"],
+        "box2d": {
             "models": {
                 "R50-FPN": "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml",
                 "R101-FPN": "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
@@ -342,7 +350,7 @@ def launch() -> None:
                 }
             }
         },
-        "Polygon": {
+        "polygon2d": {
             "models": {
                 "POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"
             },

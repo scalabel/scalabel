@@ -17,6 +17,8 @@ export interface RegisterMessageType {
   address: string
   /** whether it came from a bot or not */
   bot: boolean
+  /** label type */
+  labelType?: string
 }
 
 /** action type for synchronization between front and back ends */
@@ -41,6 +43,8 @@ export interface ModelRegisterMessageType {
   taskId: string
   /** item list */
   items: ItemType[]
+  /** task type */
+  taskType: string
 }
 
 /** model register message type */
@@ -89,6 +93,8 @@ export interface BotData {
   botId: string
   /** the address of the io server */
   address: string
+  /** label type */
+  labelType: string
 }
 
 /** precomputed queries for models */

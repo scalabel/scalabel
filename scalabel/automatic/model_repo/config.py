@@ -5,4 +5,4 @@ def add_general_config(cfg):
     """
     Add config for Polygon-RNN++.
     """
-    cfg.TASK_TYPE = "OD"
+    cfg.TASK_TYPE = "box2d"

@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 import skimage.transform as transform
+import logging
 
 from detectron2.modeling import META_ARCH_REGISTRY
 from detectron2.config import get_cfg, CfgNode
@@ -22,7 +23,7 @@ class PolyRNNPP(nn.Module):
         self.device = self.cfg.MODEL.DEVICE
 
         self.encoder = SkipResnet50()
-        self.first_v = FirstVertex(feats_channels=self.encoder.final_dim, feats_dim=self.encoder.feat_size)
+        self.first_v = FirstVertex(self.encoder.feat_size, self.encoder.final_dim)
         self.conv_lstm = AttConvLSTM(
             cfg,
             feats_channels=self.encoder.final_dim,
@@ -102,7 +103,7 @@ class PolyRNNPP(nn.Module):
             'img': torch.as_tensor(new_img.astype("float32").transpose(2, 0, 1)),
             'patch_w': patch_w,
             'starting_point': starting_point,
-            'poly': torch.as_tensor(arr_poly.astype("float32"))
+            'poly': torch.as_tensor(arr_poly.astype("float32")) if arr_poly is not None else None
         }
 
         return return_dict
@@ -120,41 +121,26 @@ class PolyRNNPP(nn.Module):
         return poly.astype(np.int32).tolist()
 
     def forward(self, batched_inputs):
-        processed_dict = self.preprocess(batched_inputs)
+        processed_dict = self.preprocess(batched_inputs[0])
 
         x = processed_dict["img"].to(self.device).unsqueeze(0)
-        poly = processed_dict["poly"].to(self.device).unsqueeze(0)
-
-        fp_beam_size = 5
-        lstm_beam_size = 1
+        poly = processed_dict["poly"]
+        if poly is not None:
+            poly = poly.to(self.device).unsqueeze(0)
 
         batch_size = x.shape[0]
-
         concat_feats, feats = self.encoder(x)
 
-        edge_logits, vertex_logits, first_logprob, first_v = self.first_v(feats, beam_size=fp_beam_size)
+        _, _, first_logprob, first_v = self.first_v(feats, beam_size=5)
 
         poly_class = None
         if poly is not None:
             poly_class = utils.xy_to_class(poly, grid_size=self.encoder.feat_size)
             first_v = poly_class[:, 0]
             first_logprob = None
-            lstm_beam_size = 1
 
-        out_dict = self.conv_lstm(
-            feats,
-            first_v,
-            poly_class,
-            temperature=0.0,
-            fp_beam_size=fp_beam_size,
-            first_log_prob=first_logprob,
-        )
-
-        ious = self.evaluator(
-            out_dict['feats'],
-            out_dict['rnn_state'],
-            out_dict['pred_polys']
-        )
+        out_dict = self.conv_lstm(feats, first_v, poly_class, fp_beam_size=5, first_log_prob=first_logprob)
+        ious = self.evaluator(out_dict['feats'], out_dict['rnn_state'], out_dict['pred_polys'])
         comparison_metric = ious
         out_dict['ious'] = ious
 
@@ -163,8 +149,8 @@ class PolyRNNPP(nn.Module):
         isect = torch.from_numpy(isect).to(torch.float32).to(self.device)
         comparison_metric = comparison_metric + isect
 
-        comparison_metric = comparison_metric.view(batch_size, fp_beam_size, lstm_beam_size)
-        out_dict['pred_polys'] = out_dict['pred_polys'].view(batch_size, fp_beam_size, lstm_beam_size, -1)
+        comparison_metric = comparison_metric.view(batch_size, 5, 1)
+        out_dict['pred_polys'] = out_dict['pred_polys'].view(batch_size, 5, 1, -1)
 
         # Max across beams
         comparison_metric, beam_idx = torch.max(comparison_metric, dim=-1)
@@ -185,4 +171,4 @@ class PolyRNNPP(nn.Module):
 
         poly = self.postprocess(processed_dict, out_dict)
 
-        return poly
+        return [poly]

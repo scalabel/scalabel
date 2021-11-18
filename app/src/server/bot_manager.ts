@@ -98,7 +98,8 @@ export class BotManager {
       projectName: data.projectName,
       taskIndex: data.taskIndex,
       botId: "",
-      address: data.address
+      address: data.address,
+      labelType: data.labelType !== undefined ? data.labelType : "box2d"
     }
 
     if (data.bot || (await this.checkBotExists(botData))) {

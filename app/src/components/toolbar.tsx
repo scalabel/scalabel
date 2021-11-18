@@ -3,7 +3,7 @@ import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
-import { ToastContainer, toast, Slide } from "react-toastify"
+import { Slide, toast, ToastContainer } from "react-toastify"
 
 import {
   changeModeToAnnotating,
@@ -11,9 +11,9 @@ import {
   changeSelect,
   changeViewerConfig,
   mergeTracks,
+  sendPredictionRequest,
   splitTrack,
-  startLinkTrack,
-  sendPredictionRequest
+  startLinkTrack
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -80,6 +80,12 @@ export class ToolBar extends Component<Props> {
    */
   public onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
+      case Key.ONE:
+      case Key.TWO:
+      case Key.THREE:
+      case Key.FOUR:
+        this.changeLabelType(this.state, Number(e.key) - 1)
+        break
       case Key.BACKSPACE:
         this.deletePressed()
         break
@@ -432,5 +438,26 @@ export class ToolBar extends Component<Props> {
    */
   private startPrediction(state: State): void {
     Session.dispatch(sendPredictionRequest(state.user.select.item))
+  }
+
+  /**
+   * Change the label type
+   *
+   * @param state
+   * @param labelType
+   */
+  private changeLabelType(state: State, labelType: number): void {
+    if (labelType > state.task.config.labelTypes.length - 1) {
+      alert(Severity.WARNING, "The chosen label type is not available")
+      return
+    }
+    Session.dispatch(changeSelect({ labelType }))
+    toast(
+      `Change the selected label type to ${state.task.config.labelTypes[labelType]}`,
+      {
+        position: "top-center",
+        autoClose: 2000
+      }
+    )
   }
 }

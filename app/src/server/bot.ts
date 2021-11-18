@@ -3,7 +3,7 @@ import io from "socket.io-client"
 import { configureStore } from "../common/configure_store"
 import { uid } from "../common/uid"
 import { index2str } from "../common/util"
-import { PREDICT } from "../const/action"
+import { ADD_LABELS, PREDICT } from "../const/action"
 import { EventName, RedisChannel } from "../const/connection"
 import {
   AddLabelsAction,
@@ -24,11 +24,11 @@ import {
   SyncActionMessageType
 } from "../types/message"
 import { ReduxStore } from "../types/redux"
-import { ModelStatus, State } from "../types/state"
+import { ModelStatus, RectType, State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
 import { makeRedisPubSub, RedisPubSub } from "./redis_pub_sub"
-import { ModelRequestType } from "../const/common"
+import { LabelTypeName, ModelRequestType, ShapeTypeName } from "../const/common"
 import { updateModelStatus } from "../action/common"
 
 /**
@@ -45,6 +45,8 @@ export class Bot {
   public sessionId: string
   /** address for session connections */
   public address: string
+  /** label type */
+  public labelType: string
   /** The store to save state */
   protected store: ReduxStore
   /** Socket connection */
@@ -84,6 +86,7 @@ export class Bot {
     this.taskIndex = botData.taskIndex
     this.botId = botData.botId
     this.address = botData.address
+    this.labelType = botData.labelType
     this.sessionId = uid()
 
     this.publisher = makeRedisPubSub(redisConfig)
@@ -164,7 +167,8 @@ export class Bot {
     const modelRegisterMessage: ModelRegisterMessageType = {
       projectName: this.projectName,
       taskId: index2str(this.taskIndex),
-      items: this.store.getState().present.task.items
+      items: this.store.getState().present.task.items,
+      taskType: this.labelType
     }
     this.publisher.publishEvent(
       RedisChannel.MODEL_REGISTER,
@@ -232,6 +236,9 @@ export class Bot {
       active: active
     }
     this.publisher.publishEvent(RedisChannel.MODEL_STATUS, modelStatusMessage)
+    if (!active) {
+      this.socket.disconnect()
+    }
   }
 
   /**
@@ -256,7 +263,8 @@ export class Bot {
       botId: this.botId,
       projectName: this.projectName,
       taskIndex: this.taskIndex,
-      address: this.address
+      address: this.address,
+      labelType: this.labelType
     }
   }
 
@@ -320,12 +328,22 @@ export class Bot {
 
         const state = this.store.getState().present
         if (action.type === PREDICT) {
-          const request = this.actionToRequest(
+          const request = this.imageActionToRequest(
             state,
             action as PredictionAction
           )
           if (request !== null) {
             modelRequests.push(request)
+          }
+        } else if (action.type === ADD_LABELS) {
+          if (this.labelType === LabelTypeName.POLYGON_2D) {
+            const request = this.boxActionToRequest(
+              state,
+              action as AddLabelsAction
+            )
+            if (request !== null) {
+              modelRequests.push(request)
+            }
           }
         }
       }
@@ -338,10 +356,9 @@ export class Bot {
    * Only handles box2d/polygon2d actions, so assume a single label/shape/item
    *
    * @param state
-   * @param state
    * @param action
    */
-  private actionToRequest(
+  private imageActionToRequest(
     state: State,
     action: PredictionAction
   ): ModelRequest | null {
@@ -350,6 +367,34 @@ export class Bot {
     const url = Object.values(item.urls)[0]
 
     return this.modelInterface.makeImageRequest(url, itemIndex)
+  }
+
+  /**
+   * Generate BDD data format item corresponding to the action
+   * Only handles box2d/polygon2d actions, so assume a single label/shape/item
+   *
+   * @param state
+   * @param action
+   */
+  private boxActionToRequest(
+    state: State,
+    action: AddLabelsAction
+  ): ModelRequest | null {
+    const shapeType = action.shapes[0][0][0].shapeType
+    const shapes = action.shapes[0][0]
+    const itemIndex = action.itemIndices[0]
+    const item = state.task.items[itemIndex]
+    const url = Object.values(item.urls)[0]
+
+    if (shapeType === ShapeTypeName.RECT) {
+      return this.modelInterface.makeRectRequest(
+        shapes[0] as RectType,
+        url,
+        itemIndex
+      )
+    } else {
+      return null
+    }
   }
 
   /**
@@ -362,14 +407,19 @@ export class Bot {
     const actions: AddLabelsAction[] = []
 
     const receivedData = JSON.parse(modelResponse)
-    const boxes: number[][] = receivedData[0]
+    const shapes: number[][] = receivedData[0]
     const itemIndices: number[] = receivedData[1]
     const actionPacketId: string = receivedData[2]
 
-    boxes.forEach((box: number[]) => {
-      const action = this.modelInterface.makeRectAction(box, itemIndices[0])
+    if (this.labelType === LabelTypeName.BOX_2D) {
+      shapes.forEach((shape: number[]) => {
+        const action = this.modelInterface.makeRectAction(shape, itemIndices[0])
+        actions.push(action)
+      })
+    } else {
+      const action = this.modelInterface.makePolyAction(shapes, itemIndices[0])
       actions.push(action)
-    })
+    }
 
     // Dispatch the predicted actions locally
     for (const action of actions) {

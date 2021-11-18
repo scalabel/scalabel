@@ -46,23 +46,10 @@ class AttConvLSTM(nn.Module):
                 # +3 for prev 2 vertices and for the 1st vertex
 
             self.conv_x.append(
-                nn.Conv2d(
-                    in_channels=in_channels,
-                    out_channels=4 * hidden_dim,
-                    kernel_size=self.kernel_size,
-                    padding=self.kernel_size // 2,
-                    bias=not use_bn
-                )
+                nn.Conv2d(in_channels, 4 * hidden_dim, self.kernel_size, padding=self.kernel_size // 2, bias=not use_bn)
             )
-
             self.conv_h.append(
-                nn.Conv2d(
-                    in_channels=hidden_dim,
-                    out_channels=4 * hidden_dim,
-                    kernel_size=self.kernel_size,
-                    padding=self.kernel_size // 2,
-                    bias=not use_bn
-                )
+                nn.Conv2d(hidden_dim, 4 * hidden_dim, self.kernel_size, padding=self.kernel_size // 2, bias=not use_bn)
             )
 
             if use_bn:
@@ -80,31 +67,10 @@ class AttConvLSTM(nn.Module):
             self.bn_c = nn.ModuleList(self.bn_c)
 
         self.att_in_planes = sum(self.hidden_dim)
-        self.conv_att = nn.Conv2d(
-            in_channels=self.att_in_planes,
-            out_channels=self.feats_channels,
-            kernel_size=1,
-            padding=0,
-            bias=True
-        )
+        self.conv_att = nn.Conv2d(self.att_in_planes, self.feats_channels, 1, padding=0, bias=True)
 
-        self.fc_att = nn.Linear(
-            in_features=self.feats_channels,
-            out_features=1
-        )
-        '''
-        self.conv_att_2 = nn.Conv2d(
-            in_channels = self.feats_channels,
-            out_channels = 1,
-            kernel_size = 1,
-            padding = 0,
-            bias = True
-        )
-        '''
-        self.fc_out = nn.Linear(
-            in_features=self.grid_size ** 2 * self.hidden_dim[-1],
-            out_features=self.grid_size ** 2 + 1,
-        )
+        self.fc_att = nn.Linear(self.feats_channels, 1)
+        self.fc_out = nn.Linear(self.grid_size ** 2 * self.hidden_dim[-1], self.grid_size ** 2 + 1)
 
     def rnn_step(self, t, input, cur_state):
         """
@@ -172,11 +138,8 @@ class AttConvLSTM(nn.Module):
                 feats,
                 first_vertex,
                 poly=None,
-                temperature=0.0,
                 fp_beam_size=1,
-                first_log_prob=None,
-                return_attention=False,
-                use_correction=False):
+                first_log_prob=None):
         """
         feats: [b, c, h, w]
         first_vertex: [b, ]
@@ -197,11 +160,8 @@ class AttConvLSTM(nn.Module):
                         feats,
                         first_vertex,
                         poly=None,
-                        temperature=0.0,
                         fp_beam_size=1,
-                        first_log_prob=None,
-                        return_attention=False,
-                        use_correction=False):
+                        first_log_prob=None):
         """
         See forward
         """
@@ -215,17 +175,14 @@ class AttConvLSTM(nn.Module):
             expanded = False
             first_vertex = first_vertex.unsqueeze(1)
             first_vertex = first_vertex.repeat([1, fp_beam_size])
-            # Repeat same first vertex fp_beam_size times
-            # We will diverge the beams after the corrected vertex
 
         first_vertex = first_vertex.view(-1)
-        batch_size = feats.size(0) * fp_beam_size
+        batch_size = feats.shape[0] * fp_beam_size
 
         # Expand feats
-        if fp_beam_size > 1:
-            feats = feats.unsqueeze(1)
-            feats = feats.repeat([1, fp_beam_size, 1, 1, 1])
-            feats = feats.view(batch_size, -1, self.grid_size, self.grid_size)
+        feats = feats.unsqueeze(1)
+        feats = feats.repeat([1, fp_beam_size, 1, 1, 1])
+        feats = feats.view(batch_size, -1, self.grid_size, self.grid_size)
 
         # Setup tensors to be reused
         v_prev2 = torch.zeros(batch_size, 1, self.grid_size, self.grid_size, device=self.device)
@@ -237,9 +194,6 @@ class AttConvLSTM(nn.Module):
         v_first = utils.class_to_grid(first_vertex, v_first, self.grid_size)
         rnn_state = self.rnn_zero_state(feats.size())
 
-        # Things to output
-        if return_attention:
-            out_attention = [torch.zeros(batch_size, 1, self.grid_size, self.grid_size, device=self.device)]
         pred_polys = [first_vertex.to(torch.float32)]
 
         logits = [torch.zeros(batch_size, self.grid_size ** 2 + 1, device=self.device)]
@@ -258,28 +212,13 @@ class AttConvLSTM(nn.Module):
             input_t = torch.cat((att_feats, v_prev2, v_prev1, v_first), dim=1)
 
             rnn_state = self.rnn_step(t, input_t, rnn_state)
-            if return_attention:
-                out_attention.append(att)
 
             h_final = rnn_state[-1][0]  # h from last layer
             h_final = h_final.view(batch_size, -1)
 
             logits_t = self.fc_out(h_final)
             logprobs = F.log_softmax(logits_t, dim=-1)
-
-            if temperature < 0.01:
-                # No precision issues
-                logprob, pred = torch.max(logprobs, dim=-1)
-            else:
-                probs = torch.exp(logprobs / temperature)
-                pred = torch.multinomial(probs, 1)
-
-                # Get logprob of the sampled vertex
-                logprob = logprobs.gather(1, pred)
-
-                # Remove the last dimension if not 1
-                pred = torch.squeeze(pred, dim=-1)
-                logprob = torch.squeeze(logprob, dim=-1)
+            logprob, pred = torch.max(logprobs, dim=-1)
 
             for b in range(batch_size):
                 if lengths[b] != self.time_steps:
@@ -312,7 +251,6 @@ class AttConvLSTM(nn.Module):
 
         pred_polys = torch.stack(pred_polys)  # (self.time_steps, b,)
         out_dict['pred_polys'] = pred_polys.permute(1, 0)
-
         out_dict['rnn_state'] = rnn_state
         # Return last rnn state
 
@@ -325,20 +263,12 @@ class AttConvLSTM(nn.Module):
             lp = ((5. + lengths[b]) / 6.) ** 0.65
             logprob_sums[b] = p
 
+        logits = torch.stack(logits)  # (self.time_steps, b, self.grid_size**2 + 1)
         out_dict['logprob_sums'] = logprob_sums
         out_dict['feats'] = feats
-        # Return the reshape feats based on beam sizes
-
         out_dict['log_probs'] = log_probs
-
-        logits = torch.stack(logits)  # (self.time_steps, b, self.grid_size**2 + 1)
         out_dict['logits'] = logits.permute(1, 0, 2)
-
         out_dict['lengths'] = lengths
-
-        if return_attention:
-            out_attention = torch.stack(out_attention)
-            out_dict['attention'] = out_attention.permute(1, 0, 2, 3, 4)
 
         return out_dict
 

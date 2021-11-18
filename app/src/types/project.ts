@@ -39,6 +39,8 @@ export interface CreationForm {
   instructionUrl: string
   /** whether demo mode is true */
   demoMode: boolean
+  /** use model or not */
+  useModel: boolean
 }
 
 /* file data parsed from form */

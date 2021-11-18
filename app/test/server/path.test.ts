@@ -7,7 +7,8 @@ test("Test redis keys", () => {
     projectName: baseKey,
     taskIndex: 0,
     address: "address",
-    botId: "botId"
+    botId: "botId",
+    labelType: "box2d"
   }
   const extendedKeys = [
     path.getRedisMetaKey(baseKey),

@@ -109,7 +109,7 @@ export class Hub {
     const state = await this.projectStore.loadState(projectName, taskId)
     state.session.id = sessionId
     state.task.config.autosave = this.autosave
-    state.task.config.bots = this.bots
+    state.task.config.bots = state.task.config.bots && this.bots
 
     // Connect socket to others in the same room
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
@@ -117,7 +117,10 @@ export class Hub {
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
     // Notify other processes of registration
-    this.publisher.publishEvent(RedisChannel.REGISTER_EVENT, data)
+    if (state.task.config.bots) {
+      data.labelType = state.task.config.labelTypes[0]
+      this.publisher.publishEvent(RedisChannel.REGISTER_EVENT, data)
+    }
   }
 
   /**

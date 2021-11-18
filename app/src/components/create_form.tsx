@@ -67,6 +67,8 @@ interface State {
   showTaskSize: boolean
   /** submit with multiple files or a single complete file*/
   submitSingleFile: boolean
+  /** whether use model or not */
+  useModel: boolean
 }
 
 /**
@@ -93,7 +95,8 @@ export default class CreateForm extends React.Component<Props, State> {
       hasSubmitted: false,
       showCategoriesUpload: true,
       showTaskSize: true,
-      submitSingleFile: false
+      submitSingleFile: false,
+      useModel: false
     }
   }
 
@@ -210,6 +213,23 @@ export default class CreateForm extends React.Component<Props, State> {
               name={FormField.SINGLE_FILE}
               value={this.state.submitSingleFile}
               label="Submit single file"
+              labelPlacement="end"
+            />
+            <FormControlLabel
+              control={
+                <StyledCheckbox
+                  checked={this.state.useModel}
+                  onChange={() => {
+                    this.setState({
+                      useModel: !this.state.useModel
+                    })
+                  }}
+                />
+              }
+              id="use_model"
+              name={FormField.USE_MODEL}
+              value={this.state.useModel}
+              label="AI-Assisted"
               labelPlacement="end"
             />
           </FormGroup>
