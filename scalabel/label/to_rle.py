@@ -11,7 +11,7 @@ from ..common.logger import logger
 from ..common.parallel import NPROC
 from .io import group_and_sort, load, load_label_config, save
 from .transforms import frame_to_rles, rle_to_box2d
-from .typing import Config, Frame, ImageSize, Poly2D
+from .typing import Config, Frame, ImageSize
 
 ToRLEsFunc = Callable[[List[Frame], str, Config, int], None]
 
@@ -33,6 +33,13 @@ def parse_args() -> argparse.Namespace:
         help="path to save rle formatted label file",
     )
     parser.add_argument(
+        "-m",
+        "--mode",
+        default="det",
+        choices=["ins_seg", "sem_seg", "pan_seg", "seg_track"],
+        help="conversion mode",
+    )
+    parser.add_argument(
         "--nproc",
         type=int,
         default=NPROC,
@@ -47,86 +54,59 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def frames_to_rle(
-    out_path: str, shape: ImageSize, frames: List[Frame]
-) -> None:
+def frame_to_rle(shape: ImageSize, frame: Frame) -> Frame:
     """Converting a frame of poly2ds to rle."""
-    for image_anns in frames:
-        poly2ds: List[List[Poly2D]] = []
-        labels_ = image_anns.labels
-        if labels_ is None or len(labels_) == 0:
-            continue
-        # Scores higher, rendering later
-        has_score = all((label.score is not None for label in labels_))
-        if has_score:
-            labels_ = sorted(
-                labels_, key=lambda label: float(label.score)  # type: ignore
-            )
-        for label in labels_:
-            if label.poly2d is None:
-                continue
-            poly2ds.append(label.poly2d)
-        rles = frame_to_rles(shape, poly2ds)
-        for label, rle in zip(labels_, rles):
-            label.rle = rle
-            label.box2d = rle_to_box2d(rle)
-    save(out_path, frames)
+    labels = frame.labels
+    if labels is None or len(labels) == 0:
+        return frame
+    # higher score, rendering later
+    has_score = all((label.score is not None for label in labels))
+    if has_score:
+        labels = sorted(
+            labels, key=lambda label: float(label.score)  # type: ignore
+        )
+    poly2ds = [label.poly2d for label in labels if label.poly2d is not None]
+    rles = frame_to_rles(shape, poly2ds)
+    for label, rle in zip(labels, rles):
+        label.rle = rle
+        label.box2d = rle_to_box2d(rle)
+    return frame
 
 
-def frames_to_rles(
-    nproc: int,
-    out_paths: List[str],
+def frames_to_rle(
     shapes: List[ImageSize],
-    frames_list: List[List[Frame]],
-) -> None:
+    frames: List[Frame],
+    nproc: int = NPROC,
+) -> List[Frame]:
     """Execute the rle conversion in parallel."""
     with Pool(nproc) as pool:
-        pool.starmap(
-            partial(frames_to_rle),
+        frames = pool.starmap(
+            partial(frame_to_rle),
             tqdm(
-                zip(out_paths, shapes, frames_list),
-                total=len(out_paths),
+                zip(shapes, frames),
+                total=len(frames),
             ),
         )
 
+    sorted(frames, key=lambda frame: frame.name)
+    return frames
 
-def seg_to_rles(  # pylint: disable=unused-argument
-    frames: List[Frame], out_path: str, config: Config, nproc: int = NPROC
-) -> None:
+
+def seg_to_rles(
+    frames: List[Frame], config: Config, nproc: int = NPROC
+) -> List[Frame]:
     """Converting segmentation poly2d to rles."""
     img_shape = config.imageSize
     assert img_shape is not None, "Seg conversion requires imageSize in config"
+    img_shapes = [img_shape] * len(frames)
     logger.info("Start conversion for Seg to RLEs")
-    frames_to_rle(out_path, img_shape, frames)
-
-
-def segtrack_to_rles(
-    frames: List[Frame], out_base: str, config: Config, nproc: int = NPROC
-) -> None:
-    """Converting segmentation tracking poly2d to rles."""
-    frames_list = group_and_sort(frames)
-    os.makedirs(out_base, exist_ok=True)
-    img_shape = config.imageSize
-    assert img_shape is not None, "Conversion requires imageSize in config."
-
-    logger.info("Preparing annotations for SegTrack to RLEs")
-    out_paths: List[str] = []
-    shapes: List[ImageSize] = []
-    for video_anns in frames_list:
-        video_name = video_anns[0].videoName
-        assert (
-            video_name is not None
-        ), "SegTrack conversion requires videoName in annotations"
-        out_paths.append(os.path.join(out_base, f"{video_name}.json"))
-        shapes.append(img_shape)
-
-    logger.info("Start Conversion for SegTrack to RLEs")
-    frames_to_rles(nproc, out_paths, shapes, frames_list)
+    return frames_to_rle(img_shapes, frames, nproc)
 
 
 def main() -> None:
     """Main function."""
     args = parse_args()
+    assert args.mode in ["ins_seg", "sem_seg", "pan_seg", "seg_track"]
 
     dataset = load(args.input, args.nproc)
     frames, config = dataset.frames, dataset.config
@@ -139,7 +119,20 @@ def main() -> None:
             " to specify a config for this dataset."
         )
 
-    seg_to_rles(frames, args.output, config, args.nproc)
+    frames = seg_to_rles(frames, config, args.nproc)
+    if args.mode == "seg_track":
+        frames_list = group_and_sort(frames)
+        os.makedirs(args.output, exist_ok=True)
+        for video_anns in frames_list:
+            video_name = video_anns[0].videoName
+            assert (
+                video_name is not None
+            ), "SegTrack conversion requires videoName in annotations"
+            out_path = os.path.join(args.output, f"{video_name}.json")
+            save(out_path, video_anns)
+    else:
+        frames = seg_to_rles(frames, config, args.nproc)
+        save(args.output, frames)
 
     logger.info("Finished!")
 

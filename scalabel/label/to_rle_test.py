@@ -2,11 +2,9 @@
 import os
 import shutil
 import unittest
-from typing import Callable, List
 
 from .io import load, load_label_config
-from .to_rle import seg_to_rles, segtrack_to_rles
-from .typing import Config, Frame
+from .to_rle import seg_to_rles
 
 
 class TestToRLEs(unittest.TestCase):
@@ -14,13 +12,7 @@ class TestToRLEs(unittest.TestCase):
 
     test_out = "./test_rles"
 
-    def task_specific_test(
-        self,
-        task_name: str,
-        file_name: str,
-        output_name: str,
-        convert_func: Callable[[List[Frame], str, Config, int], None],
-    ) -> None:
+    def task_specific_test(self, task_name: str, file_name: str) -> None:
         """General test function for different tasks."""
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,11 +21,8 @@ class TestToRLEs(unittest.TestCase):
         scalabel_config = load_label_config(
             f"{cur_dir}/../eval/testcases/{task_name}/{task_name}_configs.toml"
         )
-        output_path = os.path.join(self.test_out, output_name)
-        os.makedirs(self.test_out, exist_ok=True)
-        convert_func(frames, output_path, scalabel_config, 1)
+        dt_rle = seg_to_rles(frames, scalabel_config, 1)
         gt_rle = load(f"{cur_dir}/testcases/rles/{file_name}").frames
-        dt_rle = load(output_path).frames
         for gt, dt in zip(gt_rle, dt_rle):
             self.assertEqual(gt.name, dt.name)
             self.assertEqual(gt.videoName, dt.videoName)
@@ -49,30 +38,19 @@ class TestToRLEs(unittest.TestCase):
 
     def test_semseg_to_rles(self) -> None:
         """Test case for semantic segmentation to rles."""
-        self.task_specific_test(
-            "sem_seg", "semseg_rle.json", "semseg_rle.json", seg_to_rles
-        )
+        self.task_specific_test("sem_seg", "semseg_rle.json")
 
     def test_insseg_to_rles(self) -> None:
         """Test case for instance segmentation to rles."""
-        self.task_specific_test(
-            "ins_seg", "insseg_rle.json", "insseg_rle.json", seg_to_rles
-        )
+        self.task_specific_test("ins_seg", "insseg_rle.json")
 
     def test_panseg_to_rles(self) -> None:
         """Test case for panoptic segmentation to rles."""
-        self.task_specific_test(
-            "ins_seg", "panseg_rle.json", "panseg_rle.json", seg_to_rles
-        )
+        self.task_specific_test("ins_seg", "panseg_rle.json")
 
     def test_segtrack_to_rles(self) -> None:
         """Test case for segmentation tracking to rles."""
-        self.task_specific_test(
-            "seg_track",
-            "segtrack/b1c81faa-3df17267.json",
-            "segtrack",
-            segtrack_to_rles,
-        )
+        self.task_specific_test("seg_track", "segtrack")
 
     @classmethod
     def tearDownClass(cls) -> None:
