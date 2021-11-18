@@ -10,16 +10,12 @@ def test_parse_annotations() -> None:
 
     assert list(result.keys()) == [0, 1, 3]
 
-    for frame_idx, labels in result.items():
+    for _, labels in result.items():
         for label in labels:
             assert label.attributes is not None
-            if label.attributes["ignored"]:
-                assert label.category == "pedestrian"
-                assert frame_idx == 1
-            else:
-                assert label.category == "pedestrian"
-                assert label.id == "1"
-                assert label.attributes["visibility"] == 1.0
-                assert label.box2d is not None
-                assert label.box2d.x1 in [458, 460]
-                assert label.box2d.x2 in [589, 587]
+            assert label.category == "pedestrian"
+            assert label.id == "1"
+            assert label.attributes["visibility"] == 1.0
+            assert label.box2d is not None
+            assert label.box2d.x1 in [458, 460]
+            assert label.box2d.x2 in [588, 590]

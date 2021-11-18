@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.font_manager import FontProperties
+from skimage.transform import resize
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
@@ -222,6 +223,7 @@ class LabelViewer:
         """Draw image."""
         if title is not None:
             self.fig.canvas.manager.set_window_title(title)
+        img = resize(img, (self.ui_cfg.height, self.ui_cfg.width))
         self.ax.imshow(img, interpolation="bilinear", aspect="auto")
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
