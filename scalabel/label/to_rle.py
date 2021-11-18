@@ -33,13 +33,6 @@ def parse_args() -> argparse.Namespace:
         help="path to save rle formatted label file",
     )
     parser.add_argument(
-        "-m",
-        "--mode",
-        default="det",
-        choices=["ins_seg", "sem_seg", "pan_seg", "seg_track"],
-        help="conversion mode",
-    )
-    parser.add_argument(
         "--nproc",
         type=int,
         default=NPROC,
@@ -49,7 +42,12 @@ def parse_args() -> argparse.Namespace:
         "--config",
         type=str,
         default=None,
-        help="Configuration file",
+        help="configuration file",
+    )
+    parser.add_argument(
+        "--per-video",
+        action="store_true",
+        help="store seg_track annotations per video",
     )
     return parser.parse_args()
 
@@ -106,8 +104,6 @@ def seg_to_rles(
 def main() -> None:
     """Main function."""
     args = parse_args()
-    assert args.mode in ["ins_seg", "sem_seg", "pan_seg", "seg_track"]
-
     dataset = load(args.input, args.nproc)
     frames, config = dataset.frames, dataset.config
 
@@ -120,18 +116,14 @@ def main() -> None:
         )
 
     frames = seg_to_rles(frames, config, args.nproc)
-    if args.mode == "seg_track":
+    if args.per_video:
         frames_list = group_and_sort(frames)
         os.makedirs(args.output, exist_ok=True)
         for video_anns in frames_list:
             video_name = video_anns[0].videoName
-            assert (
-                video_name is not None
-            ), "SegTrack conversion requires videoName in annotations"
             out_path = os.path.join(args.output, f"{video_name}.json")
             save(out_path, video_anns)
     else:
-        frames = seg_to_rles(frames, config, args.nproc)
         save(args.output, frames)
 
     logger.info("Finished!")
