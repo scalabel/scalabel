@@ -6,6 +6,8 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 import argparse
 import concurrent.futures
 import io
+
+from scalabel.label.transforms import rle_to_mask
 import threading
 from dataclasses import dataclass
 from queue import Queue
@@ -191,6 +193,7 @@ class LabelViewer:
         with_box3d: bool = True,
         with_poly2d: bool = True,
         with_graph: bool = True,
+        with_rle: bool = True,
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
@@ -218,6 +221,8 @@ class LabelViewer:
             )
         if with_graph:
             self.draw_graph(labels)
+        if with_rle:
+            self.draw_rle(image, labels)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
@@ -474,6 +479,30 @@ class LabelViewer:
                         int(2 * self.ui_cfg.scale),
                     )
                     self.ax.add_patch(result[0])
+
+    def draw_rle(
+        self,
+        image: NDArrayU8,
+        labels: List[Label],
+        alpha: float = 0.5,
+    ) -> None:
+        """Draw RLE."""
+        combined_mask = np.zeros(image.shape)
+
+        for label in labels:
+            if not label.rle:
+                continue
+
+            color = self._get_label_color(label)
+            bitmask = rle_to_mask(label.rle)
+            mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
+
+            # Non-zero values correspond to colors for each label
+            combined_mask = np.where(mask, (color * 255).astype(np.uint8), combined_mask)
+
+        if combined_mask is None:
+            return
+        self.ax.imshow(np.where(combined_mask > 0, combined_mask.astype(np.uint8), image), alpha=alpha)
 
 
 def parse_args() -> argparse.Namespace:
