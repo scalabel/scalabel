@@ -493,7 +493,7 @@ class LabelViewer:
             if not label.rle:
                 continue
 
-            color = self._get_label_color(label) * 255  # type: NDArrayF64
+            color: NDArrayF64 = self._get_label_color(label) * 255
             bitmask = rle_to_mask(label.rle)
             mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
 
@@ -502,8 +502,6 @@ class LabelViewer:
                 mask, color.astype(np.uint8), combined_mask
             )
 
-        if combined_mask is None:
-            return
         self.ax.imshow(
             np.where(combined_mask > 0, combined_mask.astype(np.uint8), image),
             alpha=alpha,
