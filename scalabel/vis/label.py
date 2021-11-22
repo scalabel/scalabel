@@ -6,8 +6,6 @@ Works for 2D / 3D bounding box, segmentation masks, etc.
 import argparse
 import concurrent.futures
 import io
-
-from scalabel.label.transforms import rle_to_mask
 import threading
 from dataclasses import dataclass
 from queue import Queue
@@ -19,6 +17,8 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.font_manager import FontProperties
 from skimage.transform import resize
+
+from scalabel.label.transforms import rle_to_mask
 
 from ..common.logger import logger
 from ..common.parallel import NPROC
@@ -493,16 +493,21 @@ class LabelViewer:
             if not label.rle:
                 continue
 
-            color = self._get_label_color(label)
+            color = self._get_label_color(label) * 255  # type: NDArrayF64
             bitmask = rle_to_mask(label.rle)
             mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
 
             # Non-zero values correspond to colors for each label
-            combined_mask = np.where(mask, (color * 255).astype(np.uint8), combined_mask)
+            combined_mask = np.where(
+                mask, color.astype(np.uint8), combined_mask
+            )
 
         if combined_mask is None:
             return
-        self.ax.imshow(np.where(combined_mask > 0, combined_mask.astype(np.uint8), image), alpha=alpha)
+        self.ax.imshow(
+            np.where(combined_mask > 0, combined_mask.astype(np.uint8), image),
+            alpha=alpha,
+        )
 
 
 def parse_args() -> argparse.Namespace:
