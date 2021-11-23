@@ -812,3 +812,11 @@ export function removeAlert(alertId: string): actionTypes.RemoveAlertAction {
     alertId
   }
 }
+
+export function activateSpan(): actionTypes.ActivateSpanAction {
+  return makeBaseAction(actionConsts.ACTIVATE_SPAN)
+}
+
+export function registerBox(): actionTypes.RegisterBoxAction {
+  return makeBaseAction(actionConsts.REGISTER_BOX)
+}

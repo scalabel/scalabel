@@ -224,6 +224,9 @@ export interface RemoveAlertAction extends BaseAction {
   alertId: string
 }
 
+export type ActivateSpanAction = BaseAction
+export type RegisterBoxAction = BaseAction
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */

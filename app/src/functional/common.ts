@@ -38,6 +38,7 @@ import {
   updateListItem,
   updateObject
 } from "./util"
+import { Span3D } from "../drawable/3d/box_span/span3d"
 
 /**
  * Initialize session component of state
@@ -1610,5 +1611,34 @@ export function removeAlert(
   })
   return updateObject(state, {
     session: newSession
+  })
+}
+
+/**
+ * Activate box spanning mode
+ *
+ * @param state
+ */
+export function activateSpan(state: State): State {
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    boxSpan: true
+  })
+  const oldTask = state.task
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: new Span3D()
+  })
+  return updateObject(state, {
+    session: newSession,
+    task: newTask
+  })
+}
+
+// TODO: add span box into list of labels and clear the Span3D class
+export function registerBox(state: State): State {
+  return updateObject(state, {
+    ...state
   })
 }

@@ -639,6 +639,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     mode: ModeStatus.ANNOTATING,
     numUpdates: 0,
     alerts: [],
+    boxSpan: false,
     ...params
   }
 }

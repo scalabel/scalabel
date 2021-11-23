@@ -93,6 +93,10 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.addAlert(state, action as actionTypes.AddAlertAction)
     case actionConsts.CLOSE_ALERT:
       return common.removeAlert(state, action as actionTypes.RemoveAlertAction)
+    case actionConsts.ACTIVATE_SPAN:
+      return common.activateSpan(state)
+    case actionConsts.REGISTER_BOX:
+      return common.registerBox(state)
     case actionConsts.NULL:
       return state
     default:

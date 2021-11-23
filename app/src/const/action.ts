@@ -25,6 +25,9 @@ export const ADD_TRACK = "ADD_TRACK"
 export const MERGE_TRACKS = "MERGE_TRACKS"
 export const SPLIT_TRACK = "SPLIT_TRACK"
 
+export const ACTIVATE_SPAN = "ACTIVATE_SPAN"
+export const REGISTER_BOX = "REGISTER_BOX"
+
 // View Level
 export const ADD_VIEWER_CONFIG = "ADD_VIEWER_CONFIG"
 export const CHANGE_VIEWER_CONFIG = "CHANGE_VIEWER_CONFIG"
@@ -47,6 +50,7 @@ export const SEQUENTIAL = "SEQUENTIAL"
  * UPDATE_TASK deliberately not included because its used for local updates
  */
 const TASK_ACTION_TYPES = [
+  ACTIVATE_SPAN,
   ADD_LABELS,
   CHANGE_SHAPES,
   CHANGE_LABELS,
@@ -54,6 +58,7 @@ const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   ADD_TRACK,
   MERGE_TRACKS,
+  REGISTER_BOX,
   SPLIT_TRACK,
   SUBMIT
 ]

@@ -12,7 +12,9 @@ import {
   changeViewerConfig,
   mergeTracks,
   splitTrack,
-  startLinkTrack
+  startLinkTrack,
+  activateSpan,
+  registerBox
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -24,7 +26,7 @@ import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
-import { getSelectedTracks } from "../functional/state_util"
+import { getSelectedTracks, getSpanBoxComplete } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, Category, ModeStatus, State } from "../types/state"
@@ -184,6 +186,15 @@ export class ToolBar extends Component<Props> {
             {makeButton("Delete", () => {
               this.deletePressed()
             })}
+          </div>
+          <div>
+            {this.state.session.boxSpan
+              ? makeButton("Finish", () => {
+                  this.deactivateSpan(this.state)
+                })
+              : makeButton("Activate span", () => {
+                  this.activateSpan()
+                })}
           </div>
           {this.state.task.config.tracking && (
             <div>
@@ -415,5 +426,19 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  private deactivateSpan(state: State): void {
+    const boxComplete = getSpanBoxComplete(state)
+
+    if (boxComplete) {
+      Session.dispatch(registerBox())
+    } else {
+      alert(Severity.WARNING, "Box was not generated")
+    }
+  }
+
+  private activateSpan(): void {
+    Session.dispatch(activateSpan())
   }
 }

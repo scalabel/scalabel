@@ -322,3 +322,11 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
 
   return minSensorIds
 }
+
+export function getSpanBoxComplete(state: State): boolean {
+  if (state.task.boxSpan !== undefined) {
+    return state.task.boxSpan.complete
+  } else {
+    return false
+  }
+}
