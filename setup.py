@@ -36,6 +36,7 @@ setuptools.setup(
         "motmetrics",
         "nanoid",
         "numpy",
+        "opencv-python",
         "pandas",
         "Pillow",
         "plyfile",

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from queue import Queue
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-import cv2
+import cv2  # type: ignore
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,11 +19,10 @@ from matplotlib.axes import Axes
 from matplotlib.font_manager import FontProperties
 from skimage.transform import resize
 
-from scalabel.label.transforms import rle_to_mask
-
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
+from ..label.transforms import rle_to_mask
 from ..label.typing import Edge, Frame, Intrinsics, Label, Node
 from ..label.utils import (
     check_crowd,
@@ -490,9 +489,7 @@ class LabelViewer:
         """Draw RLE."""
         combined_mask: NDArrayU8 = np.zeros(image.shape)
 
-        labels = sorted(
-            labels, key=lambda label: float(label.score or 0)  # type: ignore
-        )
+        labels = sorted(labels, key=lambda label: float(label.score or 0))
 
         for label in labels:
             if not label.rle:
@@ -511,12 +508,12 @@ class LabelViewer:
                 mask, color.astype(np.uint8), combined_mask
             )
 
-        image = image * 255
+        img: NDArrayU8 = image * 255
         self.ax.imshow(
             np.where(
                 combined_mask > 0,
                 combined_mask.astype(np.uint8),
-                image.astype(np.uint8),
+                img.astype(np.uint8),
             ),
             alpha=alpha,
         )
