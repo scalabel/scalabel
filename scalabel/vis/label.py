@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from queue import Queue
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
-import cv2  # type: ignore
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -206,6 +205,10 @@ class LabelViewer:
             logger.info("No labels found")
             return
 
+        # If both poly2d and rle are specified, show only rle if labels have
+        # rle and otherwise poly2d.
+        has_rle = any(label.rle is not None for label in frame.labels)
+
         labels = frame.labels
         if with_attr:
             self.draw_attributes(frame)
@@ -213,7 +216,7 @@ class LabelViewer:
             self.draw_box2ds(labels, with_tags=with_tags)
         if with_box3d and frame.intrinsics is not None:
             self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
-        if with_poly2d:
+        if with_poly2d and (not with_rle or not has_rle):
             self.draw_poly2ds(
                 labels,
                 with_tags=with_tags,
@@ -222,7 +225,7 @@ class LabelViewer:
             )
         if with_graph:
             self.draw_graph(labels)
-        if with_rle:
+        if with_rle and has_rle:
             self.draw_rle(img, labels)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
@@ -496,10 +499,9 @@ class LabelViewer:
                 continue
 
             color: NDArrayF64 = self._get_label_color(label) * 255
-            bitmask = cv2.resize(
+            bitmask = resize(
                 rle_to_mask(label.rle),
-                dsize=(self.ui_cfg.width, self.ui_cfg.height),
-                interpolation=cv2.INTER_NEAREST,
+                (self.ui_cfg.height, self.ui_cfg.width),
             )
             mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
 
