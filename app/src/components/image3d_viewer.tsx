@@ -2,9 +2,9 @@ import { withStyles } from "@material-ui/styles"
 import * as React from "react"
 import * as THREE from "three"
 
-// import Session from "../common/session"
-// import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
-// import { isCurrentFrameLoaded } from "../functional/state_util"
+import Session from "../common/session"
+import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
+import { isCurrentFrameLoaded } from "../functional/state_util"
 import { viewerStyles } from "../styles/viewer"
 import { Image3DViewerConfigType } from "../types/state"
 import ImageCanvas from "./image_canvas"
@@ -16,7 +16,7 @@ import { Viewer2D, Viewer2DProps } from "./viewer2d"
  */
 class Image3DViewer extends Viewer2D {
   /** Intrinsic camera */
-  private readonly _camera: THREE.PerspectiveCamera
+  private readonly _camera: IntrinsicCamera
 
   /**
    * Constructor
@@ -26,54 +26,55 @@ class Image3DViewer extends Viewer2D {
    */
   constructor(props: Viewer2DProps) {
     super(props)
-    this._camera = new THREE.PerspectiveCamera(45, 1, 0.2, 1000)
-    this._camera.position.set(0, 0, 10)
+    this._camera = new IntrinsicCamera()
+    this._camera.up = new THREE.Vector3(0, -1, 0)
+    this._camera.lookAt(new THREE.Vector3(0, 0, 1))
   }
 
   /** Component update function */
-  // public componentDidUpdate(): void {
-  //   if (this._viewerConfig !== null) {
-  //     const img3dConfig = this._viewerConfig as Image3DViewerConfigType
-  //     const sensor = img3dConfig.sensor
-  //
-  //     if (isCurrentFrameLoaded(this.state, img3dConfig.sensor)) {
-  //       const image =
-  //         Session.images[this.state.user.select.item][img3dConfig.sensor]
-  //       this._camera.width = image.width
-  //       this._camera.height = image.height
-  //     }
-  //     if (sensor in this.state.task.sensors) {
-  //       this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
-  //       const extrinsics = this.state.task.sensors[sensor].extrinsics
-  //       this._camera.position.set(0, 0, 0)
-  //       if (extrinsics !== null && extrinsics !== undefined) {
-  //         this._camera.quaternion.set(
-  //           extrinsics.rotation.x,
-  //           extrinsics.rotation.y,
-  //           extrinsics.rotation.z,
-  //           extrinsics.rotation.w
-  //         )
-  //         this._camera.quaternion.multiply(
-  //           new THREE.Quaternion().setFromAxisAngle(
-  //             new THREE.Vector3(1, 0, 0),
-  //             Math.PI
-  //           )
-  //         )
-  //         this._camera.position.set(
-  //           extrinsics.translation.x,
-  //           extrinsics.translation.y,
-  //           extrinsics.translation.z
-  //         )
-  //       }
-  //     }
-  //
-  //     this._camera.calculateProjectionMatrix()
-  //
-  //     if (Session.activeViewerId === this.props.id) {
-  //       Session.label3dList.setActiveCamera(this._camera)
-  //     }
-  //   }
-  // }
+  public componentDidUpdate(): void {
+    if (this._viewerConfig !== null) {
+      const img3dConfig = this._viewerConfig as Image3DViewerConfigType
+      const sensor = img3dConfig.sensor
+
+      if (isCurrentFrameLoaded(this.state, img3dConfig.sensor)) {
+        const image =
+          Session.images[this.state.user.select.item][img3dConfig.sensor]
+        this._camera.width = image.width
+        this._camera.height = image.height
+      }
+      if (sensor in this.state.task.sensors) {
+        this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
+        const extrinsics = this.state.task.sensors[sensor].extrinsics
+        this._camera.position.set(0, 0, 0)
+        if (extrinsics !== null && extrinsics !== undefined) {
+          this._camera.quaternion.set(
+            extrinsics.rotation.x,
+            extrinsics.rotation.y,
+            extrinsics.rotation.z,
+            extrinsics.rotation.w
+          )
+          this._camera.quaternion.multiply(
+            new THREE.Quaternion().setFromAxisAngle(
+              new THREE.Vector3(1, 0, 0),
+              Math.PI
+            )
+          )
+          this._camera.position.set(
+            extrinsics.translation.x,
+            extrinsics.translation.y,
+            extrinsics.translation.z
+          )
+        }
+      }
+
+      this._camera.calculateProjectionMatrix()
+
+      if (Session.activeViewerId === this.props.id) {
+        Session.label3dList.setActiveCamera(this._camera)
+      }
+    }
+  }
 
   /**
    * Render function
