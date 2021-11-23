@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from queue import Queue
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
 
+import cv2
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -200,7 +201,8 @@ class LabelViewer:
     ) -> None:
         """Display the image and corresponding labels."""
         plt.cla()
-        self.draw_image(image, frame.name)
+        img = resize(image, (self.ui_cfg.height, self.ui_cfg.width))
+        self.draw_image(img, frame.name)
         if frame.labels is None or len(frame.labels) == 0:
             logger.info("No labels found")
             return
@@ -222,13 +224,12 @@ class LabelViewer:
         if with_graph:
             self.draw_graph(labels)
         if with_rle:
-            self.draw_rle(image, labels)
+            self.draw_rle(img, labels)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
         if title is not None:
             self.fig.canvas.manager.set_window_title(title)
-        img = resize(img, (self.ui_cfg.height, self.ui_cfg.width))
         self.ax.imshow(img, interpolation="bilinear", aspect="auto")
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
@@ -487,14 +488,22 @@ class LabelViewer:
         alpha: float = 0.5,
     ) -> None:
         """Draw RLE."""
-        combined_mask = np.zeros(image.shape)
+        combined_mask: NDArrayU8 = np.zeros(image.shape)
+
+        labels = sorted(
+            labels, key=lambda label: float(label.score or 0)  # type: ignore
+        )
 
         for label in labels:
             if not label.rle:
                 continue
 
             color: NDArrayF64 = self._get_label_color(label) * 255
-            bitmask = rle_to_mask(label.rle)
+            bitmask = cv2.resize(
+                rle_to_mask(label.rle),
+                dsize=(self.ui_cfg.width, self.ui_cfg.height),
+                interpolation=cv2.INTER_NEAREST,
+            )
             mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
 
             # Non-zero values correspond to colors for each label
@@ -502,8 +511,13 @@ class LabelViewer:
                 mask, color.astype(np.uint8), combined_mask
             )
 
+        image = image * 255
         self.ax.imshow(
-            np.where(combined_mask > 0, combined_mask.astype(np.uint8), image),
+            np.where(
+                combined_mask > 0,
+                combined_mask.astype(np.uint8),
+                image.astype(np.uint8),
+            ),
             alpha=alpha,
         )
 
