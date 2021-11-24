@@ -110,4 +110,19 @@ export class Vector3D extends Vector {
     this[1] *= s
     this[2] *= s
   }
+
+  /**
+   * cross product with another vector
+   *
+   * @param vector
+   */
+  public cross(vector: Vector): this {
+    const x = this[1] * vector[2] - this[2] * vector[1]
+    const y = this[2] * vector[0] - this[0] * vector[2]
+    const z = this[0] * vector[1] - this[1] * vector[0]
+    this[0] = x
+    this[1] = y
+    this[2] = z
+    return this
+  }
 }
