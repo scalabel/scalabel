@@ -56,6 +56,19 @@ export class SpanPoint3D {
   }
 
   /**
+   * Set raw x,y,z coords
+   *
+   * @param x
+   * @param y
+   * @param z
+   */
+  public setCoords(x: number, y: number, z: number) {
+    this._x = x
+    this._y = y
+    this._z = z
+  }
+
+  /**
    * Set x,y,z coords based on mouse pos
    *
    * @param x - mouse x
