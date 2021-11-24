@@ -87,6 +87,7 @@ export function convertItemToImport(
     let isTagging = false
     if (
       itemAttributes !== undefined &&
+      itemAttributes !== null &&
       Object.keys(itemAttributes).length > 0
     ) {
       if (labelsExport === undefined) {
@@ -112,7 +113,10 @@ export function convertItemToImport(
         }
 
         let attributes: { [key: number]: number[] } = {}
-        if (labelExport.attributes !== undefined) {
+        if (
+          labelExport.attributes !== undefined &&
+          labelExport.attributes !== null
+        ) {
           attributes = parseExportAttributes(
             labelExport.attributes,
             attributeNameMap,
