@@ -686,12 +686,12 @@ export async function createTasks(
           maxSensorId,
           "",
           itemExport.dataType,
-          itemExport.intrinsics !== undefined
-            ? intrinsicsFromExport(itemExport.intrinsics)
-            : undefined,
-          itemExport.extrinsics !== undefined
-            ? extrinsicsFromExport(itemExport.extrinsics)
-            : undefined
+          itemExport.intrinsics === undefined || itemExport.intrinsics === null
+            ? undefined
+            : intrinsicsFromExport(itemExport.intrinsics),
+          itemExport.extrinsics === undefined || itemExport.extrinsics === null
+            ? undefined
+            : extrinsicsFromExport(itemExport.extrinsics)
         )
         itemExport.sensor = maxSensorId
         itemExport.dataType = undefined

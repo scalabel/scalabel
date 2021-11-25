@@ -84,12 +84,18 @@ export function convertItemToImport(
     if (itemExportMap[sensorId].name !== undefined) {
       names[sensorId] = itemExportMap[sensorId].name as string
     }
-    if (itemExportMap[sensorId].intrinsics !== undefined) {
+    if (
+      itemExportMap[sensorId].intrinsics !== undefined &&
+      itemExportMap[sensorId].intrinsics !== null
+    ) {
       intrinsics[sensorId] = intrinsicsFromExport(
         itemExportMap[sensorId].intrinsics as IntrinsicsExportType
       )
     }
-    if (itemExportMap[sensorId].extrinsics !== undefined) {
+    if (
+      itemExportMap[sensorId].extrinsics !== undefined &&
+      itemExportMap[sensorId].extrinsics !== null
+    ) {
       extrinsics[sensorId] = extrinsicsFromExport(
         itemExportMap[sensorId].extrinsics as ExtrinsicsExportType
       )
@@ -124,7 +130,10 @@ export function convertItemToImport(
         }
 
         let attributes: { [key: number]: number[] } = {}
-        if (labelExport.attributes !== undefined) {
+        if (
+          labelExport.attributes !== undefined &&
+          labelExport.attributes !== null
+        ) {
           attributes = parseExportAttributes(
             labelExport.attributes,
             attributeNameMap,
