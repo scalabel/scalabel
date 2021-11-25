@@ -13,6 +13,7 @@ import { CreationForm, FormFileData, Project } from "../../src/types/project"
 import { Attribute, Category, TaskType } from "../../src/types/state"
 import {
   sampleStateExportImage,
+  sampleStateExportImage3dBox,
   sampleStateExportImagePolygon
 } from "./test_export_objects"
 
@@ -341,6 +342,74 @@ export const sampleProjectAutolabelPolygon: Project = {
   sensors: {}
 }
 
+export const sampleProjectAutolabel3dBox: Project = {
+  items: sampleStateExportImage3dBox,
+  config: {
+    projectName: sampleProjectName,
+    itemType: ItemTypeName.IMAGE,
+    labelTypes: [LabelTypeName.BOX_3D],
+    label2DTemplates: {},
+    policyTypes: [],
+    taskSize: sampleTaskSize,
+    tracking: false,
+    handlerUrl: HandlerUrl.LABEL,
+    pageTitle: sampleTitle,
+    instructionPage: sampleInstructions,
+    bundleFile: BundleFile.V2,
+    categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
+    attributes: sampleAttributes as Attribute[],
+    taskId: "",
+    demoMode: false,
+    autosave: true,
+    bots: false
+  },
+  sensors: {}
+}
+
+export const sampleProjectSensors: Project = {
+  items: sampleStateExportImage3dBox,
+  config: {
+    projectName: sampleProjectName,
+    itemType: ItemTypeName.IMAGE,
+    labelTypes: [LabelTypeName.BOX_3D],
+    label2DTemplates: {},
+    policyTypes: [],
+    taskSize: sampleTaskSize,
+    tracking: false,
+    handlerUrl: HandlerUrl.LABEL,
+    pageTitle: sampleTitle,
+    instructionPage: sampleInstructions,
+    bundleFile: BundleFile.V2,
+    categories: sampleCategories,
+    treeCategories: sampleTreeCategories,
+    attributes: sampleAttributes as Attribute[],
+    taskId: "",
+    demoMode: false,
+    autosave: true,
+    bots: false
+  },
+  sensors: {
+    "-1": {
+      id: -1,
+      name: "image2",
+      type: "image",
+      intrinsics: {
+        focal: [721.5377197265625, 721.5377197265625],
+        center: [609.559326171875, 172.85400390625]
+      },
+
+      extrinsics: {
+        location: [-0.5327253937721252, 0.0, 0.0],
+        rotation: [
+          -1.5723664220969806,
+          0.07224191126404556,
+          -1.8406363281435645
+        ]
+      }
+    }
+  }
+}
 export const sampleTasksImage: TaskType[] = [
   {
     config: {

@@ -2,7 +2,6 @@ import {
   Attribute,
   ConfigType,
   ItemType,
-  SensorType,
   TaskStatus,
   TrackType,
   Vector3Type
@@ -26,6 +25,19 @@ export interface DatasetExport {
   frameGroups?: ItemGroupExport[]
   /** shared fields for frames */
   config: ConfigExport
+}
+
+export interface SensorExportType {
+  /** id */
+  id: number
+  /** name */
+  name: string
+  /** data type */
+  type: string
+  /** intrinsics */
+  intrinsics?: IntrinsicsExportType
+  /** extrinsics */
+  extrinsics?: ExtrinsicsExportType
 }
 
 export interface IntrinsicsExportType {
@@ -148,7 +160,7 @@ export interface ConfigExport {
   /** categories */
   categories: string[]
   /** sensors */
-  sensors?: SensorType[]
+  sensors?: SensorExportType[]
 }
 
 export interface ImageSizeType {

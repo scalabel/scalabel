@@ -168,3 +168,31 @@ export function extrinsicsFromExport(
     }
   }
 }
+
+/**
+ * Transform exported sensors to internal type
+ *
+ * @param sensors
+ */
+export function sensorsFromExport(sensorExportMap: {
+  [id: number]: bdd.SensorExportType
+}): types.SensorMapType {
+  const sensors: types.SensorMapType = {}
+  for (const key of Object.keys(sensorExportMap)) {
+    const sensorExport = sensorExportMap[Number(key)]
+    sensors[Number(key)] = {
+      ...sensorExport,
+      intrinsics:
+        sensorExport.intrinsics === undefined ||
+        sensorExport.intrinsics === null
+          ? undefined
+          : intrinsicsFromExport(sensorExport.intrinsics),
+      extrinsics:
+        sensorExport.extrinsics === undefined ||
+        sensorExport.extrinsics === null
+          ? undefined
+          : extrinsicsFromExport(sensorExport.extrinsics)
+    }
+  }
+  return sensors
+}
