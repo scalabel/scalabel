@@ -17,11 +17,9 @@ export class SpanPoint3D {
    * @param y - mouse y
    */
   constructor(x: number, y: number) {
-    /**
-     * TODO: convert mouse pos to world coords
-     */
-    this._x = 0
-    this._y = 0
+    // TODO: convert mouse pos to world coords
+    this._x = x
+    this._y = y
     this._z = 0
     this._color = "#ff0000"
     this._radius = 0.05
@@ -41,17 +39,17 @@ export class SpanPoint3D {
   }
 
   /** x coords */
-  public get x() {
+  public get x(): number {
     return this._x
   }
 
   /** y coords */
-  public get y() {
+  public get y(): number {
     return this._y
   }
 
   /** z coords */
-  public get z() {
+  public get z(): number {
     return this._z
   }
 
@@ -62,7 +60,7 @@ export class SpanPoint3D {
    * @param y
    * @param z
    */
-  public setCoords(x: number, y: number, z: number) {
+  public setCoords(x: number, y: number, z: number): void {
     this._x = x
     this._y = y
     this._z = z
@@ -74,12 +72,10 @@ export class SpanPoint3D {
    * @param x - mouse x
    * @param y - mouse y
    */
-  public updateState(x: number, y: number) {
-    /**
-     * TODO: convert mouse pos to world coords
-     */
-    this._x = 0
-    this._y = 0
+  public updateState(x: number, y: number): void {
+    // TODO: convert mouse pos to world coords
+    this._x = x
+    this._y = y
     this._z = 0
   }
 }

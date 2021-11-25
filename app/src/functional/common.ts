@@ -1630,6 +1630,7 @@ export function activateSpan(state: State): State {
     ...state.task,
     boxSpan: new Span3D()
   })
+  console.log(newSession.boxSpan)
   return updateObject(state, {
     session: newSession,
     task: newTask
@@ -1637,8 +1638,20 @@ export function activateSpan(state: State): State {
 }
 
 // TODO: add span box into list of labels and clear the Span3D class
+/**
+ * Register span box as new label
+ *
+ * @param state
+ */
 export function registerBox(state: State): State {
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    boxSpan: false
+  })
+
+  console.log(newSession.boxSpan)
   return updateObject(state, {
-    ...state
+    session: newSession
   })
 }

@@ -1,5 +1,5 @@
 /** general vector class */
-export abstract class Vector extends Array<number> {
+export class Vector extends Array<number> {
   /**
    * Constructor
    *
@@ -82,13 +82,6 @@ export abstract class Vector extends Array<number> {
     this.forEach((v, i, arr) => (arr[i] = v * vector[i]))
     return this
   }
-
-  /**
-   * cross product with another vector
-   *
-   * @param vector
-   */
-  public abstract cross(vector: Vector): this
 
   /** calculate the absolute values of the vector elements */
   public abs(): this {

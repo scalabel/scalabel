@@ -558,7 +558,13 @@ class Viewer3D extends DrawableViewer<Props> {
     super.onMouseMove(e)
     const dX = this._mX - oldX
     const dY = this._mY - oldY
-    if (this._mouseDown && this._viewerConfig !== undefined) {
+    const state = Session.getState()
+    if (state.session.boxSpan) {
+      /**
+       * TODO: send mouse position to update temporary point in span box
+       */
+      // Session.dispatch(updateSpanPoint(this._mX, this._mY))
+    } else if (this._mouseDown && this._viewerConfig !== undefined) {
       this._movingCamera = true
       const lockSelection = lockedToSelection(
         this._viewerConfig as PointCloudViewerConfigType
@@ -593,8 +599,14 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected onMouseUp(e: React.MouseEvent): void {
     super.onMouseUp(e)
-    this._movingCamera = false
-    this.commitCamera()
+    const state = Session.getState()
+    if (state.session.boxSpan) {
+      // TODO: send mouse position to register new point in span box
+      // Session.dispatch(registerSpanPoint(this._mX, this._mY))
+    } else {
+      this._movingCamera = false
+      this.commitCamera()
+    }
   }
 
   /**

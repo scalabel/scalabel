@@ -428,17 +428,24 @@ export class ToolBar extends Component<Props> {
     Session.dispatch(startLinkTrack())
   }
 
-  private deactivateSpan(state: State): void {
-    const boxComplete = getSpanBoxComplete(state)
-
-    if (boxComplete) {
-      Session.dispatch(registerBox())
-    } else {
-      alert(Severity.WARNING, "Box was not generated")
-    }
-  }
-
+  /**
+   * Activate box spanning mode
+   */
   private activateSpan(): void {
     Session.dispatch(activateSpan())
+  }
+
+  /**
+   * Deactivate box spanning mode
+   *
+   * @param state
+   */
+  private deactivateSpan(state: State): void {
+    console.log(this.state.task.boxSpan)
+    Session.dispatch(registerBox())
+    const boxComplete = getSpanBoxComplete(state)
+    if (!boxComplete) {
+      alert(Severity.WARNING, "Box was not generated")
+    }
   }
 }

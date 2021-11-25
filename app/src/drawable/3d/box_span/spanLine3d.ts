@@ -11,6 +11,12 @@ export class SpanLine3D {
   private readonly _color: number
   private readonly _lineWidth: number
 
+  /**
+   * Constructor
+   *
+   * @param p1
+   * @param p2
+   */
   constructor(p1: SpanPoint3D, p2: SpanPoint3D) {
     this._p1 = p1
     this._p2 = p2
@@ -24,9 +30,7 @@ export class SpanLine3D {
    * @param scene
    */
   public render(scene: THREE.Scene): void {
-    /**
-     * TODO: generate line formed by two points and add to scene
-     */
+    // TODO: generate line formed by two points and add to scene
     const points = []
     points.push(new THREE.Vector3(this._p1.x, this._p1.y, this._p1.z))
     points.push(new THREE.Vector3(this._p2.x, this._p2.y, this._p2.z))
@@ -39,7 +43,12 @@ export class SpanLine3D {
     scene.add(line)
   }
 
-  /** Update line vertices */
+  /**
+   * Update line vertices
+   *
+   * @param p1
+   * @param p2
+   */
   public updateState(p1: SpanPoint3D, p2: SpanPoint3D): void {
     this._p1 = p1
     this._p2 = p2
