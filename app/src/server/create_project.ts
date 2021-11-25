@@ -668,7 +668,7 @@ export async function createTasks(
   returnTask: boolean = false
 ): Promise<TaskType[]> {
   const sensors = project.sensors
-  const { itemType, taskSize, tracking } = project.config
+  const { itemType, taskSize, tracking, labelTypes } = project.config
 
   const items = filterInvalidItems(project.items, itemType, sensors)
 
@@ -774,7 +774,8 @@ export async function createTasks(
         attributeNameMap,
         attributeValueMap,
         categoryNameMap,
-        tracking
+        tracking,
+        labelTypes
       )
 
       if (tracking) {
