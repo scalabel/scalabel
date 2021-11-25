@@ -10,7 +10,12 @@ import {
   makePlane,
   makeRect
 } from "../functional/states"
-import { ItemExport, LabelExport } from "../types/export"
+import {
+  ExtrinsicsExportType,
+  IntrinsicsExportType,
+  ItemExport,
+  LabelExport
+} from "../types/export"
 import {
   Attribute,
   ExtrinsicsType,
@@ -23,6 +28,11 @@ import {
   ShapeIdMap,
   ShapeType
 } from "../types/state"
+import {
+  box3dToCube,
+  extrinsicsFromExport,
+  intrinsicsFromExport
+} from "./bdd_type_transformers"
 
 /**
  * Convert the attributes to label to ensure the format consistency
@@ -75,12 +85,14 @@ export function convertItemToImport(
       names[sensorId] = itemExportMap[sensorId].name as string
     }
     if (itemExportMap[sensorId].intrinsics !== undefined) {
-      intrinsics[sensorId] = itemExportMap[sensorId]
-        .intrinsics as IntrinsicsType
+      intrinsics[sensorId] = intrinsicsFromExport(
+        itemExportMap[sensorId].intrinsics as IntrinsicsExportType
+      )
     }
     if (itemExportMap[sensorId].extrinsics !== undefined) {
-      extrinsics[sensorId] = itemExportMap[sensorId]
-        .extrinsics as ExtrinsicsType
+      extrinsics[sensorId] = extrinsicsFromExport(
+        itemExportMap[sensorId].extrinsics as ExtrinsicsExportType
+      )
     }
     let labelsExport = itemExportMap[sensorId].labels
     const itemAttributes = itemExportMap[sensorId].attributes
@@ -255,7 +267,7 @@ function convertLabelToImport(
     )
   } else if (labelExport.box3d !== null && labelExport.box3d !== undefined) {
     labelType = LabelTypeName.BOX_3D
-    shapes = [makeCube(labelExport.box3d)]
+    shapes = [makeCube(box3dToCube(labelExport.box3d))]
   } else if (
     labelExport.plane3d !== null &&
     labelExport.plane3d !== undefined
@@ -281,7 +293,7 @@ function convertLabelToImport(
       type: labelType,
       item,
       shapes: shapeIds,
-      manual: labelExport.manualShape,
+      manual: labelExport.manualShape || false,
       category,
       attributes,
       sensors: [sensorId]

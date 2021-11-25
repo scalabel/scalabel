@@ -40,6 +40,10 @@ import { Storage } from "./storage"
 import * as util from "./util"
 import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
 import Logger from "./logger"
+import {
+  extrinsicsFromExport,
+  intrinsicsFromExport
+} from "./bdd_type_transformers"
 
 /**
  * convert fields to form and validate input
@@ -682,8 +686,12 @@ export async function createTasks(
           maxSensorId,
           "",
           itemExport.dataType,
-          itemExport.intrinsics,
-          itemExport.extrinsics
+          itemExport.intrinsics !== undefined
+            ? intrinsicsFromExport(itemExport.intrinsics)
+            : undefined,
+          itemExport.extrinsics !== undefined
+            ? extrinsicsFromExport(itemExport.extrinsics)
+            : undefined
         )
         itemExport.sensor = maxSensorId
         itemExport.dataType = undefined

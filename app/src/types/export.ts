@@ -1,8 +1,6 @@
 import {
   Attribute,
   ConfigType,
-  ExtrinsicsType,
-  IntrinsicsType,
   ItemType,
   SensorType,
   TaskStatus,
@@ -30,6 +28,20 @@ export interface DatasetExport {
   config: ConfigExport
 }
 
+export interface IntrinsicsExportType {
+  /** focal length */
+  focal: [number, number]
+  /** focal center */
+  center: [number, number]
+}
+
+export interface ExtrinsicsExportType {
+  /** 3D location reltative to world origin */
+  location: [number, number, number]
+  /** 3D rotation relative to a world origin in axis-angle representation */
+  rotation: [number, number, number]
+}
+
 export interface ItemExport {
   /** project name */
   name: string
@@ -42,9 +54,9 @@ export interface ItemExport {
   /** data type, overrides data source if present */
   dataType?: string
   /** intrinsics, overrides data source if present */
-  intrinsics?: IntrinsicsType
+  intrinsics?: IntrinsicsExportType
   /** extrinsics, overrides data source if present */
-  extrinsics?: ExtrinsicsType
+  extrinsics?: ExtrinsicsExportType
   /** item attributes */
   attributes: { [key: string]: string | string[] }
   /** submitted timestamp */
@@ -80,11 +92,11 @@ export interface Box2DType {
 
 export interface Box3DType {
   /** Center of the cube */
-  center: Vector3Type
+  location: [number, number, number]
   /** size */
-  size: Vector3Type
+  dimension: [number, number, number]
   /** orientation */
-  orientation: Vector3Type
+  orientation: [number, number, number]
 }
 
 export interface Plane3DType {
