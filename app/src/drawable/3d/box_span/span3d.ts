@@ -71,7 +71,7 @@ export class Span3D {
    * @param x
    * @param y
    */
-  public registerPointTmp(x: number, y: number): void {
+  public updatePointTmp(x: number, y: number): void {
     this._pTmp.x = x
     this._pTmp.y = y
   }

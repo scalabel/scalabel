@@ -1655,3 +1655,57 @@ export function registerBox(state: State): State {
     session: newSession
   })
 }
+
+/**
+ * Update temporary point in span box
+ *
+ * @param state
+ * @param action
+ */
+export function updateSpanPoint(
+  state: State,
+  action: actionTypes.UpdateSpanPointAction
+): State {
+  const oldTask = state.task
+  let newBox = oldTask.boxSpan
+
+  if (newBox === undefined) {
+    newBox = new Span3D()
+  }
+  newBox.updatePointTmp(action.mX, action.mY)
+
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: newBox
+  })
+  return updateObject(state, {
+    task: newTask
+  })
+}
+
+/**
+ * Register new point in span box
+ *
+ * @param state
+ * @param action
+ */
+export function registerSpanPoint(
+  state: State,
+  action: actionTypes.RegisterSpanPointAction
+): State {
+  const oldTask = state.task
+  let newBox = oldTask.boxSpan
+
+  if (newBox === undefined) {
+    newBox = new Span3D()
+  }
+  newBox.registerPoint(action.mX, action.mY)
+
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: newBox
+  })
+  return updateObject(state, {
+    task: newTask
+  })
+}

@@ -225,7 +225,17 @@ export interface RemoveAlertAction extends BaseAction {
 }
 
 export type ActivateSpanAction = BaseAction
+
 export type RegisterBoxAction = BaseAction
+
+export interface UpdateSpanPointAction extends BaseAction {
+  /** mouse X */
+  mX: number
+  /** mouse Y */
+  mY: number
+}
+
+export type RegisterSpanPointAction = UpdateSpanPointAction
 
 /**
  * These actions are event-driven messages intercepted by the sync middleware
@@ -247,6 +257,10 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
+  | ActivateSpanAction
+  | RegisterBoxAction
+  | UpdateSpanPointAction
+  | RegisterSpanPointAction
 
 export type UserActionType =
   | ChangeSelectAction

@@ -97,6 +97,16 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.activateSpan(state)
     case actionConsts.REGISTER_BOX:
       return common.registerBox(state)
+    case actionConsts.UPDATE_SPAN_POINT:
+      return common.updateSpanPoint(
+        state,
+        action as actionTypes.UpdateSpanPointAction
+      )
+    case actionConsts.REGISTER_SPAN_POINT:
+      return common.registerSpanPoint(
+        state,
+        action as actionTypes.RegisterSpanPointAction
+      )
     case actionConsts.NULL:
       return state
     default:
