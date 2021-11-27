@@ -107,6 +107,7 @@ export function convertItemToImport(
     let isTagging = false
     if (
       itemAttributes !== undefined &&
+      itemAttributes !== null &&
       Object.keys(itemAttributes).length > 0
     ) {
       if (labelsExport === undefined) {
