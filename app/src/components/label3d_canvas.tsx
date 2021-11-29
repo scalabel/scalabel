@@ -16,6 +16,7 @@ import {
   DrawableProps,
   mapStateToDrawableProps
 } from "./viewer"
+import { Crosshair, Crosshair2D } from "./crosshair"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -80,6 +81,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private _keyDownMap: { [key: string]: boolean }
   /** Flag set if data is 2d */
   private data2d: boolean
+  /** The crosshair */
+  private readonly crosshair: React.RefObject<Crosshair2D>
 
   /** drawable label list */
   private readonly _labelHandler: Label3DHandler
@@ -115,6 +118,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       ...this._raycaster.params,
       Line: { threshold: 0.02 }
     }
+    this.crosshair = React.createRef()
 
     this._keyDownMap = {}
 
@@ -148,11 +152,22 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   }
 
   /**
+   * Set the current cursor
+   *
+   * @param {string} cursor - cursor type
+   */
+  public setCursor(cursor: string): void {
+    if (this.canvas !== null) {
+      this.canvas.style.cursor = cursor
+    }
+  }
+
+  /**
    * Render function
    *
    * @return {React.Fragment} React fragment
    */
-  public render(): JSX.Element {
+  public render(): JSX.Element[] {
     const { classes } = this.props
 
     let canvas = (
@@ -177,6 +192,16 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       />
     )
 
+    const ch = Session.getState().session.boxSpan ? (
+      <Crosshair
+        key="crosshair-canvas3d"
+        display={this.display}
+        innerRef={this.crosshair}
+      />
+    ) : (
+      <></>
+    )
+
     if (this.display !== null) {
       const displayRect = this.display.getBoundingClientRect()
       canvas = React.cloneElement(canvas, {
@@ -185,7 +210,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       })
     }
 
-    return canvas
+    return [ch, canvas]
   }
 
   /**
@@ -284,6 +309,16 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         : this._labelHandler.onMouseMove(x, y)
     if (consumed) {
       e.stopPropagation()
+    }
+
+    if (this.crosshair.current !== null) {
+      this.crosshair.current.onMouseMove(e)
+    }
+
+    if (Session.getState().session.boxSpan) {
+      this.setCursor("crosshair")
+    } else {
+      this.setCursor("default")
     }
 
     Session.label3dList.onDrawableUpdate()
