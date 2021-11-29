@@ -6,10 +6,14 @@ import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 // import { SpanCuboid3D } from "./spanCuboid3d"
 
+import { convertMouseToNDC } from "../../../view_config/point_cloud"
+
 /**
  * ThreeJS class for rendering 3D span object
  */
 export class Span3D {
+  private _camera: THREE.Camera
+  private _canvas: HTMLCanvasElement | null
   private _p1: SpanPoint3D | null
   private _p2: SpanPoint3D | null
   private _p3: SpanPoint3D | null
@@ -19,6 +23,8 @@ export class Span3D {
 
   /** Constructor */
   constructor() {
+    this._camera = new THREE.Camera()
+    this._canvas = null
     this._p1 = null
     this._p2 = null
     this._p3 = null
@@ -33,35 +39,44 @@ export class Span3D {
    * @param {THREE.Scene} scene: ThreeJS Scene Object
    * @param scene
    * @param camera
+   * @param canvas
    */
-  public render(scene: THREE.Scene): void {
+  public render(
+    scene: THREE.Scene,
+    camera: THREE.Camera,
+    canvas: HTMLCanvasElement
+  ): void {
     // TODO: use points data to render temporary geometries
     // TODO: figure out whether to render lines/planes/cuboids natively
     // TODO: with ThreeJS or encapsulate in a custom class
+    this._camera = camera
+    this._canvas = canvas
 
-    const tmpPoint = new SpanPoint3D(this._pTmp.x, this._pTmp.y)
+    const tmpPoint = new SpanPoint3D(this._pTmp.x, this._pTmp.y, camera, true)
 
-    if (this._p2 === null) {
-      // TODO: render first point
-      // TODO: render line between first point and temp point
-      this._p1?.render(scene)
-      const line = new SpanLine3D(this._p1 as SpanPoint3D, tmpPoint)
-      line.render(scene)
-    } else if (this._p3 === null) {
-      // TODO: render first, second point
-      // TODO: render plane formed by first, second point and temp point
-      if (this._p1 !== null && this._p2 !== null) {
+    if (this._p1 !== null) {
+      if (this._p2 === null) {
+        // TODO: render first point
+        // TODO: render line between first point and temp point
         this._p1.render(scene)
-        this._p2.render(scene)
-        const plane = new SpanRect3D(this._p1, this._p2, tmpPoint)
-        plane.render(scene)
+        const line = new SpanLine3D(this._p1, tmpPoint)
+        line.render(scene)
+      } else if (this._p3 === null) {
+        // TODO: render first, second point
+        // TODO: render plane formed by first, second point and temp point
+        if (this._p1 !== null && this._p2 !== null) {
+          this._p1.render(scene)
+          this._p2.render(scene)
+          const plane = new SpanRect3D(this._p1, this._p2, tmpPoint)
+          plane.render(scene)
+        }
+      } else if (this._p4 === null) {
+        // TODO: render first, second, third point
+        // TODO: render cuboid formed by first, second, third point and temp point
+      } else {
+        // should not reach this case, throw an error
+        throw new Error("Span3D: invalid state")
       }
-    } else if (this._p4 === null) {
-      // TODO: render first, second, third point
-      // TODO: render cuboid formed by first, second, third point and temp point
-    } else {
-      // should not reach this case, throw an error
-      throw new Error("Span3D: invalid state")
     }
   }
 
@@ -83,14 +98,28 @@ export class Span3D {
    * @param y
    */
   public registerPoint(x: number, y: number): void {
+    const normalized = this.normalizeCoordinatesToCanvas(
+      x,
+      y,
+      this._canvas as HTMLCanvasElement
+    )
+    const NDC = convertMouseToNDC(
+      normalized[0],
+      normalized[1],
+      this._canvas as HTMLCanvasElement
+    )
+    x = NDC[0]
+    y = NDC[1]
+    console.log(x, y)
+
     if (this._p1 === null) {
-      this._p1 = new SpanPoint3D(x, y)
+      this._p1 = new SpanPoint3D(x, y, this._camera, false)
     } else if (this._p2 === null) {
-      this._p2 = new SpanPoint3D(x, y)
+      this._p2 = new SpanPoint3D(x, y, this._camera, false)
     } else if (this._p3 === null) {
-      this._p3 = new SpanPoint3D(x, y)
+      this._p3 = new SpanPoint3D(x, y, this._camera, false)
     } else if (this._p4 === null) {
-      this._p4 = new SpanPoint3D(x, y)
+      this._p4 = new SpanPoint3D(x, y, this._camera, false)
       this._complete = true
     } else {
       throw new Error("Span3D: error registering new point")
@@ -148,5 +177,23 @@ export class Span3D {
     // TODO: convert point data to box coordinates
     // TODO: add an appropriate Label3D class based on
     // TODO: currently selected category or default
+  }
+
+  /**
+   * Normalize mouse coordinates to make canvas left top origin
+   *
+   * @param x
+   * @param y
+   * @param canvas
+   */
+  private normalizeCoordinatesToCanvas(
+    x: number,
+    y: number,
+    canvas: HTMLCanvasElement
+  ): number[] {
+    return [
+      x - canvas.getBoundingClientRect().left,
+      y - canvas.getBoundingClientRect().top
+    ]
   }
 }

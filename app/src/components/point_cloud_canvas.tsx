@@ -71,18 +71,18 @@ const fragmentShader = `
         testPoint.y < halfSize.y &&
         testPoint.z < halfSize.z;
     }
-    
+
     bool pointInNearby(vec3 point) {
       vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
       vec3 halfSize = selectionSize / 2.;
       float expandX = min(halfSize.x, 0.5);
       float expandY = min(halfSize.y, 0.5);
       float expandZ = min(halfSize.z, 0.5);
-      return (testPoint.x < halfSize.x + expandX && 
-              testPoint.y < halfSize.y + expandY && 
+      return (testPoint.x < halfSize.x + expandX &&
+              testPoint.y < halfSize.y + expandY &&
               testPoint.z < halfSize.z + expandZ) &&
-             (testPoint.x > halfSize.x || 
-              testPoint.y > halfSize.y || 
+             (testPoint.x > halfSize.x ||
+              testPoint.y > halfSize.y ||
               testPoint.z > halfSize.z);
     }
 
@@ -275,6 +275,15 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         selectionToWorld.setPosition(label.center)
         selectionTransform.copy(selectionToWorld).invert()
         selectionSize.copy(label.size)
+      }
+
+      if (Session.getState().session.boxSpan) {
+        const boxSpan = Session.getState().task.boxSpan
+        boxSpan?.render(
+          this.scene,
+          this.camera,
+          this.canvas as HTMLCanvasElement
+        )
       }
 
       const material = this.pointCloud.material as THREE.ShaderMaterial

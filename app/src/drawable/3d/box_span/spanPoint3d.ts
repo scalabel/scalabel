@@ -15,12 +15,21 @@ export class SpanPoint3D {
    *
    * @param x - mouse x
    * @param y - mouse y
+   * @param camera - camera
+   * @param pointCloud - point cloud
+   * @param temp - temporary
    */
-  constructor(x: number, y: number) {
-    // TODO: convert mouse pos to world coords
-    this._x = x
-    this._y = y
-    this._z = 0
+  constructor(x: number, y: number, camera: THREE.Camera, temp: boolean) {
+    if (temp) {
+      this._x = 0
+      this._y = 0
+      this._z = 0
+    } else {
+      const point = this.raycast(x, y, camera)
+      this._x = point.x
+      this._y = point.y
+      this._z = point.z
+    }
     this._color = "#ff0000"
     this._radius = 0.05
   }
@@ -29,6 +38,8 @@ export class SpanPoint3D {
    * Add to scene for rendering
    *
    * @param scene
+   * @param camera
+   * @param pointCloud
    */
   public render(scene: THREE.Scene): void {
     // (radius, widthSegments, heightSegments)
@@ -67,15 +78,25 @@ export class SpanPoint3D {
   }
 
   /**
-   * Set x,y,z coords based on mouse pos
+   * Convert mouse pos to 3D world coordinates
    *
    * @param x - mouse x
    * @param y - mouse y
+   * @param camera - camera
    */
-  public updateState(x: number, y: number): void {
-    // TODO: convert mouse pos to world coords
-    this._x = x
-    this._y = y
-    this._z = 0
+  public raycast(x: number, y: number, camera: THREE.Camera): THREE.Vector3 {
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2(x, y)
+    raycaster.setFromCamera(mouse, camera)
+    if (raycaster.ray.intersectsPlane(plane)) {
+      console.log("intersects")
+      const intersects = new THREE.Vector3()
+      raycaster.ray.intersectPlane(plane, intersects)
+      console.log(intersects)
+      return intersects
+    } else {
+      return new THREE.Vector3(0, 0, 0)
+    }
   }
 }
