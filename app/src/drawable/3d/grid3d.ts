@@ -13,6 +13,8 @@ import { Shape3D } from "./shape3d"
 export class Grid3D extends Shape3D {
   /** grid lines */
   private readonly _lines: THREE.GridHelper
+  /** internal shape state */
+  private _planeShape: Plane3DType
 
   /**
    * Constructor
@@ -31,6 +33,12 @@ export class Grid3D extends Shape3D {
     this.add(this._lines)
     this.scale.x = 6
     this.scale.y = 6
+    this._planeShape = makePlane()
+  }
+
+  /** get the shape id */
+  public get shapeId(): IdType {
+    return this._planeShape.id
   }
 
   /** Get lines object */
@@ -90,10 +98,10 @@ export class Grid3D extends Shape3D {
    * Object representation
    */
   public toState(): ShapeType {
-    return makePlane({
-      center: new Vector3D().fromThree(this.position).toState(),
-      orientation: new Vector3D().fromThree(this.rotation.toVector3()).toState()
-    })
+    const plane = this._planeShape
+    plane.center = new Vector3D().fromThree(this.center.toThree()).toState()
+    plane.orientation = this.rotation
+    return plane
   }
 
   /**
@@ -180,5 +188,7 @@ export class Grid3D extends Shape3D {
     this.rotation.setFromVector3(
       new Vector3D().fromState(newShape.orientation).toThree()
     )
+    // Also update the _planeShape
+    this._planeShape = newShape
   }
 }

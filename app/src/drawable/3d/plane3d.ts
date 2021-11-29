@@ -15,7 +15,7 @@ import { Shape3D } from "./shape3d"
  */
 export class Plane3D extends Label3D {
   /** ThreeJS object for rendering shape */
-  private _shape: Grid3D
+  private readonly _shape: Grid3D
   /** temporary shape */
   private _temporaryLabel: Label3D | null
 
@@ -28,6 +28,40 @@ export class Plane3D extends Label3D {
     super(labelList)
     this._shape = new Grid3D(this)
     this._temporaryLabel = null
+  }
+
+  /**
+   * Initialize label
+   *
+   * @param {State} state
+   * @param itemIndex
+   * @param category
+   * @param center
+   * @param sensors
+   */
+  public init(
+    itemIndex: number,
+    category: number,
+    center?: Vector3D,
+    sensors?: number[]
+  ): void {
+    if (sensors === null || sensors === undefined || sensors.length === 0) {
+      sensors = [-1]
+    }
+
+    this._label = makeLabel({
+      type: LabelTypeName.PLANE_3D,
+      id: INVALID_ID,
+      item: itemIndex,
+      category: [category],
+      sensors,
+      shapes: [this._shape.shapeId]
+    })
+    if (center !== undefined && center !== null) {
+      // this._shape.center = center
+      this._shape.position.copy(center.toThree())
+      this._shape.rotation.copy(new THREE.Euler(Math.PI / 2, 0, 0))
+    }
   }
 
   /** Override set selected method */
@@ -220,9 +254,10 @@ export class Plane3D extends Label3D {
   ): void {
     super.updateState(state, itemIndex, labelId)
 
+    const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
-      state.task.items[itemIndex].shapes[this._label.shapes[0]],
-      this._label.shapes[0],
+      state.task.items[itemIndex].shapes[label.shapes[0]],
+      label.shapes[0],
       activeCamera
     )
 
@@ -234,33 +269,6 @@ export class Plane3D extends Label3D {
           this._shape.remove(shape)
         }
       }
-    }
-  }
-
-  /**
-   * Initialize label
-   *
-   * @param {State} state
-   * @param itemIndex
-   * @param category
-   * @param center
-   * @param sensors
-   */
-  public init(
-    itemIndex: number,
-    category: number,
-    center?: Vector3D,
-    sensors?: number[]
-  ): void {
-    this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D,
-      id: INVALID_ID,
-      item: itemIndex,
-      category: [category],
-      sensors
-    })
-    if (center !== undefined) {
-      this._shape.center = center
     }
   }
 
@@ -279,6 +287,9 @@ export class Plane3D extends Label3D {
      * Also store the shape id properly so that the generated shape state has
      * the right id directly.
      */
+    if (this._label === null || this._label === undefined) {
+      throw new Error("Uninitialized label")
+    }
     const shape = this._shape.toState()
     if (!this._temporary) {
       shape.id = this._label.shapes[0]

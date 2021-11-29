@@ -206,6 +206,83 @@ export class Label3DHandler {
   }
 
   /**
+   * Return initial label center based on label type and viewer type
+   *
+   * @param viewerType
+   * @param labelType
+   * @returns Vector3D
+   */
+  private getInitialCenter(
+    viewerType: ViewerConfigTypeName,
+    labelType: LabelTypeName
+  ): Vector3D {
+    const center = new Vector3D()
+    switch (viewerType) {
+      case ViewerConfigTypeName.POINT_CLOUD:
+        center.fromState(
+          (this._viewerConfig as PointCloudViewerConfigType).target
+        )
+        break
+      case ViewerConfigTypeName.IMAGE_3D:
+        if (labelType === LabelTypeName.PLANE_3D) {
+          center.add(new Vector3D(0, 1, 10))
+        } else {
+          center.add(new Vector3D(0, 0, 10))
+        }
+        if (
+          this._sensor.extrinsics != null &&
+          this._sensor.extrinsics !== undefined
+        ) {
+          const worldDirection = new THREE.Vector3()
+          this._camera.getWorldDirection(worldDirection)
+          worldDirection.normalize()
+          worldDirection.multiplyScalar(5)
+          center.fromState(this._sensor.extrinsics.translation)
+          center.add(new Vector3D().fromThree(worldDirection))
+        }
+        break
+    }
+    return center
+  }
+
+  /**
+   * Add 3d label to viewer
+   *
+   * @param labelType_
+   * @returns boolean: true if added, false otherwise
+   */
+  private add3dLabel(labelType_?: LabelTypeName): boolean {
+    // Get center based on viewer type, label type
+    const labelType =
+      labelType_ !== undefined
+        ? labelType_
+        : Session.label3dList.currentLabelType
+    const label = makeDrawableLabel3D(Session.label3dList, labelType)
+    if (label !== null) {
+      const center = this.getInitialCenter(
+        this._viewerConfig.type as ViewerConfigTypeName,
+        labelType
+      )
+      label.init(
+        this._selectedItemIndex,
+        Session.label3dList.currentCategory,
+        center,
+        this._sensorIds,
+        undefined,
+        this._state.task.config.tracking
+      )
+      Session.label3dList.addUpdatedLabel(label)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+      Session.label3dList.clearUpdatedLabels()
+      return true
+    }
+    return false
+  }
+
+  /**
    * Handle keyboard events
    *
    * @param {KeyboardEvent} e
@@ -214,51 +291,13 @@ export class Label3DHandler {
   public onKeyDown(e: KeyboardEvent): boolean {
     // TODO: break the cases into functions
     switch (e.key) {
+      case Key.G_UP:
+      case Key.G_LOW: {
+        this.add3dLabel(LabelTypeName.PLANE_3D)
+        break
+      }
       case Key.SPACE: {
-        const label = makeDrawableLabel3D(
-          Session.label3dList,
-          Session.label3dList.currentLabelType
-        )
-        if (label !== null) {
-          const center = new Vector3D()
-          switch (this._viewerConfig.type) {
-            case ViewerConfigTypeName.POINT_CLOUD:
-              center.fromState(
-                (this._viewerConfig as PointCloudViewerConfigType).target
-              )
-              break
-            case ViewerConfigTypeName.IMAGE_3D:
-              center.add(new Vector3D(0, 0, 10))
-              if (
-                this._sensor.extrinsics != null &&
-                this._sensor.extrinsics !== undefined
-              ) {
-                const worldDirection = new THREE.Vector3()
-                this._camera.getWorldDirection(worldDirection)
-                worldDirection.normalize()
-                worldDirection.multiplyScalar(5)
-                center.fromState(this._sensor.extrinsics.translation)
-                center.add(new Vector3D().fromThree(worldDirection))
-              }
-              break
-          }
-          label.init(
-            this._selectedItemIndex,
-            Session.label3dList.currentCategory,
-            center,
-            this._sensorIds,
-            undefined,
-            this._state.task.config.tracking
-          )
-          Session.label3dList.addUpdatedLabel(label)
-          commitLabels(
-            [...Session.label3dList.updatedLabels.values()],
-            this._tracking
-          )
-          Session.label3dList.clearUpdatedLabels()
-          return true
-        }
-        return false
+        return this.add3dLabel()
       }
       case Key.ESCAPE:
       case Key.ENTER:
