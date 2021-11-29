@@ -1667,12 +1667,8 @@ export function updateSpanPoint(
   action: actionTypes.UpdateSpanPointAction
 ): State {
   const oldTask = state.task
-  let newBox = oldTask.boxSpan
-
-  if (newBox === undefined) {
-    newBox = new Span3D()
-  }
-  newBox.updatePointTmp(action.mX, action.mY)
+  const newBox = oldTask.boxSpan
+  newBox?.updatePointTmp(action.mX, action.mY)
 
   const newTask = updateObject(oldTask, {
     ...state.task,
@@ -1694,12 +1690,8 @@ export function registerSpanPoint(
   action: actionTypes.RegisterSpanPointAction
 ): State {
   const oldTask = state.task
-  let newBox = oldTask.boxSpan
-
-  if (newBox === undefined) {
-    newBox = new Span3D()
-  }
-  newBox.registerPoint(action.mX, action.mY)
+  const newBox = oldTask.boxSpan
+  newBox?.registerPoint(action.mX, action.mY)
 
   const newTask = updateObject(oldTask, {
     ...state.task,

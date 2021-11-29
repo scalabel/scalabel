@@ -26,7 +26,7 @@ import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
-import { getSelectedTracks, getSpanBoxComplete } from "../functional/state_util"
+import { getSelectedTracks, isSpanBoxComplete } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, Category, ModeStatus, State } from "../types/state"
@@ -443,7 +443,7 @@ export class ToolBar extends Component<Props> {
   private deactivateSpan(state: State): void {
     console.log(this.state.task.boxSpan)
     Session.dispatch(registerBox())
-    const boxComplete = getSpanBoxComplete(state)
+    const boxComplete = isSpanBoxComplete(state)
     if (!boxComplete) {
       alert(Severity.WARNING, "Box was not generated")
     }
