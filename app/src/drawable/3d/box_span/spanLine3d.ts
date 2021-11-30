@@ -20,8 +20,8 @@ export class SpanLine3D {
   constructor(p1: SpanPoint3D, p2: SpanPoint3D) {
     this._p1 = p1
     this._p2 = p2
-    this._color = 0x0000ff
-    this._lineWidth = 0.01
+    this._color = 0x00ff00
+    this._lineWidth = 0.05
   }
 
   /**

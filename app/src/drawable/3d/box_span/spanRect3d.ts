@@ -29,8 +29,9 @@ export class SpanRect3D {
    * Add to scene for rendering
    *
    * @param scene
+   * @param camera
    */
-  public render(scene: THREE.Scene): void {
+  public render(scene: THREE.Scene, camera: THREE.Camera): void {
     // TODO: generate rectangle formed by three points and add to scene
     // TODO: display p1, p2, p3
     // TODO: (p3 is along the line orthogonal to the line p1-p2 and intersects p2)
@@ -43,7 +44,7 @@ export class SpanRect3D {
     const l12 = new SpanLine3D(this._p1, this._p2)
     const l23 = new SpanLine3D(this._p2, this._p3)
     const v4 = this.completeParallelogram()
-    const p4 = new SpanPoint3D(0, 0, new THREE.Camera(), false)
+    const p4 = new SpanPoint3D(0, 0, camera)
     p4.setCoords(v4.x, v4.y, v4.z)
     const l34 = new SpanLine3D(this._p3, p4)
     const l41 = new SpanLine3D(p4, this._p1)

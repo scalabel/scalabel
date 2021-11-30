@@ -19,17 +19,11 @@ export class SpanPoint3D {
    * @param pointCloud - point cloud
    * @param temp - temporary
    */
-  constructor(x: number, y: number, camera: THREE.Camera, temp: boolean) {
-    if (temp) {
-      this._x = 0
-      this._y = 0
-      this._z = 0
-    } else {
-      const point = this.raycast(x, y, camera)
-      this._x = point.x
-      this._y = point.y
-      this._z = point.z
-    }
+  constructor(x: number, y: number, camera: THREE.Camera) {
+    const point = this.raycast(x, y, camera)
+    this._x = point.x
+    this._y = point.y
+    this._z = point.z
     this._color = "#ff0000"
     this._radius = 0.05
   }
@@ -46,6 +40,7 @@ export class SpanPoint3D {
     const geometry = new THREE.SphereGeometry(this._radius, 3, 2)
     const material = new THREE.MeshBasicMaterial({ color: this._color })
     const point = new THREE.Mesh(geometry, material)
+    point.position.set(this._x, this._y, this._z)
     scene.add(point)
   }
 
@@ -89,8 +84,8 @@ export class SpanPoint3D {
     const raycaster = new THREE.Raycaster()
     const mouse = new THREE.Vector2(x, y)
     raycaster.setFromCamera(mouse, camera)
+    console.log(raycaster.ray)
     if (raycaster.ray.intersectsPlane(plane)) {
-      console.log("intersects")
       const intersects = new THREE.Vector3()
       raycaster.ray.intersectPlane(plane, intersects)
       console.log(intersects)

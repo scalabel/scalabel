@@ -277,15 +277,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         selectionSize.copy(label.size)
       }
 
-      if (Session.getState().session.boxSpan) {
-        const boxSpan = Session.getState().task.boxSpan
-        boxSpan?.render(
-          this.scene,
-          this.camera,
-          this.canvas as HTMLCanvasElement
-        )
-      }
-
       const material = this.pointCloud.material as THREE.ShaderMaterial
       material.uniforms.toSelectionFrame.value = selectionTransform
       material.uniforms.selectionSize.value = selectionSize

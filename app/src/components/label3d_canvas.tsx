@@ -192,14 +192,12 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       />
     )
 
-    const ch = Session.getState().session.boxSpan ? (
+    const ch = (
       <Crosshair
         key="crosshair-canvas3d"
         display={this.display}
         innerRef={this.crosshair}
       />
-    ) : (
-      <></>
     )
 
     if (this.display !== null) {
@@ -401,6 +399,14 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       isCurrentFrameLoaded(state, sensor)
     ) {
       this.renderer.render(Session.label3dList.scene, this.camera)
+      if (Session.getState().session.boxSpan) {
+        const boxSpan = Session.getState().task.boxSpan
+        boxSpan?.render(
+          Session.label3dList.scene,
+          this.camera,
+          this.canvas as HTMLCanvasElement
+        )
+      }
     } else if (this.renderer !== null && this.renderer !== undefined) {
       this.renderer.clear()
     }
