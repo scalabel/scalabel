@@ -1,5 +1,7 @@
 import * as THREE from "three"
 
+import { Vector3D } from "../../../math/vector3d"
+
 /**
  * ThreeJS class for rendering 3D point
  */
@@ -13,14 +15,9 @@ export class SpanPoint3D {
   /**
    * Constructor
    *
-   * @param x - mouse x
-   * @param y - mouse y
-   * @param camera - camera
-   * @param pointCloud - point cloud
-   * @param temp - temporary
+   * @param point
    */
-  constructor(x: number, y: number, camera: THREE.Camera) {
-    const point = this.raycast(x, y, camera)
+  constructor(point: Vector3D) {
     this._x = point.x
     this._y = point.y
     this._z = point.z
@@ -40,58 +37,38 @@ export class SpanPoint3D {
     const geometry = new THREE.SphereGeometry(this._radius, 3, 2)
     const material = new THREE.MeshBasicMaterial({ color: this._color })
     const point = new THREE.Mesh(geometry, material)
-    point.position.set(this._x, this._y, this._z)
+    // console.log(this.x, this.y, this.z)
+    point.position.set(this.x, this.y, this.z)
     scene.add(point)
   }
 
-  /** x coords */
+  /** get x */
   public get x(): number {
     return this._x
   }
 
-  /** y coords */
+  /** set x */
+  public set x(x: number) {
+    this._x = x
+  }
+
+  /** get y */
   public get y(): number {
     return this._y
   }
 
-  /** z coords */
+  /** set y */
+  public set y(y: number) {
+    this._y = y
+  }
+
+  /** get z */
   public get z(): number {
     return this._z
   }
 
-  /**
-   * Set raw x,y,z coords
-   *
-   * @param x
-   * @param y
-   * @param z
-   */
-  public setCoords(x: number, y: number, z: number): void {
-    this._x = x
-    this._y = y
+  /** set z */
+  public set z(z: number) {
     this._z = z
-  }
-
-  /**
-   * Convert mouse pos to 3D world coordinates
-   *
-   * @param x - mouse x
-   * @param y - mouse y
-   * @param camera - camera
-   */
-  public raycast(x: number, y: number, camera: THREE.Camera): THREE.Vector3 {
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
-    const raycaster = new THREE.Raycaster()
-    const mouse = new THREE.Vector2(x, y)
-    raycaster.setFromCamera(mouse, camera)
-    console.log(raycaster.ray)
-    if (raycaster.ray.intersectsPlane(plane)) {
-      const intersects = new THREE.Vector3()
-      raycaster.ray.intersectPlane(plane, intersects)
-      console.log(intersects)
-      return intersects
-    } else {
-      return new THREE.Vector3(0, 0, 0)
-    }
   }
 }

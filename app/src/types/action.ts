@@ -226,7 +226,7 @@ export interface RemoveAlertAction extends BaseAction {
 
 export type ActivateSpanAction = BaseAction
 
-export type RegisterBoxAction = BaseAction
+export type DeactivateSpanAction = BaseAction
 
 export interface UpdateSpanPointAction extends BaseAction {
   /** mouse X */
@@ -257,10 +257,6 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
-  | ActivateSpanAction
-  | RegisterBoxAction
-  | UpdateSpanPointAction
-  | RegisterSpanPointAction
 
 export type UserActionType =
   | ChangeSelectAction
@@ -279,6 +275,10 @@ export type TaskActionType =
   | AddTrackAction
   | MergeTrackAction
   | SubmitAction
+  | ActivateSpanAction
+  | DeactivateSpanAction
+  | UpdateSpanPointAction
+  | RegisterSpanPointAction
 
 export type ActionType =
   | SessionActionType

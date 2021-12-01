@@ -827,8 +827,8 @@ export function activateSpan(): actionTypes.ActivateSpanAction {
  *
  * @param alertId
  */
-export function registerBox(): actionTypes.RegisterBoxAction {
-  return makeBaseAction(actionConsts.REGISTER_BOX)
+export function deactivateSpan(): actionTypes.DeactivateSpanAction {
+  return makeBaseAction(actionConsts.DEACTIVATE_SPAN)
 }
 
 /**

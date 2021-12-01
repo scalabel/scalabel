@@ -1636,13 +1636,12 @@ export function activateSpan(state: State): State {
   })
 }
 
-// TODO: add span box into list of labels and clear the Span3D class
 /**
- * Register span box as new label
+ * Deactivate box spanning mode
  *
  * @param state
  */
-export function registerBox(state: State): State {
+export function deactivateSpan(state: State): State {
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
     ...state.session,

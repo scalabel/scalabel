@@ -18,7 +18,7 @@ export class Span3D {
   private _p2: SpanPoint3D | null
   private _p3: SpanPoint3D | null
   private _p4: SpanPoint3D | null
-  private _pTmp: SpanPoint3D | null
+  private _pTmp: SpanPoint3D
   private _cuboid: SpanCuboid3D | null
   private _complete: boolean
 
@@ -30,7 +30,7 @@ export class Span3D {
     this._p2 = null
     this._p3 = null
     this._p4 = null
-    this._pTmp = new SpanPoint3D(0, 0, new THREE.Camera())
+    this._pTmp = new SpanPoint3D(new Vector3D(0, 0, 0))
     this._cuboid = null
     this._complete = false
   }
@@ -47,7 +47,7 @@ export class Span3D {
     camera: THREE.Camera,
     canvas: HTMLCanvasElement
   ): void {
-    // TODO: use points data to render temporary geometries
+    // use points data to render temporary geometries
     // TODO: figure out whether to render lines/planes/cuboids natively
     // TODO: with ThreeJS or encapsulate in a custom class
     if (this._camera === null) {
@@ -57,38 +57,40 @@ export class Span3D {
       this._canvas = canvas
     }
 
-    // const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0)
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
+      new THREE.Vector3(0, 0, -1.5)
+    )
 
-    // // Create a basic rectangle geometry
-    // const planeGeometry = new THREE.PlaneGeometry(10, 10)
+    // Create a basic rectangle geometry
+    const planeGeometry = new THREE.PlaneGeometry(10, 10)
 
-    // // Align the geometry to the plane
-    // const coplanarPoint = plane.coplanarPoint(new THREE.Vector3(0, 0, 1))
-    // const focalPoint = new THREE.Vector3().copy(coplanarPoint).add(plane.normal)
-    // planeGeometry.lookAt(focalPoint)
-    // planeGeometry.translate(coplanarPoint.x, coplanarPoint.y, coplanarPoint.z)
+    // Align the geometry to the plane
+    const coplanarPoint = plane.coplanarPoint(new THREE.Vector3(0, 0, 1))
+    const focalPoint = new THREE.Vector3().copy(coplanarPoint).add(plane.normal)
+    planeGeometry.lookAt(focalPoint)
+    planeGeometry.translate(coplanarPoint.x, coplanarPoint.y, coplanarPoint.z)
 
-    // // Create mesh with the geometry
-    // const planeMaterial = new THREE.MeshBasicMaterial({
-    //   color: 0xffff00,
-    //   side: THREE.DoubleSide
-    // })
-    // const dispPlane = new THREE.Mesh(planeGeometry, planeMaterial)
-    // scene.add(dispPlane)
+    // Create mesh with the geometry
+    const planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffff00,
+      side: THREE.DoubleSide
+    })
+    const dispPlane = new THREE.Mesh(planeGeometry, planeMaterial)
+    scene.add(dispPlane)
 
     if (this._pTmp !== null) {
       this._pTmp.render(scene)
 
       if (this._p1 !== null) {
         if (this._p2 === null) {
-          // TODO: render first point
-          // TODO: render line between first point and temp point
+          // render first point
+          // render line between first point and temp point
           this._p1.render(scene)
           const line = new SpanLine3D(this._p1, this._pTmp)
           line.render(scene)
         } else if (this._p3 === null) {
-          // TODO: render first, second point
-          // TODO: render plane formed by first, second point and temp point
+          // render first, second point
+          // render plane formed by first, second point and temp point
           if (this._p1 !== null && this._p2 !== null) {
             this._p1.render(scene)
             this._p2.render(scene)
@@ -96,8 +98,8 @@ export class Span3D {
             plane.render(scene)
           }
         } else if (this._p4 === null) {
-          // TODO: render first, second, third point
-          // TODO: render cuboid formed by first, second, third point and temp point
+          // render first, second, third point
+          // render cuboid formed by first, second, third point and temp point
           this._p1.render(scene)
           this._p2.render(scene)
           this._p3.render(scene)
@@ -130,25 +132,30 @@ export class Span3D {
       y,
       this._canvas as HTMLCanvasElement
     )
-    console.log(normalized)
+    // console.log(normalized)
     const NDC = convertMouseToNDC(
       normalized[0],
       normalized[1],
       this._canvas as HTMLCanvasElement
     )
-    console.log(NDC)
+    // console.log(NDC)
     x = NDC[0]
     y = NDC[1]
 
-    this._pTmp = new SpanPoint3D(x, y, this._camera as THREE.Camera)
+    if (this._p3 !== null && this._p4 === null) {
+      const scaleFactor = 5
+      this._pTmp = new SpanPoint3D(
+        new Vector3D(this._p3.x, this._p3.y, y * scaleFactor)
+      )
+    } else {
+      if (this._camera !== null) {
+        const worldCoords = this.raycast(x, y, this._camera)
+        this._pTmp = new SpanPoint3D(worldCoords)
+      }
+    }
   }
 
-  /**
-   * Register new point given current mouse position
-   *
-   * @param x
-   * @param y
-   */
+  /** Register new point */
   public registerPoint(): void {
     if (this._p1 === null) {
       this._p1 = this._pTmp
@@ -171,23 +178,8 @@ export class Span3D {
 
   /** Return cuboid center */
   public get center(): THREE.Vector3 {
-    if (
-      this._p1 !== null &&
-      this._p2 !== null &&
-      this._p3 !== null &&
-      this._p4 !== null
-    ) {
-      const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
-      const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-      const v3 = new Vector3D(this._p3.x, this._p3.y, this._p3.z)
-      const v4 = new Vector3D(this._p4.x, this._p4.y, this._p4.z)
-
-      const center = v1.clone().add(v2).add(v3).add(v4)
-      center.x /= 4
-      center.y /= 4
-      center.z /= 4
-
-      return new THREE.Vector3(center.x, center.y, center.z)
+    if (this._cuboid !== null) {
+      return this._cuboid.center
     }
 
     return new THREE.Vector3(0, 0, 0)
@@ -195,25 +187,37 @@ export class Span3D {
 
   /** Return cuboid dimensions */
   public get dimensions(): THREE.Vector3 {
-    if (
-      this._p1 !== null &&
-      this._p2 !== null &&
-      this._p3 !== null &&
-      this._p4 !== null
-    ) {
-      const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
-      const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-      const v3 = new Vector3D(this._p3.x, this._p3.y, this._p3.z)
-      const v4 = new Vector3D(this._p4.x, this._p4.y, this._p4.z)
-
-      const width = v2.distanceTo(v3)
-      const depth = v1.distanceTo(v2)
-      const height = v3.distanceTo(v4)
-
-      return new THREE.Vector3(width, depth, height)
+    if (this._cuboid !== null) {
+      return this._cuboid.dimensions
     }
 
     return new THREE.Vector3(0, 0, 0)
+  }
+
+  /**
+   * Convert mouse pos to 3D world coordinates
+   *
+   * @param x - mouse x
+   * @param y - mouse y
+   * @param camera - camera
+   */
+  private raycast(x: number, y: number, camera: THREE.Camera): Vector3D {
+    const offset = new THREE.Vector3(0, 0, -1.5)
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
+      offset
+    )
+    const raycaster = new THREE.Raycaster()
+    const mousePos = new THREE.Vector2(x, y)
+    raycaster.setFromCamera(mousePos, camera)
+    // console.log(raycaster.ray)
+    if (raycaster.ray.intersectsPlane(plane)) {
+      const intersects = new THREE.Vector3()
+      raycaster.ray.intersectPlane(plane, intersects)
+      // console.log(intersects)
+      return new Vector3D().fromThree(intersects)
+    } else {
+      return new Vector3D(0, 0, 0)
+    }
   }
 
   /**

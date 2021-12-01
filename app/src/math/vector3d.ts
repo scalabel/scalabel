@@ -112,6 +112,17 @@ export class Vector3D extends Vector {
   }
 
   /**
+   * Divide all values by a scalar
+   *
+   * @param s
+   */
+  public divideScalar(s: number): void {
+    this[0] /= s
+    this[1] /= s
+    this[2] /= s
+  }
+
+  /**
    * Cross product with another vector
    *
    * @param v

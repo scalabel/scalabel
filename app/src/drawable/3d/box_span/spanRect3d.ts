@@ -26,8 +26,7 @@ export class SpanRect3D {
     this._p3 = p3
 
     const v4 = this.completeParallelogram()
-    this._p4 = new SpanPoint3D(0, 0, new THREE.Camera())
-    this._p4.setCoords(v4.x, v4.y, v4.z)
+    this._p4 = new SpanPoint3D(v4)
   }
 
   /**
@@ -37,12 +36,12 @@ export class SpanRect3D {
    * @param camera
    */
   public render(scene: THREE.Scene): void {
-    // TODO: generate rectangle formed by three points and add to scene
-    // TODO: display p1, p2, p3
-    // TODO: (p3 is along the line orthogonal to the line p1-p2 and intersects p2)
-    // TODO: display lines p1-p2, p2-p3
-    // TODO: calculate p4 (cross of p1-p2 and p2-p3)
-    // TODO: complete the parallelogram
+    // generate rectangle formed by three points and add to scene
+    // display p1, p2, p3
+    // (p3 is along the line orthogonal to the line p1-p2 and intersects p2)
+    // display lines p1-p2, p2-p3
+    // calculate p4 (cross of p1-p2 and p2-p3)
+    // complete the parallelogram
     const l12 = new SpanLine3D(this._p1, this._p2)
     const l23 = new SpanLine3D(this._p2, this._p3)
     const l34 = new SpanLine3D(this._p3, this._p4)

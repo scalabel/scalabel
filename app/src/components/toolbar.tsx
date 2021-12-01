@@ -14,7 +14,7 @@ import {
   splitTrack,
   startLinkTrack,
   activateSpan,
-  registerBox
+  deactivateSpan
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -441,7 +441,7 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private deactivateSpan(state: State): void {
-    Session.dispatch(registerBox())
+    Session.dispatch(deactivateSpan())
     const boxComplete = isSpanBoxComplete(state)
     if (!boxComplete) {
       alert(Severity.WARNING, "Box was not generated")

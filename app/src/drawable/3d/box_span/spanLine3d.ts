@@ -30,7 +30,7 @@ export class SpanLine3D {
    * @param scene
    */
   public render(scene: THREE.Scene): void {
-    // TODO: generate line formed by two points and add to scene
+    // generate line formed by two points and add to scene
     const points = []
     points.push(new THREE.Vector3(this._p1.x, this._p1.y, this._p1.z))
     points.push(new THREE.Vector3(this._p2.x, this._p2.y, this._p2.z))
