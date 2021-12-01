@@ -9,7 +9,7 @@ import {
   ViewerConfigType
 } from "../types/state"
 import { makeItem } from "./states"
-import { ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import { ViewerConfigTypeName } from "../const/common"
 
 // TODO- move these to selector file and use hierarchical structure
 
@@ -277,7 +277,7 @@ export function getSensorTypes(state: State): Set<ViewerConfigTypeName> {
           return ViewerConfigTypeName.IMAGE
         case "pointcloud":
           return ViewerConfigTypeName.POINT_CLOUD
-        case "image3d":
+        case "image_3d":
           return ViewerConfigTypeName.IMAGE_3D
         case "homography":
           return ViewerConfigTypeName.HOMOGRAPHY
@@ -301,19 +301,28 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
     .sort((a, b) => a - b)
 
   const minSensorIds: { [type: string]: number } = {
-    [ItemTypeName.IMAGE]: -1,
-    [ItemTypeName.POINT_CLOUD]: -1
+    [ViewerConfigTypeName.IMAGE]: -1,
+    [ViewerConfigTypeName.IMAGE_3D]: -1,
+    [ViewerConfigTypeName.POINT_CLOUD]: -1
   }
 
   if (sensorIds.length > 1) {
     for (const sensorId of sensorIds) {
-      if (state.task.sensors[sensorId].type === ItemTypeName.IMAGE) {
+      if (state.task.sensors[sensorId].type === ViewerConfigTypeName.IMAGE) {
         minSensorIds[ViewerConfigTypeName.IMAGE] = sensorId
         break
       }
     }
     for (const sensorId of sensorIds) {
-      if (state.task.sensors[sensorId].type === ItemTypeName.POINT_CLOUD) {
+      if (state.task.sensors[sensorId].type === ViewerConfigTypeName.IMAGE_3D) {
+        minSensorIds[ViewerConfigTypeName.IMAGE_3D] = sensorId
+        break
+      }
+    }
+    for (const sensorId of sensorIds) {
+      if (
+        state.task.sensors[sensorId].type === ViewerConfigTypeName.POINT_CLOUD
+      ) {
         minSensorIds[ViewerConfigTypeName.POINT_CLOUD] = sensorId
         break
       }

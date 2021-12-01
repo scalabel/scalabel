@@ -1,0 +1,468 @@
+{
+    "task": {
+        "config": {
+            "projectName": "image3dBox",
+            "itemType": "image",
+            "labelTypes": [
+                "box3d"
+            ],
+            "label2DTemplates": {},
+            "taskSize": 1,
+            "handlerUrl": "label",
+            "pageTitle": "3D Bounding Box",
+            "instructionPage": "",
+            "bundleFile": "image.js",
+            "categories": [
+                "pedestrian",
+                "rider",
+                "other person",
+                "car",
+                "bus",
+                "truck",
+                "train",
+                "trailer",
+                "other vehicle",
+                "motorcycle",
+                "bicycle",
+                "traffic sign",
+                "traffic light"
+            ],
+            "treeCategories": [
+                {
+                    "name": "pedestrian"
+                },
+                {
+                    "name": "rider"
+                },
+                {
+                    "name": "other person"
+                },
+                {
+                    "name": "car"
+                },
+                {
+                    "name": "bus"
+                },
+                {
+                    "name": "truck"
+                },
+                {
+                    "name": "train"
+                },
+                {
+                    "name": "trailer"
+                },
+                {
+                    "name": "other vehicle"
+                },
+                {
+                    "name": "motorcycle"
+                },
+                {
+                    "name": "bicycle"
+                },
+                {
+                    "name": "traffic sign"
+                },
+                {
+                    "name": "traffic light"
+                }
+            ],
+            "attributes": [],
+            "taskId": "000000",
+            "tracking": false,
+            "policyTypes": [],
+            "demoMode": false,
+            "autosave": true,
+            "bots": false
+        },
+        "status": {
+            "maxOrder": 7
+        },
+        "items": [
+            {
+                "id": "0",
+                "index": 0,
+                "videoName": "",
+                "urls": {
+                    "-1": "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png"
+                },
+                "labels": {
+                    "0": {
+                        "id": "0",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "q2IA9xVDZqBsPVfm"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "1": {
+                        "id": "1",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "AGX396iafcf9k4Mm"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "2": {
+                        "id": "2",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "RjDdt1AXrAhLL4fR"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "3": {
+                        "id": "3",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "PnZA1pGnrUleiTkb"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "4": {
+                        "id": "4",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "iyHysmk5NM66bgwP"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "5": {
+                        "id": "5",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "i30Jhe5mW781XR6z"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    },
+                    "6": {
+                        "id": "6",
+                        "item": 0,
+                        "sensors": [
+                            -1
+                        ],
+                        "type": "box3d",
+                        "category": [
+                            3
+                        ],
+                        "attributes": {},
+                        "parent": "",
+                        "children": [],
+                        "shapes": [
+                            "7Q0ouEB0S2Osa9Ka"
+                        ],
+                        "track": "",
+                        "order": 0,
+                        "manual": false,
+                        "changed": false
+                    }
+                },
+                "shapes": {
+                    "q2IA9xVDZqBsPVfm": {
+                        "center": {
+                            "x": 2.921483,
+                            "y": 0.755883,
+                            "z": 6.348542
+                        },
+                        "size": {
+                            "x": 1.50992,
+                            "y": 1.85,
+                            "z": 4.930564
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 3.2679489647691184e-7,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "0"
+                        ],
+                        "shapeType": "cube",
+                        "id": "q2IA9xVDZqBsPVfm"
+                    },
+                    "AGX396iafcf9k4Mm": {
+                        "center": {
+                            "x": 2.994469,
+                            "y": 0.8304805,
+                            "z": 13.169745
+                        },
+                        "size": {
+                            "x": 1.404795,
+                            "y": 1.612032,
+                            "z": 3.772344
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 3.2679489647691184e-7,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "1"
+                        ],
+                        "shapeType": "cube",
+                        "id": "AGX396iafcf9k4Mm"
+                    },
+                    "RjDdt1AXrAhLL4fR": {
+                        "center": {
+                            "x": 2.908125,
+                            "y": 0.8767944999999999,
+                            "z": 19.299001
+                        },
+                        "size": {
+                            "x": 1.413269,
+                            "y": 1.567278,
+                            "z": 3.158158
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 0.05897932679489659,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "2"
+                        ],
+                        "shapeType": "cube",
+                        "id": "RjDdt1AXrAhLL4fR"
+                    },
+                    "PnZA1pGnrUleiTkb": {
+                        "center": {
+                            "x": -6.037999,
+                            "y": 1.4392370000000003,
+                            "z": 23.712843
+                        },
+                        "size": {
+                            "x": 1.527328,
+                            "y": 1.555003,
+                            "z": 3.57675
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 3.1579983267948966,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "3"
+                        ],
+                        "shapeType": "cube",
+                        "id": "PnZA1pGnrUleiTkb"
+                    },
+                    "iyHysmk5NM66bgwP": {
+                        "center": {
+                            "x": -6.310451,
+                            "y": 1.7865565,
+                            "z": 46.486705
+                        },
+                        "size": {
+                            "x": 1.417371,
+                            "y": 1.540476,
+                            "z": 3.504344
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 3.1323123267948967,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "4"
+                        ],
+                        "shapeType": "cube",
+                        "id": "iyHysmk5NM66bgwP"
+                    },
+                    "i30Jhe5mW781XR6z": {
+                        "center": {
+                            "x": 2.822686,
+                            "y": 1.2086425,
+                            "z": 50.003616
+                        },
+                        "size": {
+                            "x": 1.512623,
+                            "y": 1.746309,
+                            "z": 3.775171
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": -0.0013926732051035007,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "5"
+                        ],
+                        "shapeType": "cube",
+                        "id": "i30Jhe5mW781XR6z"
+                    },
+                    "7Q0ouEB0S2Osa9Ka": {
+                        "center": {
+                            "x": -6.285505,
+                            "y": 1.7774785,
+                            "z": 52.066669
+                        },
+                        "size": {
+                            "x": 1.360295,
+                            "y": 1.513462,
+                            "z": 4.017021
+                        },
+                        "orientation": {
+                            "x": 0,
+                            "y": 3.1543543267948966,
+                            "z": 0
+                        },
+                        "anchorIndex": 0,
+                        "label": [
+                            "6"
+                        ],
+                        "shapeType": "cube",
+                        "id": "7Q0ouEB0S2Osa9Ka"
+                    }
+                },
+                "timestamp": 0,
+                "names": {},
+                "intrinsics": {
+                    "-1": {
+                        "focalLength": {
+                            "x": 721.5377197265625,
+                            "y": 721.5377197265625
+                        },
+                        "focalCenter": {
+                            "x": 609.559326171875,
+                            "y": 172.85400390625
+                        }
+                    }
+                },
+                "extrinsics": {
+                    "-1": {
+                        "rotation": {
+                            "x": -1.5723664220969806,
+                            "y": 0.07224191126404556,
+                            "z": -1.8406363281435645,
+                            "w": 0
+                        },
+                        "translation": {
+                            "x": -0.5327253937721252,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                }
+            }
+        ],
+        "tracks": {},
+        "sensors": {
+            "-1": {
+                "id": -1,
+                "name": "image2",
+                "type": "image",
+                "intrinsics": {
+                    "focalLength": {
+                        "x": 721.5377197265625,
+                        "y": 721.5377197265625
+                    },
+                    "focalCenter": {
+                        "x": 609.559326171875,
+                        "y": 172.85400390625
+                    }
+                },
+                "extrinsics": {
+                    "rotation": {
+                        "x": -1.5723664220969806,
+                        "y": 0.07224191126404556,
+                        "z": -1.8406363281435645,
+                        "w": 0
+                    },
+                    "translation": {
+                        "x": -0.5327253937721252,
+                        "y": 0.0,
+                        "z": 0.0
+                    }
+                }
+            }
+        },
+        "progress": {
+            "submissions": []
+        }
+    }
+}

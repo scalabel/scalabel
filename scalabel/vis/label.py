@@ -21,6 +21,7 @@ from skimage.transform import resize
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
+from ..label.transforms import rle_to_mask
 from ..label.typing import Edge, Frame, Intrinsics, Label, Node
 from ..label.utils import (
     check_crowd,
@@ -191,16 +192,22 @@ class LabelViewer:
         with_box3d: bool = True,
         with_poly2d: bool = True,
         with_graph: bool = True,
+        with_rle: bool = True,
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
     ) -> None:
         """Display the image and corresponding labels."""
         plt.cla()
-        self.draw_image(image, frame.name)
+        img = resize(image, (self.ui_cfg.height, self.ui_cfg.width))
+        self.draw_image(img, frame.name)
         if frame.labels is None or len(frame.labels) == 0:
             logger.info("No labels found")
             return
+
+        # If both poly2d and rle are specified, show only rle if labels have
+        # rle and otherwise poly2d.
+        has_rle = any(label.rle is not None for label in frame.labels)
 
         labels = frame.labels
         if with_attr:
@@ -209,7 +216,7 @@ class LabelViewer:
             self.draw_box2ds(labels, with_tags=with_tags)
         if with_box3d and frame.intrinsics is not None:
             self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
-        if with_poly2d:
+        if with_poly2d and (not with_rle or not has_rle):
             self.draw_poly2ds(
                 labels,
                 with_tags=with_tags,
@@ -218,12 +225,13 @@ class LabelViewer:
             )
         if with_graph:
             self.draw_graph(labels)
+        if with_rle and has_rle:
+            self.draw_rle(img, labels)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
         if title is not None:
             self.fig.canvas.manager.set_window_title(title)
-        img = resize(img, (self.ui_cfg.height, self.ui_cfg.width))
         self.ax.imshow(img, interpolation="bilinear", aspect="auto")
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
@@ -474,6 +482,43 @@ class LabelViewer:
                         int(2 * self.ui_cfg.scale),
                     )
                     self.ax.add_patch(result[0])
+
+    def draw_rle(
+        self,
+        image: NDArrayU8,
+        labels: List[Label],
+        alpha: float = 0.5,
+    ) -> None:
+        """Draw RLE."""
+        combined_mask: NDArrayU8 = np.zeros(image.shape)
+
+        labels = sorted(labels, key=lambda label: float(label.score or 0))
+
+        for label in labels:
+            if not label.rle:
+                continue
+
+            color: NDArrayF64 = self._get_label_color(label) * 255
+            bitmask = resize(
+                rle_to_mask(label.rle),
+                (self.ui_cfg.height, self.ui_cfg.width),
+            )
+            mask = np.repeat(bitmask[:, :, np.newaxis], 3, axis=2)
+
+            # Non-zero values correspond to colors for each label
+            combined_mask = np.where(
+                mask, color.astype(np.uint8), combined_mask
+            )
+
+        img: NDArrayU8 = image * 255
+        self.ax.imshow(
+            np.where(
+                combined_mask > 0,
+                combined_mask.astype(np.uint8),
+                img.astype(np.uint8),
+            ),
+            alpha=alpha,
+        )
 
 
 def parse_args() -> argparse.Namespace:

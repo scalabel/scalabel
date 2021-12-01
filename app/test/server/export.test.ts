@@ -13,13 +13,16 @@ import {
   sampleItemExportImage,
   sampleItemExportImagePolygon,
   sampleStateExportImage,
-  sampleStateExportImagePolygon
+  sampleStateExportImagePolygon,
+  sampleItemExportImage3dBox,
+  sampleStateExportImage3dBox
 } from "../test_states/test_export_objects"
 
 const sampleStateFile = "./app/test/test_states/sample_state.json"
 const samplePolygonStateFile =
   "./app/test/test_states/sample_state_polygon.json"
 const sampleTagStateFile = "./app/test/test_states/sample_state_tag.json"
+const sample3dBoxStateFile = "./app/test/test_states/sample_state_3d_box.json"
 
 describe("test export functionality across multiple labeling types", () => {
   test("unit test for polygon export", () => {
@@ -82,6 +85,21 @@ describe("test export functionality for segmentation", () => {
 describe("test export functionality for tracking", () => {
   test("single item conversion", () => {})
   test("full state export including empty items", () => {})
+})
+
+describe("test export functionality for 3d bounding box", () => {
+  test("single item conversion", () => {
+    const state = readSampleState(sample3dBoxStateFile)
+    const config = state.task.config
+    const item = state.task.items[0]
+    const itemExport = convertItemToExport(config, item)[0]
+    expect(itemExport).toEqual(sampleItemExportImage3dBox)
+  })
+  test("full state export including empty items", () => {
+    const state = readSampleState(sample3dBoxStateFile)
+    const exportedState = convertStateToExport(state)
+    expect(exportedState).toEqual(sampleStateExportImage3dBox)
+  })
 })
 
 /**
