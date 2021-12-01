@@ -188,7 +188,7 @@ export class ToolBar extends Component<Props> {
             })}
           </div>
           <div>
-            {this.state.session.boxSpan
+            {this.state.session.boxSpan || this.state.task.boxSpan !== undefined
               ? makeButton("Finish", () => {
                   this.deactivateSpan(this.state)
                 })

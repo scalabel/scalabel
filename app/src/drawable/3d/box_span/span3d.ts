@@ -57,29 +57,31 @@ export class Span3D {
       this._canvas = canvas
     }
 
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
-      new THREE.Vector3(0, 0, -1.5)
-    )
+    // const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
+    //   new THREE.Vector3(0, 0, -1.5)
+    // )
 
-    // Create a basic rectangle geometry
-    const planeGeometry = new THREE.PlaneGeometry(10, 10)
+    // // Create a basic rectangle geometry
+    // const planeGeometry = new THREE.PlaneGeometry(10, 10)
 
-    // Align the geometry to the plane
-    const coplanarPoint = plane.coplanarPoint(new THREE.Vector3(0, 0, 1))
-    const focalPoint = new THREE.Vector3().copy(coplanarPoint).add(plane.normal)
-    planeGeometry.lookAt(focalPoint)
-    planeGeometry.translate(coplanarPoint.x, coplanarPoint.y, coplanarPoint.z)
+    // // Align the geometry to the plane
+    // const coplanarPoint = plane.coplanarPoint(new THREE.Vector3(0, 0, 1))
+    // const focalPoint = new THREE.Vector3().copy(coplanarPoint).add(plane.normal)
+    // planeGeometry.lookAt(focalPoint)
+    // planeGeometry.translate(coplanarPoint.x, coplanarPoint.y, coplanarPoint.z)
 
-    // Create mesh with the geometry
-    const planeMaterial = new THREE.MeshBasicMaterial({
-      color: 0xffff00,
-      side: THREE.DoubleSide
-    })
-    const dispPlane = new THREE.Mesh(planeGeometry, planeMaterial)
-    scene.add(dispPlane)
+    // // Create mesh with the geometry
+    // const planeMaterial = new THREE.MeshBasicMaterial({
+    //   color: 0xffff00,
+    //   side: THREE.DoubleSide
+    // })
+    // const dispPlane = new THREE.Mesh(planeGeometry, planeMaterial)
+    // scene.add(dispPlane)
 
     if (this._pTmp !== null) {
-      this._pTmp.render(scene)
+      if (!this._complete) {
+        this._pTmp.render(scene)
+      }
 
       if (this._p1 !== null) {
         if (this._p2 === null) {
@@ -192,6 +194,15 @@ export class Span3D {
     }
 
     return new THREE.Vector3(0, 0, 0)
+  }
+
+  /** Return cuboid rotation */
+  public get rotation(): THREE.Quaternion {
+    if (this._cuboid !== null) {
+      return this._cuboid.rotation
+    }
+
+    return new THREE.Quaternion()
   }
 
   /**

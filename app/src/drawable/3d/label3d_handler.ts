@@ -285,7 +285,7 @@ export class Label3DHandler {
           }
         }
         break
-      case Key.S_LOW:
+      case Key.Q_LOW:
         if (Session.getState().session.boxSpan) {
           Session.dispatch(pauseSpan())
         } else if (Session.getState().task.boxSpan !== undefined) {
@@ -459,6 +459,7 @@ export class Label3DHandler {
           if (box.complete) {
             label.move(box.center)
             label.scale(box.dimensions, box.center, true)
+            label.rotate(box.rotation)
           }
         }
       }
