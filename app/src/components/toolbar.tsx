@@ -441,7 +441,6 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private deactivateSpan(state: State): void {
-    console.log(this.state.task.boxSpan)
     Session.dispatch(registerBox())
     const boxComplete = isSpanBoxComplete(state)
     if (!boxComplete) {

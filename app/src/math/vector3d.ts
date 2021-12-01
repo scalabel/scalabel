@@ -112,17 +112,29 @@ export class Vector3D extends Vector {
   }
 
   /**
-   * cross product with another vector
+   * Cross product with another vector
    *
-   * @param vector
+   * @param v
    */
-  public cross(vector: Vector): this {
-    const x = this[1] * vector[2] - this[2] * vector[1]
-    const y = this[2] * vector[0] - this[0] * vector[2]
-    const z = this[0] * vector[1] - this[1] * vector[0]
+  public cross(v: Vector3D): this {
+    const x = this[1] * v[2] - this[2] * v[1]
+    const y = this[2] * v[0] - this[0] * v[2]
+    const z = this[0] * v[1] - this[1] * v[0]
     this[0] = x
     this[1] = y
     this[2] = z
     return this
+  }
+
+  /**
+   * Distance to another vector
+   *
+   * @param v
+   */
+  public distanceTo(v: Vector3D): number {
+    const x = this[0] - v[0]
+    const y = this[1] - v[1]
+    const z = this[2] - v[2]
+    return Math.sqrt(x * x + y * y + z * z)
   }
 }

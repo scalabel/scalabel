@@ -235,7 +235,7 @@ export interface UpdateSpanPointAction extends BaseAction {
   mY: number
 }
 
-export type RegisterSpanPointAction = UpdateSpanPointAction
+export type RegisterSpanPointAction = BaseAction
 
 /**
  * These actions are event-driven messages intercepted by the sync middleware

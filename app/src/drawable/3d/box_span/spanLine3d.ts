@@ -21,7 +21,7 @@ export class SpanLine3D {
     this._p1 = p1
     this._p2 = p2
     this._color = 0x00ff00
-    this._lineWidth = 0.05
+    this._lineWidth = 0.1
   }
 
   /**

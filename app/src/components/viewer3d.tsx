@@ -603,9 +603,11 @@ class Viewer3D extends DrawableViewer<Props> {
   protected onMouseUp(e: React.MouseEvent): void {
     super.onMouseUp(e)
     const state = Session.getState()
-    if (state.session.boxSpan) {
+    if (state.session.boxSpan && state.task.boxSpan !== undefined) {
       // TODO: send mouse position to register new point in span box
-      Session.dispatch(registerSpanPoint(this._mX, this._mY))
+      if (!state.task.boxSpan.complete) {
+        Session.dispatch(registerSpanPoint())
+      }
     } else {
       this._movingCamera = false
       this.commitCamera()

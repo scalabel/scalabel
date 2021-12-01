@@ -215,45 +215,7 @@ export class Label3DHandler {
     // TODO: break the cases into functions
     switch (e.key) {
       case Key.SPACE: {
-        const label = makeDrawableLabel3D(
-          Session.label3dList,
-          Session.label3dList.currentLabelType
-        )
-        if (label !== null) {
-          const center = new Vector3D()
-          switch (this._viewerConfig.type) {
-            case ViewerConfigTypeName.POINT_CLOUD:
-              center.fromState(
-                (this._viewerConfig as PointCloudViewerConfigType).target
-              )
-              break
-            case ViewerConfigTypeName.IMAGE_3D:
-              if (this._sensor.extrinsics !== undefined) {
-                const worldDirection = new THREE.Vector3()
-                this._camera.getWorldDirection(worldDirection)
-                worldDirection.normalize()
-                worldDirection.multiplyScalar(5)
-                center.fromState(this._sensor.extrinsics.translation)
-                center.add(new Vector3D().fromThree(worldDirection))
-              }
-          }
-          label.init(
-            this._selectedItemIndex,
-            Session.label3dList.currentCategory,
-            center,
-            this._sensorIds,
-            undefined,
-            this._state.task.config.tracking
-          )
-          Session.label3dList.addUpdatedLabel(label)
-          commitLabels(
-            [...Session.label3dList.updatedLabels.values()],
-            this._tracking
-          )
-          Session.label3dList.clearUpdatedLabels()
-          return true
-        }
-        return false
+        return this.createLabel()
       }
       case Key.ESCAPE:
       case Key.ENTER:
@@ -443,5 +405,59 @@ export class Label3DHandler {
       fn()
       setTimeout(() => this.timedRepeat(fn, key, timeout), timeout)
     }
+  }
+
+  /** Create new label */
+  private createLabel(): boolean {
+    const label = makeDrawableLabel3D(
+      Session.label3dList,
+      Session.label3dList.currentLabelType
+    )
+    if (label !== null) {
+      const center = new Vector3D()
+      switch (this._viewerConfig.type) {
+        case ViewerConfigTypeName.POINT_CLOUD:
+          center.fromState(
+            (this._viewerConfig as PointCloudViewerConfigType).target
+          )
+          break
+        case ViewerConfigTypeName.IMAGE_3D:
+          if (this._sensor.extrinsics !== undefined) {
+            const worldDirection = new THREE.Vector3()
+            this._camera.getWorldDirection(worldDirection)
+            worldDirection.normalize()
+            worldDirection.multiplyScalar(5)
+            center.fromState(this._sensor.extrinsics.translation)
+            center.add(new Vector3D().fromThree(worldDirection))
+          }
+      }
+      label.init(
+        this._selectedItemIndex,
+        Session.label3dList.currentCategory,
+        center,
+        this._sensorIds,
+        undefined,
+        this._state.task.config.tracking
+      )
+
+      if (Session.getState().session.boxSpan) {
+        const box = Session.getState().task.boxSpan
+        if (box !== undefined) {
+          if (box.complete) {
+            label.move(box.center)
+            label.scale(box.dimensions, box.center, true)
+          }
+        }
+      }
+
+      Session.label3dList.addUpdatedLabel(label)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+      Session.label3dList.clearUpdatedLabels()
+      return true
+    }
+    return false
   }
 }

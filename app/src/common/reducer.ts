@@ -103,10 +103,7 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         action as actionTypes.UpdateSpanPointAction
       )
     case actionConsts.REGISTER_SPAN_POINT:
-      return common.registerSpanPoint(
-        state,
-        action as actionTypes.RegisterSpanPointAction
-      )
+      return common.registerSpanPoint(state)
     case actionConsts.NULL:
       return state
     default:

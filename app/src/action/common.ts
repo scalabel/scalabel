@@ -854,13 +854,6 @@ export function updateSpanPoint(
  * @param mX - mouse X
  * @param mY - mouse Y
  */
-export function registerSpanPoint(
-  mX: number,
-  mY: number
-): actionTypes.RegisterSpanPointAction {
-  return {
-    ...makeBaseAction(actionConsts.REGISTER_SPAN_POINT),
-    mX,
-    mY
-  }
+export function registerSpanPoint(): actionTypes.RegisterSpanPointAction {
+  return makeBaseAction(actionConsts.REGISTER_SPAN_POINT)
 }

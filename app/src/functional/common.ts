@@ -1630,7 +1630,6 @@ export function activateSpan(state: State): State {
     ...state.task,
     boxSpan: new Span3D()
   })
-  console.log(newSession.boxSpan)
   return updateObject(state, {
     session: newSession,
     task: newTask
@@ -1649,10 +1648,14 @@ export function registerBox(state: State): State {
     ...state.session,
     boxSpan: false
   })
-
-  console.log(newSession.boxSpan)
+  const oldTask = state.task
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: undefined
+  })
   return updateObject(state, {
-    session: newSession
+    session: newSession,
+    task: newTask
   })
 }
 
@@ -1668,8 +1671,9 @@ export function updateSpanPoint(
 ): State {
   const oldTask = state.task
   const newBox = oldTask.boxSpan
-  newBox?.updatePointTmp(action.mX, action.mY)
-
+  if (newBox !== undefined) {
+    newBox.updatePointTmp(action.mX, action.mY)
+  }
   const newTask = updateObject(oldTask, {
     ...state.task,
     boxSpan: newBox
@@ -1685,14 +1689,12 @@ export function updateSpanPoint(
  * @param state
  * @param action
  */
-export function registerSpanPoint(
-  state: State,
-  action: actionTypes.RegisterSpanPointAction
-): State {
+export function registerSpanPoint(state: State): State {
   const oldTask = state.task
   const newBox = oldTask.boxSpan
-  newBox?.registerPoint(action.mX, action.mY)
-
+  if (newBox !== undefined) {
+    newBox.registerPoint()
+  }
   const newTask = updateObject(oldTask, {
     ...state.task,
     boxSpan: newBox

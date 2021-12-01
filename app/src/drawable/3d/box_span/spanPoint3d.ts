@@ -25,7 +25,7 @@ export class SpanPoint3D {
     this._y = point.y
     this._z = point.z
     this._color = "#ff0000"
-    this._radius = 0.05
+    this._radius = 0.1
   }
 
   /**
