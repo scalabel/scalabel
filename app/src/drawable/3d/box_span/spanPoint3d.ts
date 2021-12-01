@@ -34,7 +34,7 @@ export class SpanPoint3D {
    */
   public render(scene: THREE.Scene): void {
     // (radius, widthSegments, heightSegments)
-    const geometry = new THREE.SphereGeometry(this._radius, 3, 2)
+    const geometry = new THREE.SphereGeometry(this._radius)
     const material = new THREE.MeshBasicMaterial({ color: this._color })
     const point = new THREE.Mesh(geometry, material)
     // console.log(this.x, this.y, this.z)

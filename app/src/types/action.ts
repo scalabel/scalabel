@@ -237,6 +237,12 @@ export interface UpdateSpanPointAction extends BaseAction {
 
 export type RegisterSpanPointAction = BaseAction
 
+export type ResetSpanAction = BaseAction
+
+export type PauseSpanAction = BaseAction
+
+export type ResumeSpanAction = BaseAction
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
@@ -279,6 +285,9 @@ export type TaskActionType =
   | DeactivateSpanAction
   | UpdateSpanPointAction
   | RegisterSpanPointAction
+  | ResetSpanAction
+  | PauseSpanAction
+  | ResumeSpanAction
 
 export type ActionType =
   | SessionActionType

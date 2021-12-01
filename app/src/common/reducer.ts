@@ -104,6 +104,12 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       )
     case actionConsts.REGISTER_SPAN_POINT:
       return common.registerSpanPoint(state)
+    case actionConsts.RESET_SPAN:
+      return common.resetSpan(state)
+    case actionConsts.PAUSE_SPAN:
+      return common.pauseSpan(state)
+    case actionConsts.RESUME_SPAN:
+      return common.resumeSpan(state)
     case actionConsts.NULL:
       return state
     default:

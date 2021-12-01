@@ -813,20 +813,12 @@ export function removeAlert(alertId: string): actionTypes.RemoveAlertAction {
   }
 }
 
-/**
- * Activate box spanning mode
- *
- * @param alertId
- */
+/** Activate box spanning mode */
 export function activateSpan(): actionTypes.ActivateSpanAction {
   return makeBaseAction(actionConsts.ACTIVATE_SPAN)
 }
 
-/**
- * Register span box as new 3D label
- *
- * @param alertId
- */
+/** Register span box as new 3D label */
 export function deactivateSpan(): actionTypes.DeactivateSpanAction {
   return makeBaseAction(actionConsts.DEACTIVATE_SPAN)
 }
@@ -856,4 +848,19 @@ export function updateSpanPoint(
  */
 export function registerSpanPoint(): actionTypes.RegisterSpanPointAction {
   return makeBaseAction(actionConsts.REGISTER_SPAN_POINT)
+}
+
+/** Reset span box generation */
+export function resetSpan(): actionTypes.ResetSpanAction {
+  return makeBaseAction(actionConsts.RESET_SPAN)
+}
+
+/** Reset span box generation */
+export function pauseSpan(): actionTypes.PauseSpanAction {
+  return makeBaseAction(actionConsts.PAUSE_SPAN)
+}
+
+/** Reset span box generation */
+export function resumeSpan(): actionTypes.ResumeSpanAction {
+  return makeBaseAction(actionConsts.RESUME_SPAN)
 }

@@ -1686,7 +1686,6 @@ export function updateSpanPoint(
  * Register new point in span box
  *
  * @param state
- * @param action
  */
 export function registerSpanPoint(state: State): State {
   const oldTask = state.task
@@ -1700,5 +1699,53 @@ export function registerSpanPoint(state: State): State {
   })
   return updateObject(state, {
     task: newTask
+  })
+}
+
+/**
+ * Reset span box
+ *
+ * @param state
+ */
+export function resetSpan(state: State): State {
+  const oldTask = state.task
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: new Span3D()
+  })
+  return updateObject(state, {
+    task: newTask
+  })
+}
+
+/**
+ * Pause box spanning mode
+ *
+ * @param state
+ */
+export function pauseSpan(state: State): State {
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    boxSpan: false
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Resume box spanning mode
+ *
+ * @param state
+ */
+export function resumeSpan(state: State): State {
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    boxSpan: true
+  })
+  return updateObject(state, {
+    session: newSession
   })
 }

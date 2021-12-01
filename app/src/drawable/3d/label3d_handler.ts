@@ -1,6 +1,7 @@
 import * as THREE from "three"
 
 import { selectLabel, selectLabel3dType } from "../../action/select"
+import { pauseSpan, resetSpan, resumeSpan } from "../../action/common"
 import Session from "../../common/session"
 import {
   DataType,
@@ -218,6 +219,10 @@ export class Label3DHandler {
         return this.createLabel()
       }
       case Key.ESCAPE:
+        if (Session.getState().session.boxSpan) {
+          Session.dispatch(resetSpan())
+        }
+        return true
       case Key.ENTER:
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
@@ -279,6 +284,14 @@ export class Label3DHandler {
             )
           }
         }
+        break
+      case Key.S_LOW:
+        if (Session.getState().session.boxSpan) {
+          Session.dispatch(pauseSpan())
+        } else if (Session.getState().task.boxSpan !== undefined) {
+          Session.dispatch(resumeSpan())
+        }
+        return true
     }
     if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
