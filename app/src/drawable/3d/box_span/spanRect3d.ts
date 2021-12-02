@@ -37,11 +37,7 @@ export class SpanRect3D {
    */
   public render(scene: THREE.Scene): void {
     // generate rectangle formed by three points and add to scene
-    // display p1, p2, p3
-    // (p3 is along the line orthogonal to the line p1-p2 and intersects p2)
-    // display lines p1-p2, p2-p3
-    // calculate p4 (cross of p1-p2 and p2-p3)
-    // complete the parallelogram
+    // display lines p1-p2, p2-p3, p3-p4, p4-p1
     const l12 = new SpanLine3D(this._p1, this._p2)
     const l23 = new SpanLine3D(this._p2, this._p3)
     const l34 = new SpanLine3D(this._p3, this._p4)
@@ -58,7 +54,6 @@ export class SpanRect3D {
     return [this._p1, this._p2, this._p3, this._p4]
   }
 
-  // TODO: make this function a common math function
   /** Complete parallelogram from 3 points */
   private completeParallelogram(): Vector3D {
     const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)

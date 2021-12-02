@@ -1,13 +1,14 @@
 import * as THREE from "three"
 
 import { SpanPoint3D } from "./spanPoint3d"
+import { Vector3D } from "../../../math/vector3d"
 
 /**
  * ThreeJS class for rendering 3D line
  */
 export class SpanLine3D {
-  private _p1: SpanPoint3D
-  private _p2: SpanPoint3D
+  private readonly _p1: SpanPoint3D
+  private readonly _p2: SpanPoint3D
   private readonly _color: number
   private readonly _lineWidth: number
 
@@ -44,13 +45,32 @@ export class SpanLine3D {
   }
 
   /**
-   * Update line vertices
+   * calculate unit normal of line
    *
-   * @param p1
-   * @param p2
+   * @param point
    */
-  public updateState(p1: SpanPoint3D, p2: SpanPoint3D): void {
-    this._p1 = p1
-    this._p2 = p2
+  public calculateNormal(point: Vector3D): Vector3D {
+    const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
+    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
+    const v12 = v2.clone().subtract(v1)
+    const vDir = point.clone().subtract(v2)
+    if (vDir.x + vDir.y >= 0) {
+      return new Vector3D(-v12.y, v12.x, 0).unitVector()
+    } else {
+      return new Vector3D(v12.y, -v12.x, 0).unitVector()
+    }
+  }
+
+  /** align point to unit normal
+   *
+   * @param point
+   */
+  public alignPointToNormal(point: Vector3D): Vector3D {
+    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
+    const normal = this.calculateNormal(point)
+    const dist = point.clone().distanceTo(v2)
+    normal.multiplyScalar(dist)
+    const v3 = v2.clone().add(normal)
+    return v3
   }
 }

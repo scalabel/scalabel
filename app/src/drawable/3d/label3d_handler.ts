@@ -467,8 +467,8 @@ export class Label3DHandler {
         if (box !== undefined) {
           if (box.complete) {
             label.move(box.center)
-            label.scale(box.dimensions, box.center, true)
             label.rotate(box.rotation)
+            label.scale(box.dimensions, box.center, true)
           }
         }
       }

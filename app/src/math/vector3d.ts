@@ -148,4 +148,18 @@ export class Vector3D extends Vector {
     const z = this[2] - v[2]
     return Math.sqrt(x * x + y * y + z * z)
   }
+
+  /** Magnitude of vector */
+  public magnitude(): number {
+    return Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2])
+  }
+
+  /** Calculate unit vector */
+  public unitVector(): this {
+    const m = this.magnitude()
+    if (m !== 0) {
+      this.divideScalar(m)
+    }
+    return this
+  }
 }

@@ -19,6 +19,7 @@ export class Span3D {
   private _p3: SpanPoint3D | null
   private _p4: SpanPoint3D | null
   private _pTmp: SpanPoint3D
+  private _line: SpanLine3D | null
   private _cuboid: SpanCuboid3D | null
   private _complete: boolean
 
@@ -31,6 +32,7 @@ export class Span3D {
     this._p3 = null
     this._p4 = null
     this._pTmp = new SpanPoint3D(new Vector3D(0, 0, 0))
+    this._line = null
     this._cuboid = null
     this._complete = false
   }
@@ -65,6 +67,7 @@ export class Span3D {
         // render line between first point and temp point
         this._p1.render(scene)
         const line = new SpanLine3D(this._p1, this._pTmp)
+        this._line = line
         line.render(scene)
       } else if (this._p3 === null) {
         // render first, second point
@@ -121,7 +124,17 @@ export class Span3D {
     x = NDC[0]
     y = NDC[1]
 
-    if (this._p3 !== null && this._p4 === null) {
+    if (this._p2 !== null && this._p3 === null) {
+      // make second point orthogonal to line
+      if (this._camera !== null) {
+        const worldCoords = this.raycast(x, y, this._camera)
+        if (this._line !== null) {
+          const newCoords = this._line.alignPointToNormal(worldCoords)
+          this._pTmp = new SpanPoint3D(newCoords)
+        }
+      }
+    } else if (this._p3 !== null && this._p4 === null) {
+      // make third point orthogonal to plane
       const scaleFactor = 5
       this._pTmp = new SpanPoint3D(
         new Vector3D(this._p3.x, this._p3.y, y * scaleFactor)
