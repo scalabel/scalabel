@@ -4,7 +4,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, List, Optional
 
 import motmetrics as mm
 import numpy as np
@@ -13,16 +13,10 @@ from pycocotools.mask import iou  # type: ignore
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayI32, NDArrayU8
+from ..common.typing import NDArrayU8
 from ..label.io import group_and_sort, load, load_label_config
-from ..label.transforms import mask_to_rle, poly2ds_to_mask
-from ..label.typing import Config, Frame, ImageSize, Label
-from ..label.utils import (
-    check_crowd,
-    check_ignored,
-    get_leaf_categories,
-    get_parent_categories,
-)
+from ..label.typing import Category, Config, Frame, ImageSize
+from ..label.utils import get_leaf_categories, get_parent_categories
 from .mot import (
     METRIC_MAPS,
     TrackResult,
@@ -30,54 +24,19 @@ from .mot import (
     aggregate_accs,
     evaluate_single_class,
     generate_results,
-    label_ids_to_int,
 )
+from .utils import label_ids_to_int, parse_seg_objects
 
-RLE = Dict[str, Union[str, Tuple[int, int]]]
 VidFunc = Callable[
-    [Video, Video, List[str], float, float, bool, Optional[ImageSize]],
+    [Video, Video, List[Category], float, float, bool, Optional[ImageSize]],
     List[mm.MOTAccumulator],
 ]
-
-
-def parse_objects(
-    objects: List[Label],
-    classes: List[str],
-    ignore_unknown_cats: bool = False,
-    image_size: Optional[ImageSize] = None,
-) -> Tuple[List[RLE], NDArrayI32, NDArrayI32, List[RLE]]:
-    """Parse objects under Scalabel formats."""
-    rles, labels, ids, ignore_rles = [], [], [], []
-    for obj in objects:
-        if obj.rle is not None:
-            rle = obj.rle
-        elif obj.poly2d is not None:
-            assert (
-                image_size is not None
-            ), "Requires ImageSize for Poly2D conversion to RLE"
-            rle = mask_to_rle(poly2ds_to_mask(image_size, obj.poly2d))
-        else:
-            continue
-        category = obj.category
-        if category in classes:
-            if check_crowd(obj) or check_ignored(obj):
-                ignore_rles.append(rle.dict())
-            else:
-                rles.append(rle.dict())
-                labels.append(classes.index(category))
-                ids.append(obj.id)
-        else:
-            if not ignore_unknown_cats:
-                raise KeyError(f"Unknown category: {category}")
-    labels_arr = np.array(labels, dtype=np.int32)
-    ids_arr = np.array(ids, dtype=np.int32)
-    return (rles, labels_arr, ids_arr, ignore_rles)
 
 
 def acc_single_video_mots(
     gts: List[Frame],
     results: List[Frame],
-    classes: List[str],
+    classes: List[Category],
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
     ignore_unknown_cats: bool = False,
@@ -98,13 +57,13 @@ def acc_single_video_mots(
 
     for gt, result in zip(gts, results):
         assert gt.frameIndex == result.frameIndex
-        gt_rles, gt_labels, gt_ids, gt_ignores = parse_objects(
+        gt_rles, gt_labels, gt_ids, gt_ignores = parse_seg_objects(
             gt.labels if gt.labels is not None else [],
             classes,
             ignore_unknown_cats,
             image_size,
         )
-        pred_rles, pred_labels, pred_ids, _ = parse_objects(
+        pred_rles, pred_labels, pred_ids, _ = parse_seg_objects(
             result.labels if result.labels is not None else [],
             classes,
             ignore_unknown_cats,
@@ -184,7 +143,7 @@ def evaluate_seg_track(
         nproc: processes number for loading files
 
     Returns:
-        TrackResult: rendered eval results.
+        TrackResult: evaluation results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
@@ -194,14 +153,13 @@ def evaluate_seg_track(
     super_classes = get_parent_categories(config.categories)
 
     logger.info("evaluating...")
-    class_names = [c.name for c in classes]
     image_size = config.imageSize
     if nproc > 1:
         with Pool(nproc) as pool:
             video_accs = pool.starmap(
                 partial(
                     acc_single_video,
-                    classes=class_names,
+                    classes=classes,
                     ignore_iof_thr=ignore_iof_thr,
                     ignore_unknown_cats=ignore_unknown_cats,
                     image_size=image_size,
@@ -213,7 +171,7 @@ def evaluate_seg_track(
             acc_single_video(
                 gt,
                 result,
-                class_names,
+                classes,
                 iou_thr,
                 ignore_iof_thr,
                 ignore_unknown_cats,

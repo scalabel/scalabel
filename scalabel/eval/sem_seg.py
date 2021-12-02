@@ -1,7 +1,7 @@
 """Evaluation procedures for semantic segmentation.
 
 For dataset with `n` classes, we treat the index `n` as the ignored class.
-When compute IoUs, this ignored class is considered.
+When computing IoUs, this ignored class is considered.
 However, IoU(ignored) doesn't influence mIoU.
 """
 import argparse
@@ -24,6 +24,7 @@ from ..label.io import load, load_label_config
 from ..label.transforms import poly2ds_to_mask, rle_to_mask
 from ..label.typing import Config, Frame, ImageSize
 from .result import Result
+from .utils import reorder_preds
 
 
 class SegResult(Result):
@@ -165,30 +166,23 @@ def evaluate_sem_seg(
     config: Config,
     nproc: int = NPROC,
 ) -> SegResult:
-    """Load the ground truth and prediction results.
+    """Evaluate segmentation with Scalabel format.
 
     Args:
-        ann_frames: the ground truth annotations in Scalabel format
-        pred_frames: the prediction results in Scalabel format.
+        ann_frames: the ground truth frames.
+        pred_frames: the prediction frames.
         config: Metadata config.
         nproc: the number of process.
 
     Returns:
-        SegResult: rendered eval results.
-
-    Example usage:
-        evaluate_sem_seg(
-            "/path/to/gts",
-            "/path/to/results",
-            "/path/to/cfg",
-            nproc=4,
-        )
+        SegResult: evaluation results.
     """
     assert (
         config.imageSize is not None
     ), "Segmentation evaluation requires imageSize to be defined in config"
     categories = {cat.name: id for id, cat in enumerate(config.categories)}
     ignore_label = 255
+    pred_frames = reorder_preds(ann_frames, pred_frames)
 
     logger.info("evaluating...")
     if nproc > 1:

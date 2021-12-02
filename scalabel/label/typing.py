@@ -147,6 +147,7 @@ class Category(BaseModel):
 
     name: str
     subcategories: Optional[List["Category"]]
+    isThing: Optional[bool] = None  # for panoptic segmentation
 
 
 Category.update_forward_refs()
