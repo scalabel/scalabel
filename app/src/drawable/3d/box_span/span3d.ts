@@ -47,9 +47,6 @@ export class Span3D {
     camera: THREE.Camera,
     canvas: HTMLCanvasElement
   ): void {
-    // use points data to render temporary geometries
-    // TODO: figure out whether to render lines/planes/cuboids natively
-    // TODO: with ThreeJS or encapsulate in a custom class
     if (this._camera === null) {
       this._camera = camera
     }
@@ -57,67 +54,45 @@ export class Span3D {
       this._canvas = canvas
     }
 
-    // const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
-    //   new THREE.Vector3(0, 0, -1.5)
-    // )
-
-    // // Create a basic rectangle geometry
-    // const planeGeometry = new THREE.PlaneGeometry(10, 10)
-
-    // // Align the geometry to the plane
-    // const coplanarPoint = plane.coplanarPoint(new THREE.Vector3(0, 0, 1))
-    // const focalPoint = new THREE.Vector3().copy(coplanarPoint).add(plane.normal)
-    // planeGeometry.lookAt(focalPoint)
-    // planeGeometry.translate(coplanarPoint.x, coplanarPoint.y, coplanarPoint.z)
-
-    // // Create mesh with the geometry
-    // const planeMaterial = new THREE.MeshBasicMaterial({
-    //   color: 0xffff00,
-    //   side: THREE.DoubleSide
-    // })
-    // const dispPlane = new THREE.Mesh(planeGeometry, planeMaterial)
-    // scene.add(dispPlane)
-
-    if (this._pTmp !== null) {
-      if (!this._complete) {
-        this._pTmp.render(scene)
-      }
-
-      if (this._p1 !== null) {
-        if (this._p2 === null) {
-          // render first point
-          // render line between first point and temp point
-          this._p1.render(scene)
-          const line = new SpanLine3D(this._p1, this._pTmp)
-          line.render(scene)
-        } else if (this._p3 === null) {
-          // render first, second point
-          // render plane formed by first, second point and temp point
-          if (this._p1 !== null && this._p2 !== null) {
-            this._p1.render(scene)
-            this._p2.render(scene)
-            const plane = new SpanRect3D(this._p1, this._p2, this._pTmp)
-            plane.render(scene)
-          }
-        } else if (this._p4 === null) {
-          // render first, second, third point
-          // render cuboid formed by first, second, third point and temp point
+    // use points data to render temporary geometries
+    // render lines/planes/cuboids natively
+    if (!this._complete) {
+      this._pTmp.render(scene)
+    }
+    if (this._p1 !== null) {
+      if (this._p2 === null) {
+        // render first point
+        // render line between first point and temp point
+        this._p1.render(scene)
+        const line = new SpanLine3D(this._p1, this._pTmp)
+        line.render(scene)
+      } else if (this._p3 === null) {
+        // render first, second point
+        // render plane formed by first, second point and temp point
+        if (this._p1 !== null && this._p2 !== null) {
           this._p1.render(scene)
           this._p2.render(scene)
-          this._p3.render(scene)
-          const cuboid = new SpanCuboid3D(
-            this._p1,
-            this._p2,
-            this._p3,
-            this._pTmp
-          )
-          this._cuboid = cuboid
-          this._cuboid.render(scene)
-        } else if (this._cuboid !== null) {
-          this._cuboid.render(scene)
-        } else {
-          throw new Error("Span3D: rendering error")
+          const plane = new SpanRect3D(this._p1, this._p2, this._pTmp)
+          plane.render(scene)
         }
+      } else if (this._p4 === null) {
+        // render first, second, third point
+        // render cuboid formed by first, second, third point and temp point
+        this._p1.render(scene)
+        this._p2.render(scene)
+        this._p3.render(scene)
+        const cuboid = new SpanCuboid3D(
+          this._p1,
+          this._p2,
+          this._p3,
+          this._pTmp
+        )
+        this._cuboid = cuboid
+        this._cuboid.render(scene)
+      } else if (this._cuboid !== null) {
+        this._cuboid.render(scene)
+      } else {
+        throw new Error("Span3D: rendering error")
       }
     }
   }
@@ -129,18 +104,20 @@ export class Span3D {
    * @param y
    */
   public updatePointTmp(x: number, y: number): void {
+    // TODO: figure out why this offset is necessary
+    const offset = [160, 92]
+    x += offset[0]
+    y += offset[1]
     const normalized = this.normalizeCoordinatesToCanvas(
       x,
       y,
       this._canvas as HTMLCanvasElement
     )
-    // console.log(normalized)
     const NDC = convertMouseToNDC(
       normalized[0],
       normalized[1],
       this._canvas as HTMLCanvasElement
     )
-    // console.log(NDC)
     x = NDC[0]
     y = NDC[1]
 
@@ -170,6 +147,20 @@ export class Span3D {
       this._complete = true
     } else {
       throw new Error("Span3D: error registering new point")
+    }
+  }
+
+  /** Remove last registered point */
+  public removeLastPoint(): void {
+    if (this._p4 !== null) {
+      this._p4 = null
+      this._complete = false
+    } else if (this._p3 !== null) {
+      this._p3 = null
+    } else if (this._p2 !== null) {
+      this._p2 = null
+    } else if (this._p1 !== null) {
+      this._p1 = null
     }
   }
 
@@ -213,6 +204,7 @@ export class Span3D {
    * @param camera - camera
    */
   private raycast(x: number, y: number, camera: THREE.Camera): Vector3D {
+    // TODO: figure out why this offset is necessary
     const offset = new THREE.Vector3(0, 0, -1.5)
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
       offset
@@ -220,11 +212,9 @@ export class Span3D {
     const raycaster = new THREE.Raycaster()
     const mousePos = new THREE.Vector2(x, y)
     raycaster.setFromCamera(mousePos, camera)
-    // console.log(raycaster.ray)
     if (raycaster.ray.intersectsPlane(plane)) {
       const intersects = new THREE.Vector3()
       raycaster.ray.intersectPlane(plane, intersects)
-      // console.log(intersects)
       return new Vector3D().fromThree(intersects)
     } else {
       return new Vector3D(0, 0, 0)
