@@ -1749,3 +1749,23 @@ export function resumeSpan(state: State): State {
     session: newSession
   })
 }
+
+/**
+ * Undo span point registration
+ *
+ * @param state
+ */
+export function undoSpan(state: State): State {
+  const oldTask = state.task
+  const box = oldTask.boxSpan
+  if (box !== undefined) {
+    box.removeLastPoint()
+  }
+  const newTask = updateObject(oldTask, {
+    ...state.task,
+    boxSpan: box
+  })
+  return updateObject(state, {
+    task: newTask
+  })
+}

@@ -22,7 +22,7 @@ export class SpanPoint3D {
     this._y = point.y
     this._z = point.z
     this._color = "#ff0000"
-    this._radius = 0.1
+    this._radius = 0.05
   }
 
   /**
@@ -37,7 +37,6 @@ export class SpanPoint3D {
     const geometry = new THREE.SphereGeometry(this._radius)
     const material = new THREE.MeshBasicMaterial({ color: this._color })
     const point = new THREE.Mesh(geometry, material)
-    // console.log(this.x, this.y, this.z)
     point.position.set(this.x, this.y, this.z)
     scene.add(point)
   }

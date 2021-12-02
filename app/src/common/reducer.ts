@@ -110,6 +110,8 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.pauseSpan(state)
     case actionConsts.RESUME_SPAN:
       return common.resumeSpan(state)
+    case actionConsts.UNDO_SPAN:
+      return common.undoSpan(state)
     case actionConsts.NULL:
       return state
     default:

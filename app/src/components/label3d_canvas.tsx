@@ -194,7 +194,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
     const ch = Session.getState().session.boxSpan ? (
       <Crosshair
-        key="crosshair-canvas3d"
+        key={`crosshair-canvas3d-${this.props.id}`}
         display={this.display}
         innerRef={this.crosshair}
       />
@@ -210,7 +210,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       })
     }
 
-    return [ch, canvas]
+    return Session.getState().session.boxSpan ? [ch, canvas] : [canvas]
   }
 
   /**

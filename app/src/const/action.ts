@@ -32,6 +32,7 @@ export const UPDATE_SPAN_POINT = "UPDATE_SPAN_POINT"
 export const RESET_SPAN = "RESET_SPAN"
 export const PAUSE_SPAN = "PAUSE_SPAN"
 export const RESUME_SPAN = "RESUME_SPAN"
+export const UNDO_SPAN = "UNDO_SPAN"
 
 // View Level
 export const ADD_VIEWER_CONFIG = "ADD_VIEWER_CONFIG"
@@ -70,6 +71,7 @@ const TASK_ACTION_TYPES = [
   RESUME_SPAN,
   SPLIT_TRACK,
   SUBMIT,
+  UNDO_SPAN,
   UPDATE_SPAN_POINT
 ]
 

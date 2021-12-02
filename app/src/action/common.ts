@@ -864,3 +864,8 @@ export function pauseSpan(): actionTypes.PauseSpanAction {
 export function resumeSpan(): actionTypes.ResumeSpanAction {
   return makeBaseAction(actionConsts.RESUME_SPAN)
 }
+
+/** Undo span point registration */
+export function undoSpan(): actionTypes.UndoSpanAction {
+  return makeBaseAction(actionConsts.UNDO_SPAN)
+}

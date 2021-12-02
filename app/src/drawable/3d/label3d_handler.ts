@@ -1,7 +1,7 @@
 import * as THREE from "three"
 
 import { selectLabel, selectLabel3dType } from "../../action/select"
-import { pauseSpan, resetSpan, resumeSpan } from "../../action/common"
+import { pauseSpan, resetSpan, resumeSpan, undoSpan } from "../../action/common"
 import Session from "../../common/session"
 import {
   DataType,
@@ -22,6 +22,8 @@ import {
 import { commitLabels } from "../states"
 import { Label3D } from "./label3d"
 import { makeDrawableLabel3D } from "./label3d_list"
+import { alert } from "../../common/alert"
+import { Severity } from "../../types/common"
 
 /**
  * Handles user interactions with labels
@@ -292,6 +294,13 @@ export class Label3DHandler {
           Session.dispatch(resumeSpan())
         }
         return true
+      case Key.U_LOW:
+        if (Session.getState().session.boxSpan) {
+          Session.dispatch(undoSpan())
+        }
+        break
+      default:
+        break
     }
     if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
@@ -470,6 +479,7 @@ export class Label3DHandler {
         this._tracking
       )
       Session.label3dList.clearUpdatedLabels()
+      alert(Severity.SUCCESS, "Box successfully created")
       return true
     }
     return false

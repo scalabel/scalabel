@@ -243,6 +243,8 @@ export type PauseSpanAction = BaseAction
 
 export type ResumeSpanAction = BaseAction
 
+export type UndoSpanAction = BaseAction
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
