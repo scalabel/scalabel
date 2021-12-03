@@ -56,15 +56,50 @@ class TestScalabelPanSegEval(unittest.TestCase):
         result = evaluate_pan_seg(gt_frames, pred_frames, self.config, nproc=1)
         summary = result.summary()
         gt_summary = {
-            "PQ": 33.58418883790368,
-            "PQ/STUFF": 34.33766787875077,
-            "PQ/THING": 30.570272674515294,
-            "SQ": 37.72832544155889,
-            "SQ/STUFF": 34.33766787875077,
-            "SQ/THING": 51.29095569279133,
-            "RQ": 41.333333333333336,
+            "PQ": 26.671487325762055,
+            "PQ/STUFF": 32.04431646856032,
+            "PQ/THING": 5.180170754569009,
+            "SQ": 30.815623929417264,
+            "SQ/STUFF": 32.04431646856032,
+            "SQ/THING": 25.90085377284505,
+            "RQ": 34.666666666666664,
             "RQ/STUFF": 41.666666666666664,
-            "RQ/THING": 40.0,
+            "RQ/THING": 6.666666666666667,
+            "NUM": 15,
+            "NUM/STUFF": 12,
+            "NUM/THING": 3,
+        }
+        self.assertSetEqual(set(summary.keys()), set(gt_summary.keys()))
+        for name, score in gt_summary.items():
+            self.assertAlmostEqual(score, summary[name])
+
+
+class TestScalabelPanSegEvalMissing(unittest.TestCase):
+    """Test cases for Scalabel panoptic segmentation with missing preds."""
+
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    gt_file = f"{cur_dir}/testcases/pan_seg/pan_seg_sample_2.json"
+    pred_file = f"{cur_dir}/testcases/pan_seg/pan_seg_preds.json"
+    config = load_label_config(
+        f"{cur_dir}/testcases/pan_seg/pan_seg_configs.toml"
+    )
+
+    def test_summary(self) -> None:
+        """Check evaluation scores' correctnes."""
+        gt_frames = load(self.gt_file).frames
+        pred_frames = load(self.pred_file).frames
+        result = evaluate_pan_seg(gt_frames, pred_frames, self.config, nproc=1)
+        summary = result.summary()
+        gt_summary = {
+            "PQ": 17.780991550508038,
+            "PQ/STUFF": 21.362877645706877,
+            "PQ/THING": 3.4534471697126734,
+            "SQ": 30.815623929417264,
+            "SQ/STUFF": 32.04431646856032,
+            "SQ/THING": 25.90085377284505,
+            "RQ": 23.111111111111104,
+            "RQ/STUFF": 27.77777777777777,
+            "RQ/THING": 4.444444444444445,
             "NUM": 15,
             "NUM/STUFF": 12,
             "NUM/THING": 3,
@@ -100,11 +135,10 @@ class TestScalabelPanSegEvalEmpty(unittest.TestCase):
             "RQ": 0.0,
             "RQ/STUFF": 0.0,
             "RQ/THING": 0.0,
-            "NUM": 0,
-            "NUM/STUFF": 0,
-            "NUM/THING": 0,
+            "NUM": 15,
+            "NUM/STUFF": 12,
+            "NUM/THING": 3,
         }
-        print(summary)
         self.assertSetEqual(set(summary.keys()), set(gt_summary.keys()))
         for name, score in gt_summary.items():
             self.assertAlmostEqual(score, summary[name])

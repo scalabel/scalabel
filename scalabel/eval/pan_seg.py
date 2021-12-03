@@ -113,8 +113,8 @@ class PQStat:
 
     def __iadd__(self, pq_stat: "PQStat") -> "PQStat":
         """Adding definition."""
-        for category_id, pq_stat_cat in pq_stat.pq_per_cats.items():
-            self.pq_per_cats[category_id] += pq_stat_cat
+        for category_id, _ in enumerate(self.categories):
+            self.pq_per_cats[category_id] += pq_stat.pq_per_cats[category_id]
         return self
 
     def pq_average(self, categories: List[Category]) -> Dict[str, float]:
@@ -147,6 +147,12 @@ def pq_per_image(
 ) -> PQStat:
     """Calculate PQStar for each image."""
     pq_stat = PQStat(categories)
+    gt_rles, gt_labels, _, _ = parse_seg_objects(
+        ann_frame.labels if ann_frame.labels is not None else [],
+        categories,
+        image_size=image_size,
+    )
+
     if (
         pred_frame.labels is None
         or not pred_frame.labels
@@ -156,13 +162,10 @@ def pq_per_image(
         )
     ):
         # no predictions for image
+        for gt_cat in gt_labels:
+            pq_stat[gt_cat].fneg += 1
         return pq_stat
 
-    gt_rles, gt_labels, _, _ = parse_seg_objects(
-        ann_frame.labels if ann_frame.labels is not None else [],
-        categories,
-        image_size=image_size,
-    )
     pred_rles, pred_labels, _, _ = parse_seg_objects(
         pred_frame.labels if pred_frame.labels is not None else [],
         categories,
