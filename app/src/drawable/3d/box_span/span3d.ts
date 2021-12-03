@@ -106,7 +106,7 @@ export class Span3D {
    * @param x
    * @param y
    */
-  public updatePointTmp(x: number, y: number): void {
+  public updatePointTmp(x: number, y: number): this {
     // TODO: figure out why this offset is necessary
     const offset = [160, 92]
     x += offset[0]
@@ -145,10 +145,11 @@ export class Span3D {
         this._pTmp = new SpanPoint3D(worldCoords)
       }
     }
+    return this
   }
 
   /** Register new point */
-  public registerPoint(): void {
+  public registerPoint(): this {
     if (this._p1 === null) {
       this._p1 = this._pTmp
     } else if (this._p2 === null) {
@@ -161,10 +162,11 @@ export class Span3D {
     } else {
       throw new Error("Span3D: error registering new point")
     }
+    return this
   }
 
   /** Remove last registered point */
-  public removeLastPoint(): void {
+  public removeLastPoint(): this {
     if (this._p4 !== null) {
       this._p4 = null
       this._complete = false
@@ -175,6 +177,7 @@ export class Span3D {
     } else if (this._p1 !== null) {
       this._p1 = null
     }
+    return this
   }
 
   /** Return whether span box is complete */
