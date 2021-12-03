@@ -113,8 +113,8 @@ class PQStat:
 
     def __iadd__(self, pq_stat: "PQStat") -> "PQStat":
         """Adding definition."""
-        for category_id, _ in enumerate(self.categories):
-            self.pq_per_cats[category_id] += pq_stat.pq_per_cats[category_id]
+        for category_id, pq_stat_cat in pq_stat.pq_per_cats.items():
+            self.pq_per_cats[category_id] += pq_stat_cat
         return self
 
     def pq_average(self, categories: List[Category]) -> Dict[str, float]:
