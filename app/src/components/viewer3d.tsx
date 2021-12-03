@@ -564,7 +564,7 @@ class Viewer3D extends DrawableViewer<Props> {
     const dX = this._mX - oldX
     const dY = this._mY - oldY
     const state = Session.getState()
-    if (state.session.boxSpan) {
+    if (state.session.boxSpan === true) {
       // send mouse position to update temporary point in span box
       Session.dispatch(updateSpanPoint(this._mX, this._mY))
     } else if (this._mouseDown && this._viewerConfig !== undefined) {
@@ -603,9 +603,9 @@ class Viewer3D extends DrawableViewer<Props> {
   protected onMouseUp(e: React.MouseEvent): void {
     super.onMouseUp(e)
     const state = Session.getState()
-    if (state.session.boxSpan && state.task.boxSpan !== undefined) {
+    if (state.session.boxSpan === true && state.task.boxSpan !== undefined) {
       // send mouse position to register new point in span box
-      if (!state.task.boxSpan.complete) {
+      if (state.task.boxSpan.complete === false) {
         Session.dispatch(registerSpanPoint())
       }
     } else {
