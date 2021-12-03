@@ -488,7 +488,7 @@ function listEntry(props: ListEntryProps): JSX.Element {
       <Grid
         spacing={1}
         alignItems={"baseline"}
-        justify={"space-around"}
+        justifyContent={"space-around"}
         className={classes.listContainer}
         container
       >

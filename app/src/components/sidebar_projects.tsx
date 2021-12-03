@@ -58,7 +58,7 @@ class ProjectList extends React.Component<ProjectListProps, ProjectListState> {
             alignItems="center"
             className={index % 2 === 0 ? classes.coloredListItem : ""}
           >
-            <Grid container justify="center">
+            <Grid container justifyContent="center">
               <Link
                 component="button"
                 variant="body2"

@@ -1,10 +1,10 @@
 import { Mixins, MixinsOptions } from "@material-ui/core/styles/createMixins"
-import createMuiTheme, { Theme } from "@material-ui/core/styles/createMuiTheme"
+import createTheme, { Theme } from "@material-ui/core/styles/createTheme"
 import { Palette, PaletteOptions } from "@material-ui/core/styles/createPalette"
 
 const titleBarHeight = 48
 
-declare module "@material-ui/core/styles/createMuiTheme" {
+declare module "@material-ui/core/styles/createTheme" {
   interface Theme {
     /** Palette of Theme */
     palette: Palette
@@ -26,7 +26,7 @@ declare module "@material-ui/core/styles/createMuiTheme" {
  * that overwrites the primary main color
  */
 export default function createScalabelTheme(): Theme {
-  return createMuiTheme({
+  return createTheme({
     palette: {
       type: "dark",
       primary: {
