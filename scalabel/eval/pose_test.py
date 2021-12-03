@@ -9,8 +9,8 @@ from ..unittest.util import get_test_file
 from .pose import evaluate_pose
 
 
-class TestBDD100KPoseEval(unittest.TestCase):
-    """Test cases for BDD100K pose estimation evaluation."""
+class TestScalabelPoseEval(unittest.TestCase):
+    """Test cases for Scalabel pose estimation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/pose/pose_sample.json"
@@ -74,8 +74,8 @@ class TestBDD100KPoseEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KPoseEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K pose estimation on empty test cases."""
+class TestScalabelPoseEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel pose estimation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/pose/pose_sample.json"

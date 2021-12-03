@@ -9,8 +9,8 @@ from ..unittest.util import get_test_file
 from .mots import acc_single_video_mots, evaluate_seg_track
 
 
-class TestBDD100KMotsEval(unittest.TestCase):
-    """Test cases for BDD100K MOTS evaluation."""
+class TestScalabelMotsEval(unittest.TestCase):
+    """Test cases for Scalabel MOTS evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts = group_and_sort(

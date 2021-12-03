@@ -33,14 +33,16 @@ from collections import defaultdict
 from functools import partial
 from multiprocessing import Pool
 from typing import AbstractSet, Dict, List, Optional, Union
+
+import pycocotools.mask as coco_mask  # type: ignore
 from tqdm import tqdm
 
-import pycocotools.mask as coco_mask
 from scalabel.common.io import open_write_text
 from scalabel.common.logger import logger
 from scalabel.common.parallel import NPROC
 from scalabel.label.io import load, load_label_config
 from scalabel.label.typing import Category, Config, Frame, ImageSize
+
 from .result import OVERALL, Result, Scores, ScoresList
 from .utils import label_ids_to_int, parse_seg_objects, reorder_preds
 
@@ -144,7 +146,19 @@ def pq_per_image(
     image_size: Optional[ImageSize] = None,
 ) -> PQStat:
     """Calculate PQStar for each image."""
-    gt_rles, gt_labels, _, gt_ignores = parse_seg_objects(
+    pq_stat = PQStat(categories)
+    if (
+        pred_frame.labels is None
+        or not pred_frame.labels
+        or all(
+            label.rle is None and label.poly2d is None
+            for label in pred_frame.labels
+        )
+    ):
+        # no predictions for image
+        return pq_stat
+
+    gt_rles, gt_labels, _, _ = parse_seg_objects(
         ann_frame.labels if ann_frame.labels is not None else [],
         categories,
         image_size=image_size,
@@ -162,17 +176,16 @@ def pq_per_image(
     ).T
     iofs = coco_mask.iou(
         pred_rles,
-        gt_ignores,
-        [True for _ in range(len(gt_ignores))],
-    )
+        gt_rles,
+        [True for _ in range(len(gt_rles))],
+    ).T
     cat_equals = gt_labels.reshape(-1, 1) == pred_labels.reshape(1, -1)
     ious *= cat_equals
 
     max_ious = ious.max(axis=1)
     max_idxs = ious.argmax(axis=1)
-    inv_iofs = 1 - iofs.sum(axis=0) if len(iofs) > 0 else []
+    inv_iofs = 1 - iofs.sum(axis=0)
 
-    pq_stat = PQStat(categories)
     pred_matched = set()
     for gt_cat, max_iou, max_idx in zip(gt_labels, max_ious, max_idxs):
         if max_iou <= 0.5:
@@ -182,11 +195,10 @@ def pq_per_image(
             pq_stat[gt_cat].iou += max_iou
             pred_matched.add(max_idx)
 
-    if len(iofs) > 0:
-        for j, pred_label in enumerate(pred_labels):
-            if j in pred_matched or inv_iofs[j] > 0.5:
-                continue
-            pq_stat[pred_label].fpos += 1
+    for j, pred_label in enumerate(pred_labels):
+        if j in pred_matched or inv_iofs[j] > 0.5:
+            continue
+        pq_stat[pred_label].fpos += 1
     return pq_stat
 
 
@@ -208,6 +220,9 @@ def evaluate_pan_seg(
         PanSegResult: evaluation results.
     """
     categories = config.categories
+    assert all(
+        category.isThing is not None for category in categories
+    ), "isThing should be defined for all categories for PanSeg."
     categories_stuff = [
         category for category in categories if not category.isThing
     ]
