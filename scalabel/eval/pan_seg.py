@@ -35,9 +35,7 @@ from multiprocessing import Pool
 from typing import AbstractSet, Dict, List, Optional, Union
 from tqdm import tqdm
 
-import numpy as np
-from PIL import Image
-from pycocotools.mask import iou  # type: ignore
+import pycocotools.mask as coco_mask
 from scalabel.common.io import open_write_text
 from scalabel.common.logger import logger
 from scalabel.common.parallel import NPROC
@@ -56,7 +54,7 @@ class PanSegResult(Result):
     PQ: List[Dict[str, float]]
     SQ: List[Dict[str, float]]
     RQ: List[Dict[str, float]]
-    N: List[Dict[str, int]]  # pylint: disable=invalid-name
+    NUM: List[Dict[str, int]]
 
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "PanSegResult") -> bool:  # type: ignore
@@ -85,25 +83,27 @@ class PQStatCat:
     def __init__(self) -> None:
         """Initialize method."""
         self.iou: float = 0.0
-        self.tp: int = 0  # pylint: disable=invalid-name
-        self.fp: int = 0  # pylint: disable=invalid-name
-        self.fn: int = 0  # pylint: disable=invalid-name
+        self.tpos: int = 0
+        self.fpos: int = 0
+        self.fneg: int = 0
 
     def __iadd__(self, pq_stat_cat: "PQStatCat") -> "PQStatCat":
         """Adding definition."""
         self.iou += pq_stat_cat.iou
-        self.tp += pq_stat_cat.tp
-        self.fp += pq_stat_cat.fp
-        self.fn += pq_stat_cat.fn
+        self.tpos += pq_stat_cat.tpos
+        self.fpos += pq_stat_cat.fpos
+        self.fneg += pq_stat_cat.fneg
         return self
 
 
 class PQStat:
     """PQ statistics for an image of the whole dataset."""
 
-    def __init__(self) -> None:
+    def __init__(self, categories: List[Category]) -> None:
         """Initialize the PQStatCat dict."""
         self.pq_per_cats: Dict[int, PQStatCat] = defaultdict(PQStatCat)
+        self.categories = categories
+        self.category_names = [category.name for category in categories]
 
     def __getitem__(self, category_id: int) -> PQStatCat:
         """Get a PQStatCat object given category."""
@@ -116,24 +116,25 @@ class PQStat:
         return self
 
     def pq_average(self, categories: List[Category]) -> Dict[str, float]:
-        """Calculate averatge metrics over categories."""
+        """Calculate average metrics over categories."""
         pq, sq, rq, n = 0.0, 0.0, 0.0, 0
-        for category_id, _ in enumerate(categories):
+        for category in categories:
+            category_id = self.category_names.index(category.name)
             iou = self.pq_per_cats[category_id].iou
-            tp = self.pq_per_cats[category_id].tp
-            fp = self.pq_per_cats[category_id].fp
-            fn = self.pq_per_cats[category_id].fn
+            tpos = self.pq_per_cats[category_id].tpos
+            fpos = self.pq_per_cats[category_id].fpos
+            fneg = self.pq_per_cats[category_id].fneg
 
-            if tp + fp + fn == 0:
+            if tpos + fpos + fneg == 0:
                 continue
-            pq += (iou / (tp + 0.5 * fp + 0.5 * fn)) * 100
-            sq += (iou / tp if tp != 0 else 0) * 100
-            rq += (tp / (tp + 0.5 * fp + 0.5 * fn)) * 100
+            pq += (iou / (tpos + 0.5 * fpos + 0.5 * fneg)) * 100
+            sq += (iou / tpos if tpos != 0 else 0) * 100
+            rq += (tpos / (tpos + 0.5 * fpos + 0.5 * fneg)) * 100
             n += 1
 
         if n > 0:
-            return dict(PQ=pq / n, SQ=sq / n, RQ=rq / n, N=n)
-        return dict(PQ=0, SQ=0, RQ=0, N=0)
+            return dict(PQ=pq / n, SQ=sq / n, RQ=rq / n, NUM=n)
+        return dict(PQ=0, SQ=0, RQ=0, NUM=0)
 
 
 def pq_per_image(
@@ -143,72 +144,49 @@ def pq_per_image(
     image_size: Optional[ImageSize] = None,
 ) -> PQStat:
     """Calculate PQStar for each image."""
-    gt_rles, gt_labels, gt_ids, gt_ignores = parse_seg_objects(
+    gt_rles, gt_labels, _, gt_ignores = parse_seg_objects(
         ann_frame.labels if ann_frame.labels is not None else [],
         categories,
         image_size=image_size,
     )
-    pred_rles, pred_labels, pred_ids, _ = parse_seg_objects(
+    pred_rles, pred_labels, _, _ = parse_seg_objects(
         pred_frame.labels if pred_frame.labels is not None else [],
         categories,
         image_size=image_size,
     )
 
-    ious = iou(
+    ious = coco_mask.iou(
         pred_rles,
         gt_rles,
         [False for _ in range(len(gt_rles))],
     ).T
-    iofs = iou(
+    iofs = coco_mask.iou(
         pred_rles,
         gt_ignores,
         [True for _ in range(len(gt_ignores))],
     )
-    print(iofs)
     cat_equals = gt_labels.reshape(-1, 1) == pred_labels.reshape(1, -1)
     ious *= cat_equals
 
     max_ious = ious.max(axis=1)
     max_idxs = ious.argmax(axis=1)
-    inv_iofs = 1 - iofs.sum(axis=0)
-    assert False
-    # gt_bitmask = np.asarray(Image.open(gt_path), dtype=np.uint8)
-    # if not pred_path:
-    #     pred_bitmask = gen_blank_bitmask(gt_bitmask.shape)
-    # else:
-    #     pred_bitmask = np.asarray(Image.open(pred_path), dtype=np.uint8)
+    inv_iofs = 1 - iofs.sum(axis=0) if len(iofs) > 0 else []
 
-    # gt_masks, gt_ids, gt_attrs, gt_cats = parse_bitmask(gt_bitmask)
-    # pred_masks, pred_ids, pred_attrs, pred_cats = parse_bitmask(pred_bitmask)
-
-    # gt_valids = np.logical_not(np.bitwise_and(gt_attrs, 3).astype(bool))
-    # pred_valids = np.logical_not(np.bitwise_and(pred_attrs, 3).astype(bool))
-
-    # ious, iofs = bitmask_intersection_rate(gt_masks, pred_masks)
-    # cat_equals = gt_cats.reshape(-1, 1) == pred_cats.reshape(1, -1)
-    # ious *= cat_equals
-
-    # max_ious = ious.max(axis=1)
-    # max_idxs = ious.argmax(axis=1)
-    # inv_iofs = 1 - iofs[gt_valids].sum(axis=0)
-
-    pq_stat = PQStat()
+    pq_stat = PQStat(categories)
     pred_matched = set()
-    for i in range(len(gt_ids)):
-        if not gt_valids[i]:
-            continue
-        cat_i = gt_cats[i]
-        if max_ious[i] <= 0.5 or not pred_valids[max_idxs[i]]:
-            pq_stat[cat_i].fn += 1
+    for gt_cat, max_iou, max_idx in zip(gt_labels, max_ious, max_idxs):
+        if max_iou <= 0.5:
+            pq_stat[gt_cat].fneg += 1
         else:
-            pq_stat[cat_i].tp += 1
-            pq_stat[cat_i].iou += max_ious[i]
-            pred_matched.add(max_idxs[i])
+            pq_stat[gt_cat].tpos += 1
+            pq_stat[gt_cat].iou += max_iou
+            pred_matched.add(max_idx)
 
-    for j in range(len(pred_ids)):
-        if not pred_valids[j] or j in pred_matched or inv_iofs[j] > 0.5:
-            continue
-        pq_stat[pred_cats[j]].fp += 1
+    if len(iofs) > 0:
+        for j, pred_label in enumerate(pred_labels):
+            if j in pred_matched or inv_iofs[j] > 0.5:
+                continue
+            pq_stat[pred_label].fpos += 1
     return pq_stat
 
 
@@ -263,7 +241,7 @@ def evaluate_pan_seg(
                 zip(ann_frames, pred_frames), total=len(ann_frames)
             )
         ]
-    pq_stat = PQStat()
+    pq_stat = PQStat(categories)
     for pq_stat_ in pq_stats:
         pq_stat += pq_stat_
 

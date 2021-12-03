@@ -45,10 +45,10 @@ def combine_stuff_masks(
             combine_rles.extend(rles_c)
             combine_cids.extend([class_id] * len(rles_c))
         else:
-            combine_rle: NDArrayU8 = sum(  # type: ignore
+            combine_mask: NDArrayU8 = sum(  # type: ignore
                 rle_to_mask(rle) for rle in rles_c
             )
-            combine_rles.append(mask_to_rle(combine_rle))
+            combine_rles.append(mask_to_rle(combine_mask))
             combine_cids.append(class_id)
     return combine_rles, combine_cids
 
