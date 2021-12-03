@@ -16,7 +16,7 @@ import { Viewer2D, Viewer2DProps } from "./viewer2d"
  */
 class Image3DViewer extends Viewer2D {
   /** Intrinsic camera */
-  private _camera: IntrinsicCamera
+  private readonly _camera: IntrinsicCamera
 
   /**
    * Constructor
@@ -27,6 +27,8 @@ class Image3DViewer extends Viewer2D {
   constructor(props: Viewer2DProps) {
     super(props)
     this._camera = new IntrinsicCamera()
+    this._camera.up = new THREE.Vector3(0, -1, 0)
+    this._camera.lookAt(new THREE.Vector3(0, 0, 1))
   }
 
   /** Component update function */

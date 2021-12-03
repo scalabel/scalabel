@@ -228,7 +228,11 @@ export class Label3DHandler {
               )
               break
             case ViewerConfigTypeName.IMAGE_3D:
-              if (this._sensor.extrinsics !== undefined) {
+              center.add(new Vector3D(0, 0, 10))
+              if (
+                this._sensor.extrinsics != null &&
+                this._sensor.extrinsics !== undefined
+              ) {
                 const worldDirection = new THREE.Vector3()
                 this._camera.getWorldDirection(worldDirection)
                 worldDirection.normalize()
@@ -236,6 +240,7 @@ export class Label3DHandler {
                 center.fromState(this._sensor.extrinsics.translation)
                 center.add(new Vector3D().fromThree(worldDirection))
               }
+              break
           }
           label.init(
             this._selectedItemIndex,
