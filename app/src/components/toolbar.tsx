@@ -26,7 +26,7 @@ import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
 import { Key, LabelTypeName } from "../const/common"
-import { getSelectedTracks, isSpanBoxComplete } from "../functional/state_util"
+import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
 import { Attribute, Category, ModeStatus, State } from "../types/state"
@@ -189,8 +189,9 @@ export class ToolBar extends Component<Props> {
           </div>
           <div>
             {this.state.session.boxSpan || this.state.task.boxSpan !== undefined
-              ? makeButton("Finish", () => {
-                  this.deactivateSpan(this.state)
+              ? makeButton("Cancel", () => {
+                  this.deactivateSpan()
+                  alert(Severity.WARNING, "Box was not generated")
                 })
               : makeButton("Activate span", () => {
                   this.activateSpan()
@@ -440,11 +441,7 @@ export class ToolBar extends Component<Props> {
    *
    * @param state
    */
-  private deactivateSpan(state: State): void {
+  private deactivateSpan(): void {
     Session.dispatch(deactivateSpan())
-    const boxComplete = isSpanBoxComplete(state)
-    if (!boxComplete) {
-      alert(Severity.WARNING, "Box was not generated")
-    }
   }
 }

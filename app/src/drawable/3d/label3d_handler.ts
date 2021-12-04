@@ -1,7 +1,13 @@
 import * as THREE from "three"
 
 import { selectLabel, selectLabel3dType } from "../../action/select"
-import { pauseSpan, resetSpan, resumeSpan, undoSpan } from "../../action/common"
+import {
+  deactivateSpan,
+  pauseSpan,
+  resetSpan,
+  resumeSpan,
+  undoSpan
+} from "../../action/common"
 import Session from "../../common/session"
 import {
   DataType,
@@ -215,13 +221,22 @@ export class Label3DHandler {
    * @returns true if consumed, false otherwise
    */
   public onKeyDown(e: KeyboardEvent): boolean {
+    const state = Session.getState()
     // TODO: break the cases into functions
     switch (e.key) {
       case Key.SPACE: {
-        return this.createLabel()
+        if (
+          state.session.boxSpan &&
+          state.task.boxSpan !== undefined &&
+          !state.task.boxSpan.complete
+        ) {
+          break
+        } else {
+          return this.createLabel()
+        }
       }
       case Key.ESCAPE:
-        if (Session.getState().session.boxSpan) {
+        if (state.session.boxSpan) {
           Session.dispatch(resetSpan())
         }
         return true
@@ -288,14 +303,14 @@ export class Label3DHandler {
         }
         break
       case Key.Q_LOW:
-        if (Session.getState().session.boxSpan) {
+        if (state.session.boxSpan) {
           Session.dispatch(pauseSpan())
-        } else if (Session.getState().task.boxSpan !== undefined) {
+        } else if (state.task.boxSpan !== undefined) {
           Session.dispatch(resumeSpan())
         }
         return true
       case Key.U_LOW:
-        if (Session.getState().session.boxSpan) {
+        if (state.session.boxSpan) {
           Session.dispatch(undoSpan())
         }
         break
@@ -469,6 +484,7 @@ export class Label3DHandler {
             label.move(box.center)
             label.rotate(box.rotation)
             label.scale(box.dimensions, box.center, true)
+            Session.dispatch(deactivateSpan())
           }
         }
       }

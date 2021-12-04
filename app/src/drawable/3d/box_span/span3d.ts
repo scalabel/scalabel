@@ -152,11 +152,11 @@ export class Span3D {
   public registerPoint(): this {
     if (this._p1 === null) {
       this._p1 = this._pTmp
-    } else if (this._p2 === null) {
+    } else if (this._p2 === null && this._p1 !== this._pTmp) {
       this._p2 = this._pTmp
-    } else if (this._p3 === null) {
+    } else if (this._p3 === null && this._p2 !== this._pTmp) {
       this._p3 = this._pTmp
-    } else if (this._p4 === null) {
+    } else if (this._p4 === null && this._p3 !== this._pTmp) {
       this._p4 = this._pTmp
       this._complete = true
     } else {

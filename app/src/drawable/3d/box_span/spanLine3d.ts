@@ -45,32 +45,63 @@ export class SpanLine3D {
   }
 
   /**
-   * calculate unit normal of line
-   *
-   * @param point
-   */
-  public calculateNormal(point: Vector3D): Vector3D {
-    const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
-    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-    const v12 = v2.clone().subtract(v1)
-    const vDir = point.clone().subtract(v2)
-    if (vDir.x + vDir.y >= 0) {
-      return new Vector3D(-v12.y, v12.x, 0).unitVector()
-    } else {
-      return new Vector3D(v12.y, -v12.x, 0).unitVector()
-    }
-  }
-
-  /** align point to unit normal
+   * align point to unit normal
    *
    * @param point
    */
   public alignPointToNormal(point: Vector3D): Vector3D {
+    const unitNormal = this.calculateUnitNormal()
+    const footPerpendicular = this.footPerpendicular(point, unitNormal)
+    return footPerpendicular
+  }
+
+  /**
+   * calculate unit normal of line
+   *
+   * @param point
+   */
+  private calculateUnitNormal(): Vector3D {
+    const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
     const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-    const normal = this.calculateNormal(point)
-    const dist = point.clone().distanceTo(v2)
-    normal.multiplyScalar(dist)
-    const v3 = v2.clone().add(normal)
-    return v3
+    const v12 = v2.clone().subtract(v1)
+    return new Vector3D(-v12.y, v12.x, 0).normalize()
+  }
+
+  /**
+   * calculate perpendicular distance between point and normal of line
+   *
+   * @param point
+   * @param unitNormal
+   */
+  private perpendicularDist(point: Vector3D, unitNormal: Vector3D): number {
+    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
+    const vTmp = point.clone().subtract(v2)
+    const perpendicularDist = vTmp.clone().cross(unitNormal).magnitude()
+    return perpendicularDist
+  }
+
+  /**
+   * calculate foot of perpendicular between point and normal of line
+   *
+   * @param point
+   * @param unitNormal
+   */
+  private footPerpendicular(point: Vector3D, unitNormal: Vector3D): Vector3D {
+    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
+    const perpendicularDist = this.perpendicularDist(point, unitNormal)
+    const dTmp = point.clone().distanceTo(v2)
+    const dist = Math.sqrt(dTmp * dTmp - perpendicularDist * perpendicularDist)
+    const normalDist = unitNormal.clone()
+    normalDist.multiplyScalar(dist)
+    let footPerpendicular = v2.clone().add(normalDist)
+    const dPoint = point.distanceTo(footPerpendicular)
+    const errorDeg = 0.01
+    if (
+      Math.abs(dPoint - this.perpendicularDist(point, unitNormal)) > errorDeg
+    ) {
+      normalDist.multiplyScalar(-1)
+      footPerpendicular = v2.clone().add(normalDist)
+    }
+    return footPerpendicular
   }
 }

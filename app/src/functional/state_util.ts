@@ -331,17 +331,3 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
 
   return minSensorIds
 }
-
-/**
- * Check if span box is complete
- *
- * @param {State} state
- * @returns boolean
- */
-export function isSpanBoxComplete(state: State): boolean {
-  if (state.task.boxSpan !== undefined) {
-    return state.task.boxSpan.complete
-  } else {
-    return false
-  }
-}

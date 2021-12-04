@@ -155,7 +155,7 @@ export class Vector3D extends Vector {
   }
 
   /** Calculate unit vector */
-  public unitVector(): this {
+  public normalize(): this {
     const m = this.magnitude()
     if (m !== 0) {
       this.divideScalar(m)
