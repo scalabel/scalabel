@@ -22,7 +22,9 @@ class TestScalabelMotsEval(unittest.TestCase):
     config = load_label_config(
         get_test_file("seg_track/seg_track_configs.toml")
     )
-    result = evaluate_seg_track(acc_single_video_mots, gts, preds, config)
+    result = evaluate_seg_track(
+        acc_single_video_mots, gts, preds, config, nproc=1
+    )
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""

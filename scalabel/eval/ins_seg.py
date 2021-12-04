@@ -15,7 +15,7 @@ from ..common.io import open_write_text
 from ..common.logger import logger
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
-from .utils import reorder_preds
+from .utils import check_overlap, reorder_preds
 
 
 def evaluate_ins_seg(
@@ -35,7 +35,7 @@ def evaluate_ins_seg(
     Returns:
         DetResult: evaluation results.
     """
-    # Convert the annotation file to COCO format
+    # convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
     ann_coco = scalabel2coco_ins_seg(ann_frames, config)
     ann_coco["annotations"] = [
@@ -43,13 +43,20 @@ def evaluate_ins_seg(
     ]
     coco_gt = COCOV2(None, ann_coco)
 
-    # Load results and convert the predictions
+    # load results and convert the predictions
     pred_frames = reorder_preds(ann_frames, pred_frames)
+    # check overlap of masks
+    logger.info("checking for overlap of masks...")
+    assert not check_overlap(pred_frames, config, nproc), (
+        "Found overlap in prediction bitmasks, but instance segmentation "
+        "evaluation does not allow overlaps."
+    )
+    logger.info("converting predictions to COCO format...")
     pred_res = scalabel2coco_ins_seg(pred_frames, config)["annotations"]
-    # Handle empty predictions
+    # handle empty predictions
     if not pred_res:
         return DetResult.empty(coco_gt)
-    # Removing bbox so pycocotools will use mask to compute area
+    # removing bbox so pycocotools will use mask to compute area
     for ann in pred_res:
         if "bbox" in ann:
             ann.pop("bbox")

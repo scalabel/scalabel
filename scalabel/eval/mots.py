@@ -10,25 +10,33 @@ import motmetrics as mm
 import numpy as np
 from pycocotools.mask import iou  # type: ignore
 
-from ..common.io import open_write_text
-from ..common.logger import logger
-from ..common.parallel import NPROC
-from ..common.typing import NDArrayU8
-from ..label.io import group_and_sort, load, load_label_config
-from ..label.typing import Category, Config, Frame, ImageSize
-from ..label.utils import get_leaf_categories, get_parent_categories
+from scalabel.common.io import open_write_text
+from scalabel.common.logger import logger
+from scalabel.common.parallel import NPROC
+from scalabel.common.typing import NDArrayU8
+from scalabel.label.io import group_and_sort, load, load_label_config
+from scalabel.label.typing import Category, Config, Frame, ImageSize
+from scalabel.label.utils import get_leaf_categories, get_parent_categories
+
 from .mot import (
     METRIC_MAPS,
     TrackResult,
-    Video,
     aggregate_accs,
     evaluate_single_class,
     generate_results,
 )
-from .utils import label_ids_to_int, parse_seg_objects
+from .utils import check_overlap, label_ids_to_int, parse_seg_objects
 
 VidFunc = Callable[
-    [Video, Video, List[Category], float, float, bool, Optional[ImageSize]],
+    [
+        List[Frame],
+        List[Frame],
+        List[Category],
+        float,
+        float,
+        bool,
+        Optional[ImageSize],
+    ],
     List[mm.MOTAccumulator],
 ]
 
@@ -120,9 +128,9 @@ def acc_single_video_mots(
 
 
 def evaluate_seg_track(
-    acc_single_video: VidFunc[Video],
-    gts: List[Video],
-    results: List[Video],
+    acc_single_video: VidFunc,
+    gts: List[List[Frame]],
+    results: List[List[Frame]],
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
@@ -133,8 +141,8 @@ def evaluate_seg_track(
 
     Args:
         acc_single_video: Function for calculating metrics over a single video.
-        gts: (paths to) the ground truth annotations in Scalabel format
-        results: (paths to) the prediction results in Scalabel format.
+        gts: the ground truth annotations in Scalabel format
+        results: the prediction results in Scalabel format.
         config: Config object
         iou_thr: Minimum IoU for a mask to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
@@ -148,6 +156,14 @@ def evaluate_seg_track(
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     assert len(gts) == len(results)
+    # check overlap of masks
+    logger.info("checking for overlap of masks...")
+    assert not check_overlap(
+        [frame for res in results for frame in res], config, nproc
+    ), (
+        "Found overlap in prediction bitmasks, but segmentation tracking "
+        "evaluation does not allow overlaps."
+    )
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)

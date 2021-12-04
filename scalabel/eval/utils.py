@@ -1,13 +1,28 @@
 """Utility functions for eval."""
+from functools import partial
+from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from tqdm import tqdm
 
 from scalabel.common.logger import logger
+from scalabel.common.parallel import NPROC
 from scalabel.common.typing import NDArrayI32, NDArrayU8
 from scalabel.label.transforms import mask_to_rle, poly2ds_to_mask, rle_to_mask
-from scalabel.label.typing import RLE, Category, Frame, ImageSize, Label
-from scalabel.label.utils import check_crowd, check_ignored
+from scalabel.label.typing import (
+    RLE,
+    Category,
+    Config,
+    Frame,
+    ImageSize,
+    Label,
+)
+from scalabel.label.utils import (
+    check_crowd,
+    check_ignored,
+    get_leaf_categories,
+)
 
 RLEDict = Dict[str, Union[str, Tuple[int, int]]]
 
@@ -28,6 +43,62 @@ def label_ids_to_int(frames: List[Frame]) -> None:
             if frame.labels is not None:
                 for label in frame.labels:
                     label.id = str(ids_to_int[label.id])
+
+
+def check_overlap_frame(
+    frame: Frame, categories: List[str], image_size: Optional[ImageSize]
+) -> bool:
+    """Check overlap of segmentation masks for a single frame."""
+    if frame.labels is None:
+        return False
+    overlap_mask = np.zeros((0), dtype=np.uint8)
+    for label in frame.labels:
+        if label.category not in categories:
+            continue
+        if label.rle is None and label.poly2d is None:
+            continue
+        if label.rle is not None:
+            mask = rle_to_mask(label.rle)
+        elif label.poly2d is not None:
+            assert (
+                image_size is not None
+            ), "Requires ImageSize for Poly2D conversion to RLE"
+            mask = poly2ds_to_mask(image_size, label.poly2d)
+        if len(overlap_mask) == 0:
+            overlap_mask = mask
+        else:
+            if np.logical_and(overlap_mask, mask).any():
+                # found overlap
+                return True
+            overlap_mask += mask
+    return False
+
+
+def check_overlap(
+    frames: List[Frame], config: Config, nproc: int = NPROC
+) -> bool:
+    """Check overlap of segmentation masks.
+
+    Returns True if overlap found in masks of any frame.
+    """
+    categories = get_leaf_categories(config.categories)
+    category_names = [category.name for category in categories]
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            overlaps = pool.starmap(
+                partial(
+                    check_overlap_frame,
+                    categories=category_names,
+                    image_size=config.imageSize,
+                ),
+                tqdm(frames),
+            )
+    else:
+        overlaps = [
+            check_overlap_frame(frame, category_names, config.imageSize)
+            for frame in tqdm(frames)
+        ]
+    return any(overlaps)
 
 
 def combine_stuff_masks(

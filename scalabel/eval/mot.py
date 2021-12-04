@@ -4,7 +4,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple, TypeVar, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import motmetrics as mm
 import numpy as np
@@ -25,9 +25,9 @@ from ..label.utils import (
 from .result import AVERAGE, OVERALL, Result, Scores, ScoresList
 from .utils import label_ids_to_int
 
-Video = TypeVar("Video", List[Frame], List[str])
+# Video = TypeVar("Video", List[Frame])
 VidFunc = Callable[
-    [Video, Video, List[str], float, float, bool],
+    [List[Frame], List[Frame], List[str], float, float, bool],
     List[mm.MOTAccumulator],
 ]
 
@@ -322,9 +322,9 @@ def generate_results(
 
 
 def evaluate_track(
-    acc_single_video: VidFunc[Video],
-    gts: List[Video],
-    results: List[Video],
+    acc_single_video: VidFunc,
+    gts: List[List[Frame]],
+    results: List[List[Frame]],
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,

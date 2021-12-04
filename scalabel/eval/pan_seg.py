@@ -42,9 +42,15 @@ from scalabel.common.logger import logger
 from scalabel.common.parallel import NPROC
 from scalabel.label.io import load, load_label_config
 from scalabel.label.typing import Category, Config, Frame, ImageSize
+from scalabel.label.utils import get_leaf_categories
 
 from .result import OVERALL, Result, Scores, ScoresList
-from .utils import label_ids_to_int, parse_seg_objects, reorder_preds
+from .utils import (
+    check_overlap,
+    label_ids_to_int,
+    parse_seg_objects,
+    reorder_preds,
+)
 
 STUFF = "STUFF"
 THING = "THING"
@@ -222,7 +228,7 @@ def evaluate_pan_seg(
     Returns:
         PanSegResult: evaluation results.
     """
-    categories = config.categories
+    categories = get_leaf_categories(config.categories)
     assert all(
         category.isThing is not None for category in categories
     ), "isThing should be defined for all categories for PanSeg."
@@ -234,6 +240,12 @@ def evaluate_pan_seg(
     ]
     category_names = [category.name for category in categories]
     pred_frames = reorder_preds(ann_frames, pred_frames)
+    # check overlap of masks
+    logger.info("checking for overlap of masks...")
+    assert not check_overlap(pred_frames, config, nproc), (
+        "Found overlap in prediction bitmasks, but panoptic segmentation "
+        "evaluation does not allow overlaps."
+    )
     label_ids_to_int(ann_frames)
 
     logger.info("evaluating...")
