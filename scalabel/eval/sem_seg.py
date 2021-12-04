@@ -111,7 +111,7 @@ def freq_iou(hist: NDArrayU8) -> float:
 def frame_to_mask(
     frame: Frame,
     categories: Dict[str, int],
-    image_size: Optional[ImageSize],
+    image_size: Optional[ImageSize] = None,
     ignore_label: int = 255,
 ) -> NDArrayU8:
     """Convert list of labels to a mask."""
@@ -147,7 +147,7 @@ def per_image_hist(
     ann_frame: Frame,
     pred_frame: Frame,
     categories: Dict[str, int],
-    image_size: Optional[ImageSize],
+    image_size: Optional[ImageSize] = None,
     ignore_label: int = 255,
 ) -> Tuple[NDArrayI32, Set[int]]:
     """Calculate per image hist."""

@@ -46,7 +46,7 @@ def label_ids_to_int(frames: List[Frame]) -> None:
 
 
 def check_overlap_frame(
-    frame: Frame, categories: List[str], image_size: Optional[ImageSize]
+    frame: Frame, categories: List[str], image_size: Optional[ImageSize] = None
 ) -> bool:
     """Check overlap of segmentation masks for a single frame."""
     if frame.labels is None:
