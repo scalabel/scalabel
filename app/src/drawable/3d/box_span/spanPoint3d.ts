@@ -6,9 +6,9 @@ import { Vector3D } from "../../../math/vector3d"
  * ThreeJS class for rendering 3D point
  */
 export class SpanPoint3D {
-  private _x: number
-  private _y: number
-  private _z: number
+  private readonly _x: number
+  private readonly _y: number
+  private readonly _z: number
   private readonly _color: string
   private readonly _radius: number
 
@@ -45,19 +45,9 @@ export class SpanPoint3D {
     return this._x
   }
 
-  /** set x */
-  public set x(x: number) {
-    this._x = x
-  }
-
   /** get y */
   public get y(): number {
     return this._y
-  }
-
-  /** set y */
-  public set y(y: number) {
-    this._y = y
   }
 
   /** get z */
@@ -65,8 +55,8 @@ export class SpanPoint3D {
     return this._z
   }
 
-  /** set z */
-  public set z(z: number) {
-    this._z = z
+  /** return point coordinates as Vector3D */
+  public toVector3D(): Vector3D {
+    return new Vector3D(this.x, this.y, this.z)
   }
 }

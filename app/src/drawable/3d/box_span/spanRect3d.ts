@@ -24,7 +24,6 @@ export class SpanRect3D {
     this._p1 = p1
     this._p2 = p2
     this._p3 = p3
-
     const v4 = this.completeParallelogram()
     this._p4 = new SpanPoint3D(v4)
   }
@@ -42,7 +41,6 @@ export class SpanRect3D {
     const l23 = new SpanLine3D(this._p2, this._p3)
     const l34 = new SpanLine3D(this._p3, this._p4)
     const l41 = new SpanLine3D(this._p4, this._p1)
-
     l12.render(scene)
     l23.render(scene)
     l34.render(scene)
@@ -56,11 +54,9 @@ export class SpanRect3D {
 
   /** Complete parallelogram from 3 points */
   private completeParallelogram(): Vector3D {
-    const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
-    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-    const v3 = new Vector3D(this._p3.x, this._p3.y, this._p3.z)
-
-    const v4 = v1.clone().add(v3).subtract(v2)
-    return v4
+    const [v1, v2, v3] = [this._p1, this._p2, this._p3].map((p) =>
+      p.toVector3D()
+    )
+    return v1.clone().add(v3).subtract(v2)
   }
 }

@@ -61,8 +61,7 @@ export class SpanLine3D {
    * @param point
    */
   private calculateUnitNormal(): Vector3D {
-    const v1 = new Vector3D(this._p1.x, this._p1.y, this._p1.z)
-    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
+    const [v1, v2] = [this._p1, this._p2].map((p) => p.toVector3D())
     const v12 = v2.clone().subtract(v1)
     return new Vector3D(-v12.y, v12.x, 0).normalize()
   }

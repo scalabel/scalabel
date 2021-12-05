@@ -1671,7 +1671,7 @@ export function updateSpanPoint(
   const oldTask = state.task
   const newBox = oldTask.boxSpan
   if (newBox !== undefined) {
-    newBox.updatePointTmp(action.mX, action.mY)
+    newBox.updatePointTmp(action.point)
   }
   const newTask = updateObject(oldTask, {
     ...state.task,

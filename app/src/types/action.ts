@@ -18,6 +18,7 @@ import {
   TaskType,
   ViewerConfigType
 } from "./state"
+import { Vector3D } from "../math/vector3d"
 
 export interface BaseAction {
   /** unique id for the action */
@@ -229,10 +230,7 @@ export type ActivateSpanAction = BaseAction
 export type DeactivateSpanAction = BaseAction
 
 export interface UpdateSpanPointAction extends BaseAction {
-  /** mouse X */
-  mX: number
-  /** mouse Y */
-  mY: number
+  point: Vector3D
 }
 
 export type RegisterSpanPointAction = BaseAction

@@ -22,6 +22,7 @@ import {
   TaskType,
   ViewerConfigType
 } from "../types/state"
+import { Vector3D } from "../math/vector3d"
 
 let getState = getStateGetter()
 
@@ -826,17 +827,14 @@ export function deactivateSpan(): actionTypes.DeactivateSpanAction {
 /**
  * Update temporary point in span box
  *
- * @param mX - mouse X
- * @param mY - mouse Y
+ * @param point
  */
 export function updateSpanPoint(
-  mX: number,
-  mY: number
+  point: Vector3D
 ): actionTypes.UpdateSpanPointAction {
   return {
     ...makeBaseAction(actionConsts.UPDATE_SPAN_POINT),
-    mX,
-    mY
+    point
   }
 }
 

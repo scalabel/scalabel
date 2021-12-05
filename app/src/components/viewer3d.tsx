@@ -11,12 +11,7 @@ import { withStyles } from "@material-ui/styles"
 import React from "react"
 import * as THREE from "three"
 
-import {
-  changeViewerConfig,
-  toggleSynchronization,
-  registerSpanPoint,
-  updateSpanPoint
-} from "../action/common"
+import { changeViewerConfig, toggleSynchronization } from "../action/common"
 import {
   alignToAxis,
   CameraLockState,
@@ -563,11 +558,7 @@ class Viewer3D extends DrawableViewer<Props> {
     super.onMouseMove(e)
     const dX = this._mX - oldX
     const dY = this._mY - oldY
-    const state = Session.getState()
-    if (state.session.boxSpan) {
-      // send mouse position to update temporary point in span box
-      Session.dispatch(updateSpanPoint(this._mX, this._mY))
-    } else if (this._mouseDown && this._viewerConfig !== undefined) {
+    if (this._mouseDown && this._viewerConfig !== undefined) {
       this._movingCamera = true
       const lockSelection = lockedToSelection(
         this._viewerConfig as PointCloudViewerConfigType
@@ -602,16 +593,8 @@ class Viewer3D extends DrawableViewer<Props> {
    */
   protected onMouseUp(e: React.MouseEvent): void {
     super.onMouseUp(e)
-    const state = Session.getState()
-    if (state.session.boxSpan && state.task.boxSpan !== undefined) {
-      // send mouse position to register new point in span box
-      if (!state.task.boxSpan.complete) {
-        Session.dispatch(registerSpanPoint())
-      }
-    } else {
-      this._movingCamera = false
-      this.commitCamera()
-    }
+    this._movingCamera = false
+    this.commitCamera()
   }
 
   /**
