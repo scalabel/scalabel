@@ -481,10 +481,14 @@ export class Label3DHandler {
         const box = Session.getState().task.boxSpan
         if (box !== undefined) {
           if (box.complete) {
-            label.move(box.center)
-            label.rotate(box.rotation)
-            label.scale(box.dimensions, box.center, true)
-            Session.dispatch(deactivateSpan())
+            try {
+              label.move(box.center)
+              label.rotate(box.rotation)
+              label.scale(box.dimensions, box.center, true)
+              Session.dispatch(deactivateSpan())
+            } catch (err) {
+              alert(Severity.ERROR, err.message)
+            }
           }
         }
       }

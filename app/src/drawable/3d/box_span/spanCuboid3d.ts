@@ -9,10 +9,15 @@ import { Vector3D } from "../../../math/vector3d"
  * ThreeJS class for rendering 3D cuboid
  */
 export class SpanCuboid3D {
+  /** first point */
   private readonly _p1: SpanPoint3D
+  /** second point */
   private readonly _p2: SpanPoint3D
+  /** third point */
   private readonly _p3: SpanPoint3D
+  /** fourth point */
   private readonly _p4: SpanPoint3D
+  /** cuboid center */
   private _center: THREE.Vector3
 
   /**

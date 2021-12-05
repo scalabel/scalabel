@@ -7,9 +7,13 @@ import { Vector3D } from "../../../math/vector3d"
  * ThreeJS class for rendering 3D line
  */
 export class SpanLine3D {
+  /** first point */
   private readonly _p1: SpanPoint3D
+  /** second point */
   private readonly _p2: SpanPoint3D
+  /** line color */
   private readonly _color: number
+  /** line width */
   private readonly _lineWidth: number
 
   /**
@@ -32,9 +36,11 @@ export class SpanLine3D {
    */
   public render(scene: THREE.Scene): void {
     // generate line formed by two points and add to scene
-    const points = []
-    points.push(new THREE.Vector3(this._p1.x, this._p1.y, this._p1.z))
-    points.push(new THREE.Vector3(this._p2.x, this._p2.y, this._p2.z))
+    const points: THREE.Vector3[] = []
+    points.push.apply(
+      points,
+      [this._p1, this._p2].map((p) => new THREE.Vector3(p.x, p.y, p.z))
+    )
     const geometry = new THREE.BufferGeometry().setFromPoints(points)
     const material = new THREE.LineBasicMaterial({
       color: this._color,
@@ -94,6 +100,8 @@ export class SpanLine3D {
     normalDist.multiplyScalar(dist)
     let footPerpendicular = v2.clone().add(normalDist)
     const dPoint = point.distanceTo(footPerpendicular)
+
+    // flip normal if it is not facing the right direction
     const errorDeg = 0.01
     if (
       Math.abs(dPoint - this.perpendicularDist(point, unitNormal)) > errorDeg

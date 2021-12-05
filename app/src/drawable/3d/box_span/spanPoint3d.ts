@@ -6,10 +6,15 @@ import { Vector3D } from "../../../math/vector3d"
  * ThreeJS class for rendering 3D point
  */
 export class SpanPoint3D {
+  /** x coordinate in 3D space */
   private readonly _x: number
+  /** y coordinate in 3D space */
   private readonly _y: number
+  /** z coordinate in 3D space */
   private readonly _z: number
+  /** point color */
   private readonly _color: string
+  /** point radius */
   private readonly _radius: number
 
   /**

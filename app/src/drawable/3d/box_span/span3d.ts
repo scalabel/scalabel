@@ -10,13 +10,21 @@ import { Vector3D } from "../../../math/vector3d"
  * ThreeJS class for rendering 3D span object
  */
 export class Span3D {
+  /** First point */
   private _p1: SpanPoint3D | null
+  /** Second point */
   private _p2: SpanPoint3D | null
+  /** Third point */
   private _p3: SpanPoint3D | null
+  /** Fourth point */
   private _p4: SpanPoint3D | null
+  /** Temporary point that follows mouse cursor */
   private _pTmp: SpanPoint3D
+  /** Line between first and second point */
   private _line: SpanLine3D | null
+  /** Cuboid formed by the four points */
   private _cuboid: SpanCuboid3D | null
+  /** Whether span box is complete */
   private _complete: boolean
 
   /** Constructor */
@@ -84,7 +92,7 @@ export class Span3D {
   }
 
   /**
-   * Register new temp point given current mouse position
+   * Register new temporary point given current mouse position
    *
    * @param point
    */
@@ -149,7 +157,7 @@ export class Span3D {
       return this._cuboid.center
     }
 
-    return new THREE.Vector3(0, 0, 0)
+    throw new Error("Span3D: cannot get cuboid center")
   }
 
   /** Return cuboid dimensions */
@@ -158,7 +166,7 @@ export class Span3D {
       return this._cuboid.dimensions
     }
 
-    return new THREE.Vector3(0, 0, 0)
+    throw new Error("Span3D: cannot get cuboid dimensions")
   }
 
   /** Return cuboid rotation */
@@ -167,6 +175,6 @@ export class Span3D {
       return this._cuboid.rotation
     }
 
-    return new THREE.Quaternion()
+    throw new Error("Span3D: cannot get cuboid rotation")
   }
 }
