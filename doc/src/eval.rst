@@ -92,6 +92,34 @@ Available arguments:
                             Number of processes for evaluation.
 
 
+Panoptic Segmentation
+-----------------------
+The panoptic segmentation evaluation uses the Panoptic Quality (PQ) metric. You can start the evaluation by running, e.g.:
+
+.. code-block:: bash
+
+    python3 -m scalabel.eval.pan_seg \
+        --gt scalabel/eval/testcases/pan_seg/pan_seg_sample.json \
+        --result scalabel/eval/testcases/pan_seg/pan_seg_preds.json \
+        --config scalabel/eval/testcases/pan_seg/pan_seg_configs.toml
+
+
+Available arguments:
+
+.. code-block:: bash
+
+    --gt GT_PATH, -g GT_PATH
+                            path to ground truth annotations.
+    --result RESULT_PATH, -r RESULT_PATH
+                            path to results to be evaluated.
+    --config CFG_PATH, -c CFG_PATH
+                            Config path. Contains metadata like available categories.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            Output path for evaluation results.
+    --nproc NUM_PROCS, -p NUM_PROCS
+                            Number of processes for evaluation.
+
+
 Pose Estimation
 -----------------
 The pose estimation evaluation also uses the AP metric and follows the protocol defined

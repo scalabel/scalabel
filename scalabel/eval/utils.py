@@ -68,8 +68,7 @@ def check_overlap_frame(
             overlap_mask = mask
         else:
             if np.logical_and(overlap_mask, mask).any():
-                # removing prediction with overlap
-                frame.labels = None
+                # found overlap
                 return True
             overlap_mask += mask
     return False
@@ -86,7 +85,7 @@ def check_overlap(
     category_names = [category.name for category in categories]
     if nproc > 1:
         with Pool(nproc) as pool:
-            overlaps = pool.starmap(
+            overlaps = pool.map(
                 partial(
                     check_overlap_frame,
                     categories=category_names,
@@ -99,6 +98,10 @@ def check_overlap(
             check_overlap_frame(frame, category_names, config.imageSize)
             for frame in tqdm(frames)
         ]
+    for is_overlap, frame in zip(overlaps, frames):
+        if is_overlap:
+            # remove predictions with overlap
+            frame.labels = None
     return any(overlaps)
 
 
