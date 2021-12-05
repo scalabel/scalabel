@@ -158,12 +158,13 @@ def evaluate_seg_track(
     assert len(gts) == len(results)
     # check overlap of masks
     logger.info("checking for overlap of masks...")
-    assert not check_overlap(
+    if check_overlap(
         [frame for res in results for frame in res], config, nproc
-    ), (
-        "Found overlap in prediction bitmasks, but segmentation tracking "
-        "evaluation does not allow overlaps."
-    )
+    ):
+        logger.critical(
+            "Found overlap in prediction bitmasks, but segmentation tracking "
+            "evaluation does not allow overlaps. Removing such predictions."
+        )
 
     classes = get_leaf_categories(config.categories)
     super_classes = get_parent_categories(config.categories)

@@ -47,14 +47,16 @@ def evaluate_ins_seg(
     pred_frames = reorder_preds(ann_frames, pred_frames)
     # check overlap of masks
     logger.info("checking for overlap of masks...")
-    assert not check_overlap(pred_frames, config, nproc), (
-        "Found overlap in prediction bitmasks, but instance segmentation "
-        "evaluation does not allow overlaps."
-    )
+    if check_overlap(pred_frames, config, nproc):
+        logger.critical(
+            "Found overlap in prediction bitmasks, but instance segmentation "
+            "evaluation does not allow overlaps. Removing such predictions."
+        )
     logger.info("converting predictions to COCO format...")
     pred_res = scalabel2coco_ins_seg(pred_frames, config)["annotations"]
     # handle empty predictions
     if not pred_res:
+        logger.critical("No predictions found. Skipping evaluation.")
         return DetResult.empty(coco_gt)
     # removing bbox so pycocotools will use mask to compute area
     for ann in pred_res:

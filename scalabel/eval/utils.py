@@ -68,7 +68,8 @@ def check_overlap_frame(
             overlap_mask = mask
         else:
             if np.logical_and(overlap_mask, mask).any():
-                # found overlap
+                # removing prediction with overlap
+                frame.labels = None
                 return True
             overlap_mask += mask
     return False

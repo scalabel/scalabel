@@ -240,13 +240,14 @@ def evaluate_pan_seg(
     ]
     category_names = [category.name for category in categories]
     pred_frames = reorder_preds(ann_frames, pred_frames)
+    label_ids_to_int(ann_frames)
     # check overlap of masks
     logger.info("checking for overlap of masks...")
-    assert not check_overlap(pred_frames, config, nproc), (
-        "Found overlap in prediction bitmasks, but panoptic segmentation "
-        "evaluation does not allow overlaps."
-    )
-    label_ids_to_int(ann_frames)
+    if check_overlap(pred_frames, config, nproc):
+        logger.critical(
+            "Found overlap in prediction bitmasks, but panoptic segmentation "
+            "evaluation does not allow overlaps. Removing such predictions."
+        )
 
     logger.info("evaluating...")
     if nproc > 1:

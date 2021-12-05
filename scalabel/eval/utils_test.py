@@ -36,3 +36,4 @@ class TestEvalUtils(unittest.TestCase):
         )
         pred_frames = load(pred_file).frames
         self.assertTrue(check_overlap(pred_frames, config, nproc=1))
+        self.assertFalse(check_overlap(pred_frames, config, nproc=1))
