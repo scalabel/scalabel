@@ -46,7 +46,6 @@ class TestScalabelPoseEval(unittest.TestCase):
                 -1.0,
             ]
         )
-        print(data_arr[-1])
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

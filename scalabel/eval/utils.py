@@ -106,26 +106,35 @@ def check_overlap(
 
 
 def combine_stuff_masks(
-    rles: List[RLE], class_ids: List[int], classes: List[Category]
-) -> Tuple[List[RLE], List[int]]:
+    rles: List[RLE],
+    class_ids: List[int],
+    inst_ids: List[int],
+    classes: List[Category],
+) -> Tuple[List[RLE], List[int], List[int]]:
     """For each stuff class, combine masks into a single mask."""
     combine_rles: List[RLE] = []
     combine_cids: List[int] = []
+    combine_iids: List[int] = []
     for class_id in sorted(set(class_ids)):
         category = classes[class_id]
         rles_c = [
             rle for rle, c_id in zip(rles, class_ids) if c_id == class_id
         ]
+        iids_c = [
+            iid for iid, c_id in zip(inst_ids, class_ids) if c_id == class_id
+        ]
         if category.isThing is None or category.isThing:
             combine_rles.extend(rles_c)
             combine_cids.extend([class_id] * len(rles_c))
+            combine_iids.extend(iids_c)
         else:
             combine_mask: NDArrayU8 = sum(  # type: ignore
                 rle_to_mask(rle) for rle in rles_c
             )
             combine_rles.append(mask_to_rle(combine_mask))
             combine_cids.append(class_id)
-    return combine_rles, combine_cids
+            combine_iids.append(iids_c[0])
+    return combine_rles, combine_cids, combine_iids
 
 
 def parse_seg_objects(
@@ -154,7 +163,7 @@ def parse_seg_objects(
             else:
                 rles.append(rle)
                 labels.append(class_names.index(category))
-                ids.append(obj.id)
+                ids.append(int(obj.id))
         else:
             if not ignore_unknown_cats:
                 raise KeyError(f"Unknown category: {category}")
@@ -162,7 +171,7 @@ def parse_seg_objects(
         category.isThing is not None and not category.isThing
         for category in classes
     ):
-        rles, labels = combine_stuff_masks(rles, labels, classes)
+        rles, labels, ids = combine_stuff_masks(rles, labels, ids, classes)
     rles_dict = [rle.dict() for rle in rles]
     ignore_rles_dict = [rle.dict() for rle in ignore_rles]
     labels_arr = np.array(labels, dtype=np.int32)
