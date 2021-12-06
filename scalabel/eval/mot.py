@@ -335,8 +335,8 @@ def evaluate_track(
 
     Args:
         acc_single_video: Function for calculating metrics over a single video.
-        gts: (paths to) the ground truth annotations in Scalabel format
-        results: (paths to) the prediction results in Scalabel format.
+        gts: the ground truth annotations in Scalabel format
+        results: the prediction results in Scalabel format.
         config: Config object
         iou_thr: Minimum IoU for a bounding box to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
