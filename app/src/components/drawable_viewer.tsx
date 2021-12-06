@@ -136,7 +136,7 @@ export abstract class DrawableViewer<
         >
           {this.getDrawableComponents()}
         </div>
-        <Grid justify={"flex-start"} container direction="row">
+        <Grid justifyContent={"flex-start"} container direction="row">
           {...this.getMenuComponents()}
         </Grid>
       </div>

@@ -1,4 +1,5 @@
 import { AttributeToolType } from "../const/common"
+import { Span3D } from "../drawable/3d/box_span/span3d"
 
 export type IdType = string
 export const INVALID_ID: IdType = ""
@@ -456,6 +457,8 @@ export interface TaskType {
   sensors: SensorMapType
   /** info on task progress */
   progress: Progress
+  /** bounding box created by spanning mode */
+  boxSpan: Span3D | undefined
 }
 
 export interface Select {
@@ -548,6 +551,8 @@ export interface SessionType {
   numUpdates: number
   /** Alerts */
   alerts: AlertType[]
+  /** Box span toggled */
+  boxSpan: boolean
 }
 
 export interface State {

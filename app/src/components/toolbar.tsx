@@ -12,7 +12,9 @@ import {
   changeViewerConfig,
   mergeTracks,
   splitTrack,
-  startLinkTrack
+  startLinkTrack,
+  activateSpan,
+  deactivateSpan
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -184,6 +186,16 @@ export class ToolBar extends Component<Props> {
             {makeButton("Delete", () => {
               this.deletePressed()
             })}
+          </div>
+          <div>
+            {this.state.session.boxSpan || this.state.task.boxSpan !== undefined
+              ? makeButton("Cancel", () => {
+                  this.deactivateSpan()
+                  alert(Severity.WARNING, "Box was not generated")
+                })
+              : makeButton("Activate span", () => {
+                  this.activateSpan()
+                })}
           </div>
           {this.state.task.config.tracking && (
             <div>
@@ -415,5 +427,21 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Activate box spanning mode
+   */
+  private activateSpan(): void {
+    Session.dispatch(activateSpan())
+  }
+
+  /**
+   * Deactivate box spanning mode
+   *
+   * @param state
+   */
+  private deactivateSpan(): void {
+    Session.dispatch(deactivateSpan())
   }
 }

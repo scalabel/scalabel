@@ -93,6 +93,25 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.addAlert(state, action as actionTypes.AddAlertAction)
     case actionConsts.CLOSE_ALERT:
       return common.removeAlert(state, action as actionTypes.RemoveAlertAction)
+    case actionConsts.ACTIVATE_SPAN:
+      return common.activateSpan(state)
+    case actionConsts.DEACTIVATE_SPAN:
+      return common.deactivateSpan(state)
+    case actionConsts.UPDATE_SPAN_POINT:
+      return common.updateSpanPoint(
+        state,
+        action as actionTypes.UpdateSpanPointAction
+      )
+    case actionConsts.REGISTER_SPAN_POINT:
+      return common.registerSpanPoint(state)
+    case actionConsts.RESET_SPAN:
+      return common.resetSpan(state)
+    case actionConsts.PAUSE_SPAN:
+      return common.pauseSpan(state)
+    case actionConsts.RESUME_SPAN:
+      return common.resumeSpan(state)
+    case actionConsts.UNDO_SPAN:
+      return common.undoSpan(state)
     case actionConsts.NULL:
       return state
     default:

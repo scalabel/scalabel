@@ -1,6 +1,13 @@
 import * as THREE from "three"
 
 import { selectLabel, selectLabel3dType } from "../../action/select"
+import {
+  deactivateSpan,
+  pauseSpan,
+  resetSpan,
+  resumeSpan,
+  undoSpan
+} from "../../action/common"
 import Session from "../../common/session"
 import {
   DataType,
@@ -21,6 +28,8 @@ import {
 import { commitLabels } from "../states"
 import { Label3D } from "./label3d"
 import { makeDrawableLabel3D } from "./label3d_list"
+import { alert } from "../../common/alert"
+import { Severity } from "../../types/common"
 
 /**
  * Handles user interactions with labels
@@ -289,6 +298,7 @@ export class Label3DHandler {
    * @returns true if consumed, false otherwise
    */
   public onKeyDown(e: KeyboardEvent): boolean {
+    const state = Session.getState()
     // TODO: break the cases into functions
     switch (e.key) {
       case Key.G_UP:
@@ -297,9 +307,21 @@ export class Label3DHandler {
         break
       }
       case Key.SPACE: {
-        return this.add3dLabel()
+        if (
+          state.session.boxSpan &&
+          state.task.boxSpan !== undefined &&
+          !state.task.boxSpan.complete
+        ) {
+          break
+        } else {
+          return this.createLabel()
+        }
       }
       case Key.ESCAPE:
+        if (state.session.boxSpan) {
+          Session.dispatch(resetSpan())
+        }
+        return true
       case Key.ENTER:
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
@@ -361,6 +383,21 @@ export class Label3DHandler {
             )
           }
         }
+        break
+      case Key.Q_LOW:
+        if (state.session.boxSpan) {
+          Session.dispatch(pauseSpan())
+        } else if (state.task.boxSpan !== undefined) {
+          Session.dispatch(resumeSpan())
+        }
+        return true
+      case Key.U_LOW:
+        if (state.session.boxSpan) {
+          Session.dispatch(undoSpan())
+        }
+        break
+      default:
+        break
     }
     if (Session.label3dList.selectedLabel !== null && !this.isKeyDown(e.key)) {
       const consumed = Session.label3dList.control.onKeyDown(e, this._camera)
@@ -487,5 +524,66 @@ export class Label3DHandler {
       fn()
       setTimeout(() => this.timedRepeat(fn, key, timeout), timeout)
     }
+  }
+
+  /** Create new label */
+  private createLabel(): boolean {
+    const label = makeDrawableLabel3D(
+      Session.label3dList,
+      Session.label3dList.currentLabelType
+    )
+    if (label !== null) {
+      const center = new Vector3D()
+      switch (this._viewerConfig.type) {
+        case ViewerConfigTypeName.POINT_CLOUD:
+          center.fromState(
+            (this._viewerConfig as PointCloudViewerConfigType).target
+          )
+          break
+        case ViewerConfigTypeName.IMAGE_3D:
+          if (this._sensor.extrinsics !== undefined) {
+            const worldDirection = new THREE.Vector3()
+            this._camera.getWorldDirection(worldDirection)
+            worldDirection.normalize()
+            worldDirection.multiplyScalar(5)
+            center.fromState(this._sensor.extrinsics.translation)
+            center.add(new Vector3D().fromThree(worldDirection))
+          }
+      }
+      label.init(
+        this._selectedItemIndex,
+        Session.label3dList.currentCategory,
+        center,
+        this._sensorIds,
+        undefined,
+        this._state.task.config.tracking
+      )
+
+      if (Session.getState().session.boxSpan) {
+        const box = Session.getState().task.boxSpan
+        if (box !== undefined) {
+          if (box.complete) {
+            try {
+              label.move(box.center)
+              label.rotate(box.rotation)
+              label.scale(box.dimensions, box.center, true)
+              Session.dispatch(deactivateSpan())
+            } catch (err) {
+              alert(Severity.ERROR, err.message)
+            }
+          }
+        }
+      }
+
+      Session.label3dList.addUpdatedLabel(label)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+      Session.label3dList.clearUpdatedLabels()
+      alert(Severity.SUCCESS, "Box successfully created")
+      return true
+    }
+    return false
   }
 }
