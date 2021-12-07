@@ -673,7 +673,7 @@ export function makeTask(params: Partial<TaskType> = {}): TaskType {
     progress: {
       submissions: []
     },
-    boxSpan: undefined,
+    boxSpan: null,
     ...params
   }
   return taskIdToString(task)

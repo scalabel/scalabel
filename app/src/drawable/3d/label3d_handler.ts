@@ -7,7 +7,7 @@ import {
   resetSpan,
   resumeSpan,
   undoSpan
-} from "../../action/common"
+} from "../../action/span3d"
 import Session from "../../common/session"
 import {
   DataType,
@@ -225,11 +225,7 @@ export class Label3DHandler {
     // TODO: break the cases into functions
     switch (e.key) {
       case Key.SPACE: {
-        if (
-          state.session.boxSpan &&
-          state.task.boxSpan !== undefined &&
-          !state.task.boxSpan.complete
-        ) {
+        if (state.task.boxSpan !== null && !state.task.boxSpan.complete) {
           break
         } else {
           return this.createLabel()
@@ -305,7 +301,7 @@ export class Label3DHandler {
       case Key.Q_LOW:
         if (state.session.boxSpan) {
           Session.dispatch(pauseSpan())
-        } else if (state.task.boxSpan !== undefined) {
+        } else if (state.task.boxSpan !== null) {
           Session.dispatch(resumeSpan())
         }
         return true
@@ -477,18 +473,16 @@ export class Label3DHandler {
         this._state.task.config.tracking
       )
 
-      if (Session.getState().session.boxSpan) {
-        const box = Session.getState().task.boxSpan
-        if (box !== undefined) {
-          if (box.complete) {
-            try {
-              label.move(box.center)
-              label.rotate(box.rotation)
-              label.scale(box.dimensions, box.center, true)
-              Session.dispatch(deactivateSpan())
-            } catch (err) {
-              alert(Severity.ERROR, err.message)
-            }
+      const box = Session.getState().task.boxSpan
+      if (box !== null) {
+        if (box.complete) {
+          try {
+            label.move(box.center)
+            label.rotate(box.rotation)
+            label.scale(box.dimensions, box.center, true)
+            Session.dispatch(deactivateSpan())
+          } catch (err) {
+            alert(Severity.ERROR, err.message)
           }
         }
       }

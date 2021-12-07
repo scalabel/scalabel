@@ -6,7 +6,7 @@ import * as THREE from "three"
 
 import Session from "../common/session"
 import { ViewerConfigTypeName } from "../const/common"
-import { registerSpanPoint, updateSpanPoint } from "../action/common"
+import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { Image3DViewerConfigType, State } from "../types/state"
@@ -265,7 +265,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       return
     }
     const state = Session.getState()
-    if (state.session.boxSpan && state.task.boxSpan !== undefined) {
+    if (state.session.boxSpan && state.task.boxSpan !== null) {
       // send mouse position to register new point in span box
       if (!state.task.boxSpan.complete) {
         Session.dispatch(registerSpanPoint())
@@ -283,6 +283,10 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (this.canvas === null || this.checkFreeze()) {
       return
+    }
+
+    if (this.crosshair.current !== null) {
+      this.crosshair.current.onMouseMove(e)
     }
 
     const normalized = normalizeCoordinatesToCanvas(
@@ -332,10 +336,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (consumed) {
         e.stopPropagation()
       }
-    }
-
-    if (this.crosshair.current !== null) {
-      this.crosshair.current.onMouseMove(e)
     }
 
     Session.label3dList.onDrawableUpdate()
@@ -418,7 +418,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       isCurrentFrameLoaded(state, sensor)
     ) {
       const boxSpan = Session.getState().task.boxSpan
-      if (boxSpan !== undefined) {
+      if (boxSpan !== null) {
         boxSpan.render(Session.label3dList.scene)
       }
       this.renderer.render(Session.label3dList.scene, this.camera)

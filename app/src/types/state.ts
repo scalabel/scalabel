@@ -458,7 +458,7 @@ export interface TaskType {
   /** info on task progress */
   progress: Progress
   /** bounding box created by spanning mode */
-  boxSpan: Span3D | undefined
+  boxSpan: Span3D | null
 }
 
 export interface Select {
