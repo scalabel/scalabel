@@ -20,6 +20,7 @@ import {
 import { Crosshair, Crosshair2D } from "./crosshair"
 import { Vector3D } from "../math/vector3d"
 import { Plane3D } from "../drawable/3d/plane3d"
+import { Vector2D } from "../math/vector2d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -326,16 +327,15 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
       }
 
-      if (this._raycaster.ray.intersectsPlane(plane)) {
-        const intersects = new THREE.Vector3()
-        this._raycaster.ray.intersectPlane(plane, intersects)
-        Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects)))
-        if (state.task.boxSpan !== undefined) {
-          state.task.boxSpan.updatePointTmp(
-            new Vector3D().fromThree(intersects),
-            plane
-          )
-        }
+      const intersects = new THREE.Vector3()
+      this._raycaster.ray.intersectPlane(plane, intersects)
+      Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects)))
+      if (state.task.boxSpan !== undefined) {
+        state.task.boxSpan.updatePointTmp(
+          new Vector2D(x, y),
+          plane,
+          this.camera
+        )
       }
     } else {
       this.setCursor("default")
@@ -440,7 +440,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       isCurrentFrameLoaded(state, sensor)
     ) {
       const boxSpan = Session.getState().task.boxSpan
-      if (boxSpan !== undefined) {
+      if (boxSpan?.render !== undefined) {
         boxSpan.render(Session.label3dList.scene)
       }
       this.renderer.render(Session.label3dList.scene, this.camera)
