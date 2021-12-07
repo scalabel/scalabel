@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { ViewerConfigTypeName } from "../const/common"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint, updateSpanPoint } from "../action/common"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
@@ -19,6 +19,7 @@ import {
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
 import { Vector3D } from "../math/vector3d"
+import { Plane3D } from "../drawable/3d/plane3d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -310,10 +311,31 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
         offset
       )
+
+      // Check if ground plane in current item
+      const selectedItem = state.user.select.item
+      const labels = Session.label3dList.labels()
+      const itemPlanes = labels.filter(
+        (l) =>
+          l.item === selectedItem && l.label.type === LabelTypeName.PLANE_3D
+      )
+      if (itemPlanes.length > 0) {
+        const itemPlane = itemPlanes[0] as Plane3D
+        const normal = new THREE.Vector3(0, 0, 1)
+        normal.applyQuaternion(itemPlane.orientation)
+        plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
+      }
+
       if (this._raycaster.ray.intersectsPlane(plane)) {
         const intersects = new THREE.Vector3()
         this._raycaster.ray.intersectPlane(plane, intersects)
         Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects)))
+        if (state.task.boxSpan !== undefined) {
+          state.task.boxSpan.updatePointTmp(
+            new Vector3D().fromThree(intersects),
+            plane
+          )
+        }
       }
     } else {
       this.setCursor("default")

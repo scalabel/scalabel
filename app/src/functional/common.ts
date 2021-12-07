@@ -1665,21 +1665,22 @@ export function deactivateSpan(state: State): State {
  * @param action
  */
 export function updateSpanPoint(
-  state: State,
-  action: actionTypes.UpdateSpanPointAction
+  state: State
+  // action: actionTypes.UpdateSpanPointAction
 ): State {
-  const oldTask = state.task
-  const newBox = oldTask.boxSpan
-  if (newBox !== undefined) {
-    newBox.updatePointTmp(action.point)
-  }
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: newBox
-  })
-  return updateObject(state, {
-    task: newTask
-  })
+  return state
+  // const oldTask = state.task
+  // const newBox = oldTask.boxSpan
+  // if (newBox !== undefined) {
+  //   newBox.updatePointTmp(action.point)
+  // }
+  // const newTask = updateObject(oldTask, {
+  //   ...state.task,
+  //   boxSpan: newBox
+  // })
+  // return updateObject(state, {
+  //   task: newTask
+  // })
 }
 
 /**

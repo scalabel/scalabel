@@ -4,7 +4,6 @@ import { LabelTypeName } from "../../const/common"
 import { makeLabel } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
-import { Box3D } from "./box3d"
 import { Grid3D } from "./grid3d"
 import Label3D from "./label3d"
 import { Label3DList } from "./label3d_list"
@@ -16,8 +15,6 @@ import { Shape3D } from "./shape3d"
 export class Plane3D extends Label3D {
   /** ThreeJS object for rendering shape */
   private readonly _shape: Grid3D
-  /** temporary shape */
-  private _temporaryLabel: Label3D | null
 
   /**
    * Constructor
@@ -27,7 +24,6 @@ export class Plane3D extends Label3D {
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Grid3D(this)
-    this._temporaryLabel = null
   }
 
   /**
@@ -60,7 +56,11 @@ export class Plane3D extends Label3D {
     if (center !== undefined && center !== null) {
       // this._shape.center = center
       this._shape.position.copy(center.toThree())
-      this._shape.rotation.copy(new THREE.Euler(Math.PI / 2, 0, 0))
+      this._shape.rotation.copy(
+        new Vector3D()
+          .fromState(new THREE.Vector3(Math.PI / 2, 0, 0))
+          .toThreeEuler()
+      )
     }
   }
 
@@ -97,31 +97,8 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse move
-   *
-   * @param projection
-   * @param x
-   * @param y
-   * @param camera
    */
-  public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
-    if (
-      (this.selected || this.anyChildSelected()) &&
-      this._labelList.currentLabelType === LabelTypeName.BOX_3D
-    ) {
-      this._temporaryLabel = new Box3D(this._labelList)
-      this._temporaryLabel.init(
-        this._label.item,
-        0,
-        undefined,
-        this._label.sensors,
-        true
-      )
-      this.addChild(this._temporaryLabel)
-      for (const shape of this._temporaryLabel.internalShapes()) {
-        this._labelList.scene.add(shape)
-      }
-      return this._temporaryLabel.onMouseDown(x, y, camera)
-    }
+  public onMouseDown(): boolean {
     return false
   }
 
@@ -130,25 +107,12 @@ export class Plane3D extends Label3D {
    *
    * @param projection
    */
-  public onMouseUp(): void {
-    if (this._temporaryLabel !== null) {
-      this._temporaryLabel.onMouseUp()
-      this._temporaryLabel = null
-    }
-  }
+  public onMouseUp(): void {}
 
   /**
    * Handle mouse move
-   *
-   * @param projection
-   * @param x
-   * @param y
-   * @param camera
    */
-  public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
-    if (this._temporaryLabel !== null) {
-      return this._temporaryLabel.onMouseMove(x, y, camera)
-    }
+  public onMouseMove(): boolean {
     return false
   }
 
@@ -260,16 +224,6 @@ export class Plane3D extends Label3D {
       label.shapes[0],
       activeCamera
     )
-
-    const currentChildren = [...this._children]
-    for (const child of currentChildren) {
-      if (!this._label.children.includes(child.labelId)) {
-        this.removeChild(child)
-        for (const shape of child.internalShapes()) {
-          this._shape.remove(shape)
-        }
-      }
-    }
   }
 
   /**

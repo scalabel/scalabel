@@ -58,7 +58,7 @@ export function box3dToCube(box3d: bdd.Box3DType): types.SimpleCube {
     },
     orientation: {
       x: box3d.orientation[0],
-      y: box3d.orientation[1],
+      y: box3d.orientation[1] + Math.PI / 2,
       z: box3d.orientation[2]
     },
     center: {

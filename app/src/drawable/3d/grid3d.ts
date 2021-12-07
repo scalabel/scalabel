@@ -100,7 +100,9 @@ export class Grid3D extends Shape3D {
   public toState(): ShapeType {
     const plane = this._planeShape
     plane.center = new Vector3D().fromThree(this.center.toThree()).toState()
-    plane.orientation = this.rotation
+    plane.orientation = new Vector3D()
+      .fromThree(this.rotation.toVector3())
+      .toState()
     return plane
   }
 
@@ -185,8 +187,8 @@ export class Grid3D extends Shape3D {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType
     this.position.copy(new Vector3D().fromState(newShape.center).toThree())
-    this.rotation.setFromVector3(
-      new Vector3D().fromState(newShape.orientation).toThree()
+    this.rotation.copy(
+      new Vector3D().fromState(newShape.orientation).toThreeEuler()
     )
     // Also update the _planeShape
     this._planeShape = newShape

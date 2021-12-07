@@ -234,7 +234,7 @@ export class Label3DHandler {
         break
       case ViewerConfigTypeName.IMAGE_3D:
         if (labelType === LabelTypeName.PLANE_3D) {
-          center.add(new Vector3D(0, 1, 10))
+          center.add(new Vector3D(0, 2, 10))
         } else {
           center.add(new Vector3D(0, 0, 10))
         }
@@ -292,6 +292,35 @@ export class Label3DHandler {
   }
 
   /**
+   * Select or add ground plane
+   *
+   * @returns boolean: true if successful, false otherwise
+   */
+  private selectOrCreateGroundPlane(): boolean {
+    const labels = Session.label3dList.labels()
+    const itemPlanes = labels.filter(
+      (l) =>
+        l.item === this._selectedItemIndex &&
+        l.label.type === LabelTypeName.PLANE_3D
+    )
+    if (itemPlanes.length > 0) {
+      const plane = itemPlanes[0]
+      Session.dispatch(
+        selectLabel(
+          Session.label3dList.selectedLabelIds,
+          this._selectedItemIndex,
+          plane.labelId,
+          plane.category[0],
+          plane.attributes
+        )
+      )
+      return true
+    } else {
+      return this.add3dLabel(LabelTypeName.PLANE_3D)
+    }
+  }
+
+  /**
    * Handle keyboard events
    *
    * @param {KeyboardEvent} e
@@ -303,8 +332,7 @@ export class Label3DHandler {
     switch (e.key) {
       case Key.G_UP:
       case Key.G_LOW: {
-        this.add3dLabel(LabelTypeName.PLANE_3D)
-        break
+        return this.selectOrCreateGroundPlane()
       }
       case Key.SPACE: {
         if (

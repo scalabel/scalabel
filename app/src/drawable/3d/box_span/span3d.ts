@@ -27,7 +27,9 @@ export class Span3D {
   /** Whether span box is complete */
   private _complete: boolean
 
-  /** Constructor */
+  /**
+   * Constructor
+   */
   constructor() {
     this._p1 = null
     this._p2 = null
@@ -95,12 +97,13 @@ export class Span3D {
    * Register new temporary point given current mouse position
    *
    * @param point
+   * @param plane
    */
-  public updatePointTmp(point: Vector3D): this {
+  public updatePointTmp(point: Vector3D, plane: THREE.Plane): this {
     if (this._p2 !== null && this._p3 === null) {
       // make second point orthogonal to line
       if (this._line !== null) {
-        const newCoords = this._line.alignPointToNormal(point)
+        const newCoords = this._line.alignPointToNormal(point, plane)
         this._pTmp = new SpanPoint3D(newCoords)
       }
     } else if (this._p3 !== null && this._p4 === null) {
