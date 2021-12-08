@@ -177,7 +177,7 @@ def parse_label(
         else:
             seq_id = 0
 
-        if seq_id not in labels_dict.keys():
+        if seq_id not in labels_dict:
             labels_dict[seq_id] = []
 
         cat = label[0 + offset]
