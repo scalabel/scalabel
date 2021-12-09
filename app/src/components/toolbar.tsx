@@ -14,7 +14,10 @@ import {
   splitTrack,
   startLinkTrack,
   activateSpan,
-  deactivateSpan
+  deactivateSpan,
+  splitPane,
+  deletePane,
+  addViewerConfig
 } from "../action/common"
 import {
   changeSelectedLabelsAttributes,
@@ -25,11 +28,21 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName } from "../const/common"
+import { Key, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
-import { isValidId, makeTrack } from "../functional/states"
+import {
+  isValidId,
+  makeDefaultViewerConfig,
+  makeTrack
+} from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, Category, ModeStatus, State } from "../types/state"
+import {
+  Attribute,
+  Category,
+  ModeStatus,
+  State,
+  SplitType
+} from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
@@ -212,6 +225,14 @@ export class ToolBar extends Component<Props> {
             <div>
               {makeButton("Break Track", () => {
                 this.unlinkSelectedTrack(this.state)
+              })}
+            </div>
+          )}
+          {this.state.user.viewerConfigs[0].type ===
+            ViewerConfigTypeName.IMAGE_3D && (
+            <div>
+              {makeButton("Homography", () => {
+                this.toggleHomographyView(this.state)
               })}
             </div>
           )}
@@ -443,5 +464,41 @@ export class ToolBar extends Component<Props> {
    */
   private deactivateSpan(): void {
     Session.dispatch(deactivateSpan())
+  }
+
+  /**
+   * Toggle homography view
+   *
+   * @param state
+   */
+  private toggleHomographyView(state: State): void {
+    const panes = Object.keys(state.user.layout.panes).map((key) =>
+      parseInt(key)
+    )
+    const firstPane = Math.min(...panes)
+    const lastPane = state.user.layout.maxPaneId
+    if (panes.length === 1) {
+      const viewerConfigIds = Object.keys(state.user.viewerConfigs).map((key) =>
+        parseInt(key)
+      )
+      let lastViewerConfigId = state.user.layout.maxViewerConfigId
+      if (viewerConfigIds.length === 1) {
+        lastViewerConfigId += 1
+        const config = makeDefaultViewerConfig(
+          ViewerConfigTypeName.HOMOGRAPHY,
+          lastPane
+        )
+        if (config !== null) {
+          Session.dispatch(addViewerConfig(lastViewerConfigId, config))
+        }
+      }
+      Session.dispatch(
+        splitPane(firstPane, SplitType.VERTICAL, lastViewerConfigId)
+      )
+    } else {
+      Session.dispatch(
+        deletePane(lastPane, state.user.layout.maxViewerConfigId)
+      )
+    }
   }
 }
