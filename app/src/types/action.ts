@@ -263,6 +263,13 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
+  | ActivateSpanAction
+  | DeactivateSpanAction
+  | UpdateSpanPointAction
+  | RegisterSpanPointAction
+  | ResetSpanAction
+  | PauseSpanAction
+  | ResumeSpanAction
 
 export type UserActionType =
   | ChangeSelectAction
@@ -281,13 +288,6 @@ export type TaskActionType =
   | AddTrackAction
   | MergeTrackAction
   | SubmitAction
-  | ActivateSpanAction
-  | DeactivateSpanAction
-  | UpdateSpanPointAction
-  | RegisterSpanPointAction
-  | ResetSpanAction
-  | PauseSpanAction
-  | ResumeSpanAction
 
 export type ActionType =
   | SessionActionType

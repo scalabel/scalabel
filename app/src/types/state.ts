@@ -457,8 +457,6 @@ export interface TaskType {
   sensors: SensorMapType
   /** info on task progress */
   progress: Progress
-  /** bounding box created by spanning mode */
-  boxSpan: Span3D | null
 }
 
 export interface Select {
@@ -552,7 +550,9 @@ export interface SessionType {
   /** Alerts */
   alerts: AlertType[]
   /** Box span toggled */
-  boxSpan: boolean
+  isBoxSpan: boolean
+  /** bounding box created by spanning mode */
+  boxSpan: Span3D | null
 }
 
 export interface State {
