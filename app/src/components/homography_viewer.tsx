@@ -75,6 +75,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         normal.applyQuaternion(grid.quaternion)
         normal.setLength(50)
         const position = grid.position.clone()
+        position.add(normal)
         this._camera.up = new THREE.Vector3(0, 0, 1)
         this._camera.position.copy(position)
         this._camera.lookAt(grid.position)
