@@ -46,6 +46,8 @@ export class Span3D {
     }
     this._points.map((l) => l.render(scene))
     switch (this._points.length) {
+      case 0:
+        break
       case 1: {
         // render line between first point and temp point
         const line = new SpanLine3D(this._points[0], this._pTmp)
