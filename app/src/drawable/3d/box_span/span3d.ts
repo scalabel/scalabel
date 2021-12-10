@@ -4,6 +4,7 @@ import { SpanPoint3D } from "./spanPoint3d"
 import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 import { SpanCuboid3D } from "./spanCuboid3d"
+import { Vector2D } from "../../../math/vector2d"
 import { Vector3D } from "../../../math/vector3d"
 
 /**
@@ -95,8 +96,9 @@ export class Span3D {
    * Register new temporary point given current mouse position
    *
    * @param point
+   * @param mousePos
    */
-  public updatePointTmp(point: Vector3D): this {
+  public updatePointTmp(point: Vector3D, mousePos: Vector2D): this {
     if (this._p2 !== null && this._p3 === null) {
       // make second point orthogonal to line
       if (this._line !== null) {
@@ -105,8 +107,9 @@ export class Span3D {
       }
     } else if (this._p3 !== null && this._p4 === null) {
       // make third point orthogonal to plane
+      const scaleFactor = 5
       this._pTmp = new SpanPoint3D(
-        new Vector3D(this._p3.x, this._p3.y, point.y)
+        new Vector3D(this._p3.x, this._p3.y, mousePos.y * scaleFactor)
       )
     } else {
       this._pTmp = new SpanPoint3D(point)
