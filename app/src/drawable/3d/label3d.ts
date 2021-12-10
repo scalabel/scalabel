@@ -52,6 +52,8 @@ export abstract class Label3D {
   protected _labelList: Label3DList
   /** this field now has no meaning for label3d */
   protected _singleAtInitial: boolean
+  /** this field now has no meaning for label3d */
+  protected _activeCamera: THREE.Camera | null
 
   /**
    * Constructor
@@ -68,6 +70,7 @@ export abstract class Label3D {
     this._temporary = true
     this._labelList = labelList
     this._singleAtInitial = false
+    this._activeCamera = null
   }
 
   /** Get label list */
@@ -231,9 +234,14 @@ export abstract class Label3D {
   }
 
   /** Set active camera for label */
-  // TODO: is this still useful?
-  // eslint-disable-next-line accessor-pairs,require-jsdoc
-  public set activeCamera(_camera: THREE.Camera) {}
+  public set activeCamera(camera: THREE.Camera | null) {
+    this._activeCamera = camera
+  }
+
+  /** Get active camera for label */
+  public get activeCamera(): THREE.Camera | null {
+    return this._activeCamera
+  }
 
   /**
    * Handle mouse move

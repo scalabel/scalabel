@@ -1,8 +1,10 @@
 import { withStyles } from "@material-ui/styles"
-import React from "react"
+import * as React from "react"
+import * as THREE from "three"
 
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
+import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { viewerStyles } from "../styles/viewer"
 import {
   HomographyViewerConfigType,
@@ -11,11 +13,59 @@ import {
 import { SCROLL_ZOOM_RATIO } from "../view_config/image"
 import { DrawableViewer, ViewerProps } from "./drawable_viewer"
 import HomographyCanvas from "./homography_canvas"
+import Label3dCanvas from "./label3d_canvas"
 
 /**
  * Viewer for images and 2d labels
  */
 class HomographyViewer extends DrawableViewer<ViewerProps> {
+  /** Intrinsic camera */
+  private readonly _camera: IntrinsicCamera
+
+  /**
+   * Constructor
+   *
+   * @param {Object} props: react props
+   * @param props
+   */
+  constructor(props: ViewerProps) {
+    super(props)
+    this._camera = new IntrinsicCamera()
+    this._camera.up = new THREE.Vector3(0, -1, 0)
+    this._camera.lookAt(new THREE.Vector3(0, 0, 1))
+  }
+
+  /** Component update function */
+  public componentDidUpdate(): void {
+    if (this._viewerConfig !== null) {
+      const sensor = this._viewerConfig?.sensor ?? null
+      if (sensor !== null) {
+        this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
+      }
+      if (this._container !== null) {
+        const displayRect = this._container.getBoundingClientRect()
+        this._camera.width = displayRect.width
+        this._camera.height = displayRect.height
+        this._camera.intrinsics = {
+          focalLength: {
+            x: displayRect.width,
+            y: displayRect.height
+          },
+          focalCenter: {
+            x: displayRect.width / 2,
+            y: displayRect.height / 2
+          }
+        }
+      }
+
+      this._camera.position.set(0, -50, 10)
+      this._camera.up = new THREE.Vector3(0, 0, 1)
+      this._camera.lookAt(new THREE.Vector3(0, 2, 20))
+
+      this._camera.calculateProjectionMatrix()
+    }
+  }
+
   /**
    * Render function
    *
@@ -36,6 +86,14 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
           key={`homographyCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
+        />
+      )
+      views.push(
+        <Label3dCanvas
+          key={`label3dCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+          camera={this._camera}
         />
       )
     }
