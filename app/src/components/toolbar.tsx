@@ -190,7 +190,8 @@ export class ToolBar extends Component<Props> {
             this.state.task.config.itemType ===
               ItemTypeName.POINT_CLOUD_TRACKING) && (
             <div>
-              {this.state.session.boxSpan || this.state.task.boxSpan !== null
+              {this.state.session.isBoxSpan ||
+              this.state.session.boxSpan !== null
                 ? makeButton("Cancel", () => {
                     this.deactivateSpan()
                     alert(Severity.WARNING, "Box was not generated")

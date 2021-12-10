@@ -639,7 +639,8 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     mode: ModeStatus.ANNOTATING,
     numUpdates: 0,
     alerts: [],
-    boxSpan: false,
+    isBoxSpan: false,
+    boxSpan: null,
     ...params
   }
 }
@@ -673,7 +674,6 @@ export function makeTask(params: Partial<TaskType> = {}): TaskType {
     progress: {
       submissions: []
     },
-    boxSpan: null,
     ...params
   }
   return taskIdToString(task)
