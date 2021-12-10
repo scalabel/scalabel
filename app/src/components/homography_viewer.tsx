@@ -4,6 +4,8 @@ import * as THREE from "three"
 
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
+import { LabelTypeName } from "../const/common"
+import { Grid3D } from "../drawable/3d/grid3d"
 import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { viewerStyles } from "../styles/viewer"
 import {
@@ -49,7 +51,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         this._camera.intrinsics = {
           focalLength: {
             x: displayRect.width,
-            y: displayRect.height
+            y: displayRect.height * 2
           },
           focalCenter: {
             x: displayRect.width / 2,
@@ -58,10 +60,25 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         }
       }
 
-      this._camera.position.set(0, -50, 10)
-      this._camera.up = new THREE.Vector3(0, 0, 1)
-      this._camera.lookAt(new THREE.Vector3(0, 2, 20))
+      const state = Session.getState()
+      const labels = Session.label3dList.labels()
+      const plane =
+        labels.filter(
+          (l) =>
+            l.item === state.user.select.item &&
+            l.label.type === LabelTypeName.PLANE_3D
+        )[0] ?? null
 
+      if (plane !== null) {
+        const grid = plane.internalShapes()[0] as Grid3D
+        const normal = new THREE.Vector3(0, 0, 1)
+        normal.applyQuaternion(grid.quaternion)
+        normal.setLength(50)
+        const position = grid.position.clone()
+        this._camera.up = new THREE.Vector3(0, 0, 1)
+        this._camera.position.copy(position)
+        this._camera.lookAt(grid.position)
+      }
       this._camera.calculateProjectionMatrix()
     }
   }

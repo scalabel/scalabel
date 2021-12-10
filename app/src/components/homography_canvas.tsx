@@ -141,27 +141,31 @@ class HomographyCanvas extends ImageCanvas {
     )[0]
 
     const sensor = this.state.task.sensors[sensorId]
-    // Set intrinsics
     const intrinsics = sensor?.intrinsics ?? null
-    if (intrinsics !== null) {
-      const fx = intrinsics.focalLength.x // image.width
-      const cx = intrinsics.focalCenter.x // image.width
-      const fy = intrinsics.focalLength.y // image.height
-      const cy = intrinsics.focalCenter.y // image.height
+    if (this._plane !== null && intrinsics !== null) {
+      // Set intrinsics
+      const fx = intrinsics.focalLength.x
+      const cx = intrinsics.focalCenter.x
+      const fy = intrinsics.focalLength.y
+      const cy = intrinsics.focalCenter.y
       const intrinsicArr = [fx, 0, 0, 0, 0, fy, 0, 0, cx, cy, 1, 0, 0, 0, 0, 0]
       this._intrinsicMatrix.fromArray(intrinsicArr)
+
+      const grid = this._plane.internalShapes()[0]
+      const matrix = new THREE.Matrix4()
+      matrix.makeRotationFromQuaternion(grid.quaternion)
+      matrix.setPosition(grid.position.x, grid.position.y, grid.position.z)
+
+      const extrinsics = new THREE.Matrix4()
+      extrinsics.copy(matrix)
+
+      const projection = new THREE.Matrix4()
+      projection.multiplyMatrices(this._intrinsicMatrix, extrinsics)
+      const projArray = projection.toArray()
+      const indices = [0, 1, 2, 4, 5, 6, 12, 13, 14]
+      const homographyValues = indices.map((i) => projArray[i])
+      this._homographyMatrix.fromArray(homographyValues)
     }
-    const extrinsics = new THREE.Matrix4()
-    extrinsics.set(1, 0, 0, 0, 0, 0, -1, 2, 0, 1, 0, 10, 0, 0, 0, 1)
-
-    const projection = new THREE.Matrix4()
-    projection.multiplyMatrices(this._intrinsicMatrix, extrinsics)
-
-    const projArray = projection.toArray()
-    const indices = [0, 1, 2, 4, 5, 6, 12, 13, 14]
-    const homographyValues = indices.map((i) => projArray[i])
-    this._homographyMatrix.fromArray(homographyValues)
-    console.log("homography", this._homographyMatrix)
   }
 
   /**
@@ -173,19 +177,18 @@ class HomographyCanvas extends ImageCanvas {
     super.updateState(state)
 
     const labels = Session.label3dList.labels()
-    const itemPlanes = labels.filter(
-      (l) =>
-        l.item === state.user.select.item &&
-        l.label.type === LabelTypeName.PLANE_3D
-    )
-    if (itemPlanes.length > 0) {
-      this._plane = itemPlanes[0] as Plane3D
-      const newPlaneState = JSON.stringify(
-        this._plane.internalShapes()[0].toState()
-      )
-      if (this._planeState !== newPlaneState) {
+    const plane =
+      labels.filter(
+        (l) =>
+          l.item === state.user.select.item &&
+          l.label.type === LabelTypeName.PLANE_3D
+      )[0] ?? null
+    if (plane !== null) {
+      this._plane = plane as Plane3D
+      const planeState = JSON.stringify(plane.internalShapes()[0].toState())
+      if (this._planeState !== planeState) {
         this._updated = true
-        this._planeState = newPlaneState
+        this._planeState = planeState
       }
     } else {
       this._plane = null
@@ -236,53 +239,51 @@ class HomographyCanvas extends ImageCanvas {
     if (
       this.imageCanvas !== null &&
       this.imageContext !== null &&
-      this._imageData !== null
+      this._imageData !== null &&
+      this._plane !== null &&
+      this._image !== null
     ) {
-      if (this._plane !== null && this._image !== null) {
-        const homographyData = this.imageContext.createImageData(
-          this.imageCanvas.width,
-          this.imageCanvas.height
-        )
+      const homographyData = this.imageContext.createImageData(
+        this.imageCanvas.width,
+        this.imageCanvas.height
+      )
 
-        const width = 50
-        const height = 50
-        for (let dstX = 0; dstX < this.imageCanvas.width; dstX++) {
-          for (let dstY = 0; dstY < this.imageCanvas.height; dstY++) {
-            // Get source coordinates
-            const src = new THREE.Vector3(
-              (dstX * width) / this.imageCanvas.width - width / 2,
-              (dstY * height) / this.imageCanvas.height - height / 2,
-              1
-            )
-            src.applyMatrix3(this._homographyMatrix)
-            src.multiplyScalar(1 / src.z)
+      const width = 50
+      const height = 50
+      for (let dstX = 0; dstX < this.imageCanvas.width; dstX++) {
+        for (let dstY = 0; dstY < this.imageCanvas.height; dstY++) {
+          // Get source coordinates
+          const src = new THREE.Vector3(
+            (dstX * width) / this.imageCanvas.width - width / 2,
+            (dstY * height) / this.imageCanvas.height - height / 2,
+            1
+          )
+          src.applyMatrix3(this._homographyMatrix)
+          src.multiplyScalar(1 / src.z)
 
-            const srcX = Math.floor(src.x)
-            const srcY = Math.floor(src.y)
-            if (
-              srcX >= 0 &&
-              srcY >= 0 &&
-              srcX < this._hiddenCanvas.width &&
-              srcY < this._hiddenCanvas.height
-            ) {
-              const imageStart = (srcY * this._hiddenCanvas.width + srcX) * 4
-              const homographyStart =
-                ((this.imageCanvas.height - dstY - 1) * this.imageCanvas.width +
-                  dstX) *
-                4
-              for (let i = 0; i < 4; i++) {
-                homographyData.data[homographyStart + i] = this._imageData[
-                  imageStart + i
-                ]
-              }
+          const srcX = Math.floor(src.x)
+          const srcY = Math.floor(src.y)
+          if (
+            srcX >= 0 &&
+            srcY >= 0 &&
+            srcX < this._hiddenCanvas.width &&
+            srcY < this._hiddenCanvas.height
+          ) {
+            const imageStart = (srcY * this._hiddenCanvas.width + srcX) * 4
+            const homographyStart =
+              ((this.imageCanvas.height - dstY - 1) * this.imageCanvas.width +
+                dstX) *
+              4
+            for (let i = 0; i < 4; i++) {
+              homographyData.data[homographyStart + i] = this._imageData[
+                imageStart + i
+              ]
             }
           }
         }
-
-        this.imageContext.putImageData(homographyData, 0, 0)
-      } else {
-        clearCanvas(this.imageCanvas, this.imageContext)
       }
+
+      this.imageContext.putImageData(homographyData, 0, 0)
     }
   }
 }
