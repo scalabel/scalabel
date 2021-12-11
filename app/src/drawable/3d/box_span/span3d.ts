@@ -4,7 +4,6 @@ import { SpanPoint3D } from "./spanPoint3d"
 import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 import { SpanCuboid3D } from "./spanCuboid3d"
-import { Vector2D } from "../../../math/vector2d"
 import { Vector3D } from "../../../math/vector3d"
 
 /**
@@ -88,9 +87,9 @@ export class Span3D {
    * Register new temporary point given current mouse position
    *
    * @param point
-   * @param mousePos
+   * @param mouseY
    */
-  public updatePointTmp(point: Vector3D, mousePos: Vector2D): this {
+  public updatePointTmp(point: Vector3D, mouseY: number): this {
     switch (this._points.length) {
       case 2:
         // make second point orthogonal to line
@@ -106,7 +105,7 @@ export class Span3D {
           new Vector3D(
             this._points[2].x,
             this._points[2].y,
-            mousePos.y * scaleFactor
+            mouseY * scaleFactor
           )
         )
         break

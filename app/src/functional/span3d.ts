@@ -50,7 +50,7 @@ export function updateSpanPoint(
   const oldSession = state.session
   const newBox = oldSession.boxSpan
   if (newBox !== null) {
-    newBox.updatePointTmp(action.point, action.mousePos)
+    newBox.updatePointTmp(action.point, action.mouseY)
   }
   const newSession = updateObject(oldSession, {
     ...state.session,

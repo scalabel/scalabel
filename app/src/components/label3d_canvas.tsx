@@ -18,7 +18,6 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
-import { Vector2D } from "../math/vector2d"
 import { Vector3D } from "../math/vector3d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
@@ -315,16 +314,9 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
         offset
       )
-      if (this._raycaster.ray.intersectsPlane(plane)) {
-        const intersects = new THREE.Vector3()
-        this._raycaster.ray.intersectPlane(plane, intersects)
-        Session.dispatch(
-          updateSpanPoint(
-            new Vector3D().fromThree(intersects),
-            new Vector2D(x, y)
-          )
-        )
-      }
+      const intersects = new THREE.Vector3()
+      this._raycaster.ray.intersectPlane(plane, intersects)
+      Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects), y))
     } else {
       this.setCursor("default")
       const shapes = Session.label3dList.raycastableShapes

@@ -18,7 +18,6 @@ import {
   TaskType,
   ViewerConfigType
 } from "./state"
-import { Vector2D } from "../math/vector2d"
 import { Vector3D } from "../math/vector3d"
 
 export interface BaseAction {
@@ -233,8 +232,8 @@ export type DeactivateSpanAction = BaseAction
 export interface UpdateSpanPointAction extends BaseAction {
   /** world coordinates of point */
   point: Vector3D
-  /** mouse position */
-  mousePos: Vector2D
+  /** mouse y-coordinate */
+  mouseY: number
 }
 
 export type RegisterSpanPointAction = BaseAction
