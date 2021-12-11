@@ -4,7 +4,7 @@ import json
 import time
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple, TypeVar, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import motmetrics as mm
 import numpy as np
@@ -23,10 +23,11 @@ from ..label.utils import (
     get_parent_categories,
 )
 from .result import AVERAGE, OVERALL, Result, Scores, ScoresList
+from .utils import label_ids_to_int
 
-Video = TypeVar("Video", List[Frame], List[str])
+# Video = TypeVar("Video", List[Frame])
 VidFunc = Callable[
-    [Video, Video, List[str], float, float, bool],
+    [List[Frame], List[Frame], List[str], float, float, bool],
     List[mm.MOTAccumulator],
 ]
 
@@ -105,24 +106,6 @@ def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
             h = min(p[1] + p[3], g[1] + g[3]) - max(p[1], g[1])
             out[i][j] = max(w, 0) * max(h, 0) / float(p[2] * p[3])
     return out
-
-
-def label_ids_to_int(frames: List[Frame]) -> None:
-    """Converts any type of label index to a string representing an integer."""
-    assert len(frames) > 0
-    # if label ids are strings not representing integers, convert them
-    ids = []
-    for frame in frames:
-        if frame.labels is not None:
-            ids.extend([l.id for l in frame.labels])
-
-    if any(not id.isdigit() for id in ids):
-        ids_to_int = {y: x + 1 for x, y in enumerate(sorted(set(ids)))}
-
-        for frame in frames:
-            if frame.labels is not None:
-                for label in frame.labels:
-                    label.id = str(ids_to_int[label.id])
 
 
 def acc_single_video_mot(
@@ -339,9 +322,9 @@ def generate_results(
 
 
 def evaluate_track(
-    acc_single_video: VidFunc[Video],
-    gts: List[Video],
-    results: List[Video],
+    acc_single_video: VidFunc,
+    gts: List[List[Frame]],
+    results: List[List[Frame]],
     config: Config,
     iou_thr: float = 0.5,
     ignore_iof_thr: float = 0.5,
@@ -352,8 +335,8 @@ def evaluate_track(
 
     Args:
         acc_single_video: Function for calculating metrics over a single video.
-        gts: (paths to) the ground truth annotations in Scalabel format
-        results: (paths to) the prediction results in Scalabel format.
+        gts: the ground truth annotations in Scalabel format
+        results: the prediction results in Scalabel format.
         config: Config object
         iou_thr: Minimum IoU for a bounding box to be considered a positive.
         ignore_iof_thr: Min. Intersection over foreground with ignore regions.
@@ -362,7 +345,7 @@ def evaluate_track(
         nproc: processes number for loading files
 
     Returns:
-        TrackResult: rendered eval results.
+        TrackResult: evaluation results.
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()

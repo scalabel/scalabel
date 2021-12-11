@@ -38,8 +38,8 @@ class TestComputeAverage(unittest.TestCase):
         self.assertDictEqual(ave_dict, dict(a=3, b=3, c=0.75))
 
 
-class TestBDD100KMotEval(unittest.TestCase):
-    """Test cases for BDD100K MOT evaluation."""
+class TestScalabelMotEval(unittest.TestCase):
+    """Test cases for Scalabel MOT evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts = group_and_sort(

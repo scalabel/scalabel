@@ -23,6 +23,7 @@ from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_pose
 from ..label.typing import Config, Frame
 from .result import OVERALL, Result
+from .utils import reorder_preds
 
 
 class PoseResult(Result):
@@ -235,24 +236,16 @@ def evaluate_pose(
     config: Config,
     nproc: int = NPROC,
 ) -> PoseResult:
-    """Load the ground truth and prediction results.
+    """Evaluate pose estimation with Scalabel format.
 
     Args:
-        ann_frames: the ground truth annotations in Scalabel format
-        pred_frames: the prediction results in Scalabel format.
+        ann_frames: the ground truth frames.
+        pred_frames: the prediction frames.
         config: Metadata config.
         nproc: the number of process.
 
     Returns:
-        PoseResult: rendered eval results.
-
-    Example usage:
-        evaluate_pose(
-            "/path/to/gts",
-            "/path/to/results",
-            "/path/to/cfg",
-            nproc=4,
-        )
+        PoseResult: evaluation results.
     """
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
@@ -260,7 +253,7 @@ def evaluate_pose(
     coco_gt = COCOV2(None, ann_coco)
 
     # Load results and convert the predictions
-    pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
+    pred_frames = reorder_preds(ann_frames, pred_frames)
     pred_res = scalabel2coco_pose(pred_frames, config)["annotations"]
     if not pred_res:
         return PoseResult.empty(coco_gt)
