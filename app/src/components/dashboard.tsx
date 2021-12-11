@@ -381,6 +381,9 @@ function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <>
+      <IconButton color="inherit" href={`./create`}>
+        <FontAwesomeIcon icon={fa.faChevronLeft} size="xs" transform="grow-6" />
+      </IconButton>
       <Typography variant="h6" noWrap>
         {vendor !== undefined && vendor
           ? "Vendor Dashboard"
