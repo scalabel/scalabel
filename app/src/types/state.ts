@@ -1,4 +1,5 @@
 import { AttributeToolType } from "../const/common"
+import { Span3D } from "../drawable/3d/box_span/span3d"
 
 export type IdType = string
 export const INVALID_ID: IdType = ""
@@ -548,6 +549,10 @@ export interface SessionType {
   numUpdates: number
   /** Alerts */
   alerts: AlertType[]
+  /** Box span toggled */
+  isBoxSpan: boolean
+  /** bounding box created by spanning mode */
+  boxSpan: Span3D | null
 }
 
 export interface State {

@@ -2,6 +2,7 @@ import { AnyAction, Reducer } from "redux"
 
 import * as actionConsts from "../const/action"
 import * as common from "../functional/common"
+import * as span3d from "../functional/span3d"
 import { makeState } from "../functional/states"
 import * as actionTypes from "../types/action"
 import { State } from "../types/state"
@@ -93,6 +94,25 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.addAlert(state, action as actionTypes.AddAlertAction)
     case actionConsts.CLOSE_ALERT:
       return common.removeAlert(state, action as actionTypes.RemoveAlertAction)
+    case actionConsts.ACTIVATE_SPAN:
+      return span3d.activateSpan(state)
+    case actionConsts.DEACTIVATE_SPAN:
+      return span3d.deactivateSpan(state)
+    case actionConsts.UPDATE_SPAN_POINT:
+      return span3d.updateSpanPoint(
+        state,
+        action as actionTypes.UpdateSpanPointAction
+      )
+    case actionConsts.REGISTER_SPAN_POINT:
+      return span3d.registerSpanPoint(state)
+    case actionConsts.RESET_SPAN:
+      return span3d.resetSpan(state)
+    case actionConsts.PAUSE_SPAN:
+      return span3d.pauseSpan(state)
+    case actionConsts.RESUME_SPAN:
+      return span3d.resumeSpan(state)
+    case actionConsts.UNDO_SPAN:
+      return span3d.undoSpan(state)
     case actionConsts.NULL:
       return state
     default:
