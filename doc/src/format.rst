@@ -45,7 +45,7 @@ Each item in the ``frame`` field is an image with several fields.
 to each label in images. Fields of item are given below.
 
 .. code-block:: yaml
-    
+
     - name: string (must be unique over the whole dataset!)
     - url: string (relative path or URL to data file)
     - videoName: string (optional)
@@ -77,7 +77,7 @@ to each label in images. Fields of item are given below.
             - y2: float
         - box3d:
             - alpha:
-            - orientation: 
+            - orientation:
             - location: ()
             - dimension: (3D point, height, width, length)
         - poly2d:
@@ -121,10 +121,10 @@ More details about the fields
         * location: 3D center of the box, stored as 3D point in camera coordinates, meaning the axes (x,y,z) point right, down, and forward.
         * orientation: 3D orientation of the bounding box, stored as axis angles in the same coordinate frame as the location.
         * dimension: 3D box size, with length in x direction, height in y direction and width in z direction
-    
+
     * poly2d
 
-        * types: Each character corresponds to the type of the vertex with the 
+        * types: Each character corresponds to the type of the vertex with the
           same index in vertices. ‘L’ for vertex and ‘C’ for control point of a
           bezier curve.
         * closed: true for polygon and otherwise for path
@@ -154,3 +154,17 @@ This data structure inherits from ``frame``, s.t. each  ``frameGroup`` has all o
 
     - [inherits all attributes from frame]
     - frames: [ ]str (list of frame names in the group)
+
+KITTI Format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The KITTI Velodyne dataset contains a pointcloud file (``.bin``) and four corresponding image files (``.png``).
+Currently, Scalabel only supports ``.ply`` files for pointclouds. Please refer to
+`this script
+<https://gist.github.com/HTLife/e8f1c4ff1737710e34258ef965b48344>`_ for conversion purposes.
+
+The data structure is similar to that used by ``frameGroup`` above, where the frame names consist of the pointcloud and the four corresponding images.
+
+You can have a quick try by submitting the relevant files in
+`examples/kitti
+<https://github.com/scalabel/scalabel/blob/master/examples/kitti>`_
+and choose Point Cloud  in ``Item Type`` and 3D Bounding Box in ``Label Type``.
