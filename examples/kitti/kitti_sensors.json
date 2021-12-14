@@ -1,0 +1,27 @@
+[
+  {
+    "id": 0,
+    "name": "pc0",
+    "type": "pointcloud"
+  },
+  {
+    "id": 1,
+    "name": "image0",
+    "type": "image_3d"
+  },
+  {
+    "id": 2,
+    "name": "image1",
+    "type": "image_3d"
+  },
+  {
+    "id": 3,
+    "name": "image2",
+    "type": "image_3d"
+  },
+  {
+    "id": 4,
+    "name": "image3",
+    "type": "image_3d"
+  }
+]
