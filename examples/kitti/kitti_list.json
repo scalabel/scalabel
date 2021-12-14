@@ -1,0 +1,1238 @@
+{
+  "frames": [
+    {
+      "name": "0000000000",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000000.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000001",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000001.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000002",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000002.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000003",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000003.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000004",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000004.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000005",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000005.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000006",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000006.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000007",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000007.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000008",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000008.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000009",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000009.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000010",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000010.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000011",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000011.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000012",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000012.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000013",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000013.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000014",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000014.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000015",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000015.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000016",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000016.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000017",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000017.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000018",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000018.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000019",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000019.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000020",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000020.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "0000000021",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/ply/0000000021.ply",
+      "videoName": "test"
+    },
+    {
+      "name": "image_00/0000000000",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000000.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 0,
+      "frameIndex": 0
+    },
+    {
+      "name": "image_00/0000000001",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000001.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 1,
+      "frameIndex": 1
+    },
+    {
+      "name": "image_00/0000000002",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000002.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 2,
+      "frameIndex": 2
+    },
+    {
+      "name": "image_00/0000000003",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000003.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 3,
+      "frameIndex": 3
+    },
+    {
+      "name": "image_00/0000000004",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000004.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 4,
+      "frameIndex": 4
+    },
+    {
+      "name": "image_00/0000000005",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000005.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 5,
+      "frameIndex": 5
+    },
+    {
+      "name": "image_00/0000000006",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000006.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 6,
+      "frameIndex": 6
+    },
+    {
+      "name": "image_00/0000000007",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000007.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 7,
+      "frameIndex": 7
+    },
+    {
+      "name": "image_00/0000000008",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000008.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 8,
+      "frameIndex": 8
+    },
+    {
+      "name": "image_00/0000000009",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000009.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 9,
+      "frameIndex": 9
+    },
+    {
+      "name": "image_00/0000000010",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000010.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 10,
+      "frameIndex": 10
+    },
+    {
+      "name": "image_00/0000000011",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000011.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 11,
+      "frameIndex": 11
+    },
+    {
+      "name": "image_00/0000000012",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000012.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 12,
+      "frameIndex": 12
+    },
+    {
+      "name": "image_00/0000000013",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000013.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 13,
+      "frameIndex": 13
+    },
+    {
+      "name": "image_00/0000000014",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000014.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 14,
+      "frameIndex": 14
+    },
+    {
+      "name": "image_00/0000000015",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000015.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 15,
+      "frameIndex": 15
+    },
+    {
+      "name": "image_00/0000000016",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000016.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 16,
+      "frameIndex": 16
+    },
+    {
+      "name": "image_00/0000000017",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000017.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 17,
+      "frameIndex": 17
+    },
+    {
+      "name": "image_00/0000000018",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000018.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 18,
+      "frameIndex": 18
+    },
+    {
+      "name": "image_00/0000000019",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000019.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 19,
+      "frameIndex": 19
+    },
+    {
+      "name": "image_00/0000000020",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000020.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 20,
+      "frameIndex": 20
+    },
+    {
+      "name": "image_00/0000000021",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_00/0000000021.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 21,
+      "frameIndex": 21
+    },
+    {
+      "name": "image_01/0000000000",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000000.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 0,
+      "frameIndex": 0
+    },
+    {
+      "name": "image_01/0000000001",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000001.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 1,
+      "frameIndex": 1
+    },
+    {
+      "name": "image_01/0000000002",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000002.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 2,
+      "frameIndex": 2
+    },
+    {
+      "name": "image_01/0000000003",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000003.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 3,
+      "frameIndex": 3
+    },
+    {
+      "name": "image_01/0000000004",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000004.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 4,
+      "frameIndex": 4
+    },
+    {
+      "name": "image_01/0000000005",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000005.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 5,
+      "frameIndex": 5
+    },
+    {
+      "name": "image_01/0000000006",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000006.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 6,
+      "frameIndex": 6
+    },
+    {
+      "name": "image_01/0000000007",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000007.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 7,
+      "frameIndex": 7
+    },
+    {
+      "name": "image_01/0000000008",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000008.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 8,
+      "frameIndex": 8
+    },
+    {
+      "name": "image_01/0000000009",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000009.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 9,
+      "frameIndex": 9
+    },
+    {
+      "name": "image_01/0000000010",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000010.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 10,
+      "frameIndex": 10
+    },
+    {
+      "name": "image_01/0000000011",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000011.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 11,
+      "frameIndex": 11
+    },
+    {
+      "name": "image_01/0000000012",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000012.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 12,
+      "frameIndex": 12
+    },
+    {
+      "name": "image_01/0000000013",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000013.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 13,
+      "frameIndex": 13
+    },
+    {
+      "name": "image_01/0000000014",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000014.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 14,
+      "frameIndex": 14
+    },
+    {
+      "name": "image_01/0000000015",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000015.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 15,
+      "frameIndex": 15
+    },
+    {
+      "name": "image_01/0000000016",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000016.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 16,
+      "frameIndex": 16
+    },
+    {
+      "name": "image_01/0000000017",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000017.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 17,
+      "frameIndex": 17
+    },
+    {
+      "name": "image_01/0000000018",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000018.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 18,
+      "frameIndex": 18
+    },
+    {
+      "name": "image_01/0000000019",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000019.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 19,
+      "frameIndex": 19
+    },
+    {
+      "name": "image_01/0000000020",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000020.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 20,
+      "frameIndex": 20
+    },
+    {
+      "name": "image_01/0000000021",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_01/0000000021.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 21,
+      "frameIndex": 21
+    },
+    {
+      "name": "image_02/0000000000",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000000.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 0,
+      "frameIndex": 0
+    },
+    {
+      "name": "image_02/0000000001",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000001.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 1,
+      "frameIndex": 1
+    },
+    {
+      "name": "image_02/0000000002",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000002.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 2,
+      "frameIndex": 2
+    },
+    {
+      "name": "image_02/0000000003",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000003.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 3,
+      "frameIndex": 3
+    },
+    {
+      "name": "image_02/0000000004",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000004.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 4,
+      "frameIndex": 4
+    },
+    {
+      "name": "image_02/0000000005",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000005.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 5,
+      "frameIndex": 5
+    },
+    {
+      "name": "image_02/0000000006",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000006.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 6,
+      "frameIndex": 6
+    },
+    {
+      "name": "image_02/0000000007",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000007.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 7,
+      "frameIndex": 7
+    },
+    {
+      "name": "image_02/0000000008",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000008.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 8,
+      "frameIndex": 8
+    },
+    {
+      "name": "image_02/0000000009",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000009.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 9,
+      "frameIndex": 9
+    },
+    {
+      "name": "image_02/0000000010",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000010.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 10,
+      "frameIndex": 10
+    },
+    {
+      "name": "image_02/0000000011",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000011.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 11,
+      "frameIndex": 11
+    },
+    {
+      "name": "image_02/0000000012",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000012.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 12,
+      "frameIndex": 12
+    },
+    {
+      "name": "image_02/0000000013",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000013.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 13,
+      "frameIndex": 13
+    },
+    {
+      "name": "image_02/0000000014",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000014.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 14,
+      "frameIndex": 14
+    },
+    {
+      "name": "image_02/0000000015",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000015.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 15,
+      "frameIndex": 15
+    },
+    {
+      "name": "image_02/0000000016",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000016.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 16,
+      "frameIndex": 16
+    },
+    {
+      "name": "image_02/0000000017",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000017.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 17,
+      "frameIndex": 17
+    },
+    {
+      "name": "image_02/0000000018",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000018.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 18,
+      "frameIndex": 18
+    },
+    {
+      "name": "image_02/0000000019",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000019.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 19,
+      "frameIndex": 19
+    },
+    {
+      "name": "image_02/0000000020",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000020.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 20,
+      "frameIndex": 20
+    },
+    {
+      "name": "image_02/0000000021",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/0000000021.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 21,
+      "frameIndex": 21
+    },
+    {
+      "name": "image_03/0000000000",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000000.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 0,
+      "frameIndex": 0
+    },
+    {
+      "name": "image_03/0000000001",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000001.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 1,
+      "frameIndex": 1
+    },
+    {
+      "name": "image_03/0000000002",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000002.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 2,
+      "frameIndex": 2
+    },
+    {
+      "name": "image_03/0000000003",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000003.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 3,
+      "frameIndex": 3
+    },
+    {
+      "name": "image_03/0000000004",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000004.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 4,
+      "frameIndex": 4
+    },
+    {
+      "name": "image_03/0000000005",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000005.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 5,
+      "frameIndex": 5
+    },
+    {
+      "name": "image_03/0000000006",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000006.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 6,
+      "frameIndex": 6
+    },
+    {
+      "name": "image_03/0000000007",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000007.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 7,
+      "frameIndex": 7
+    },
+    {
+      "name": "image_03/0000000008",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000008.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 8,
+      "frameIndex": 8
+    },
+    {
+      "name": "image_03/0000000009",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000009.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 9,
+      "frameIndex": 9
+    },
+    {
+      "name": "image_03/0000000010",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000010.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 10,
+      "frameIndex": 10
+    },
+    {
+      "name": "image_03/0000000011",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000011.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 11,
+      "frameIndex": 11
+    },
+    {
+      "name": "image_03/0000000012",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000012.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 12,
+      "frameIndex": 12
+    },
+    {
+      "name": "image_03/0000000013",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000013.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 13,
+      "frameIndex": 13
+    },
+    {
+      "name": "image_03/0000000014",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000014.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 14,
+      "frameIndex": 14
+    },
+    {
+      "name": "image_03/0000000015",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000015.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 15,
+      "frameIndex": 15
+    },
+    {
+      "name": "image_03/0000000016",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000016.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 16,
+      "frameIndex": 16
+    },
+    {
+      "name": "image_03/0000000017",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000017.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 17,
+      "frameIndex": 17
+    },
+    {
+      "name": "image_03/0000000018",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000018.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 18,
+      "frameIndex": 18
+    },
+    {
+      "name": "image_03/0000000019",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000019.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 19,
+      "frameIndex": 19
+    },
+    {
+      "name": "image_03/0000000020",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000020.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 20,
+      "frameIndex": 20
+    },
+    {
+      "name": "image_03/0000000021",
+      "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_03/0000000021.png",
+      "videoName": null,
+      "extrinsics": null,
+      "timestamp": 21,
+      "frameIndex": 21
+    }
+  ],
+  "frameGroups": [
+    {
+      "name": "0000000000",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 0,
+      "frameIndex": 0,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000000",
+        "image_00/0000000000",
+        "image_01/0000000000",
+        "image_02/0000000000",
+        "image_03/0000000000"
+      ]
+    },
+    {
+      "name": "0000000001",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 1,
+      "frameIndex": 1,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000001",
+        "image_00/0000000001",
+        "image_01/0000000001",
+        "image_02/0000000001",
+        "image_03/0000000001"
+      ]
+    },
+    {
+      "name": "0000000002",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 2,
+      "frameIndex": 2,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000002",
+        "image_00/0000000002",
+        "image_01/0000000002",
+        "image_02/0000000002",
+        "image_03/0000000002"
+      ]
+    },
+    {
+      "name": "0000000003",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 3,
+      "frameIndex": 3,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000003",
+        "image_00/0000000003",
+        "image_01/0000000003",
+        "image_02/0000000003",
+        "image_03/0000000003"
+      ]
+    },
+    {
+      "name": "0000000004",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 4,
+      "frameIndex": 4,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000004",
+        "image_00/0000000004",
+        "image_01/0000000004",
+        "image_02/0000000004",
+        "image_03/0000000004"
+      ]
+    },
+    {
+      "name": "0000000005",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 5,
+      "frameIndex": 5,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000005",
+        "image_00/0000000005",
+        "image_01/0000000005",
+        "image_02/0000000005",
+        "image_03/0000000005"
+      ]
+    },
+    {
+      "name": "0000000006",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 6,
+      "frameIndex": 6,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000006",
+        "image_00/0000000006",
+        "image_01/0000000006",
+        "image_02/0000000006",
+        "image_03/0000000006"
+      ]
+    },
+    {
+      "name": "0000000007",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 7,
+      "frameIndex": 7,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000007",
+        "image_00/0000000007",
+        "image_01/0000000007",
+        "image_02/0000000007",
+        "image_03/0000000007"
+      ]
+    },
+    {
+      "name": "0000000008",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 8,
+      "frameIndex": 8,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000008",
+        "image_00/0000000008",
+        "image_01/0000000008",
+        "image_02/0000000008",
+        "image_03/0000000008"
+      ]
+    },
+    {
+      "name": "0000000009",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 9,
+      "frameIndex": 9,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000009",
+        "image_00/0000000009",
+        "image_01/0000000009",
+        "image_02/0000000009",
+        "image_03/0000000009"
+      ]
+    },
+    {
+      "name": "0000000010",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 10,
+      "frameIndex": 10,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000010",
+        "image_00/0000000010",
+        "image_01/0000000010",
+        "image_02/0000000010",
+        "image_03/0000000010"
+      ]
+    },
+    {
+      "name": "0000000011",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 11,
+      "frameIndex": 11,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000011",
+        "image_00/0000000011",
+        "image_01/0000000011",
+        "image_02/0000000011",
+        "image_03/0000000011"
+      ]
+    },
+    {
+      "name": "0000000012",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 12,
+      "frameIndex": 12,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000012",
+        "image_00/0000000012",
+        "image_01/0000000012",
+        "image_02/0000000012",
+        "image_03/0000000012"
+      ]
+    },
+    {
+      "name": "0000000013",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 13,
+      "frameIndex": 13,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000013",
+        "image_00/0000000013",
+        "image_01/0000000013",
+        "image_02/0000000013",
+        "image_03/0000000013"
+      ]
+    },
+    {
+      "name": "0000000014",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 14,
+      "frameIndex": 14,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000014",
+        "image_00/0000000014",
+        "image_01/0000000014",
+        "image_02/0000000014",
+        "image_03/0000000014"
+      ]
+    },
+    {
+      "name": "0000000015",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 15,
+      "frameIndex": 15,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000015",
+        "image_00/0000000015",
+        "image_01/0000000015",
+        "image_02/0000000015",
+        "image_03/0000000015"
+      ]
+    },
+    {
+      "name": "0000000016",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 16,
+      "frameIndex": 16,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000016",
+        "image_00/0000000016",
+        "image_01/0000000016",
+        "image_02/0000000016",
+        "image_03/0000000016"
+      ]
+    },
+    {
+      "name": "0000000017",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 17,
+      "frameIndex": 17,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000017",
+        "image_00/0000000017",
+        "image_01/0000000017",
+        "image_02/0000000017",
+        "image_03/0000000017"
+      ]
+    },
+    {
+      "name": "0000000018",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 18,
+      "frameIndex": 18,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000018",
+        "image_00/0000000018",
+        "image_01/0000000018",
+        "image_02/0000000018",
+        "image_03/0000000018"
+      ]
+    },
+    {
+      "name": "0000000019",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 19,
+      "frameIndex": 19,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000019",
+        "image_00/0000000019",
+        "image_01/0000000019",
+        "image_02/0000000019",
+        "image_03/0000000019"
+      ]
+    },
+    {
+      "name": "0000000020",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 20,
+      "frameIndex": 20,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000020",
+        "image_00/0000000020",
+        "image_01/0000000020",
+        "image_02/0000000020",
+        "image_03/0000000020"
+      ]
+    },
+    {
+      "name": "0000000021",
+      "url": null,
+      "videoName": null,
+      "intrinsics": null,
+      "extrinsics": null,
+      "attributes": null,
+      "timestamp": 21,
+      "frameIndex": 21,
+      "size": null,
+      "labels": null,
+      "frames": [
+        "0000000021",
+        "image_00/0000000021",
+        "image_01/0000000021",
+        "image_02/0000000021",
+        "image_03/0000000021"
+      ]
+    }
+  ]
+}
