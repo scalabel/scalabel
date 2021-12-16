@@ -328,7 +328,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         )
         const intersects = new THREE.Vector3()
         this._raycaster.ray.intersectPlane(plane, intersects)
-        console.log(intersects)
         Session.dispatch(
           updateSpanPoint(new Vector3D().fromThree(intersects), y)
         )
