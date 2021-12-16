@@ -317,6 +317,12 @@ export class PLYLoader {
         new THREE.Float32BufferAttribute(buffer.vertices, 3)
       )
 
+      const groundPlane = estimateGroundPlane(buffer.vertices)
+      geometry.setAttribute(
+        "groundPlane",
+        new THREE.Float32BufferAttribute(groundPlane, 3)
+      )
+
       // optional buffer data
 
       if (buffer.normals.length > 0) {
@@ -518,6 +524,47 @@ export class PLYLoader {
       }
 
       return postProcess(buffer)
+    }
+
+    /** Ground plane estimation using RANSAC
+     *
+     * @param vertices
+     */
+    function estimateGroundPlane(vertices: number[]): number[] {
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i < vertices.length; i += 3) {
+        points.push(
+          new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
+        )
+      }
+      let bestPlane: number[] = []
+      let maxNumPoints = 0
+      const itMax = 5000
+      for (let i = 0; i < itMax; i++) {
+        const p1 = points[getRandomInt(points.length)]
+        const p2 = points[getRandomInt(points.length)]
+        const p3 = points[getRandomInt(points.length)]
+        const plane = new THREE.Plane().setFromCoplanarPoints(p1, p2, p3)
+        let numPoints = 0
+        for (let p = 0; p < points.length; p++) {
+          if (Math.abs(plane.distanceToPoint(points[p])) < 0.01) {
+            numPoints += 1
+          }
+        }
+        if (numPoints > maxNumPoints) {
+          bestPlane = [p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z]
+          maxNumPoints = numPoints
+        }
+      }
+      return bestPlane
+    }
+
+    /** Random integer generator
+     *
+     * @param max
+     */
+    function getRandomInt(max: number): number {
+      return Math.floor(Math.random() * max)
     }
 
     //

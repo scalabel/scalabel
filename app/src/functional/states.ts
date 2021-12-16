@@ -641,6 +641,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     alerts: [],
     isBoxSpan: false,
     boxSpan: null,
+    groundPlane: null,
     ...params
   }
 }

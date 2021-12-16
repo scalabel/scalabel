@@ -308,15 +308,31 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     const state = Session.getState()
     if (state.session.isBoxSpan) {
       this.setCursor("crosshair")
+      const groundPlanePoints = Session.getState().session.groundPlane
 
-      // TODO: figure out why this offset is necessary
-      const offset = new THREE.Vector3(0, 0, -1.5)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
-        offset
-      )
-      const intersects = new THREE.Vector3()
-      this._raycaster.ray.intersectPlane(plane, intersects)
-      Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects), y))
+      if (groundPlanePoints !== null) {
+        const points: THREE.Vector3[] = []
+        for (let i = 0; i < groundPlanePoints.length; i += 3) {
+          points.push(
+            new THREE.Vector3(
+              groundPlanePoints[i],
+              groundPlanePoints[i + 1],
+              groundPlanePoints[i + 2]
+            )
+          )
+        }
+        const plane = new THREE.Plane().setFromCoplanarPoints(
+          points[0],
+          points[1],
+          points[2]
+        )
+        const intersects = new THREE.Vector3()
+        this._raycaster.ray.intersectPlane(plane, intersects)
+        console.log(intersects)
+        Session.dispatch(
+          updateSpanPoint(new Vector3D().fromThree(intersects), y)
+        )
+      }
     } else {
       this.setCursor("default")
       const shapes = Session.label3dList.raycastableShapes

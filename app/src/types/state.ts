@@ -551,8 +551,10 @@ export interface SessionType {
   alerts: AlertType[]
   /** Box span toggled */
   isBoxSpan: boolean
-  /** bounding box created by spanning mode */
+  /** Bounding box created by spanning mode */
   boxSpan: Span3D | null
+  /** Ground plane */
+  groundPlane: number[] | null
 }
 
 export interface State {

@@ -113,6 +113,11 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return span3d.resumeSpan(state)
     case actionConsts.UNDO_SPAN:
       return span3d.undoSpan(state)
+    case actionConsts.SET_GROUND_PLANE:
+      return common.setGroundPlane(
+        state,
+        action as actionTypes.SetGroundPlaneAction
+      )
     case actionConsts.NULL:
       return state
     default:

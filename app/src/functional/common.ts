@@ -1612,3 +1612,22 @@ export function removeAlert(
     session: newSession
   })
 }
+
+/**
+ * Set ground plane
+ *
+ * @param state
+ * @param action
+ */
+export function setGroundPlane(
+  state: State,
+  action: actionTypes.SetGroundPlaneAction
+): State {
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    groundPlane: action.groundPlanePoints
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
