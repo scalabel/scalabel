@@ -210,7 +210,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       })
     }
 
-    return Session.getState().session.isBoxSpan ? [ch, canvas] : [canvas]
+    return Session.getState().session.info3D.isBoxSpan ? [ch, canvas] : [canvas]
   }
 
   /**
@@ -265,9 +265,12 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       return
     }
     const state = Session.getState()
-    if (state.session.isBoxSpan && state.session.boxSpan !== null) {
+    if (
+      state.session.info3D.isBoxSpan &&
+      state.session.info3D.boxSpan !== null
+    ) {
       // send mouse position to register new point in span box
-      if (!state.session.boxSpan.complete) {
+      if (!state.session.info3D.boxSpan.complete) {
         Session.dispatch(registerSpanPoint())
       }
     } else if (this._labelHandler.onMouseUp()) {
@@ -306,9 +309,9 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
     const state = Session.getState()
-    if (state.session.isBoxSpan) {
+    if (state.session.info3D.isBoxSpan) {
       this.setCursor("crosshair")
-      const groundPlanePoints = Session.getState().session.groundPlane
+      const groundPlanePoints = Session.getState().session.info3D.groundPlane
 
       if (groundPlanePoints !== null) {
         const points: THREE.Vector3[] = []
@@ -430,7 +433,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.renderer !== undefined &&
       isCurrentFrameLoaded(state, sensor)
     ) {
-      const boxSpan = Session.getState().session.boxSpan
+      const boxSpan = Session.getState().session.info3D.boxSpan
       if (boxSpan !== null) {
         boxSpan.render(Session.label3dList.scene)
       }
