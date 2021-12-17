@@ -35,6 +35,7 @@ export const RESUME_SPAN = "RESUME_SPAN"
 export const UNDO_SPAN = "UNDO_SPAN"
 
 export const SET_GROUND_PLANE = "SET_GROUND_PLANE"
+export const TOGGLE_GROUND_PLANE = "TOGGLE_GROUND_PLANE"
 
 // View Level
 export const ADD_VIEWER_CONFIG = "ADD_VIEWER_CONFIG"
@@ -114,12 +115,9 @@ export function hasSubmitAction(actions: actionConsts[]): boolean {
 }
 
 /**
- * These actions should not be broadcast outside the local session
+ * These actions are used to update state for 3D functions
  */
-const SESSION_ACTION_TYPES = [
-  UPDATE_SESSION_STATUS,
-  CHANGE_SESSION_MODE,
-  CHANGE_SELECT,
+const INFO3D_ACTION_TYPES = [
   ACTIVATE_SPAN,
   DEACTIVATE_SPAN,
   PAUSE_SPAN,
@@ -127,8 +125,27 @@ const SESSION_ACTION_TYPES = [
   RESET_SPAN,
   RESUME_SPAN,
   SET_GROUND_PLANE,
+  TOGGLE_GROUND_PLANE,
   UNDO_SPAN,
   UPDATE_SPAN_POINT
+]
+
+/**
+ * Checks if the action modifies 3D info
+ *
+ * @param action
+ */
+export function isInfo3DAction(action: actionConsts): boolean {
+  return INFO3D_ACTION_TYPES.includes(action.type)
+}
+
+/**
+ * These actions should not be broadcast outside the local session
+ */
+const SESSION_ACTION_TYPES = [
+  UPDATE_SESSION_STATUS,
+  CHANGE_SESSION_MODE,
+  CHANGE_SELECT
 ]
 
 /**

@@ -32,8 +32,6 @@ export class SpanPoint3D {
    * Add to scene for rendering
    *
    * @param scene
-   * @param camera
-   * @param pointCloud
    */
   public render(scene: THREE.Scene): void {
     this._point.position.set(this.x, this.y, this.z)

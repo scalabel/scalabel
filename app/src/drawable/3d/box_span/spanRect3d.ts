@@ -36,7 +36,6 @@ export class SpanRect3D {
    * Add to scene for rendering
    *
    * @param scene
-   * @param camera
    */
   public render(scene: THREE.Scene): void {
     // generate rectangle formed by three points and add to scene

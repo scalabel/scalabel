@@ -634,7 +634,8 @@ export function makeInfo3D(params: Partial<Info3DType> = {}): Info3DType {
   return {
     isBoxSpan: false,
     boxSpan: null,
-    groundPlane: [0, 0, 0, 0, 1, 0, 1, 0, 0],
+    showGroundPlane: false,
+    groundPlane: null,
     ...params
   }
 }

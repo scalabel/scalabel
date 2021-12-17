@@ -530,8 +530,10 @@ export interface Info3DType {
   isBoxSpan: boolean
   /** Bounding box created by spanning mode */
   boxSpan: Span3D | null
+  /** Ground plane toggled */
+  showGroundPlane: boolean
   /** Ground plane */
-  groundPlane: number[]
+  groundPlane: number[] | null
 }
 
 /**

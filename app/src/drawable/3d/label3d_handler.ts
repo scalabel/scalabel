@@ -6,6 +6,7 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
+  toggleGroundPlane,
   undoSpan
 } from "../../action/span3d"
 import Session from "../../common/session"
@@ -311,6 +312,11 @@ export class Label3DHandler {
       case Key.U_LOW:
         if (state.session.info3D.isBoxSpan) {
           Session.dispatch(undoSpan())
+        }
+        break
+      case Key.G_LOW:
+        if (state.session.info3D.isBoxSpan) {
+          Session.dispatch(toggleGroundPlane())
         }
         break
       default:

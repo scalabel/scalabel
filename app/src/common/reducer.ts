@@ -118,6 +118,8 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.SetGroundPlaneAction
       )
+    case actionConsts.TOGGLE_GROUND_PLANE:
+      return common.toggleGroundPlane(state)
     case actionConsts.NULL:
       return state
     default:
