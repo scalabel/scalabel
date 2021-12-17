@@ -652,8 +652,6 @@ export function getRootLabelId(item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
 
   while (isValidId(parent)) {
-    console.log(item.labels[labelId])
-    console.log(item.labels)
     if (item.labels[parent] !== undefined) {
       labelId = parent
       parent = item.labels[labelId].parent
