@@ -539,7 +539,7 @@ export class PLYLoader {
       }
       let bestPlane: number[] = []
       let maxNumPoints = 0
-      const itMax = 5000
+      const itMax = Math.ceil(points.length / 20)
       const threshold = 0.01
       for (let i = 0; i < itMax; i++) {
         const p1 = points[getRandomInt(points.length)]
