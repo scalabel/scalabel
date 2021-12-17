@@ -14,6 +14,7 @@ import {
   splitTrack,
   startLinkTrack
 } from "../action/common"
+import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
@@ -23,7 +24,7 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName } from "../const/common"
+import { ItemTypeName, Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
@@ -185,6 +186,21 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
+          {(this.state.task.config.itemType === ItemTypeName.POINT_CLOUD ||
+            this.state.task.config.itemType ===
+              ItemTypeName.POINT_CLOUD_TRACKING) && (
+            <div>
+              {this.state.session.isBoxSpan ||
+              this.state.session.boxSpan !== null
+                ? makeButton("Cancel", () => {
+                    this.deactivateSpan()
+                    alert(Severity.WARNING, "Box was not generated")
+                  })
+                : makeButton("Activate span", () => {
+                    this.activateSpan()
+                  })}
+            </div>
+          )}
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking
@@ -415,5 +431,21 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Activate box spanning mode
+   */
+  private activateSpan(): void {
+    Session.dispatch(activateSpan())
+  }
+
+  /**
+   * Deactivate box spanning mode
+   *
+   * @param state
+   */
+  private deactivateSpan(): void {
+    Session.dispatch(deactivateSpan())
   }
 }

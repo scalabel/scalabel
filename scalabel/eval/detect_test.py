@@ -9,8 +9,8 @@ from ..unittest.util import get_test_file
 from .detect import evaluate_det
 
 
-class TestBDD100KDetectEval(unittest.TestCase):
-    """Test cases for BDD100K detection evaluation."""
+class TestScalabelDetectEval(unittest.TestCase):
+    """Test cases for Scalabel detection evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
@@ -116,8 +116,8 @@ class TestBDD100KDetectEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KDetectEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K detection evaluation on empty test cases."""
+class TestScalabelDetectEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel detection evaluation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"

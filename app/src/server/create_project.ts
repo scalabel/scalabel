@@ -19,7 +19,8 @@ import {
   DatasetExport,
   ItemExport,
   ItemGroupExport,
-  LabelExport
+  LabelExport,
+  SensorExportType
 } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
@@ -40,6 +41,11 @@ import { Storage } from "./storage"
 import * as util from "./util"
 import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
 import Logger from "./logger"
+import {
+  extrinsicsFromExport,
+  intrinsicsFromExport,
+  sensorsFromExport
+} from "./bdd_type_transformers"
 
 /**
  * convert fields to form and validate input
@@ -125,7 +131,7 @@ export async function parseFiles(
     getDefaultCategories(labelType)
   )
 
-  const sensors: Promise<SensorType[]> = readConfig(
+  const sensors: Promise<SensorExportType[]> = readConfig(
     storage,
     _.get(files, FormField.SENSORS),
     []
@@ -153,7 +159,7 @@ export async function parseFiles(
     (
       result: [
         [Array<Partial<ItemExport>>, Array<Partial<ItemGroupExport>>],
-        SensorType[],
+        SensorExportType[],
         Label2DTemplateType[],
         Attribute[],
         Category[]
@@ -367,7 +373,7 @@ export async function createProject(
     }
   })
 
-  const sensors: { [id: number]: SensorType } = {}
+  const sensors: { [id: number]: SensorExportType } = {}
   for (const sensor of formFileData.sensors) {
     sensors[sensor.id] = sensor
   }
@@ -663,8 +669,8 @@ export async function createTasks(
   itemStartNum: number = 0,
   returnTask: boolean = false
 ): Promise<TaskType[]> {
-  const sensors = project.sensors
-  const { itemType, taskSize, tracking } = project.config
+  const sensors = sensorsFromExport(project.sensors)
+  const { itemType, taskSize, tracking, labelTypes } = project.config
 
   const items = filterInvalidItems(project.items, itemType, sensors)
 
@@ -682,8 +688,12 @@ export async function createTasks(
           maxSensorId,
           "",
           itemExport.dataType,
-          itemExport.intrinsics,
-          itemExport.extrinsics
+          itemExport.intrinsics === undefined || itemExport.intrinsics === null
+            ? undefined
+            : intrinsicsFromExport(itemExport.intrinsics),
+          itemExport.extrinsics === undefined || itemExport.extrinsics === null
+            ? undefined
+            : extrinsicsFromExport(itemExport.extrinsics)
         )
         itemExport.sensor = maxSensorId
         itemExport.dataType = undefined
@@ -766,7 +776,8 @@ export async function createTasks(
         attributeNameMap,
         attributeValueMap,
         categoryNameMap,
-        tracking
+        tracking,
+        labelTypes
       )
 
       if (tracking) {

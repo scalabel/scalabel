@@ -1,5 +1,9 @@
 import { ADD_LABELS } from "../const/action"
-import { ItemTypeName, LabelTypeName } from "../const/common"
+import {
+  ItemTypeName,
+  LabelTypeName,
+  ViewerConfigTypeName
+} from "../const/common"
 import { ActionPacketType } from "../types/message"
 
 /**
@@ -26,6 +30,25 @@ export function getTracking(itemType: string): [string, boolean] {
     default:
       return [itemType, false]
   }
+}
+
+/**
+ * Return viewer type required for given sensor and label types
+ *
+ * @param sensorType
+ * @param labelTypes
+ */
+export function getViewerType(
+  sensorType: ViewerConfigTypeName,
+  labelTypes: LabelTypeName[]
+): ViewerConfigTypeName {
+  if (
+    sensorType === ViewerConfigTypeName.IMAGE &&
+    labelTypes.includes(LabelTypeName.BOX_3D)
+  ) {
+    return ViewerConfigTypeName.IMAGE_3D
+  }
+  return sensorType
 }
 
 /**

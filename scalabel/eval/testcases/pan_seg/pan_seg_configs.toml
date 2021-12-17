@@ -1,0 +1,163 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "dynamic"
+isThing = false
+
+[[categories]]
+name = "ego vehicle"
+isThing = false
+
+[[categories]]
+name = "ground"
+isThing = false
+
+[[categories]]
+name = "static"
+isThing = false
+
+[[categories]]
+name = "parking"
+isThing = false
+
+[[categories]]
+name = "rail track"
+isThing = false
+
+[[categories]]
+name = "road"
+isThing = false
+
+[[categories]]
+name = "sidewalk"
+isThing = false
+
+[[categories]]
+name = "bridge"
+isThing = false
+
+[[categories]]
+name = "building"
+isThing = false
+
+[[categories]]
+name = "fence"
+isThing = false
+
+[[categories]]
+name = "garage"
+isThing = false
+
+[[categories]]
+name = "guard rail"
+isThing = false
+
+[[categories]]
+name = "tunnel"
+isThing = false
+
+[[categories]]
+name = "wall"
+isThing = false
+
+[[categories]]
+name = "banner"
+isThing = false
+
+[[categories]]
+name = "billboard"
+isThing = false
+
+[[categories]]
+name = "lane divider"
+isThing = false
+
+[[categories]]
+name = "parking sign"
+isThing = false
+
+[[categories]]
+name = "pole"
+isThing = false
+
+[[categories]]
+name = "polegroup"
+isThing = false
+
+[[categories]]
+name = "street light"
+isThing = false
+
+[[categories]]
+name = "traffic cone"
+isThing = false
+
+[[categories]]
+name = "traffic device"
+isThing = false
+
+[[categories]]
+name = "traffic light"
+isThing = false
+
+[[categories]]
+name = "traffic sign"
+isThing = false
+
+[[categories]]
+name = "traffic sign frame"
+isThing = false
+
+[[categories]]
+name = "terrain"
+isThing = false
+
+[[categories]]
+name = "vegetation"
+isThing = false
+
+[[categories]]
+name = "sky"
+isThing = false
+
+[[categories]]
+name = "person"
+isThing = true
+
+[[categories]]
+name = "rider"
+isThing = true
+
+[[categories]]
+name = "bicycle"
+isThing = true
+
+[[categories]]
+name = "bus"
+isThing = true
+
+[[categories]]
+name = "car"
+isThing = true
+
+[[categories]]
+name = "caravan"
+isThing = true
+
+[[categories]]
+name = "motorcycle"
+isThing = true
+
+[[categories]]
+name = "trailer"
+isThing = true
+
+[[categories]]
+name = "train"
+isThing = true
+
+[[categories]]
+name = "truck"
+isThing = true
