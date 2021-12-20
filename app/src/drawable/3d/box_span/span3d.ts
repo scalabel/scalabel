@@ -34,8 +34,6 @@ export class Span3D {
    * Modify ThreeJS objects to draw labels
    *
    * @param scene
-   * @param camera
-   * @param canvas
    */
   public render(scene: THREE.Scene): void {
     // use points data to render temporary geometries

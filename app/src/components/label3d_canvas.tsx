@@ -19,6 +19,7 @@ import {
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
 import { Vector3D } from "../math/vector3d"
+import { GroundPlane3D } from "../drawable/3d/ground_plane3d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -85,6 +86,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private data2d: boolean
   /** The crosshair */
   private readonly crosshair: React.RefObject<Crosshair2D>
+  /** Ground plane */
+  private groundPlane: GroundPlane3D | null
 
   /** drawable label list */
   private readonly _labelHandler: Label3DHandler
@@ -121,6 +124,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       Line: { threshold: 0.02 }
     }
     this.crosshair = React.createRef()
+    this.groundPlane = null
 
     this._keyDownMap = {}
 
@@ -210,7 +214,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       })
     }
 
-    return Session.getState().session.isBoxSpan ? [ch, canvas] : [canvas]
+    return Session.getState().session.info3D.isBoxSpan ? [ch, canvas] : [canvas]
   }
 
   /**
@@ -265,9 +269,12 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       return
     }
     const state = Session.getState()
-    if (state.session.isBoxSpan && state.session.boxSpan !== null) {
+    if (
+      state.session.info3D.isBoxSpan &&
+      state.session.info3D.boxSpan !== null
+    ) {
       // send mouse position to register new point in span box
-      if (!state.session.boxSpan.complete) {
+      if (!state.session.info3D.boxSpan.complete) {
         Session.dispatch(registerSpanPoint())
       }
     } else if (this._labelHandler.onMouseUp()) {
@@ -306,17 +313,31 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
     const state = Session.getState()
-    if (state.session.isBoxSpan) {
+    if (state.session.info3D.isBoxSpan) {
       this.setCursor("crosshair")
+      if (this.groundPlane === null) {
+        const groundPlanePoints = Session.getState().session.info3D.groundPlane
 
-      // TODO: figure out why this offset is necessary
-      const offset = new THREE.Vector3(0, 0, -1.5)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
-        offset
-      )
-      const intersects = new THREE.Vector3()
-      this._raycaster.ray.intersectPlane(plane, intersects)
-      Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects), y))
+        if (groundPlanePoints !== null) {
+          const points: THREE.Vector3[] = []
+          for (let i = 0; i < groundPlanePoints.length; i += 3) {
+            points.push(
+              new THREE.Vector3(
+                groundPlanePoints[i],
+                groundPlanePoints[i + 1],
+                groundPlanePoints[i + 2]
+              )
+            )
+          }
+          this.groundPlane = new GroundPlane3D(points)
+        }
+      } else {
+        const intersects = new THREE.Vector3()
+        this._raycaster.ray.intersectPlane(this.groundPlane.plane, intersects)
+        Session.dispatch(
+          updateSpanPoint(new Vector3D().fromThree(intersects), y)
+        )
+      }
     } else {
       this.setCursor("default")
       const shapes = Session.label3dList.raycastableShapes
@@ -415,9 +436,14 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.renderer !== undefined &&
       isCurrentFrameLoaded(state, sensor)
     ) {
-      const boxSpan = Session.getState().session.boxSpan
+      const boxSpan = Session.getState().session.info3D.boxSpan
       if (boxSpan !== null) {
         boxSpan.render(Session.label3dList.scene)
+        const showGroundPlane = Session.getState().session.info3D
+          .showGroundPlane
+        if (showGroundPlane && this.groundPlane !== null) {
+          this.groundPlane.render(Session.label3dList.scene)
+        }
       }
       this.renderer.render(Session.label3dList.scene, this.camera)
     } else if (this.renderer !== null && this.renderer !== undefined) {
