@@ -3,7 +3,7 @@ import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
-import { ToastContainer, toast, Slide } from "react-toastify"
+import { Slide, toast, ToastContainer } from "react-toastify"
 
 import {
   changeModeToAnnotating,
@@ -404,6 +404,7 @@ export class ToolBar extends Component<Props> {
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+      alert(Severity.SUCCESS, "Selected tracks have been, successfuly linked.")
     } else {
       alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
