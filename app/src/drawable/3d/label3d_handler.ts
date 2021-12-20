@@ -6,6 +6,7 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
+  toggleGroundPlane,
   undoSpan
 } from "../../action/span3d"
 import Session from "../../common/session"
@@ -225,14 +226,17 @@ export class Label3DHandler {
     // TODO: break the cases into functions
     switch (e.key) {
       case Key.SPACE: {
-        if (state.session.boxSpan !== null && !state.session.boxSpan.complete) {
+        if (
+          state.session.info3D.boxSpan !== null &&
+          !state.session.info3D.boxSpan.complete
+        ) {
           break
         } else {
           return this.createLabel()
         }
       }
       case Key.ESCAPE:
-        if (state.session.isBoxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(resetSpan())
         }
         return true
@@ -299,15 +303,20 @@ export class Label3DHandler {
         }
         break
       case Key.Q_LOW:
-        if (state.session.isBoxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(pauseSpan())
-        } else if (state.session.boxSpan !== null) {
+        } else if (state.session.info3D.boxSpan !== null) {
           Session.dispatch(resumeSpan())
         }
         return true
       case Key.U_LOW:
-        if (state.session.isBoxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(undoSpan())
+        }
+        break
+      case Key.G_LOW:
+        if (state.session.info3D.isBoxSpan) {
+          Session.dispatch(toggleGroundPlane())
         }
         break
       default:
@@ -473,7 +482,7 @@ export class Label3DHandler {
         this._state.task.config.tracking
       )
 
-      const box = Session.getState().session.boxSpan
+      const box = Session.getState().session.info3D.boxSpan
       if (box !== null) {
         if (box.complete) {
           try {

@@ -80,7 +80,7 @@ Point Cloud Bounding Box
 +-------+-----------------------------------------+
 | q     | Pause/resume spanning mode              |
 +-------+-----------------------------------------+
-| t     | Undo last point selection               |
+| u     | Undo last point selection               |
 +-------+-----------------------------------------+
 | Esc   | Restart points selection                |
 +-------+-----------------------------------------+
