@@ -59,3 +59,8 @@ export function resumeSpan(): actionTypes.ResumeSpanAction {
 export function undoSpan(): actionTypes.UndoSpanAction {
   return makeBaseAction(actionConsts.UNDO_SPAN)
 }
+
+/** Show/hide ground plane */
+export function toggleGroundPlane(): actionTypes.ToggleGroundPlaneAction {
+  return makeBaseAction(actionConsts.TOGGLE_GROUND_PLANE)
+}
