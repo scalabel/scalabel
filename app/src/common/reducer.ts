@@ -100,8 +100,8 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return span3d.deactivateSpan(state)
     case actionConsts.UPDATE_SPAN_POINT:
       return span3d.updateSpanPoint(
-        state,
-        action as actionTypes.UpdateSpanPointAction
+        state
+        // action as actionTypes.UpdateSpanPointAction
       )
     case actionConsts.REGISTER_SPAN_POINT:
       return span3d.registerSpanPoint(state)

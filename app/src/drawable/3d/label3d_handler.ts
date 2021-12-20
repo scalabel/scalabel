@@ -6,7 +6,7 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
-  toggleGroundPlane,
+  // toggleGroundPlane,
   undoSpan
 } from "../../action/span3d"
 import Session from "../../common/session"
@@ -215,111 +215,111 @@ export class Label3DHandler {
     return false
   }
 
-  // /**
-  //  * Return initial label center based on label type and viewer type
-  //  *
-  //  * @param viewerType
-  //  * @param labelType
-  //  * @returns Vector3D
-  //  */
-  // private getInitialCenter(
-  //   viewerType: ViewerConfigTypeName,
-  //   labelType: LabelTypeName
-  // ): Vector3D {
-  //   const center = new Vector3D()
-  //   switch (viewerType) {
-  //     case ViewerConfigTypeName.POINT_CLOUD:
-  //       center.fromState(
-  //         (this._viewerConfig as PointCloudViewerConfigType).target
-  //       )
-  //       break
-  //     case ViewerConfigTypeName.IMAGE_3D:
-  //       if (labelType === LabelTypeName.PLANE_3D) {
-  //         center.add(new Vector3D(0, 2, 10))
-  //       } else {
-  //         center.add(new Vector3D(0, 0, 10))
-  //       }
-  //       if (
-  //         this._sensor.extrinsics != null &&
-  //         this._sensor.extrinsics !== undefined
-  //       ) {
-  //         const worldDirection = new THREE.Vector3()
-  //         this._camera.getWorldDirection(worldDirection)
-  //         worldDirection.normalize()
-  //         worldDirection.multiplyScalar(5)
-  //         center.fromState(this._sensor.extrinsics.translation)
-  //         center.add(new Vector3D().fromThree(worldDirection))
-  //       }
-  //       break
-  //   }
-  //   return center
-  // }
+  /**
+   * Return initial label center based on label type and viewer type
+   *
+   * @param viewerType
+   * @param labelType
+   * @returns Vector3D
+   */
+  private getInitialCenter(
+    viewerType: ViewerConfigTypeName,
+    labelType: LabelTypeName
+  ): Vector3D {
+    const center = new Vector3D()
+    switch (viewerType) {
+      case ViewerConfigTypeName.POINT_CLOUD:
+        center.fromState(
+          (this._viewerConfig as PointCloudViewerConfigType).target
+        )
+        break
+      case ViewerConfigTypeName.IMAGE_3D:
+        if (labelType === LabelTypeName.PLANE_3D) {
+          center.add(new Vector3D(0, 2, 10))
+        } else {
+          center.add(new Vector3D(0, 0, 10))
+        }
+        if (
+          this._sensor.extrinsics != null &&
+          this._sensor.extrinsics !== undefined
+        ) {
+          const worldDirection = new THREE.Vector3()
+          this._camera.getWorldDirection(worldDirection)
+          worldDirection.normalize()
+          worldDirection.multiplyScalar(5)
+          center.fromState(this._sensor.extrinsics.translation)
+          center.add(new Vector3D().fromThree(worldDirection))
+        }
+        break
+    }
+    return center
+  }
 
-  // /**
-  //  * Add 3d label to viewer
-  //  *
-  //  * @param labelType_
-  //  * @returns boolean: true if added, false otherwise
-  //  */
-  // private add3dLabel(labelType_?: LabelTypeName): boolean {
-  //   // Get center based on viewer type, label type
-  //   const labelType =
-  //     labelType_ !== undefined
-  //       ? labelType_
-  //       : Session.label3dList.currentLabelType
-  //   const label = makeDrawableLabel3D(Session.label3dList, labelType)
-  //   if (label !== null) {
-  //     const center = this.getInitialCenter(
-  //       this._viewerConfig.type as ViewerConfigTypeName,
-  //       labelType
-  //     )
-  //     label.init(
-  //       this._selectedItemIndex,
-  //       Session.label3dList.currentCategory,
-  //       center,
-  //       this._sensorIds,
-  //       undefined,
-  //       this._state.task.config.tracking
-  //     )
-  //     Session.label3dList.addUpdatedLabel(label)
-  //     commitLabels(
-  //       [...Session.label3dList.updatedLabels.values()],
-  //       this._tracking
-  //     )
-  //     Session.label3dList.clearUpdatedLabels()
-  //     return true
-  //   }
-  //   return false
-  // }
+  /**
+   * Add 3d label to viewer
+   *
+   * @param labelType_
+   * @returns boolean: true if added, false otherwise
+   */
+  private add3dLabel(labelType_?: LabelTypeName): boolean {
+    // Get center based on viewer type, label type
+    const labelType =
+      labelType_ !== undefined
+        ? labelType_
+        : Session.label3dList.currentLabelType
+    const label = makeDrawableLabel3D(Session.label3dList, labelType)
+    if (label !== null) {
+      const center = this.getInitialCenter(
+        this._viewerConfig.type as ViewerConfigTypeName,
+        labelType
+      )
+      label.init(
+        this._selectedItemIndex,
+        Session.label3dList.currentCategory,
+        center,
+        this._sensorIds,
+        undefined,
+        this._state.task.config.tracking
+      )
+      Session.label3dList.addUpdatedLabel(label)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+      Session.label3dList.clearUpdatedLabels()
+      return true
+    }
+    return false
+  }
 
-  // /**
-  //  * Select or add ground plane
-  //  *
-  //  * @returns boolean: true if successful, false otherwise
-  //  */
-  // private selectOrCreateGroundPlane(): boolean {
-  //   const labels = Session.label3dList.labels()
-  //   const itemPlanes = labels.filter(
-  //     (l) =>
-  //       l.item === this._selectedItemIndex &&
-  //       l.label.type === LabelTypeName.PLANE_3D
-  //   )
-  //   if (itemPlanes.length > 0) {
-  //     const plane = itemPlanes[0]
-  //     Session.dispatch(
-  //       selectLabel(
-  //         Session.label3dList.selectedLabelIds,
-  //         this._selectedItemIndex,
-  //         plane.labelId,
-  //         plane.category[0],
-  //         plane.attributes
-  //       )
-  //     )
-  //     return true
-  //   } else {
-  //     return this.add3dLabel(LabelTypeName.PLANE_3D)
-  //   }
-  // }
+  /**
+   * Select or add ground plane
+   *
+   * @returns boolean: true if successful, false otherwise
+   */
+  private selectOrCreateGroundPlane(): boolean {
+    const labels = Session.label3dList.labels()
+    const itemPlanes = labels.filter(
+      (l) =>
+        l.item === this._selectedItemIndex &&
+        l.label.type === LabelTypeName.PLANE_3D
+    )
+    if (itemPlanes.length > 0) {
+      const plane = itemPlanes[0]
+      Session.dispatch(
+        selectLabel(
+          Session.label3dList.selectedLabelIds,
+          this._selectedItemIndex,
+          plane.labelId,
+          plane.category[0],
+          plane.attributes
+        )
+      )
+      return true
+    } else {
+      return this.add3dLabel(LabelTypeName.PLANE_3D)
+    }
+  }
 
   /**
    * Handle keyboard events
@@ -331,10 +331,10 @@ export class Label3DHandler {
     const state = Session.getState()
     // TODO: break the cases into functions
     switch (e.key) {
-      // case Key.G_UP:
-      // case Key.G_LOW: {
-      //   return this.selectOrCreateGroundPlane()
-      // }
+      case Key.G_UP:
+      case Key.G_LOW: {
+        return this.selectOrCreateGroundPlane()
+      }
       case Key.SPACE: {
         if (
           state.session.info3D.boxSpan !== null &&
@@ -424,11 +424,11 @@ export class Label3DHandler {
           Session.dispatch(undoSpan())
         }
         break
-      case Key.G_LOW:
-        if (state.session.info3D.isBoxSpan) {
-          Session.dispatch(toggleGroundPlane())
-        }
-        break
+      // case Key.G_LOW:
+      //   if (state.session.info3D.isBoxSpan) {
+      //     Session.dispatch(toggleGroundPlane())
+      //   }
+      //   break
       default:
         break
     }
@@ -597,9 +597,39 @@ export class Label3DHandler {
       if (box !== null) {
         if (box.complete) {
           try {
-            label.move(box.center)
-            label.rotate(box.rotation)
-            label.scale(box.dimensions, box.center, true)
+            // Todo: more robust way of setting rotation and dimensions
+            if (this._viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
+              const dimensions = new THREE.Vector3(
+                box.dimensions.y,
+                box.dimensions.z,
+                box.dimensions.x
+              )
+              const boxRotation = new THREE.Euler().setFromQuaternion(
+                box.rotation
+              )
+              const rotation = new THREE.Quaternion().setFromEuler(
+                new THREE.Euler(
+                  Math.PI / 2 - boxRotation.y,
+                  Math.PI / 2 - boxRotation.z,
+                  boxRotation.x
+                )
+              )
+              console.log(
+                "rotation",
+                new THREE.Euler(
+                  Math.PI / 2 - boxRotation.y,
+                  Math.PI / 2 - boxRotation.z,
+                  boxRotation.x
+                )
+              )
+              label.move(box.center)
+              label.rotate(rotation)
+              label.scale(dimensions, box.center, true)
+            } else {
+              label.move(box.center)
+              label.rotate(box.rotation)
+              label.scale(box.dimensions, box.center, true)
+            }
             Session.dispatch(deactivateSpan())
           } catch (err) {
             alert(Severity.ERROR, err.message)

@@ -5,6 +5,8 @@ import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 import { SpanCuboid3D } from "./spanCuboid3d"
 import { Vector3D } from "../../../math/vector3d"
+import { projectionFromNDC } from "../../../view_config/point_cloud"
+import { Vector2D } from "../../../math/vector2d"
 
 /**
  * ThreeJS class for rendering 3D span object
@@ -81,69 +83,45 @@ export class Span3D {
     }
   }
 
-  //   * @param plane
-  //   * @param camera
-  //   */
-  //  public updatePointTmp(
-  //    coords: Vector2D,
-  //    plane: THREE.Plane,
-  //    camera: THREE.Camera
-  //  ): this {
-  //    const projection = projectionFromNDC(coords.x, coords.y, camera)
-  //    const point3d = new THREE.Vector3()
-  //    projection.intersectPlane(plane, point3d)
-  //    const point = new Vector3D(point3d.x, point3d.y, point3d.z)
-  //    if (this._p2 !== null && this._p3 === null) {
-  //      // make second point orthogonal to line
-  //      if (this._line !== null) {
-  //        const newCoords = this._line.alignPointToNormal(point, plane)
-  //        this._pTmp = new SpanPoint3D(newCoords)
-  //      }
-  //    } else if (this._p3 !== null && this._p4 === null) {
-  //      // make third point orthogonal to plane
-  //      const newPlane = new THREE.Plane()
-  //      const p3 = this._p3.toVector3D().toThree()
-  //      const newNormal = p3.clone().normalize()
-  //      newPlane.setFromNormalAndCoplanarPoint(newNormal, p3)
-
-  //      projection.intersectPlane(newPlane, point3d)
-
-  //      const distance = plane.distanceToPoint(point3d)
-  //      const normal = plane.normal.clone()
-  //      normal.setLength(distance)
-  //      const newPoint = normal.add(this._p3.toVector3D().toThree())
-  //      this._pTmp = new SpanPoint3D(
-  //        new Vector3D(newPoint.x, newPoint.y, newPoint.z)
-  //      )
-  //    } else {
-  //      this._pTmp = new SpanPoint3D(point)
-  //    }
-
   /**
    * Register new temporary point given current mouse position
    *
    * @param coords
-   * @param point
-   * @param mouseY
+   * @param plane
+   * @param camera
    */
-  public updatePointTmp(point: Vector3D, mouseY: number): this {
+  public updatePointTmp(
+    coords: Vector2D,
+    plane: THREE.Plane,
+    camera: THREE.Camera
+  ): this {
+    const projection = projectionFromNDC(coords.x, coords.y, camera)
+    const point3d = new THREE.Vector3()
+    projection.intersectPlane(plane, point3d)
+    const point = new Vector3D(point3d.x, point3d.y, point3d.z)
     switch (this._points.length) {
       case 2:
         // make second point orthogonal to line
         if (this._line !== null) {
-          const newCoords = this._line.alignPointToNormal(point)
+          const newCoords = this._line.alignPointToNormal(point, plane)
           this._pTmp = new SpanPoint3D(newCoords)
         }
         break
       case 3: {
         // make third point orthogonal to plane
-        const scaleFactor = 5
+        const newPlane = new THREE.Plane()
+        const p3 = this._points[2].toVector3D().toThree()
+        const newNormal = p3.clone().normalize()
+        newPlane.setFromNormalAndCoplanarPoint(newNormal, p3)
+
+        projection.intersectPlane(newPlane, point3d)
+
+        const distance = plane.distanceToPoint(point3d)
+        const normal = plane.normal.clone()
+        normal.setLength(distance)
+        const newPoint = normal.add(this._points[2].toVector3D().toThree())
         this._pTmp = new SpanPoint3D(
-          new Vector3D(
-            this._points[2].x,
-            this._points[2].y,
-            mouseY * scaleFactor
-          )
+          new Vector3D(newPoint.x, newPoint.y, newPoint.z)
         )
         break
       }
@@ -152,6 +130,40 @@ export class Span3D {
     }
     return this
   }
+
+  // /**
+  //  * Register new temporary point given current mouse position
+  //  *
+  //  * @param coords
+  //  * @param point
+  //  * @param mouseY
+  //  */
+  // public updatePointTmp(point: Vector3D, mouseY: number): this {
+  //   switch (this._points.length) {
+  //     case 2:
+  //       // make second point orthogonal to line
+  //       if (this._line !== null) {
+  //         const newCoords = this._line.alignPointToNormal(point)
+  //         this._pTmp = new SpanPoint3D(newCoords)
+  //       }
+  //       break
+  //     case 3: {
+  //       // make third point orthogonal to plane
+  //       const scaleFactor = 5
+  //       this._pTmp = new SpanPoint3D(
+  //         new Vector3D(
+  //           this._points[2].x,
+  //           this._points[2].y,
+  //           mouseY * scaleFactor
+  //         )
+  //       )
+  //       break
+  //     }
+  //     default:
+  //       this._pTmp = new SpanPoint3D(point)
+  //   }
+  //   return this
+  // }
 
   /** Register new point */
   public registerPoint(): this {

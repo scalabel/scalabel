@@ -73,25 +73,30 @@ export class SpanCuboid3D {
     )
     const d12 = v1.distanceTo(v2)
     const d23 = v2.distanceTo(v3)
-    const width = Math.max(d12, d23)
-    const depth = Math.min(d12, d23)
+    const width = d12
+    const length = d23
     const height = v3.distanceTo(v4)
-    return new THREE.Vector3(width, depth, height)
+    return new THREE.Vector3(width, length, height)
   }
 
   /** Return cuboid rotation */
   public get rotation(): THREE.Quaternion {
     const [v1, v2, v3] = [this._p1, this._p2, this._p3].map((p) =>
-      p.toVector3D()
+      p.toVector3D().toThree()
     )
-    const v12 = v2.clone().subtract(v1)
-    const v23 = v3.clone().subtract(v2)
-    const d12 = v1.distanceTo(v2)
-    const d23 = v2.distanceTo(v3)
-    const theta =
-      d12 >= d23 ? Math.atan2(v12.y, v12.x) : Math.atan2(v23.y, v23.x)
+    const v12 = v2.clone().sub(v1)
+    const v23 = v3.clone().sub(v2)
+    const up = v12.clone().cross(v23).normalize()
+    const pitch = up.angleTo(new THREE.Vector3(0, 0, 1))
+    const rotation = new THREE.Euler(0, Math.PI / 2 - pitch, 0)
+    const yaw = v23
+      .clone()
+      .normalize()
+
+      .angleTo(new THREE.Vector3(0, 0, 1).applyEuler(rotation))
+
     const euler = new THREE.Euler()
-    const angle = new THREE.Vector3(0, 0, theta)
+    const angle = new THREE.Vector3(0, pitch, -yaw)
     euler.setFromVector3(angle, "XYZ")
     const quaternion = new THREE.Quaternion()
     quaternion.setFromEuler(euler)

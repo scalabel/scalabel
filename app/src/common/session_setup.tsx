@@ -17,8 +17,8 @@ import {
 } from "../action/common"
 import {
   alignToAxis,
-  toggleSelectionLock,
-  setGroundPlane
+  toggleSelectionLock
+  // setGroundPlane
 } from "../action/point_cloud"
 import Window from "../components/window"
 import {
@@ -210,10 +210,10 @@ function loadPointClouds(
         attemptsMap[sensorId] = 0
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
-          const groundPlanePoints = Array.from(
-            geometry.getAttribute("groundPlane").array
-          )
-          dispatch(setGroundPlane(groundPlanePoints))
+          // const groundPlanePoints = Array.from(
+          //   geometry.getAttribute("groundPlane").array
+          // )
+          // dispatch(setGroundPlane(groundPlanePoints))
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent

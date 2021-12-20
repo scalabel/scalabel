@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { ViewerConfigTypeName } from "../const/common"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
@@ -20,6 +20,8 @@ import {
 import { Crosshair, Crosshair2D } from "./crosshair"
 import { Vector3D } from "../math/vector3d"
 import { GroundPlane3D } from "../drawable/3d/ground_plane3d"
+import { Plane3D } from "../drawable/3d/plane3d"
+import { Vector2D } from "../math/vector2d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -314,29 +316,68 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
     const state = Session.getState()
     if (state.session.info3D.isBoxSpan) {
-      this.setCursor("crosshair")
-      if (this.groundPlane === null) {
-        const groundPlanePoints = Session.getState().session.info3D.groundPlane
+      if (state.session.info3D.groundPlane !== null) {
+        this.setCursor("crosshair")
+        if (this.groundPlane === null) {
+          const groundPlanePoints = Session.getState().session.info3D
+            .groundPlane
 
-        if (groundPlanePoints !== null) {
-          const points: THREE.Vector3[] = []
-          for (let i = 0; i < groundPlanePoints.length; i += 3) {
-            points.push(
-              new THREE.Vector3(
-                groundPlanePoints[i],
-                groundPlanePoints[i + 1],
-                groundPlanePoints[i + 2]
+          if (groundPlanePoints !== null) {
+            const points: THREE.Vector3[] = []
+            for (let i = 0; i < groundPlanePoints.length; i += 3) {
+              points.push(
+                new THREE.Vector3(
+                  groundPlanePoints[i],
+                  groundPlanePoints[i + 1],
+                  groundPlanePoints[i + 2]
+                )
               )
+            }
+            this.groundPlane = new GroundPlane3D(points)
+          }
+        } else {
+          const intersects = new THREE.Vector3()
+          this._raycaster.ray.intersectPlane(this.groundPlane.plane, intersects)
+          Session.dispatch(
+            updateSpanPoint(new Vector3D().fromThree(intersects), y)
+          )
+
+          if (state.session.info3D.boxSpan !== null) {
+            state.session.info3D.boxSpan.updatePointTmp(
+              new Vector2D(x, y),
+              this.groundPlane.plane,
+              this.camera
             )
           }
-          this.groundPlane = new GroundPlane3D(points)
         }
       } else {
-        const intersects = new THREE.Vector3()
-        this._raycaster.ray.intersectPlane(this.groundPlane.plane, intersects)
-        Session.dispatch(
-          updateSpanPoint(new Vector3D().fromThree(intersects), y)
+        const plane = new THREE.Plane()
+        // Check if ground plane in current item
+        const selectedItem = state.user.select.item
+        const labels = Session.label3dList.labels()
+        const itemPlanes = labels.filter(
+          (l) =>
+            l.item === selectedItem && l.label.type === LabelTypeName.PLANE_3D
         )
+        if (itemPlanes.length > 0) {
+          const itemPlane = itemPlanes[0] as Plane3D
+          const normal = new THREE.Vector3(0, 0, 1)
+          normal.applyQuaternion(itemPlane.orientation)
+          plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
+        }
+
+        const intersects = new THREE.Vector3()
+        this._raycaster.ray.intersectPlane(plane, intersects)
+        if (state.session.info3D.boxSpan !== null) {
+          Session.dispatch(
+            updateSpanPoint(new Vector3D().fromThree(intersects), y)
+          )
+          state.session.info3D.boxSpan.updatePointTmp(
+            new Vector2D(x, y),
+            plane,
+            this.camera
+          )
+        }
       }
     } else {
       this.setCursor("default")

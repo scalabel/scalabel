@@ -457,8 +457,6 @@ export interface TaskType {
   sensors: SensorMapType
   /** info on task progress */
   progress: Progress
-  /** bounding box created by spanning mode */
-  boxSpan: Span3D | undefined
 }
 
 export interface Select {
