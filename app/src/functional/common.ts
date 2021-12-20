@@ -38,7 +38,6 @@ import {
   updateListItem,
   updateObject
 } from "./util"
-import { Span3D } from "../drawable/3d/box_span/span3d"
 
 /**
  * Initialize session component of state
@@ -1615,120 +1614,24 @@ export function removeAlert(
 }
 
 /**
- * Activate box spanning mode
- *
- * @param state
- */
-export function activateSpan(state: State): State {
-  const oldSession = state.session
-  const newSession = updateObject(oldSession, {
-    ...state.session,
-    boxSpan: true
-  })
-  const oldTask = state.task
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: new Span3D()
-  })
-  return updateObject(state, {
-    session: newSession,
-    task: newTask
-  })
-}
-
-/**
- * Deactivate box spanning mode
- *
- * @param state
- */
-export function deactivateSpan(state: State): State {
-  const oldSession = state.session
-  const newSession = updateObject(oldSession, {
-    ...state.session,
-    boxSpan: false
-  })
-  const oldTask = state.task
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: undefined
-  })
-  return updateObject(state, {
-    session: newSession,
-    task: newTask
-  })
-}
-
-/**
- * Update temporary point in span box
+ * Set ground plane
  *
  * @param state
  * @param action
  */
-export function updateSpanPoint(
-  state: State
-  // action: actionTypes.UpdateSpanPointAction
+export function setGroundPlane(
+  state: State,
+  action: actionTypes.SetGroundPlaneAction
 ): State {
-  return state
-  // const oldTask = state.task
-  // const newBox = oldTask.boxSpan
-  // if (newBox !== undefined) {
-  //   newBox.updatePointTmp(action.point)
-  // }
-  // const newTask = updateObject(oldTask, {
-  //   ...state.task,
-  //   boxSpan: newBox
-  // })
-  // return updateObject(state, {
-  //   task: newTask
-  // })
-}
-
-/**
- * Register new point in span box
- *
- * @param state
- */
-export function registerSpanPoint(state: State): State {
-  const oldTask = state.task
-  const newBox = oldTask.boxSpan
-  if (newBox !== undefined) {
-    newBox.registerPoint()
-  }
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: newBox
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
+    groundPlane: action.groundPlanePoints
   })
-  return updateObject(state, {
-    task: newTask
-  })
-}
-
-/**
- * Reset span box
- *
- * @param state
- */
-export function resetSpan(state: State): State {
-  const oldTask = state.task
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: new Span3D()
-  })
-  return updateObject(state, {
-    task: newTask
-  })
-}
-
-/**
- * Pause box spanning mode
- *
- * @param state
- */
-export function pauseSpan(state: State): State {
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
-    ...state.session,
-    boxSpan: false
+    ...oldSession,
+    info3D: newInfo3D
   })
   return updateObject(state, {
     session: newSession
@@ -1736,37 +1639,23 @@ export function pauseSpan(state: State): State {
 }
 
 /**
- * Resume box spanning mode
+ * Set ground plane
  *
  * @param state
+ * @param action
  */
-export function resumeSpan(state: State): State {
+export function toggleGroundPlane(state: State): State {
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
+    showGroundPlane: !oldInfo3D.showGroundPlane
+  })
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
-    ...state.session,
-    boxSpan: true
+    ...oldSession,
+    info3D: newInfo3D
   })
   return updateObject(state, {
     session: newSession
-  })
-}
-
-/**
- * Undo span point registration
- *
- * @param state
- */
-export function undoSpan(state: State): State {
-  const oldTask = state.task
-  const box = oldTask.boxSpan
-  if (box !== undefined) {
-    box.removeLastPoint()
-  }
-  const newTask = updateObject(oldTask, {
-    ...state.task,
-    boxSpan: box
-  })
-  return updateObject(state, {
-    task: newTask
   })
 }

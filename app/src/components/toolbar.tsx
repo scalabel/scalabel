@@ -19,6 +19,7 @@ import {
   deletePane,
   addViewerConfig
 } from "../action/common"
+import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
@@ -28,7 +29,12 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName, ViewerConfigTypeName } from "../const/common"
+import {
+  ItemTypeName,
+  Key,
+  LabelTypeName,
+  ViewerConfigTypeName
+} from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import {
   isValidId,
@@ -200,16 +206,21 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
-          <div>
-            {this.state.session.boxSpan || this.state.task.boxSpan !== undefined
-              ? makeButton("Cancel", () => {
-                  this.deactivateSpan()
-                  alert(Severity.WARNING, "Box was not generated")
-                })
-              : makeButton("Activate span", () => {
-                  this.activateSpan()
-                })}
-          </div>
+          {(this.state.task.config.itemType === ItemTypeName.POINT_CLOUD ||
+            this.state.task.config.itemType ===
+              ItemTypeName.POINT_CLOUD_TRACKING) && (
+            <div>
+              {this.state.session.info3D.isBoxSpan ||
+              this.state.session.info3D.boxSpan !== null
+                ? makeButton("Cancel", () => {
+                    this.deactivateSpan()
+                    alert(Severity.WARNING, "Box was not generated")
+                  })
+                : makeButton("Activate span", () => {
+                    this.activateSpan()
+                  })}
+            </div>
+          )}
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking

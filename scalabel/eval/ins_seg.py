@@ -15,6 +15,7 @@ from ..common.io import open_write_text
 from ..common.logger import logger
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
+from .utils import check_overlap, reorder_preds
 
 
 def evaluate_ins_seg(
@@ -23,26 +24,18 @@ def evaluate_ins_seg(
     config: Config,
     nproc: int = NPROC,
 ) -> DetResult:
-    """Load the ground truth and prediction results.
+    """Evaluate instance segmentation with Scalabel format.
 
     Args:
-        ann_frames: the ground truth annotations in Scalabel format
-        pred_frames: the prediction results in Scalabel format.
+        ann_frames: the ground truth frames.
+        pred_frames: the prediction frames.
         config: Metadata config.
         nproc: the number of process.
 
     Returns:
-        DetResult: rendered eval results.
-
-    Example usage:
-        evaluate_ins_seg(
-            "/path/to/gts",
-            "/path/to/results",
-            "/path/to/cfg",
-            nproc=4,
-        )
+        DetResult: evaluation results.
     """
-    # Convert the annotation file to COCO format
+    # convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
     ann_coco = scalabel2coco_ins_seg(ann_frames, config)
     ann_coco["annotations"] = [
@@ -50,13 +43,22 @@ def evaluate_ins_seg(
     ]
     coco_gt = COCOV2(None, ann_coco)
 
-    # Load results and convert the predictions
-    pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
+    # load results and convert the predictions
+    pred_frames = reorder_preds(ann_frames, pred_frames)
+    # check overlap of masks
+    logger.info("checking for overlap of masks...")
+    if check_overlap(pred_frames, config, nproc):
+        logger.critical(
+            "Found overlap in prediction bitmasks, but instance segmentation "
+            "evaluation does not allow overlaps. Removing such predictions."
+        )
+    logger.info("converting predictions to COCO format...")
     pred_res = scalabel2coco_ins_seg(pred_frames, config)["annotations"]
-    # Handle empty predictions
+    # handle empty predictions
     if not pred_res:
+        logger.critical("No predictions found. Skipping evaluation.")
         return DetResult.empty(coco_gt)
-    # Removing bbox so pycocotools will use mask to compute area
+    # removing bbox so pycocotools will use mask to compute area
     for ann in pred_res:
         if "bbox" in ann:
             ann.pop("bbox")

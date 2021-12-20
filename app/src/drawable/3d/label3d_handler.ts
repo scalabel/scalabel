@@ -6,8 +6,9 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
+  toggleGroundPlane,
   undoSpan
-} from "../../action/common"
+} from "../../action/span3d"
 import Session from "../../common/session"
 import {
   DataType,
@@ -330,15 +331,14 @@ export class Label3DHandler {
     const state = Session.getState()
     // TODO: break the cases into functions
     switch (e.key) {
-      case Key.G_UP:
-      case Key.G_LOW: {
-        return this.selectOrCreateGroundPlane()
-      }
+      // case Key.G_UP:
+      // case Key.G_LOW: {
+      //   return this.selectOrCreateGroundPlane()
+      // }
       case Key.SPACE: {
         if (
-          state.session.boxSpan &&
-          state.task.boxSpan !== undefined &&
-          !state.task.boxSpan.complete
+          state.session.info3D.boxSpan !== null &&
+          !state.session.info3D.boxSpan.complete
         ) {
           break
         } else {
@@ -346,7 +346,7 @@ export class Label3DHandler {
         }
       }
       case Key.ESCAPE:
-        if (state.session.boxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(resetSpan())
         }
         return true
@@ -413,15 +413,20 @@ export class Label3DHandler {
         }
         break
       case Key.Q_LOW:
-        if (state.session.boxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(pauseSpan())
-        } else if (state.task.boxSpan !== undefined) {
+        } else if (state.session.info3D.boxSpan !== null) {
           Session.dispatch(resumeSpan())
         }
         return true
       case Key.U_LOW:
-        if (state.session.boxSpan) {
+        if (state.session.info3D.isBoxSpan) {
           Session.dispatch(undoSpan())
+        }
+        break
+      case Key.G_LOW:
+        if (state.session.info3D.isBoxSpan) {
+          Session.dispatch(toggleGroundPlane())
         }
         break
       default:
@@ -588,18 +593,16 @@ export class Label3DHandler {
         this._state.task.config.tracking
       )
 
-      if (Session.getState().session.boxSpan) {
-        const box = Session.getState().task.boxSpan
-        if (box !== undefined) {
-          if (box.complete) {
-            try {
-              label.move(box.center)
-              label.rotate(box.rotation)
-              label.scale(box.dimensions, box.center, true)
-              Session.dispatch(deactivateSpan())
-            } catch (err) {
-              alert(Severity.ERROR, err.message)
-            }
+      const box = Session.getState().session.info3D.boxSpan
+      if (box !== null) {
+        if (box.complete) {
+          try {
+            label.move(box.center)
+            label.rotate(box.rotation)
+            label.scale(box.dimensions, box.center, true)
+            Session.dispatch(deactivateSpan())
+          } catch (err) {
+            alert(Severity.ERROR, err.message)
           }
         }
       }

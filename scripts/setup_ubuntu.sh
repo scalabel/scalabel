@@ -35,6 +35,6 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Compiling source code
 echo [$(date +"%F %T")] ================================
 
-node_modules/.bin/webpack --config webpack.config.js --mode=production
+node --max_old_space_size=8000 node_modules/.bin/webpack --config webpack.config.js --mode=production
 
 # . ${DIR}/setup_local_dir.sh

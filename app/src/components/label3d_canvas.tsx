@@ -5,8 +5,8 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
-import { registerSpanPoint, updateSpanPoint } from "../action/common"
+import { ViewerConfigTypeName } from "../const/common"
+import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { Image3DViewerConfigType, State } from "../types/state"
@@ -19,8 +19,7 @@ import {
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
 import { Vector3D } from "../math/vector3d"
-import { Plane3D } from "../drawable/3d/plane3d"
-import { Vector2D } from "../math/vector2d"
+import { GroundPlane3D } from "../drawable/3d/ground_plane3d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -87,6 +86,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private data2d: boolean
   /** The crosshair */
   private readonly crosshair: React.RefObject<Crosshair2D>
+  /** Ground plane */
+  private groundPlane: GroundPlane3D | null
 
   /** drawable label list */
   private readonly _labelHandler: Label3DHandler
@@ -123,6 +124,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       Line: { threshold: 0.02 }
     }
     this.crosshair = React.createRef()
+    this.groundPlane = null
 
     this._keyDownMap = {}
 
@@ -212,7 +214,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       })
     }
 
-    return Session.getState().session.boxSpan ? [ch, canvas] : [canvas]
+    return Session.getState().session.info3D.isBoxSpan ? [ch, canvas] : [canvas]
   }
 
   /**
@@ -267,9 +269,12 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       return
     }
     const state = Session.getState()
-    if (state.session.boxSpan && state.task.boxSpan !== undefined) {
+    if (
+      state.session.info3D.isBoxSpan &&
+      state.session.info3D.boxSpan !== null
+    ) {
       // send mouse position to register new point in span box
-      if (!state.task.boxSpan.complete) {
+      if (!state.session.info3D.boxSpan.complete) {
         Session.dispatch(registerSpanPoint())
       }
     } else if (this._labelHandler.onMouseUp()) {
@@ -285,6 +290,10 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   public onMouseMove(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (this.canvas === null || this.checkFreeze()) {
       return
+    }
+
+    if (this.crosshair.current !== null) {
+      this.crosshair.current.onMouseMove(e)
     }
 
     const normalized = normalizeCoordinatesToCanvas(
@@ -304,37 +313,29 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     this._raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera)
 
     const state = Session.getState()
-    if (state.session.boxSpan) {
+    if (state.session.info3D.isBoxSpan) {
       this.setCursor("crosshair")
+      if (this.groundPlane === null) {
+        const groundPlanePoints = Session.getState().session.info3D.groundPlane
 
-      // TODO: figure out why this offset is necessary
-      const offset = new THREE.Vector3(0, 0, -1.5)
-      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0).translate(
-        offset
-      )
-
-      // Check if ground plane in current item
-      const selectedItem = state.user.select.item
-      const labels = Session.label3dList.labels()
-      const itemPlanes = labels.filter(
-        (l) =>
-          l.item === selectedItem && l.label.type === LabelTypeName.PLANE_3D
-      )
-      if (itemPlanes.length > 0) {
-        const itemPlane = itemPlanes[0] as Plane3D
-        const normal = new THREE.Vector3(0, 0, 1)
-        normal.applyQuaternion(itemPlane.orientation)
-        plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
-      }
-
-      const intersects = new THREE.Vector3()
-      this._raycaster.ray.intersectPlane(plane, intersects)
-      Session.dispatch(updateSpanPoint(new Vector3D().fromThree(intersects)))
-      if (state.task.boxSpan !== undefined) {
-        state.task.boxSpan.updatePointTmp(
-          new Vector2D(x, y),
-          plane,
-          this.camera
+        if (groundPlanePoints !== null) {
+          const points: THREE.Vector3[] = []
+          for (let i = 0; i < groundPlanePoints.length; i += 3) {
+            points.push(
+              new THREE.Vector3(
+                groundPlanePoints[i],
+                groundPlanePoints[i + 1],
+                groundPlanePoints[i + 2]
+              )
+            )
+          }
+          this.groundPlane = new GroundPlane3D(points)
+        }
+      } else {
+        const intersects = new THREE.Vector3()
+        this._raycaster.ray.intersectPlane(this.groundPlane.plane, intersects)
+        Session.dispatch(
+          updateSpanPoint(new Vector3D().fromThree(intersects), y)
         )
       }
     } else {
@@ -354,10 +355,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (consumed) {
         e.stopPropagation()
       }
-    }
-
-    if (this.crosshair.current !== null) {
-      this.crosshair.current.onMouseMove(e)
     }
 
     Session.label3dList.onDrawableUpdate()
@@ -439,9 +436,14 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       this.renderer !== undefined &&
       isCurrentFrameLoaded(state, sensor)
     ) {
-      const boxSpan = Session.getState().task.boxSpan
-      if (boxSpan?.render !== undefined) {
+      const boxSpan = Session.getState().session.info3D.boxSpan
+      if (boxSpan !== null) {
         boxSpan.render(Session.label3dList.scene)
+        const showGroundPlane = Session.getState().session.info3D
+          .showGroundPlane
+        if (showGroundPlane && this.groundPlane !== null) {
+          this.groundPlane.render(Session.label3dList.scene)
+        }
       }
       this.renderer.render(Session.label3dList.scene, this.camera)
     } else if (this.renderer !== null && this.renderer !== undefined) {

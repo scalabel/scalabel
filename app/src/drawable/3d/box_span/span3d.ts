@@ -5,21 +5,13 @@ import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 import { SpanCuboid3D } from "./spanCuboid3d"
 import { Vector3D } from "../../../math/vector3d"
-import { Vector2D } from "../../../math/vector2d"
-import { projectionFromNDC } from "../../../view_config/point_cloud"
 
 /**
  * ThreeJS class for rendering 3D span object
  */
 export class Span3D {
-  /** First point */
-  private _p1: SpanPoint3D | null
-  /** Second point */
-  private _p2: SpanPoint3D | null
-  /** Third point */
-  private _p3: SpanPoint3D | null
-  /** Fourth point */
-  private _p4: SpanPoint3D | null
+  /** Points list */
+  private readonly _points: SpanPoint3D[]
   /** Temporary point that follows mouse cursor */
   private _pTmp: SpanPoint3D
   /** Line between first and second point */
@@ -29,14 +21,9 @@ export class Span3D {
   /** Whether span box is complete */
   private _complete: boolean
 
-  /**
-   * Constructor
-   */
+  /** Constructor */
   constructor() {
-    this._p1 = null
-    this._p2 = null
-    this._p3 = null
-    this._p4 = null
+    this._points = []
     this._pTmp = new SpanPoint3D(new Vector3D(0, 0, 0))
     this._line = null
     this._cuboid = null
@@ -47,8 +34,6 @@ export class Span3D {
    * Modify ThreeJS objects to draw labels
    *
    * @param scene
-   * @param camera
-   * @param canvas
    */
   public render(scene: THREE.Scene): void {
     // use points data to render temporary geometries
@@ -56,118 +41,147 @@ export class Span3D {
     if (!this._complete) {
       this._pTmp.render(scene)
     }
-    if (this._p1 !== null) {
-      if (this._p2 === null) {
-        // render first point
+    this._points.map((l) => l.render(scene))
+    switch (this._points.length) {
+      case 0:
+        break
+      case 1: {
         // render line between first point and temp point
-        this._p1.render(scene)
-        const line = new SpanLine3D(this._p1, this._pTmp)
+        const line = new SpanLine3D(this._points[0], this._pTmp)
         this._line = line
         line.render(scene)
-      } else if (this._p3 === null) {
-        // render first, second point
+        break
+      }
+      case 2: {
         // render plane formed by first, second point and temp point
-        if (this._p1 !== null && this._p2 !== null) {
-          this._p1.render(scene)
-          this._p2.render(scene)
-          const plane = new SpanRect3D(this._p1, this._p2, this._pTmp)
-          plane.render(scene)
-        }
-      } else if (this._p4 === null) {
-        // render first, second, third point
+        const plane = new SpanRect3D(
+          this._points[0],
+          this._points[1],
+          this._pTmp
+        )
+        plane.render(scene)
+        break
+      }
+      case 3: {
         // render cuboid formed by first, second, third point and temp point
-        this._p1.render(scene)
-        this._p2.render(scene)
-        this._p3.render(scene)
         const cuboid = new SpanCuboid3D(
-          this._p1,
-          this._p2,
-          this._p3,
+          this._points[0],
+          this._points[1],
+          this._points[2],
           this._pTmp
         )
         this._cuboid = cuboid
         this._cuboid.render(scene)
-      } else if (this._cuboid !== null) {
-        this._cuboid.render(scene)
-      } else {
-        throw new Error("Span3D: rendering error")
+        break
       }
+      default:
+        if (this._cuboid !== null) {
+          this._cuboid.render(scene)
+        }
     }
   }
+
+  //   * @param plane
+  //   * @param camera
+  //   */
+  //  public updatePointTmp(
+  //    coords: Vector2D,
+  //    plane: THREE.Plane,
+  //    camera: THREE.Camera
+  //  ): this {
+  //    const projection = projectionFromNDC(coords.x, coords.y, camera)
+  //    const point3d = new THREE.Vector3()
+  //    projection.intersectPlane(plane, point3d)
+  //    const point = new Vector3D(point3d.x, point3d.y, point3d.z)
+  //    if (this._p2 !== null && this._p3 === null) {
+  //      // make second point orthogonal to line
+  //      if (this._line !== null) {
+  //        const newCoords = this._line.alignPointToNormal(point, plane)
+  //        this._pTmp = new SpanPoint3D(newCoords)
+  //      }
+  //    } else if (this._p3 !== null && this._p4 === null) {
+  //      // make third point orthogonal to plane
+  //      const newPlane = new THREE.Plane()
+  //      const p3 = this._p3.toVector3D().toThree()
+  //      const newNormal = p3.clone().normalize()
+  //      newPlane.setFromNormalAndCoplanarPoint(newNormal, p3)
+
+  //      projection.intersectPlane(newPlane, point3d)
+
+  //      const distance = plane.distanceToPoint(point3d)
+  //      const normal = plane.normal.clone()
+  //      normal.setLength(distance)
+  //      const newPoint = normal.add(this._p3.toVector3D().toThree())
+  //      this._pTmp = new SpanPoint3D(
+  //        new Vector3D(newPoint.x, newPoint.y, newPoint.z)
+  //      )
+  //    } else {
+  //      this._pTmp = new SpanPoint3D(point)
+  //    }
 
   /**
    * Register new temporary point given current mouse position
    *
    * @param coords
-   * @param plane
-   * @param camera
+   * @param point
+   * @param mouseY
    */
-  public updatePointTmp(
-    coords: Vector2D,
-    plane: THREE.Plane,
-    camera: THREE.Camera
-  ): this {
-    const projection = projectionFromNDC(coords.x, coords.y, camera)
-    const point3d = new THREE.Vector3()
-    projection.intersectPlane(plane, point3d)
-    const point = new Vector3D(point3d.x, point3d.y, point3d.z)
-    if (this._p2 !== null && this._p3 === null) {
-      // make second point orthogonal to line
-      if (this._line !== null) {
-        const newCoords = this._line.alignPointToNormal(point, plane)
-        this._pTmp = new SpanPoint3D(newCoords)
+  public updatePointTmp(point: Vector3D, mouseY: number): this {
+    switch (this._points.length) {
+      case 2:
+        // make second point orthogonal to line
+        if (this._line !== null) {
+          const newCoords = this._line.alignPointToNormal(point)
+          this._pTmp = new SpanPoint3D(newCoords)
+        }
+        break
+      case 3: {
+        // make third point orthogonal to plane
+        const scaleFactor = 5
+        this._pTmp = new SpanPoint3D(
+          new Vector3D(
+            this._points[2].x,
+            this._points[2].y,
+            mouseY * scaleFactor
+          )
+        )
+        break
       }
-    } else if (this._p3 !== null && this._p4 === null) {
-      // make third point orthogonal to plane
-      const newPlane = new THREE.Plane()
-      const p3 = this._p3.toVector3D().toThree()
-      const newNormal = p3.clone().normalize()
-      newPlane.setFromNormalAndCoplanarPoint(newNormal, p3)
-
-      projection.intersectPlane(newPlane, point3d)
-
-      const distance = plane.distanceToPoint(point3d)
-      const normal = plane.normal.clone()
-      normal.setLength(distance)
-      const newPoint = normal.add(this._p3.toVector3D().toThree())
-      this._pTmp = new SpanPoint3D(
-        new Vector3D(newPoint.x, newPoint.y, newPoint.z)
-      )
-    } else {
-      this._pTmp = new SpanPoint3D(point)
+      default:
+        this._pTmp = new SpanPoint3D(point)
     }
-
     return this
   }
 
   /** Register new point */
   public registerPoint(): this {
-    if (this._p1 === null) {
-      this._p1 = this._pTmp
-    } else if (this._p2 === null && this._p1 !== this._pTmp) {
-      this._p2 = this._pTmp
-    } else if (this._p3 === null && this._p2 !== this._pTmp) {
-      this._p3 = this._pTmp
-    } else if (this._p4 === null && this._p3 !== this._pTmp) {
-      this._p4 = this._pTmp
-      this._complete = true
-    } else {
-      throw new Error("Span3D: error registering new point")
+    switch (this._points.length) {
+      case 1:
+        if (this._points[0] === this._pTmp) {
+          return this
+        }
+        break
+      case 2:
+        if (this._points[1] === this._pTmp) {
+          return this
+        }
+        break
+      case 3:
+        if (this._points[2] !== this._pTmp) {
+          this._complete = true
+        } else {
+          return this
+        }
     }
+    this._points.push(this._pTmp)
     return this
   }
 
   /** Remove last registered point */
   public removeLastPoint(): this {
-    if (this._p4 !== null) {
-      this._p4 = null
+    if (this._points.length > 0) {
+      this._points.pop()
       this._complete = false
-    } else if (this._p3 !== null) {
-      this._p3 = null
-    } else if (this._p2 !== null) {
-      this._p2 = null
-    } else if (this._p1 !== null) {
-      this._p1 = null
     }
     return this
   }

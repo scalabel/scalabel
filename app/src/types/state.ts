@@ -527,6 +527,17 @@ export interface AlertType {
   timeout: number
 }
 
+export interface Info3DType {
+  /** Box span toggled */
+  isBoxSpan: boolean
+  /** Bounding box created by spanning mode */
+  boxSpan: Span3D | null
+  /** Ground plane toggled */
+  showGroundPlane: boolean
+  /** Ground plane */
+  groundPlane: number[] | null
+}
+
 /**
  * Information for this particular session
  */
@@ -551,8 +562,8 @@ export interface SessionType {
   numUpdates: number
   /** Alerts */
   alerts: AlertType[]
-  /** Box span toggled */
-  boxSpan: boolean
+  /** 3D-specific information */
+  info3D: Info3DType
 }
 
 export interface State {
