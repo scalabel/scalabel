@@ -40,10 +40,6 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
   /** Component update function */
   public componentDidUpdate(): void {
     if (this._viewerConfig !== null) {
-      const sensor = this._viewerConfig?.sensor ?? null
-      if (sensor !== null) {
-        this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
-      }
       if (this._container !== null) {
         const displayRect = this._container.getBoundingClientRect()
         this._camera.width = displayRect.width
@@ -51,7 +47,7 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         this._camera.intrinsics = {
           focalLength: {
             x: displayRect.width,
-            y: displayRect.height * 2
+            y: displayRect.height
           },
           focalCenter: {
             x: displayRect.width / 2,

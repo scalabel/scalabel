@@ -498,7 +498,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (
         this.canvas !== null &&
         this.display !== null &&
-        this.data2d !== null
+        this.data2d !== null &&
+        viewerConfig.type === ViewerConfigTypeName.IMAGE_3D
       ) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (
