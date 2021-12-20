@@ -17,14 +17,8 @@ same label id.
 In the labeling interface of video tracking, move the slider around to move
 across frames.
 
-.. raw:: html
-
-    <video width="600" controls autoplay loop>
-        <source
-            src="https://www.scalabel.ai/media/doc/videos/box2d_tracking_slider.gif.mp4"
-            type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+.. figure:: ../media/doc/videos/box2d_tracking_slider.gif
+    :width: 600px
 
 Bounding box interpolation
 =====================================
@@ -41,22 +35,18 @@ during project creation.
 
 Ending object track
 =====================================
-For an object that disappears after certain frame, click "End Object Track" or
-press ``Ctrl-E`` (``Cmd-E`` for Mac users) at the frame of its last occurrence.
-The bounding box labels after this frame will be deleted.
-
-
-.. figure:: ../media/doc/videos/box2d_tracking_end-track.gif
-    :width: 600px
+For an object that disappears after certain frame, press ``Backspace`` at the
+frame of its last occurrence. The bounding box labels after this frame will be
+deleted.
 
 
 Track Linking
 =====================================
 Sometimes an object reappears in the frame due to occlusion or re-entrance, and
 track linking enables individual tracks to be linked as a single instance.
-Select a label, click ``Track-Link`` or press ``Ctrl-L`` (``Cmd-L`` for Mac
+Select a label, click "Link Tracks" or press ``Ctrl-L`` (``Cmd-L`` for Mac
 users), and click on any other tracks that you want to link with this label. The
-tracks you choose to link appears in dashed lines. Click "Finish Track-Link" or
+tracks you choose to link appears in dashed lines. Click "Finish" or
 hit ``Enter`` to finish this operation.
 
 
@@ -68,32 +58,44 @@ overlapping frames; make sure to end object tracks correctly for all tracks
 before the linking operation.
 
 
+Track Breaking
+=====================================
+If you accidentally link two tracks that not belong to the same object. You can
+click "Break track" at the frame you want to break this track. After this operation,
+the original track will break into two tracks. The first one will have labels of
+the original tracks from frame ``0`` to ``break_frame - 1``, the second one will
+contain labels of the original track start at ``break_frame``.
+
+.. figure:: ../media/doc/videos/box2d_tracking_track-break.gif
+    :width: 600px
+
+
+Single frame addition/deletion
+=====================================
+Under the default setting, when you draw a label at a given frame, this label will
+be propagated to the end of this video. Sometimes this is unnecessary. So we provide
+an operation to only draw label at the chosen frame. This could be enabled by drawing
+the label while holding ``s``.
+
+.. figure:: ../media/doc/videos/box2d_tracking_single-frame-addition.gif
+   :width: 600px
+   :alt: Single frame addtion
+
+   When pressing s, the label would only be added at the given frame
+
+Also, the default deleting operation would delete all labels after the chosen frame.
+Sometimes we only want to delete labels at some specific frames. So we provide an
+operation that only deletes the label at the chosen frame, while not affecting the
+labels of other frames. To use it, press ``backspace`` while holding ``s``.
+
+.. figure:: ../media/doc/videos/box2d_tracking_single-frame-deletion.gif
+   :width: 600px
+   :alt: Single frame deletion
+
+   When pressing s, the label would only be deleted at the give frame
+
+
 2D Instance Segmentation Tracking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Track labeling for instance segmentation is similar with that for bounding box.
-A key difference is that for instance segmentation, overlapping frames is
-allowed when linking different tracks.
-
-
-
-Moving a segmentation label
-=====================================
-After labeling a segmentation label in a keyframe, adjusting each vertex in a
-subsequent frame can be laborious. Press ``m`` and drag a selected label to move
-the entire label around.
-
-
-.. figure:: ../media/doc/videos/seg2d_tracking_move.gif
-    :width: 600px
-
-
-
-Redrawing a segmentation label
-=====================================
-At a different frame, sometimes it is easier to redraw the entire segmentation
-label than adjusting each existing vertex. Press ``Ctrl-delete`` (``Cmd-delete``
-for Mac users) to re-draw a segmentation label in the selected object track.
-
-.. figure:: ../media/doc/videos/seg2d_tracking_redraw.gif
-    :width: 600px

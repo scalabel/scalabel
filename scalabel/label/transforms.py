@@ -132,7 +132,7 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
                 poly.vertices,
                 poly.types,
                 color=(1, 1, 1),
-                closed=True,
+                closed=poly.closed,
             )
         )
 
@@ -144,7 +144,7 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
 
 
 def frame_to_masks(
-    shape: ImageSize, poly2ds: List[List[Poly2D]], closed: bool = True
+    shape: ImageSize, poly2ds: List[List[Poly2D]]
 ) -> List[NDArrayU8]:
     """Converting a frame of poly2ds to masks/bitmasks. Removes overlaps."""
     height, width = shape.height, shape.width
@@ -171,7 +171,7 @@ def frame_to_masks(
                         ((i + 1) % 255) / 255.0,
                         0.0,
                     ),
-                    closed=closed,
+                    closed=poly.closed,
                 )
             )
 

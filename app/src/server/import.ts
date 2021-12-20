@@ -10,7 +10,12 @@ import {
   makePlane,
   makeRect
 } from "../functional/states"
-import { ItemExport, LabelExport } from "../types/export"
+import {
+  ExtrinsicsExportType,
+  IntrinsicsExportType,
+  ItemExport,
+  LabelExport
+} from "../types/export"
 import {
   Attribute,
   ExtrinsicsType,
@@ -24,6 +29,11 @@ import {
   ShapeType
 } from "../types/state"
 import { uid } from "../common/uid"
+import {
+  box3dToCube,
+  extrinsicsFromExport,
+  intrinsicsFromExport
+} from "./bdd_type_transformers"
 
 /**
  * Convert the attributes to label to ensure the format consistency
@@ -50,6 +60,7 @@ function convertAttributeToLabel(attributes: {
  * @param attributeValueMap look up an attribute value's index
  * @param categoryNameMap look up a category's index from its name
  * @param tracking
+ * @param labelTypes
  */
 export function convertItemToImport(
   videoName: string,
@@ -60,7 +71,8 @@ export function convertItemToImport(
   attributeNameMap: { [key: string]: [number, Attribute] },
   attributeValueMap: { [key: string]: number },
   categoryNameMap: { [key: string]: number },
-  tracking: boolean
+  tracking: boolean,
+  labelTypes: string[]
 ): ItemType {
   const urls: { [id: number]: string } = {}
   const names: { [id: number]: string } = {}
@@ -75,19 +87,28 @@ export function convertItemToImport(
     if (itemExportMap[sensorId].name !== undefined) {
       names[sensorId] = itemExportMap[sensorId].name as string
     }
-    if (itemExportMap[sensorId].intrinsics !== undefined) {
-      intrinsics[sensorId] = itemExportMap[sensorId]
-        .intrinsics as IntrinsicsType
+    if (
+      itemExportMap[sensorId].intrinsics !== undefined &&
+      itemExportMap[sensorId].intrinsics !== null
+    ) {
+      intrinsics[sensorId] = intrinsicsFromExport(
+        itemExportMap[sensorId].intrinsics as IntrinsicsExportType
+      )
     }
-    if (itemExportMap[sensorId].extrinsics !== undefined) {
-      extrinsics[sensorId] = itemExportMap[sensorId]
-        .extrinsics as ExtrinsicsType
+    if (
+      itemExportMap[sensorId].extrinsics !== undefined &&
+      itemExportMap[sensorId].extrinsics !== null
+    ) {
+      extrinsics[sensorId] = extrinsicsFromExport(
+        itemExportMap[sensorId].extrinsics as ExtrinsicsExportType
+      )
     }
     let labelsExport = itemExportMap[sensorId].labels
     const itemAttributes = itemExportMap[sensorId].attributes
     let isTagging = false
     if (
       itemAttributes !== undefined &&
+      itemAttributes !== null &&
       Object.keys(itemAttributes).length > 0
     ) {
       if (labelsExport === undefined) {
@@ -116,7 +137,10 @@ export function convertItemToImport(
         }
 
         let attributes: { [key: number]: number[] } = {}
-        if (labelExport.attributes !== undefined) {
+        if (
+          labelExport.attributes !== undefined &&
+          labelExport.attributes !== null
+        ) {
           attributes = parseExportAttributes(
             labelExport.attributes,
             attributeNameMap,
@@ -130,7 +154,8 @@ export function convertItemToImport(
           sensorId,
           categories,
           attributes,
-          labelId
+          labelId,
+          labelTypes
         )
         if (isTagging) {
           importedLabel.type = "tag"
@@ -228,6 +253,7 @@ function parseExportAttributes(
  * @param category
  * @param attributes
  * @param newLabelId
+ * @param labelTypes
  */
 function convertLabelToImport(
   labelExport: LabelExport,
@@ -235,7 +261,8 @@ function convertLabelToImport(
   sensorId: number,
   category?: number[],
   attributes?: { [key: number]: number[] },
-  newLabelId?: string
+  newLabelId?: string,
+  labelTypes: string[]
 ): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
   let shapes: null | ShapeType[] = null
@@ -248,10 +275,19 @@ function convertLabelToImport(
    * Convert each import shape based on their type
    * TODO: no polyline2d
    */
-  if (labelExport.box2d !== null && labelExport.box2d !== undefined) {
+  if (
+    labelTypes.includes(LabelTypeName.BOX_2D) &&
+    labelExport.box2d !== null &&
+    labelExport.box2d !== undefined
+  ) {
     labelType = LabelTypeName.BOX_2D
     shapes = [makeRect(labelExport.box2d)]
-  } else if (labelExport.poly2d !== null && labelExport.poly2d !== undefined) {
+  } else if (
+    (labelTypes.includes(LabelTypeName.POLYGON_2D) ||
+      labelTypes.includes(LabelTypeName.POLYLINE_2D)) &&
+    labelExport.poly2d !== null &&
+    labelExport.poly2d !== undefined
+  ) {
     const polyExport = labelExport.poly2d[0]
     labelType = polyExport.closed
       ? LabelTypeName.POLYGON_2D
@@ -264,10 +300,15 @@ function convertLabelToImport(
           polyExport.types[i] === "L" ? PathPointType.LINE : PathPointType.CURVE
       })
     )
-  } else if (labelExport.box3d !== null && labelExport.box3d !== undefined) {
-    labelType = LabelTypeName.BOX_3D
-    shapes = [makeCube(labelExport.box3d)]
   } else if (
+    labelTypes.includes(LabelTypeName.BOX_3D) &&
+    labelExport.box3d !== null &&
+    labelExport.box3d !== undefined
+  ) {
+    labelType = LabelTypeName.BOX_3D
+    shapes = [makeCube(box3dToCube(labelExport.box3d))]
+  } else if (
+    labelTypes.includes(LabelTypeName.PLANE_3D) &&
     labelExport.plane3d !== null &&
     labelExport.plane3d !== undefined
   ) {
@@ -292,7 +333,7 @@ function convertLabelToImport(
       type: labelType,
       item,
       shapes: shapeIds,
-      manual: labelExport.manualShape,
+      manual: labelExport.manualShape || false,
       category,
       attributes,
       sensors: [sensorId]

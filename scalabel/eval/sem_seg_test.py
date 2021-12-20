@@ -9,8 +9,8 @@ from ..unittest.util import get_test_file
 from .sem_seg import evaluate_sem_seg
 
 
-class TestBDD100KSemSegEval(unittest.TestCase):
-    """Test cases for BDD100K semantic segmentation evaluation."""
+class TestScalabelSemSegEval(unittest.TestCase):
+    """Test cases for Scalabel semantic segmentation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/sem_seg/sem_seg_sample.json"
@@ -28,19 +28,19 @@ class TestBDD100KSemSegEval(unittest.TestCase):
                 "road",
                 "sidewalk",
                 "building",
-                "fence",
                 "wall",
+                "fence",
                 "pole",
                 "traffic light",
                 "traffic sign",
-                "terrain",
                 "vegetation",
+                "terrain",
                 "sky",
                 "person",
                 "rider",
+                "car",
                 "bicycle",
                 "bus",
-                "car",
                 "motorcycle",
                 "train",
                 "truck",
@@ -101,8 +101,8 @@ class TestBDD100KSemSegEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KSemSegEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K instance segmentation on empty test cases."""
+class TestScalabelSemSegEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/sem_seg/sem_seg_sample.json"

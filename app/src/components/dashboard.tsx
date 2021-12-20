@@ -352,9 +352,11 @@ class Dashboard extends React.Component<DashboardProps, DashboardState> {
     const xhr = new XMLHttpRequest()
     xhr.onreadystatechange = () => {
       const newTaskMetaData = this.state.taskMetaDatas
-      newTaskMetaData[index] = JSON.parse(xhr.responseText)
-      if (xhr.readyState === 4) {
-        this.setState({ taskMetaDatas: newTaskMetaData })
+      if (xhr.responseText !== "") {
+        newTaskMetaData[index] = JSON.parse(xhr.responseText)
+        if (xhr.readyState === 4) {
+          this.setState({ taskMetaDatas: newTaskMetaData })
+        }
       }
     }
     taskId = taskId.substring(taskId.length - 6)
@@ -379,6 +381,9 @@ function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <>
+      <IconButton color="inherit" href={`./create`}>
+        <FontAwesomeIcon icon={fa.faChevronLeft} size="xs" transform="grow-6" />
+      </IconButton>
       <Typography variant="h6" noWrap>
         {vendor !== undefined && vendor
           ? "Vendor Dashboard"
@@ -486,7 +491,7 @@ function listEntry(props: ListEntryProps): JSX.Element {
       <Grid
         spacing={1}
         alignItems={"baseline"}
-        justify={"space-around"}
+        justifyContent={"space-around"}
         className={classes.listContainer}
         container
       >

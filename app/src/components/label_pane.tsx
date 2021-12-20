@@ -1,4 +1,6 @@
 import { IconButton, List, ListItem } from "@material-ui/core"
+import Tooltip from "@mui/material/Tooltip"
+import Fade from "@mui/material/Fade"
 import Grid from "@material-ui/core/Grid"
 import MenuItem from "@material-ui/core/MenuItem"
 import Select from "@material-ui/core/Select"
@@ -237,54 +239,87 @@ class LabelPane extends Component<Props> {
       )
 
       const visibilityButton = (
-        <IconButton
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(updatePane(pane.id, { hide: !pane.hide }))
-          }}
+        <Tooltip
+          key={`visibilityButton${pane.id}`}
+          title={`${pane.hide ? "Show pane" : "Hide pane"}`}
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          {pane.hide ? (
-            <VisibilityIcon fontSize="small" />
-          ) : (
-            <VisibilityOffIcon fontSize="small" />
-          )}
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(updatePane(pane.id, { hide: !pane.hide }))
+            }}
+          >
+            {pane.hide ? (
+              <VisibilityIcon fontSize="small" />
+            ) : (
+              <VisibilityOffIcon fontSize="small" />
+            )}
+          </IconButton>
+        </Tooltip>
       )
 
       const verticalSplitButton = (
-        <IconButton
+        <Tooltip
           key={`verticalSplitButton${pane.id}`}
-          className={this.props.classes.icon90}
-          onClick={() => {
-            dispatch(splitPane(pane.id, SplitType.VERTICAL, pane.viewerId))
-          }}
+          title="Split vertically"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ViewStreamIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon90}
+            onClick={() => {
+              dispatch(splitPane(pane.id, SplitType.VERTICAL, pane.viewerId))
+            }}
+          >
+            <ViewStreamIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const horizontalSplitButton = (
-        <IconButton
+        <Tooltip
           key={`horizontalSplitButton${pane.id}`}
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(splitPane(pane.id, SplitType.HORIZONTAL, pane.viewerId))
-          }}
+          title="Split horizontally"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <ViewStreamIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(splitPane(pane.id, SplitType.HORIZONTAL, pane.viewerId))
+            }}
+          >
+            <ViewStreamIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const deleteButton = (
-        <IconButton
+        <Tooltip
           key={`deleteButton${pane.id}`}
-          className={this.props.classes.icon}
-          onClick={() => {
-            dispatch(deletePane(pane.id, pane.viewerId))
-          }}
+          title="Delete pane"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
         >
-          <CloseIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            className={this.props.classes.icon}
+            onClick={() => {
+              dispatch(deletePane(pane.id, pane.viewerId))
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
@@ -315,7 +350,7 @@ class LabelPane extends Component<Props> {
       const configBar = (
         <Grid
           key={`configMenu${pane.id}`}
-          justify={"flex-end"}
+          justifyContent={"flex-end"}
           container
           direction="row"
           classes={{
@@ -329,7 +364,7 @@ class LabelPane extends Component<Props> {
       const paneBar = (
         <Grid
           key={`paneMenu${pane.id}`}
-          justify={"flex-start"}
+          justifyContent={"flex-start"}
           alignItems={"flex-end"}
           container
           direction="row"

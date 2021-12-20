@@ -15,8 +15,10 @@ import {
   sampleFormImage,
   sampleFormVideo,
   sampleProjectAutolabel,
+  sampleProjectAutolabel3dBox,
   sampleProjectAutolabelPolygon,
   sampleProjectImage,
+  sampleProjectSensors,
   sampleProjectVideo,
   sampleTasksImage,
   // SampleTasksVideo,
@@ -24,6 +26,7 @@ import {
 } from "../test_states/test_creation_objects"
 import {
   sampleStateExportImage,
+  sampleStateExportImage3dBox,
   sampleStateExportImagePolygon
 } from "../test_states/test_export_objects"
 
@@ -121,6 +124,36 @@ describe("create with auto labels", () => {
       const exportedItems = convertStateToExport(state as State)
       expect(exportedItems).toEqual(sampleStateExportImagePolygon)
     })
+  })
+
+  test("import then export for 3d bounding box", async () => {
+    return await createTasks(
+      sampleProjectAutolabel3dBox,
+      undefined,
+      0,
+      0,
+      true
+    ).then((tasks) => {
+      // Only 1 task should be created
+      const state: Partial<State> = {
+        task: tasks[0]
+      }
+      const exportedItems = convertStateToExport(state as State)
+      expect(exportedItems).toEqual(sampleStateExportImage3dBox)
+    })
+  })
+
+  test("import then export for camera sensor", async () => {
+    return await createTasks(sampleProjectSensors, undefined, 0, 0, true).then(
+      (tasks) => {
+        // Only 1 task should be created
+        const state: Partial<State> = {
+          task: tasks[0]
+        }
+        const exportedItems = convertStateToExport(state as State)
+        expect(exportedItems).toEqual(sampleStateExportImage3dBox)
+      }
+    )
   })
 })
 

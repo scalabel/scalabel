@@ -14,6 +14,7 @@ import {
   splitTrack,
   startLinkTrack
 } from "../action/common"
+import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
@@ -23,7 +24,7 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName } from "../const/common"
+import { ItemTypeName, Key, LabelTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
@@ -31,6 +32,8 @@ import { Attribute, Category, ModeStatus, State } from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 /** This is the interface of props passed to ToolBar */
 interface Props {
@@ -183,6 +186,21 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
+          {(this.state.task.config.itemType === ItemTypeName.POINT_CLOUD ||
+            this.state.task.config.itemType ===
+              ItemTypeName.POINT_CLOUD_TRACKING) && (
+            <div>
+              {this.state.session.info3D.isBoxSpan ||
+              this.state.session.info3D.boxSpan !== null
+                ? makeButton("Cancel", () => {
+                    this.deactivateSpan()
+                    alert(Severity.WARNING, "Box was not generated")
+                  })
+                : makeButton("Activate span", () => {
+                    this.activateSpan()
+                  })}
+            </div>
+          )}
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking
@@ -215,16 +233,19 @@ export class ToolBar extends Component<Props> {
     const select = this.state.user.select
     if (Object.keys(select.labels).length > 0) {
       const item = this.state.task.items[select.item]
-      if (isValidId(item.labels[Object.values(select.labels)[0][0]].track)) {
-        if (!this.isKeyDown(Key.S_LOW)) {
-          Session.dispatch(terminateSelectedTracks(this.state, select.item))
+      const trackId = item.labels[Object.values(select.labels)[0][0]].track
+      if (trackId !== undefined) {
+        if (isValidId(trackId)) {
+          if (!this.isKeyDown(Key.S_LOW)) {
+            Session.dispatch(terminateSelectedTracks(this.state, select.item))
+          } else {
+            Session.dispatch(
+              deleteSelectedLabelsfromTracks(this.state, select.item)
+            )
+          }
         } else {
-          Session.dispatch(
-            deleteSelectedLabelsfromTracks(this.state, select.item)
-          )
+          Session.dispatch(deleteSelectedLabels(this.state))
         }
-      } else {
-        Session.dispatch(deleteSelectedLabels(this.state))
       }
     }
   }
@@ -377,10 +398,14 @@ export class ToolBar extends Component<Props> {
   private linkSelectedTracks(state: State): void {
     const tracks = getSelectedTracks(state)
 
+    if (tracks.length === 0) {
+      alert(Severity.WARNING, "No tracks currently selected.")
+    }
+
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
     } else {
-      window.alert("Selected tracks have overlapping frames.")
+      alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
   }
 
@@ -392,9 +417,13 @@ export class ToolBar extends Component<Props> {
   private unlinkSelectedTrack(state: State): void {
     const select = this.state.user.select
     const track = getSelectedTracks(state)[0]
-    const newTrackId = makeTrack().id
 
-    Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    if (track !== undefined) {
+      const newTrackId = makeTrack().id
+      Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+    } else {
+      alert(Severity.WARNING, "No tracks currently selected.")
+    }
   }
 
   /**
@@ -402,5 +431,21 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Activate box spanning mode
+   */
+  private activateSpan(): void {
+    Session.dispatch(activateSpan())
+  }
+
+  /**
+   * Deactivate box spanning mode
+   *
+   * @param state
+   */
+  private deactivateSpan(): void {
+    Session.dispatch(deactivateSpan())
   }
 }

@@ -15,9 +15,18 @@ import {
   updatePane,
   updateState
 } from "../action/common"
-import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
+import {
+  alignToAxis,
+  toggleSelectionLock,
+  setGroundPlane
+} from "../action/point_cloud"
 import Window from "../components/window"
-import { DataType, ItemTypeName, ViewerConfigTypeName } from "../const/common"
+import {
+  DataType,
+  ItemTypeName,
+  LabelTypeName,
+  ViewerConfigTypeName
+} from "../const/common"
 import { getMinSensorIds } from "../functional/state_util"
 import { makeDefaultViewerConfig } from "../functional/states"
 import { scalabelTheme } from "../styles/theme"
@@ -33,6 +42,9 @@ import Session from "./session"
 import { DispatchFunc, GetStateFunc } from "./simple_store"
 import { Track } from "./track"
 import * as types from "../const/common"
+import { alert } from "./alert"
+import { Severity } from "../types/common"
+import { getViewerType } from "./util"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -140,7 +152,8 @@ function loadImages(
       const sensorId = Number(key)
       if (
         sensorId in state.task.sensors &&
-        state.task.sensors[sensorId].type === DataType.IMAGE
+        (state.task.sensors[sensorId].type === DataType.IMAGE ||
+          state.task.sensors[sensorId].type === DataType.IMAGE_3D)
       ) {
         attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
@@ -155,7 +168,7 @@ function loadImages(
             image.src = `${url}#${new Date().getTime()}`
             attemptsMap[sensorId]++
           } else {
-            alert(`Failed to load image at ${url}`)
+            alert(Severity.ERROR, `Failed to load image at ${url}`)
           }
         }
         image.src = url
@@ -197,7 +210,10 @@ function loadPointClouds(
         attemptsMap[sensorId] = 0
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
-
+          const groundPlanePoints = Array.from(
+            geometry.getAttribute("groundPlane").array
+          )
+          dispatch(setGroundPlane(groundPlanePoints))
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent
@@ -205,7 +221,7 @@ function loadPointClouds(
         const onError = (): void => {
           attemptsMap[sensorId]++
           if (attemptsMap[sensorId] === maxAttempts) {
-            alert(`Point cloud at ${url} was not found.`)
+            alert(Severity.ERROR, `Point cloud at ${url} was not found.`)
           } else {
             loader.load(url, onLoad, () => null, onError)
           }
@@ -230,10 +246,14 @@ function initViewerConfigs(
   if (Object.keys(state.user.viewerConfigs).length === 0) {
     const minSensorIds = getMinSensorIds(state)
     const sensor0 = state.task.sensors[minSensorIds[state.task.config.itemType]]
-    const config0 = makeDefaultViewerConfig(
+    let viewerType = getViewerType(
       sensor0.type as ViewerConfigTypeName,
+      state.task.config.labelTypes as LabelTypeName[]
+    )
+    const config0 = makeDefaultViewerConfig(
+      viewerType,
       0,
-      minSensorIds[state.task.config.itemType]
+      minSensorIds[viewerType]
     )
     if (config0 !== null) {
       dispatch(addViewerConfig(0, config0))
@@ -262,7 +282,7 @@ function initViewerConfigs(
         )
       )
       let primarySize = "33%"
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         primarySize = "25%"
       }
       dispatch(
@@ -292,7 +312,7 @@ function initViewerConfigs(
         )
       )
       primarySize = "50%"
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         primarySize = "33%"
       }
       dispatch(
@@ -314,7 +334,7 @@ function initViewerConfigs(
           2
         )
       )
-      if (minSensorIds[ItemTypeName.IMAGE] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
         dispatch(
           splitPane(
             state.user.layout.maxPaneId,
@@ -326,10 +346,14 @@ function initViewerConfigs(
         state = getState()
 
         // Change last pane to image view if frame group contains image
-        const newConfig = makeDefaultViewerConfig(
+        viewerType = getViewerType(
           types.ViewerConfigTypeName.IMAGE,
+          state.task.config.labelTypes as LabelTypeName[]
+        )
+        const newConfig = makeDefaultViewerConfig(
+          viewerType,
           state.user.layout.maxPaneId,
-          minSensorIds[ItemTypeName.IMAGE]
+          minSensorIds[viewerType]
         )
         if (newConfig !== null) {
           dispatch(

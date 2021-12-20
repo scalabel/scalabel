@@ -9,8 +9,8 @@ from ..unittest.util import get_test_file
 from .ins_seg import evaluate_ins_seg
 
 
-class TestBDD100KInsSegEval(unittest.TestCase):
-    """Test cases for BDD100K instance segmentation evaluation."""
+class TestScalabelInsSegEval(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
@@ -110,8 +110,8 @@ class TestBDD100KInsSegEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KInsSegEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K instance segmentation on empty test cases."""
+class TestScalabelInsSegEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"

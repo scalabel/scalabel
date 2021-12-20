@@ -3,6 +3,7 @@
  */
 import { SyncActionMessageType } from "./message"
 import {
+  AlertType,
   ConnectionStatus,
   DeepPartialState,
   IdType,
@@ -17,6 +18,7 @@ import {
   TaskType,
   ViewerConfigType
 } from "./state"
+import { Vector3D } from "../math/vector3d"
 
 export interface BaseAction {
   /** unique id for the action */
@@ -213,6 +215,44 @@ export interface SequentialAction extends BaseAction {
   actions: BaseAction[]
 }
 
+export interface AddAlertAction extends BaseAction {
+  /** id of the alert to close */
+  alert: AlertType
+}
+
+export interface RemoveAlertAction extends BaseAction {
+  /** id of the alert to close */
+  alertId: string
+}
+
+export type ActivateSpanAction = BaseAction
+
+export type DeactivateSpanAction = BaseAction
+
+export interface UpdateSpanPointAction extends BaseAction {
+  /** world coordinates of point */
+  point: Vector3D
+  /** mouse y-coordinate */
+  mouseY: number
+}
+
+export type RegisterSpanPointAction = BaseAction
+
+export type ResetSpanAction = BaseAction
+
+export type PauseSpanAction = BaseAction
+
+export type ResumeSpanAction = BaseAction
+
+export type UndoSpanAction = BaseAction
+
+export interface SetGroundPlaneAction extends BaseAction {
+  /** ground plane points */
+  groundPlanePoints: number[]
+}
+
+export type ToggleGroundPlaneAction = BaseAction
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
@@ -230,7 +270,21 @@ export type SessionActionType =
   | UpdateTaskAction
   | UpdateStateAction
   | UpdateSessionStatusAction
+  | AddAlertAction
+  | RemoveAlertAction
   | SyncActionType
+
+export type Info3DActionType =
+  | ActivateSpanAction
+  | DeactivateSpanAction
+  | UpdateSpanPointAction
+  | RegisterSpanPointAction
+  | ResetSpanAction
+  | PauseSpanAction
+  | ResumeSpanAction
+  | UndoSpanAction
+  | SetGroundPlaneAction
+  | ToggleGroundPlaneAction
 
 export type UserActionType =
   | ChangeSelectAction
