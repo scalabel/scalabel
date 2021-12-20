@@ -152,10 +152,10 @@ export function convertItemToImport(
           labelExport,
           itemIndex,
           sensorId,
+          labelTypes,
           categories,
           attributes,
-          labelId,
-          labelTypes
+          labelId
         )
         if (isTagging) {
           importedLabel.type = "tag"
@@ -259,10 +259,10 @@ function convertLabelToImport(
   labelExport: LabelExport,
   item: number,
   sensorId: number,
+  labelTypes: string[],
   category?: number[],
   attributes?: { [key: number]: number[] },
-  newLabelId?: string,
-  labelTypes: string[]
+  newLabelId?: string
 ): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
   let shapes: null | ShapeType[] = null
