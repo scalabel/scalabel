@@ -14,6 +14,7 @@ import {
   IdType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
+  Info3DType,
   IntrinsicsType,
   INVALID_ID,
   ItemStatus,
@@ -624,6 +625,22 @@ export function makeItemStatus(params: Partial<ItemStatus> = {}): ItemStatus {
 }
 
 /**
+ * Initialize a item status sate
+ *
+ * @param {{}} params
+ * @returns {ItemStatus}
+ */
+export function makeInfo3D(params: Partial<Info3DType> = {}): Info3DType {
+  return {
+    isBoxSpan: false,
+    boxSpan: null,
+    showGroundPlane: false,
+    groundPlane: null,
+    ...params
+  }
+}
+
+/**
  * Initialize a session state
  *
  * @param {{}} params
@@ -639,8 +656,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     mode: ModeStatus.ANNOTATING,
     numUpdates: 0,
     alerts: [],
-    isBoxSpan: false,
-    boxSpan: null,
+    info3D: makeInfo3D(),
     ...params
   }
 }
