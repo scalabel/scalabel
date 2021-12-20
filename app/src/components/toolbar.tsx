@@ -13,8 +13,6 @@ import {
   mergeTracks,
   splitTrack,
   startLinkTrack,
-  activateSpan,
-  deactivateSpan,
   splitPane,
   deletePane,
   addViewerConfig
@@ -29,12 +27,7 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import {
-  ItemTypeName,
-  Key,
-  LabelTypeName,
-  ViewerConfigTypeName
-} from "../const/common"
+import { Key, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import {
   isValidId,
@@ -206,9 +199,10 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
-          {(this.state.task.config.itemType === ItemTypeName.POINT_CLOUD ||
-            this.state.task.config.itemType ===
-              ItemTypeName.POINT_CLOUD_TRACKING) && (
+          {(this.state.user.viewerConfigs[0].type ===
+            ViewerConfigTypeName.POINT_CLOUD ||
+            this.state.user.viewerConfigs[0].type ===
+              ViewerConfigTypeName.IMAGE_3D) && (
             <div>
               {this.state.session.info3D.isBoxSpan ||
               this.state.session.info3D.boxSpan !== null
