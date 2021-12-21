@@ -604,18 +604,8 @@ export class Label3DHandler {
                 box.dimensions.z,
                 box.dimensions.x
               )
-              const boxRotation = new THREE.Euler().setFromQuaternion(
-                box.rotation
-              )
+              const boxRotation = box.rotation
               const rotation = new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(
-                  Math.PI / 2 - boxRotation.y,
-                  Math.PI / 2 - boxRotation.z,
-                  boxRotation.x
-                )
-              )
-              console.log(
-                "rotation",
                 new THREE.Euler(
                   Math.PI / 2 - boxRotation.y,
                   Math.PI / 2 - boxRotation.z,
@@ -627,7 +617,7 @@ export class Label3DHandler {
               label.scale(dimensions, box.center, true)
             } else {
               label.move(box.center)
-              label.rotate(box.rotation)
+              label.rotate(new THREE.Quaternion().setFromEuler(box.rotation))
               label.scale(box.dimensions, box.center, true)
             }
             Session.dispatch(deactivateSpan())

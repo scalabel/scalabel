@@ -222,7 +222,7 @@ export class Span3D {
   }
 
   /** Return cuboid rotation */
-  public get rotation(): THREE.Quaternion {
+  public get rotation(): THREE.Euler {
     if (this._cuboid !== null) {
       return this._cuboid.rotation
     }
