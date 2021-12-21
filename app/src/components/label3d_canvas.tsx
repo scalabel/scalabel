@@ -478,7 +478,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       isCurrentFrameLoaded(state, sensor)
     ) {
       const boxSpan = Session.getState().session.info3D.boxSpan
-      if (boxSpan !== null) {
+      if (boxSpan?.render !== undefined) {
         boxSpan.render(Session.label3dList.scene)
         const showGroundPlane = Session.getState().session.info3D
           .showGroundPlane

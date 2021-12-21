@@ -116,41 +116,26 @@ export class Grid3D extends Shape3D {
     raycaster: THREE.Raycaster,
     intersects: THREE.Intersection[]
   ): void {
-    if (this.label.selected || this.label.anyChildSelected()) {
-      const ray = raycaster.ray
-      const normal = new THREE.Vector3(0, 0, 1)
-      normal.applyEuler(this.rotation)
-      const plane = new THREE.Plane()
-      plane.setFromNormalAndCoplanarPoint(normal, this.position)
-      const target = new THREE.Vector3()
-      const intersection = ray.intersectPlane(plane, target)
-      if (intersection !== null) {
-        // DO NOT REMOVE: Used for checking whether ray intersects within the
-        // bounds of the grid. Code below assumes grid is boundless
-
-        // Const worldToPlane = new THREE.Matrix4()
-        // worldToPlane.getInverse(this.matrixWorld)
-        // const intersectionPlane = new THREE.Vector3()
-        // intersectionPlane.copy(intersection)
-        // intersectionPlane.applyMatrix4(worldToPlane)
-        // if (
-        //   intersectionPlane.x <= 0.5 &&
-        //   intersectionPlane.x >= -0.5 &&
-        //   intersectionPlane.y >= -0.5 &&
-        //   intersectionPlane.y >= -0.5
-        // ) {
-        //   const difference = new THREE.Vector3()
-        //   difference.copy(intersection)
-        //   difference.sub(ray.origin)
-        //   const distance = difference.length()
-        //   if (distance < raycaster.far && distance > raycaster.near) {
-        //     intersects.push({
-        //       distance,
-        //       point: intersection,
-        //       object: this._lines
-        //     })
-        //   }
-        // }
+    const ray = raycaster.ray
+    const normal = new THREE.Vector3(0, 0, 1)
+    normal.applyEuler(this.rotation)
+    const plane = new THREE.Plane()
+    plane.setFromNormalAndCoplanarPoint(normal, this.position)
+    const target = new THREE.Vector3()
+    const intersection = ray.intersectPlane(plane, target)
+    if (intersection !== null) {
+      // Check for intersection within bounds
+      const worldToPlane = new THREE.Matrix4()
+      worldToPlane.copy(this.matrixWorld.clone().invert())
+      const intersectionPlane = new THREE.Vector3()
+      intersectionPlane.copy(intersection)
+      intersectionPlane.applyMatrix4(worldToPlane)
+      if (
+        intersectionPlane.x <= 0.5 &&
+        intersectionPlane.x >= -0.5 &&
+        intersectionPlane.y >= -0.5 &&
+        intersectionPlane.y <= 0.5
+      ) {
         const difference = new THREE.Vector3()
         difference.copy(intersection)
         difference.sub(ray.origin)
@@ -163,8 +148,6 @@ export class Grid3D extends Shape3D {
           })
         }
       }
-    } else {
-      this._lines.raycast(raycaster, intersects)
     }
 
     for (const child of this.children) {
