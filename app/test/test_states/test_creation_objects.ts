@@ -519,8 +519,7 @@ export const sampleTasksImage: TaskType[] = [
         extrinsics: undefined,
         intrinsics: undefined
       }
-    },
-    boxSpan: undefined
+    }
   },
   {
     config: {
@@ -630,8 +629,7 @@ export const sampleTasksImage: TaskType[] = [
         extrinsics: undefined,
         intrinsics: undefined
       }
-    },
-    boxSpan: undefined
+    }
   }
 ]
 
@@ -797,8 +795,7 @@ export const sampleTasksVideo: TaskType[] = [
         extrinsics: undefined,
         intrinsics: undefined
       }
-    },
-    boxSpan: undefined
+    }
   },
   {
     config: {
@@ -922,7 +919,6 @@ export const sampleTasksVideo: TaskType[] = [
         extrinsics: undefined,
         intrinsics: undefined
       }
-    },
-    boxSpan: undefined
+    }
   }
 ]
