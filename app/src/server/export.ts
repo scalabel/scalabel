@@ -181,7 +181,7 @@ function parseLabelAttributes(
       })
       if (selectedValues.length === 1) {
         exportAttributes[attribute.name] = selectedValues[0]
-      } else {
+      } else if (selectedValues.length > 1) {
         exportAttributes[attribute.name] = selectedValues
       }
     } else if (attribute.type === AttributeToolType.SWITCH) {

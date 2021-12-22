@@ -195,10 +195,6 @@ export async function parseSingleFile(
   )
 
   return await dataset.then((dataset: DatasetExport) => {
-    const categories: Category[] = []
-    dataset.config.categories.forEach((category) =>
-      categories.push({ name: category })
-    )
     return {
       items: dataset.frames as Array<Partial<ItemExport>>,
       itemGroups: dataset.frameGroups !== undefined ? dataset.frameGroups : [],
@@ -206,7 +202,7 @@ export async function parseSingleFile(
         dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
       attributes: dataset.config.attributes as Attribute[],
-      categories: categories
+      categories: dataset.config.categories
     }
   })
 }
