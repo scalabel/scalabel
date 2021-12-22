@@ -221,10 +221,20 @@ export class Span3D {
     throw new Error("Span3D: cannot get cuboid dimensions")
   }
 
-  /** Return cuboid rotation */
-  public get rotation(): THREE.Euler {
+  /**
+   * Return cuboid rotation
+   *
+   * @param up
+   * @param forward
+   * @param right
+   */
+  public rotation(
+    up: Vector3D,
+    forward: Vector3D,
+    right: Vector3D
+  ): THREE.Euler {
     if (this._cuboid !== null) {
-      return this._cuboid.rotation
+      return this._cuboid.rotation(up, forward, right)
     }
 
     throw new Error("Span3D: cannot get cuboid rotation")

@@ -79,24 +79,37 @@ export class SpanCuboid3D {
     return new THREE.Vector3(width, length, height)
   }
 
-  /** Return cuboid rotation */
-  public get rotation(): THREE.Euler {
-    const [v1, v2, v3] = [this._p1, this._p2, this._p3].map((p) =>
+  /**
+   * Return cuboid rotation
+   *
+   * @param up
+   * @param forward
+   * @param right
+   * */
+  public rotation(
+    up: Vector3D,
+    forward: Vector3D,
+    right: Vector3D
+  ): THREE.Euler {
+    const [v2, v3, v4] = [this._p2, this._p3, this._p4].map((p) =>
       p.toVector3D().toThree()
     )
-    const v12 = v2.clone().sub(v1)
     const v23 = v3.clone().sub(v2)
-    const up = v12.clone().cross(v23).normalize()
-    const pitch = up.angleTo(new THREE.Vector3(0, 0, 1))
-    const rotation = new THREE.Euler(0, Math.PI / 2 - pitch, 0)
-    const yaw = v23
-      .clone()
-      .normalize()
+    const v34 = v4.clone().sub(v3)
+    const pitch = v34.angleTo(up.toThree())
+    const pitchVector = right.toThree().clone().multiplyScalar(pitch)
+    const pitchEuler = new THREE.Euler().setFromVector3(pitchVector)
+    const forwardOnPlane = forward.toThree().applyEuler(pitchEuler).normalize()
+    let yaw = Math.PI / 2 - v23.clone().normalize().angleTo(forwardOnPlane)
+    const isRight = right.toThree().dot(v23) > 0
+    if (!isRight) {
+      yaw = Math.PI / 2 + v23.clone().normalize().angleTo(forwardOnPlane)
+    }
 
-      .angleTo(new THREE.Vector3(0, 0, 1).applyEuler(rotation))
+    const yawVector = up.toThree().clone().multiplyScalar(yaw)
 
     const euler = new THREE.Euler()
-    const angle = new THREE.Vector3(0, pitch, -yaw)
+    const angle = pitchVector.clone().add(yawVector)
     euler.setFromVector3(angle, "XYZ")
     return euler
   }

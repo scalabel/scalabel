@@ -599,25 +599,27 @@ export class Label3DHandler {
           try {
             // Todo: more robust way of setting rotation and dimensions
             if (this._viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
+              const up = new Vector3D(0, -1, 0)
+              const forward = new Vector3D(0, 0, 1)
+              const right = new Vector3D(1, 0, 0)
               const dimensions = new THREE.Vector3(
                 box.dimensions.y,
                 box.dimensions.z,
                 box.dimensions.x
               )
-              const boxRotation = box.rotation
-              const rotation = new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(
-                  Math.PI / 2 - boxRotation.y,
-                  Math.PI / 2 - boxRotation.z,
-                  boxRotation.x
-                )
-              )
+              const boxRotation = box.rotation(up, forward, right)
+              const rotation = new THREE.Quaternion().setFromEuler(boxRotation)
               label.move(box.center)
               label.rotate(rotation)
               label.scale(dimensions, box.center, true)
             } else {
+              const up = new Vector3D(0, 0, 1)
+              const forward = new Vector3D(1, 0, 0)
+              const right = new Vector3D(0, -1, 0)
+              const boxRotation = box.rotation(up, forward, right)
+              const rotation = new THREE.Quaternion().setFromEuler(boxRotation)
               label.move(box.center)
-              label.rotate(new THREE.Quaternion().setFromEuler(box.rotation))
+              label.rotate(rotation)
               label.scale(box.dimensions, box.center, true)
             }
             Session.dispatch(deactivateSpan())
