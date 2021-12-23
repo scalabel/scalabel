@@ -497,6 +497,7 @@ export function makeTaskConfig(params: Partial<ConfigType> = {}): ConfigType {
     label2DTemplates: {},
     policyTypes: [],
     taskSize: 0,
+    keyInterval: 1,
     tracking: false,
     handlerUrl: "",
     pageTitle: "",

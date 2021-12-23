@@ -351,6 +351,8 @@ export interface ConfigType {
   policyTypes: string[]
   /** Task size */
   taskSize: number
+  /** Keyframe interval */
+  keyInterval: number
   /** Whether to track */
   tracking: boolean
   /** Handler URL */
