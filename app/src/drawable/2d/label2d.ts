@@ -255,6 +255,24 @@ export abstract class Label2D {
     this._highlightedHandle = handleIndex
   }
 
+  /**
+   * change the checked flag
+   */
+  public changeChecked(): void {
+    if (this._label !== null) {
+      this._label.checked = !this._label.checked
+      this._labelList.addUpdatedLabel(this)
+    }
+  }
+
+  /** Whether label checked */
+  public isChecked(): boolean {
+    if (this._label !== null) {
+      return this._label.checked
+    }
+    return false
+  }
+
   /** Whether label valid */
   public isValid(): boolean {
     return true
@@ -289,12 +307,14 @@ export abstract class Label2D {
    * @param {Vector2D} position
    * @param {number} ratio
    * @param {number[]} fillStyle
+   * @param checked
    */
   public drawTag(
     ctx: Context2D,
     ratio: number,
     position: Vector2D,
-    fillStyle: number[]
+    fillStyle: number[],
+    checked?: boolean
   ): void {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
@@ -341,12 +361,24 @@ export abstract class Label2D {
     ctx.fillStyle = "rgb(0,0,0)"
     ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, x * ratio + 6, y * ratio - 6)
+    tw = 0
     if (config.tracking) {
       if (this._label !== null) {
         abbr = this._label?.track.substring(0, 3)
+        tw += 60
       }
+    }
+    if (checked !== undefined && checked) {
+      if (tw > 0) {
+        abbr += ", checked"
+      } else {
+        abbr = "checked"
+      }
+      tw += 100
+    }
+    if (tw > 0) {
       ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
-      ctx.fillRect(x * ratio, y * ratio, 60, TAG_HEIGHT)
+      ctx.fillRect(x * ratio, y * ratio, tw, TAG_HEIGHT)
       ctx.fillStyle = "rgb(0,0,0)"
       ctx.fillText(abbr, x * ratio + 6, y * ratio + TAG_HEIGHT - 6)
     }

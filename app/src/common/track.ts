@@ -290,6 +290,7 @@ export class Track {
         shapes
       )
       for (let i = 0; i < itemIndices.length; i += 1) {
+        this._labels[itemIndices[i]].checked = this._labels[itemIndex].checked
         if (newAllShapes[i] !== shapes[i]) {
           this._updatedIndices.add(itemIndices[i])
           this._shapes[itemIndices[i]] = newAllShapes[i]

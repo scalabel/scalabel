@@ -72,6 +72,7 @@ export function makeLabel(
     order: 0,
     manual: true, // By default, manual is true
     changed: false, // If shape has changed, then interpolation will not apply
+    checked: false,
     ..._.cloneDeep(params)
   }
   if (newId && params.id !== undefined) {

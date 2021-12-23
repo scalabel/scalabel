@@ -258,8 +258,13 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+
+    let checked = false
+    if (this._label !== null) {
+      checked = this._label.checked
+    }
     if (mode === DrawMode.VIEW && this._state !== Polygon2DState.DRAW) {
-      this.drawTag(context, ratio, this.getCentroid(), this._color)
+      this.drawTag(context, ratio, this.getCentroid(), this._color, checked)
     }
   }
 
