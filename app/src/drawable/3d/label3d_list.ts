@@ -350,4 +350,17 @@ export class Label3DList {
       item.labels[state.user.select.labels[state.user.select.item][0]]
     return _.cloneDeep(item.shapes[label.shapes[0]])
   }
+
+  /**
+   * Get ground plane for item
+   *
+   * @param itemIndex
+   */
+  public getItemGroundPlane(itemIndex: number): Plane3D | null {
+    const labels = this.labels()
+    const itemPlanes = labels.filter(
+      (l) => l.item === itemIndex && l.label.type === LabelTypeName.PLANE_3D
+    )
+    return (itemPlanes[0] as Plane3D) ?? null
+  }
 }

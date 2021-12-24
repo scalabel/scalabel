@@ -15,11 +15,7 @@ import {
   updatePane,
   updateState
 } from "../action/common"
-import {
-  alignToAxis,
-  toggleSelectionLock,
-  setGroundPlane
-} from "../action/point_cloud"
+import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import {
   DataType,
@@ -45,6 +41,9 @@ import * as types from "../const/common"
 import { alert } from "./alert"
 import { Severity } from "../types/common"
 import { getViewerType } from "./util"
+import { Vector3D } from "../math/vector3d"
+import { makeDrawableLabel3D } from "../drawable/3d/label3d_list"
+import { commitLabels } from "../drawable/states"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -210,10 +209,30 @@ function loadPointClouds(
         attemptsMap[sensorId] = 0
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
-          const groundPlanePoints = Array.from(
-            geometry.getAttribute("groundPlane").array
-          )
-          dispatch(setGroundPlane(groundPlanePoints))
+          const groundPlane = Session.label3dList.getItemGroundPlane(item.index)
+          if (groundPlane === null) {
+            // estimate ground plane
+            const label = makeDrawableLabel3D(
+              Session.label3dList,
+              LabelTypeName.PLANE_3D
+            )
+            if (label !== null) {
+              const center = new Vector3D(0, 0, 0)
+              label.init(
+                item.index,
+                Session.label3dList.currentCategory,
+                center,
+                Object.keys(state.task.sensors).map((key) => Number(key)),
+                undefined,
+                state.task.config.tracking
+              )
+              Session.label3dList.addUpdatedLabel(label)
+              commitLabels(
+                [...Session.label3dList.updatedLabels.values()],
+                state.task.config.tracking
+              )
+            }
+          }
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent
