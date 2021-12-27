@@ -33,12 +33,14 @@ export class Plane3D extends Label3D {
    * @param itemIndex
    * @param category
    * @param center
+   * @param orientation
    * @param sensors
    */
   public init(
     itemIndex: number,
     category: number,
     center?: Vector3D,
+    orientation?: Vector3D,
     sensors?: number[]
   ): void {
     if (sensors === null || sensors === undefined || sensors.length === 0) {
@@ -57,9 +59,7 @@ export class Plane3D extends Label3D {
       // this._shape.center = center
       this._shape.position.copy(center.toThree())
       this._shape.rotation.copy(
-        new Vector3D()
-          .fromState(new THREE.Vector3(Math.PI / 2, 0, 0))
-          .toThreeEuler()
+        (orientation ?? new Vector3D(Math.PI / 2, 0, 0)).toThreeEuler()
       )
     }
   }
@@ -175,6 +175,11 @@ export class Plane3D extends Label3D {
   /** orientation of plane */
   public get orientation(): THREE.Quaternion {
     return this._shape.quaternion
+  }
+
+  /** rotation of plane */
+  public get rotation(): THREE.Euler {
+    return this._shape.rotation
   }
 
   /** scale of plane */

@@ -277,6 +277,7 @@ export class Label3DHandler {
         this._selectedItemIndex,
         Session.label3dList.currentCategory,
         center,
+        undefined,
         this._sensorIds,
         undefined,
         this._state.task.config.tracking
@@ -588,6 +589,7 @@ export class Label3DHandler {
         this._selectedItemIndex,
         Session.label3dList.currentCategory,
         center,
+        undefined,
         this._sensorIds,
         undefined,
         this._state.task.config.tracking

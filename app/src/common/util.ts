@@ -5,6 +5,7 @@ import {
   ViewerConfigTypeName
 } from "../const/common"
 import { ActionPacketType } from "../types/message"
+import * as THREE from "three"
 
 /**
  * Handle invalid page request
@@ -146,4 +147,84 @@ export function doesPacketTriggerModel(
     }
   }
   return false
+}
+
+/** Ground plane estimation using RANSAC
+ *
+ * @param vertices
+ */
+export function estimateGroundPlane(vertices: number[]): THREE.Plane {
+  const points: THREE.Vector3[] = []
+  for (let i = 0; i < vertices.length; i += 3) {
+    points.push(
+      new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
+    )
+  }
+  let bestPlane = new THREE.Plane()
+  let maxNumPoints = 0
+  const itMax = Math.ceil(points.length / 20)
+  const threshold = 0.01
+  for (let i = 0; i < itMax; i++) {
+    const p1 = points[getRandomInt(points.length)]
+    const p2 = points[getRandomInt(points.length)]
+    const p3 = points[getRandomInt(points.length)]
+    const plane = new THREE.Plane().setFromCoplanarPoints(p1, p2, p3)
+    let numPoints = 0
+    for (let p = 0; p < points.length; p++) {
+      if (Math.abs(plane.distanceToPoint(points[p])) < threshold) {
+        numPoints += 1
+      }
+    }
+    if (numPoints > maxNumPoints) {
+      bestPlane = plane
+      maxNumPoints = numPoints
+    }
+  }
+  return bestPlane
+}
+
+/** Random integer generator
+ *
+ * @param max
+ */
+function getRandomInt(max: number): number {
+  return Math.floor(Math.random() * max)
+}
+
+/**
+ * Calculate rotation for estimated plane
+ * Assume no rotation around z axis (up)
+ *
+ * @param baseNormal
+ * @param estimatedNormal
+ */
+export function calculatePlaneRotation(
+  baseNormal: THREE.Vector3,
+  estimatedNormal: THREE.Vector3
+): THREE.Vector3 {
+  const rotation = new THREE.Quaternion().setFromUnitVectors(
+    baseNormal,
+    estimatedNormal
+  )
+  const rotationEuler = new THREE.Euler().setFromQuaternion(rotation)
+  rotationEuler.z = 0
+  return rotationEuler.toVector3()
+}
+
+/**
+ * Calcuate estimated plane center.
+ * Assume the plane center is directly below target center.
+ *
+ * @param plane
+ * @param target
+ */
+export function calculatePlaneCenter(
+  plane: THREE.Plane,
+  target: THREE.Vector3
+): THREE.Vector3 {
+  const down = new THREE.Vector3(0, 0, -1)
+  const ray = new THREE.Ray(target, down)
+  const center = new THREE.Vector3()
+  ray.intersectPlane(plane, center)
+  return center
 }
