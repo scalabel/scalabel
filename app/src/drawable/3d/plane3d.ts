@@ -58,10 +58,11 @@ export class Plane3D extends Label3D {
     if (center !== undefined && center !== null) {
       // this._shape.center = center
       this._shape.position.copy(center.toThree())
-      this._shape.rotation.copy(
-        (orientation ?? new Vector3D(Math.PI / 2, 0, 0)).toThreeEuler()
-      )
     }
+
+    this._shape.rotation.copy(
+      (orientation ?? new Vector3D(Math.PI / 2, 0, 0)).toThreeEuler()
+    )
   }
 
   /** Override set selected method */

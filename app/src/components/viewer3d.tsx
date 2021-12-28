@@ -40,8 +40,6 @@ import {
   calculatePlaneRotation,
   estimateGroundPlane
 } from "../common/util"
-import { commitLabels } from "../drawable/states"
-import { Plane3D } from "../drawable/3d/plane3d"
 import { addPlaneLabel } from "../action/plane3d"
 
 interface ClassType extends ViewerClassTypes {

@@ -532,8 +532,6 @@ export interface Info3DType {
   boxSpan: Span3D | null
   /** Ground plane toggled */
   showGroundPlane: boolean
-  /** Ground plane */
-  groundPlane: number[] | null
 }
 
 /**

@@ -15,11 +15,7 @@ import {
   updatePane,
   updateState
 } from "../action/common"
-import {
-  alignToAxis,
-  toggleSelectionLock
-  // setGroundPlane
-} from "../action/point_cloud"
+import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import {
   DataType,

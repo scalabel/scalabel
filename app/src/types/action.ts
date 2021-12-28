@@ -246,11 +246,6 @@ export type ResumeSpanAction = BaseAction
 
 export type UndoSpanAction = BaseAction
 
-export interface SetGroundPlaneAction extends BaseAction {
-  /** ground plane points */
-  groundPlanePoints: number[]
-}
-
 export type ToggleGroundPlaneAction = BaseAction
 
 /**
@@ -283,7 +278,6 @@ export type Info3DActionType =
   | PauseSpanAction
   | ResumeSpanAction
   | UndoSpanAction
-  | SetGroundPlaneAction
   | ToggleGroundPlaneAction
 
 export type UserActionType =
