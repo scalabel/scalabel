@@ -31,14 +31,14 @@ export class Plane3D extends Label3D {
    *
    * @param {State} state
    * @param itemIndex
-   * @param category
+   * @param _category
    * @param center
    * @param orientation
    * @param sensors
    */
   public init(
     itemIndex: number,
-    category: number,
+    _category: number,
     center?: Vector3D,
     orientation?: Vector3D,
     sensors?: number[]
@@ -51,7 +51,7 @@ export class Plane3D extends Label3D {
       type: LabelTypeName.PLANE_3D,
       id: INVALID_ID,
       item: itemIndex,
-      category: [category],
+      category: [],
       sensors,
       shapes: [this._shape.shapeId]
     })
