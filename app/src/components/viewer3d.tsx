@@ -34,13 +34,7 @@ import {
 import Label3dCanvas from "./label3d_canvas"
 import PointCloudCanvas from "./point_cloud_canvas"
 import Tag3dCanvas from "./tag_3d_canvas"
-import { isCurrentItemLoaded, isItemLoaded } from "../functional/state_util"
-import {
-  calculatePlaneCenter,
-  calculatePlaneRotation,
-  estimateGroundPlane
-} from "../common/util"
-import { addPlaneLabel } from "../action/plane3d"
+import { isCurrentItemLoaded } from "../functional/state_util"
 
 interface ClassType extends ViewerClassTypes {
   /** camera z lock */
@@ -170,37 +164,6 @@ class Viewer3D extends DrawableViewer<Props> {
       const item = this.state.user.select.item
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       this._pointCloud = new THREE.Points(Session.pointClouds[item][sensor])
-    }
-    if (isCurrentItemLoaded(state) && this._pointCloud !== null) {
-      this.createGroundPlane()
-    }
-  }
-
-  /**
-   * Create ground plane
-   */
-  private createGroundPlane(): void {
-    const state = this.state
-    const isLoaded = isItemLoaded(state, state.user.select.item)
-    const hasGroundPlane =
-      Session.label3dList.getItemGroundPlane(state.user.select.item) !== null
-    if (isLoaded && !hasGroundPlane && this._pointCloud !== null) {
-      // estimate ground plane
-      const pointCloud = Array.from(
-        this._pointCloud.geometry.getAttribute("position").array
-      )
-      const estimatedPlane = estimateGroundPlane(pointCloud)
-      const center = calculatePlaneCenter(estimatedPlane, this._target)
-      const baseNormal = new THREE.Vector3(0, 0, 1)
-      const rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
-      addPlaneLabel(
-        Session.label3dList,
-        state.user.select.item,
-        Session.label3dList.currentCategory,
-        new Vector3D().fromThree(center),
-        new Vector3D().fromThree(rotation),
-        Object.keys(state.task.sensors).map((key) => Number(key))
-      )
     }
   }
 

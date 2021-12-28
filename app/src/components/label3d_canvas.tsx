@@ -5,11 +5,15 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
+import { DataType, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
-import { Image3DViewerConfigType, State } from "../types/state"
+import {
+  Image3DViewerConfigType,
+  PointCloudViewerConfigType,
+  State
+} from "../types/state"
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from "../view_config/image"
 import { convertMouseToNDC } from "../view_config/point_cloud"
 import {
@@ -224,6 +228,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     if (this.canvas !== null) {
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (isCurrentFrameLoaded(this.state, sensor)) {
+        this.updateGroundPlane()
         this.updateRenderer()
         this.renderThree()
       } else if (this.renderer !== null && this.renderer !== undefined) {
@@ -231,6 +236,26 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       }
     }
     return true
+  }
+
+  /** Update ground plane if needed */
+  private updateGroundPlane(): void {
+    const selectedItem = this.state.user.select.item
+    const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
+    const sensorIdx = this.state.user.viewerConfigs[this.props.id].sensor
+    const sensor = this.state.task.sensors[sensorIdx]
+    if (sensor.type === DataType.POINT_CLOUD) {
+      if (groundPlane === null) {
+        const sensorIdx = this.state.user.viewerConfigs[this.props.id].sensor
+        const sensor = this.state.task.sensors[sensorIdx]
+        if (sensor.type === DataType.POINT_CLOUD) {
+          // Estimate new ground plane
+          this._labelHandler.estimateGroundPlane()
+        }
+      } else {
+        // this._labelHandler.updateGroundPlaneCenter()
+      }
+    }
   }
 
   /**
