@@ -459,6 +459,10 @@ export class ToolBar extends Component<Props> {
    * Activate box spanning mode
    */
   private activateSpan(): void {
+    if (!this.itemHasGroundPlane()) {
+      alert(Severity.WARNING, 'First insert ground plane with "g".')
+      return
+    }
     Session.dispatch(activateSpan())
   }
 
@@ -477,6 +481,10 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private toggleHomographyView(state: State): void {
+    if (!this.itemHasGroundPlane()) {
+      alert(Severity.WARNING, 'First insert ground plane with "g".')
+      return
+    }
     const panes = Object.keys(state.user.layout.panes).map((key) =>
       parseInt(key)
     )
@@ -505,5 +513,14 @@ export class ToolBar extends Component<Props> {
         deletePane(lastPane, state.user.layout.maxViewerConfigId)
       )
     }
+  }
+
+  /**
+   * Check if current selected item has a ground plane.
+   */
+  private itemHasGroundPlane(): boolean {
+    const selectedItem = this.state.user.select.item
+    const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
+    return groundPlane !== null
   }
 }
