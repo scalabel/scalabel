@@ -131,40 +131,6 @@ export class Span3D {
     return this
   }
 
-  // /**
-  //  * Register new temporary point given current mouse position
-  //  *
-  //  * @param coords
-  //  * @param point
-  //  * @param mouseY
-  //  */
-  // public updatePointTmp(point: Vector3D, mouseY: number): this {
-  //   switch (this._points.length) {
-  //     case 2:
-  //       // make second point orthogonal to line
-  //       if (this._line !== null) {
-  //         const newCoords = this._line.alignPointToNormal(point)
-  //         this._pTmp = new SpanPoint3D(newCoords)
-  //       }
-  //       break
-  //     case 3: {
-  //       // make third point orthogonal to plane
-  //       const scaleFactor = 5
-  //       this._pTmp = new SpanPoint3D(
-  //         new Vector3D(
-  //           this._points[2].x,
-  //           this._points[2].y,
-  //           mouseY * scaleFactor
-  //         )
-  //       )
-  //       break
-  //     }
-  //     default:
-  //       this._pTmp = new SpanPoint3D(point)
-  //   }
-  //   return this
-  // }
-
   /** Register new point */
   public registerPoint(): this {
     switch (this._points.length) {
@@ -212,31 +178,35 @@ export class Span3D {
     throw new Error("Span3D: cannot get cuboid center")
   }
 
-  /** Return cuboid dimensions */
-  public get dimensions(): THREE.Vector3 {
+  /**
+   * Return cuboid dimensions
+   *
+   * @param up
+   * @param forward
+   * @param right
+   * */
+  public dimensions(
+    up: Vector3D,
+    forward: Vector3D,
+    right: Vector3D
+  ): THREE.Vector3 {
     if (this._cuboid !== null) {
-      return this._cuboid.dimensions
+      return this._cuboid.dimensions(up, forward, right)
     }
 
     throw new Error("Span3D: cannot get cuboid dimensions")
   }
 
   /**
-   * Return cuboid rotation
-   *
-   * @param up
-   * @param forward
-   * @param right
+   * Get side line
    */
-  public rotation(
-    up: Vector3D,
-    forward: Vector3D,
-    right: Vector3D
-  ): THREE.Euler {
-    if (this._cuboid !== null) {
-      return this._cuboid.rotation(up, forward, right)
+  public get v23(): THREE.Vector3 {
+    if (this._points.length < 3) {
+      throw new Error("Point 3 has not been set yet")
     }
-
-    throw new Error("Span3D: cannot get cuboid rotation")
+    return this._points[2]
+      .toVector3D()
+      .toThree()
+      .sub(this._points[1].toVector3D().toThree())
   }
 }

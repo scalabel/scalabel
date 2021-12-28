@@ -36,6 +36,7 @@ export class Box3D extends Label3D {
    * @param category
    * @param center
    * @param orientation
+   * @param dimension
    * @param sensors
    * @param temporary
    * @param tracking
@@ -45,6 +46,7 @@ export class Box3D extends Label3D {
     category: number,
     center?: Vector3D,
     orientation?: Vector3D,
+    dimension?: Vector3D,
     sensors?: number[],
     temporary?: boolean,
     tracking?: boolean
@@ -72,6 +74,14 @@ export class Box3D extends Label3D {
 
     if (orientation !== null && orientation !== undefined) {
       this._shape.rotation.copy(orientation.toThreeEuler())
+    }
+
+    if (orientation !== null && orientation !== undefined) {
+      this._shape.rotation.copy(orientation.toThreeEuler())
+    }
+
+    if (dimension !== null && dimension !== undefined) {
+      this._shape.scale.copy(dimension.toThree())
     }
 
     if (temporary !== null && temporary !== undefined && temporary) {

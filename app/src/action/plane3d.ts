@@ -17,9 +17,9 @@ export function addPlaneLabel(
   labelList: Label3DList,
   itemIndex: number,
   category: number,
-  center: Vector3D,
-  orientation: Vector3D,
-  sensors: number[]
+  center?: Vector3D,
+  orientation?: Vector3D,
+  sensors?: number[]
 ): void {
   const plane = new Plane3D(labelList)
   plane.init(itemIndex, category, center, orientation, sensors)

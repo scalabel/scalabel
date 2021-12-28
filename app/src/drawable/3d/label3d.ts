@@ -325,6 +325,7 @@ export abstract class Label3D {
     category: number,
     center?: Vector3D,
     orientation?: Vector3D,
+    dimension?: Vector3D,
     sensors?: number[],
     temporary?: boolean,
     tracking?: boolean
