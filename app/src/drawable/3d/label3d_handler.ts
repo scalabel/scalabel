@@ -41,8 +41,6 @@ import {
   calculatePlaneRotation,
   estimateGroundPlane
 } from "../../common/util"
-import { Grid3D } from "./grid3d"
-// import { Span3D } from "./box_span/span3d"
 
 /**
  * Handles user interactions with labels
@@ -357,34 +355,41 @@ export class Label3DHandler {
    */
   public estimateGroundPlane(): void {
     const state = this._state
-    const selectedItem = state.user.select.item
-    const isLoaded = isItemLoaded(state, selectedItem)
-    const hasGroundPlane =
-      Session.label3dList.getItemGroundPlane(selectedItem) !== null
-    const config = this._viewerConfig as PointCloudViewerConfigType
-    const sensorIdx = config.sensor
-    const sensor = state.task.sensors[sensorIdx]
-    const isPointCloud = sensor.type === DataType.POINT_CLOUD
-    if (isPointCloud && isLoaded && !hasGroundPlane) {
-      // estimate ground plane
-      const pointCloud = Array.from(
-        new THREE.Points(
-          Session.pointClouds[selectedItem][sensorIdx]
-        ).geometry.getAttribute("position").array
-      )
-      const estimatedPlane = estimateGroundPlane(pointCloud)
-      const target = new Vector3D().fromState(config.target)
-      const center = calculatePlaneCenter(estimatedPlane, target.toThree())
-      const baseNormal = new THREE.Vector3(0, 0, 1)
-      const rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
-      addPlaneLabel(
-        Session.label3dList,
-        selectedItem,
-        Session.label3dList.currentCategory,
-        new Vector3D().fromThree(center),
-        new Vector3D().fromThree(rotation),
-        Object.keys(state.task.sensors).map((key) => Number(key))
-      )
+    const items = state.task.items
+    for (const item of items) {
+      const isLoaded = isItemLoaded(state, item.index)
+      const hasGroundPlane =
+        Object.values(item.labels).filter(
+          (label) => label.type === LabelTypeName.PLANE_3D
+        ).length > 0
+      const config = this._viewerConfig as PointCloudViewerConfigType
+      const sensorIdx = config.sensor
+      const sensor = state.task.sensors[sensorIdx]
+      const isPointCloud = sensor.type === DataType.POINT_CLOUD
+      if (isPointCloud && isLoaded && !hasGroundPlane) {
+        // estimate ground plane
+        const pointCloud = Array.from(
+          new THREE.Points(
+            Session.pointClouds[item.index][sensorIdx]
+          ).geometry.getAttribute("position").array
+        )
+        const estimatedPlane = estimateGroundPlane(pointCloud)
+        const target = new Vector3D().fromState(config.target)
+        const center = calculatePlaneCenter(estimatedPlane, target.toThree())
+        const baseNormal = new THREE.Vector3(0, 0, 1)
+        const rotation = calculatePlaneRotation(
+          baseNormal,
+          estimatedPlane.normal
+        )
+        addPlaneLabel(
+          Session.label3dList,
+          item.index,
+          Session.label3dList.currentCategory,
+          new Vector3D().fromThree(center),
+          new Vector3D().fromThree(rotation),
+          Object.keys(state.task.sensors).map((key) => Number(key))
+        )
+      }
     }
   }
 
