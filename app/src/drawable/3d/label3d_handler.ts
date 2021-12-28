@@ -6,7 +6,6 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
-  // toggleGroundPlane,
   undoSpan
 } from "../../action/span3d"
 import Session from "../../common/session"
@@ -323,15 +322,14 @@ export class Label3DHandler {
       this._selectedItemIndex
     )
     if (groundPlane !== null) {
-      Session.dispatch(
-        selectLabel(
-          Session.label3dList.selectedLabelIds,
-          this._selectedItemIndex,
-          groundPlane.labelId,
-          groundPlane.category[0],
-          groundPlane.attributes
+      if (groundPlane.visible) {
+        groundPlane.visible = false
+        Session.dispatch(
+          selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
-      )
+      } else {
+        groundPlane.visible = true
+      }
     } else {
       const center = new Vector3D(0, 2, 10)
       addPlaneLabel(

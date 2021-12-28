@@ -256,4 +256,14 @@ export class Plane3D extends Label3D {
     }
     return [shape]
   }
+
+  /** Get visible */
+  public get visible(): boolean {
+    return this._shape.lines.visible
+  }
+
+  /** Set visible */
+  public set visible(v: boolean) {
+    this._shape.lines.visible = v
+  }
 }
