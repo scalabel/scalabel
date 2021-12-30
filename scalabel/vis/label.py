@@ -151,7 +151,7 @@ class LabelViewer:
         """Initialize the label viewer."""
         self.ui_cfg = ui_cfg
 
-        # if specified, use config to create category name to color mapping
+        # if specified, use category colors in config
         self._category_colors: Optional[Dict[str, NDArrayF64]] = None
         if label_cfg:
             self._category_colors = {
