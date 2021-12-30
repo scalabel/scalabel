@@ -155,7 +155,7 @@ class LabelViewer:
         self._category_colors: Optional[Dict[str, NDArrayF64]] = None
         if label_cfg:
             self._category_colors = {
-                c.name: np.asarray(c.color) if c.color else random_color()
+                c.name: (np.asarray(c.color)/255) if c.color else random_color()
                 for c in get_leaf_categories(label_cfg.categories)
             }
 
