@@ -13,7 +13,7 @@ from ..common.tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
 from .transforms import bbox_to_box2d, polygon_to_poly2ds
-from .typing import Category, Config, Frame, ImageSize, Label
+from .typing import Category, Config, Dataset, Frame, ImageSize, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -48,14 +48,18 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
-    cats = [
+    cats: List[Optional[Category]] = [
         None for _ in range(len(coco["categories"]))
-    ]  # type: List[Optional[Category]]
+    ]
     cat_id2name = {}
+    uniq_catids = set(category["id"] for category in coco["categories"])
+    assert len(uniq_catids) == len(coco["categories"])
+    uniq_catids = sorted(list(uniq_catids))
     for category in coco["categories"]:
-        assert 0 < int(category["id"]) <= len(coco["categories"])
         cat_id2name[category["id"]] = category["name"]
-        cats[int(category["id"]) - 1] = Category(name=category["name"])
+        cats[uniq_catids.index(category["id"])] = Category(
+            name=category["name"]
+        )
     assert None not in cats
     config = Config(categories=cats)
 
@@ -101,7 +105,8 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
                     ),
                     index=i + 1,
                     attributes=dict(
-                        crowd=bool(ann["iscrowd"]), ignored=bool(ann["ignore"])
+                        crowd=bool(ann.get("iscrowd", None)),
+                        ignored=bool(ann.get("ignore", None)),
                     ),
                     category=cat_id2name[ann["category_id"]],
                 )
@@ -111,8 +116,8 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
                     label.box2d = bbox_to_box2d(ann["bbox"])
                 if "segmentation" in ann:
                     # Currently only support conversion from polygon.
-                    assert isinstance(ann["segmentation"], list)
-                    label.poly2d = polygon_to_poly2ds(ann["segmentation"])
+                    if isinstance(ann["segmentation"], list):
+                        label.poly2d = polygon_to_poly2ds(ann["segmentation"])
                 labels.append(label)
 
         scalabel.append(
@@ -133,11 +138,12 @@ def run(args: argparse.Namespace) -> None:
     """Run."""
     with open_read_text(args.input) as fp:
         coco: GtType = json.load(fp)
-    scalabel, vid_id2name = coco_to_scalabel(coco)
+    scalabel, config = coco_to_scalabel(coco)
 
-    if vid_id2name is None:
+    has_videos = all(frame.videoName is not None for frame in scalabel)
+    if not has_videos:
         assert args.output.endswith(".json"), "output should be a json file"
-        save(args.output, scalabel)
+        save(args.output, Dataset(frames=scalabel, config=config))
     else:
         scalabels = group_and_sort(scalabel)
         if not os.path.isdir(args.output):
