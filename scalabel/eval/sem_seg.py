@@ -57,9 +57,7 @@ class SegResult(Result):
 
 
 def fast_hist(
-    groundtruth: NDArrayU8,
-    prediction: NDArrayU8,
-    size: int,
+    groundtruth: NDArrayU8, prediction: NDArrayU8, size: int
 ) -> NDArrayI32:
     """Compute the histogram."""
     prediction = prediction.copy()
@@ -76,7 +74,7 @@ def fast_hist(
     ).reshape(size, size)
 
 
-def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
+def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class iou."""
     ious: NDArrayF64 = np.diag(hist) / (
         hist.sum(1) + hist.sum(0) - np.diag(hist)
@@ -86,7 +84,7 @@ def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
     return ious[:-1]  # type: ignore
 
 
-def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
+def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class accuracy."""
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
@@ -94,13 +92,13 @@ def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
     return accs[:-1]  # type: ignore
 
 
-def whole_acc(hist: NDArrayU8) -> float:
+def whole_acc(hist: NDArrayI32) -> float:
     """Calculate whole accuray."""
     hist = hist[:-1]
     return cast(float, np.diag(hist).sum() / hist.sum())
 
 
-def freq_iou(hist: NDArrayU8) -> float:
+def freq_iou(hist: NDArrayI32) -> float:
     """Calculate frequency iou."""
     ious = per_class_iou(hist)
     hist = hist[:-1]
@@ -224,7 +222,7 @@ def evaluate_sem_seg(
 
     logger.info("accumulating...")
     num_classes = len(categories) + 1
-    hist = np.zeros((num_classes, num_classes), dtype=np.int32)
+    hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
     for (hist_, gt_id_set_) in hist_and_gt_id_sets:
         hist += hist_

@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
 from .pose import evaluate_pose
@@ -27,12 +28,12 @@ class TestScalabelPoseEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([14.059405940594061], dtype=np.float64)
+        aps: NDArrayF64 = np.array([14.059405940594061], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 14.059405940594061,
                 25.247524752475247,
@@ -93,12 +94,12 @@ class TestScalabelPoseEvalMissing(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([6.228194247996228], dtype=np.float64)
+        aps: NDArrayF64 = np.array([6.228194247996228], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 6.22819425,
                 16.12446959,
@@ -159,12 +160,12 @@ class TestScalabelPoseEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([0.0], dtype=np.float64)
+        aps: NDArrayF64 = np.array([0.0], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 10, dtype=np.float64)
+        overall_scores: NDArrayF64 = np.array([0.0] * 10, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

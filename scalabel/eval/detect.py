@@ -18,7 +18,7 @@ from pycocotools.cocoeval import COCOeval  # type: ignore
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import DictStrAny
+from ..common.typing import DictStrAny, NDArrayI32
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_detection
@@ -250,7 +250,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == area_rng]
         mind = [i for i, mDet in enumerate(p.maxDets) if mDet == max_dets]
         s = self.eval[metric]
-        cat_ids = np.array(p.catIds, dtype=np.int64)
+        cat_ids: NDArrayI32 = np.array(p.catIds, dtype=np.int32)
         if iou_thr is not None:
             t = np.where(iou_thr == p.iouThrs)[0]
             s = s[t]

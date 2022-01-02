@@ -182,7 +182,9 @@ def main() -> None:
         print("Expected normal must be a 3 element array.")
         sys.exit(0)
 
-    expected_normal = np.array(args.expected_normal, dtype=np.float64)
+    expected_normal: NDArrayF64 = np.array(
+        args.expected_normal, dtype=np.float64
+    )
 
     # Check file extensions
     supported_ext = [".yaml", ".json"]

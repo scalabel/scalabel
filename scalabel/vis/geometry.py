@@ -203,7 +203,7 @@ class Label3d:
                 ]
             )
             if cw1 != cw2:
-                vertices1 = np.array(
+                vertices1: NDArrayF64 = np.array(
                     [
                         v.v3d
                         for v in faces[face1]["v"]
@@ -211,7 +211,7 @@ class Label3d:
                     ],
                     dtype=np.float64,
                 )
-                vertices2 = np.array(
+                vertices2: NDArrayF64 = np.array(
                     [
                         v.v3d
                         for v in faces[face2]["v"]

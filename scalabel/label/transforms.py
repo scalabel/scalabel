@@ -176,14 +176,14 @@ def frame_to_masks(
             )
 
     fig.canvas.draw()
-    out = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
+    out: NDArrayU8 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
     out = out.reshape((height, width, -1)).astype(np.int32)
     out = (out[..., 0] << 8) + out[..., 1]
     plt.close()
 
     masks = []
     for i, _ in enumerate(poly2ds):
-        mask = np.zeros([height, width, 1], dtype=np.uint8)
+        mask: NDArrayU8 = np.zeros([height, width, 1], dtype=np.uint8)
         mask[out == i + 1] = 255
         masks.append(mask.squeeze(2))
     return masks

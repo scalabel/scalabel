@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 
 from ..common.io import open_read_text
+from ..common.typing import NDArrayU8
 from ..unittest.util import get_test_file
 from .io import load
 from .transforms import (
@@ -39,7 +40,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
 
     def test_mask_to_box2d(self) -> None:
         """Check the function for mask to Box2D."""
-        mask = np.zeros((10, 10), dtype=np.uint8)
+        mask: NDArrayU8 = np.zeros((10, 10), dtype=np.uint8)
         mask[4:6, 2:8] = 1
         mask[2:8, 4:6] = 1
         box2d = mask_to_box2d(mask)

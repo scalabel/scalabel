@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-from ..common.typing import NDArrayU8
+from ..common.typing import NDArrayF64, NDArrayU8
 from .seg_base import SegBase
 
 
@@ -23,7 +23,7 @@ class SegDummy(SegBase):
         for bbox in bboxes:
             x0, y0, w, h = bbox
             # create diamond inscribed in rectangle
-            preds = np.array(
+            preds: NDArrayF64 = np.array(
                 [[w / 2.0, 0], [w, h / 2.0], [w / 2.0, h], [0, h / 2.0]],
                 dtype=np.float64,
             )

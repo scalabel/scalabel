@@ -388,7 +388,9 @@ class LabelViewer:
                         ctrl_point_size,
                     )
 
-                patch_vertices = np.array(poly.vertices, dtype=np.float64)
+                patch_vertices: NDArrayF64 = np.array(
+                    poly.vertices, dtype=np.float64
+                )
                 x1 = min(np.min(patch_vertices[:, 0]), x1)
                 y1 = min(np.min(patch_vertices[:, 1]), y1)
                 x2 = max(np.max(patch_vertices[:, 0]), x2)

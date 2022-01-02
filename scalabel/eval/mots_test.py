@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import group_and_sort, load, load_label_config
 from ..unittest.util import get_test_file
 from .mots import acc_single_video_mots, evaluate_seg_track
@@ -49,7 +50,7 @@ class TestScalabelMotsEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        motas = np.array(
+        motas: NDArrayF64 = np.array(
             [
                 -1.0,
                 -6.06060606,
@@ -73,7 +74,7 @@ class TestScalabelMotsEval(unittest.TestCase):
             np.isclose(np.nan_to_num(data_arr_mota, nan=-1.0), motas).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 64.30611079,
                 83.57249803,
@@ -155,7 +156,7 @@ class TestScalabelMotsEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        motas = np.array(
+        motas: NDArrayF64 = np.array(
             [
                 0.0,
                 0.0,
@@ -179,7 +180,7 @@ class TestScalabelMotsEvalEmpty(unittest.TestCase):
             np.isclose(np.nan_to_num(data_arr_mota, nan=-1.0), motas).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 0.0,
                 -1.0,

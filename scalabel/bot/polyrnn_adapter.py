@@ -1,12 +1,12 @@
 """Interface with the segmentation model."""
 import os
 import warnings
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 from Tool.tool import Tool  # pylint: disable=import-error
 
-from ..common.typing import NDArrayU8
+from ..common.typing import NDArrayF64, NDArrayU8
 from .seg_base import SegBase
 
 
@@ -32,7 +32,9 @@ class PolyrnnAdapter(SegBase):
         inputs = []
         for (img, bbox) in zip(imgs, bboxes):
             instance = {"img": img, "bbox": bbox}
-            component = {"poly": np.array([[-1.0, -1.0]], dtype=np.float64)}
+            component: Dict[str, NDArrayF64] = {
+                "poly": np.array([[-1.0, -1.0]], dtype=np.float64)
+            }
             instance = self.tool.preprocess_instance(instance, component)
             inputs.append(instance)
 

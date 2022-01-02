@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from ..common.parallel import NPROC, pmap
-from ..common.typing import DictStrAny
+from ..common.typing import DictStrAny, NDArrayF64
 from .io import save
 from .typing import (
     Box2D,
@@ -159,9 +159,11 @@ def transform_boxes(
 
     Note: mutates input boxes.
     """
-    translation_car = -np.array(ego_pose["translation"], dtype=np.float64)
+    translation_car: NDArrayF64 = -np.array(
+        ego_pose["translation"], dtype=np.float64
+    )
     rotation_car = Quaternion(ego_pose["rotation"]).inverse
-    translation_sensor = -np.array(
+    translation_sensor: NDArrayF64 = -np.array(
         car_from_sensor["translation"], dtype=np.float64
     )
     rotation_sensor = Quaternion(car_from_sensor["rotation"]).inverse
@@ -184,7 +186,7 @@ def parse_labels(
         labels = []
         # transform into the sensor coord system
         transform_boxes(boxes, ego_pose, calib_sensor)
-        intrinsic_matrix = np.array(
+        intrinsic_matrix: NDArrayF64 = np.array(
             calib_sensor["camera_intrinsic"], dtype=np.float64
         )
         for box in boxes:
@@ -253,7 +255,9 @@ def get_extrinsics(
 
 def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
     """Convert calibration ego pose to Intrinsics."""
-    matrix = np.array(calibration["camera_intrinsic"], dtype=np.float64)
+    matrix: NDArrayF64 = np.array(
+        calibration["camera_intrinsic"], dtype=np.float64
+    )
     return get_intrinsics_from_matrix(matrix)
 
 

@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
 from .sem_seg import evaluate_sem_seg
@@ -50,7 +51,7 @@ class TestScalabelSemSegEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array(
+        aps: NDArrayF64 = np.array(
             [
                 99.54405124,
                 87.67803909,
@@ -79,7 +80,9 @@ class TestScalabelSemSegEval(unittest.TestCase):
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([77.69367703, 85.08073851], dtype=np.float64)
+        overall_scores: NDArrayF64 = np.array(
+            [77.69367703, 85.08073851], dtype=np.float64
+        )
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
@@ -143,12 +146,12 @@ class TestScalabelSemSegEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([0.0] * 20, dtype=np.float64)
+        aps: NDArrayF64 = np.array([0.0] * 20, dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 2, dtype=np.float64)
+        overall_scores: NDArrayF64 = np.array([0.0] * 2, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

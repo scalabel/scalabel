@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
 from .ins_seg import evaluate_ins_seg
@@ -39,7 +40,7 @@ class TestScalabelInsSegEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
+        aps: NDArrayF64 = np.array(
             [
                 60.198019801980195,
                 49.99999999999999,
@@ -54,10 +55,10 @@ class TestScalabelInsSegEval(unittest.TestCase):
             dtype=np.float64,
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 48.77227722772277,
                 86.73267326732673,
@@ -142,14 +143,14 @@ class TestScalabelInsSegEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
+        aps: NDArrayF64 = np.array(
             [0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float64
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 12, dtype=np.float64)
+        overall_scores: NDArrayF64 = np.array([0.0] * 12, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
