@@ -70,7 +70,8 @@ lasers_name2id = {
 }
 
 waymo2kitti_RT = np.array(
-    [[0, -1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]]
+    [[0, -1, 0, 0], [0, 0, -1, 0], [1, 0, 0, 0], [0, 0, 0, 1]],
+    dtype=np.float64,
 )
 
 
@@ -122,8 +123,8 @@ def heading_transform(laser_box3d: label_pb2, calib: NDArrayF64) -> float:
         (laser_box3d.height, laser_box3d.length, laser_box3d.width),
         rot_y,
     )
-    pt1 = np.array([-0.5, 0.5, 0, 1.0])
-    pt2 = np.array([0.5, 0.5, 0, 1.0])
+    pt1 = np.array([-0.5, 0.5, 0, 1.0], dtype=np.float64)
+    pt2 = np.array([0.5, 0.5, 0, 1.0], dtype=np.float64)
     pt1 = np.matmul(transform_box_to_cam, pt1).tolist()
     pt2 = np.matmul(transform_box_to_cam, pt2).tolist()
     return -math.atan2(pt2[2] - pt1[2], pt2[0] - pt1[0])
@@ -154,7 +155,8 @@ def parse_lidar_labels(
                         laser_box3d.center_y,
                         laser_box3d.center_z,
                     ]
-                ]
+                ],
+                dtype=np.float64,
             )
             center_lidar = tuple(
                 np.dot(car2lidar, cart2hom(center).T)[:3, 0].tolist()
@@ -292,12 +294,16 @@ def get_calibration(
         center=(calib.intrinsic[2], calib.intrinsic[3]),
     )
 
-    cam2car_mat = np.array(calib.extrinsic.transform).reshape(4, 4)
+    cam2car_mat = np.array(
+        calib.extrinsic.transform, dtype=np.float64
+    ).reshape(4, 4)
     car2cam_mat = np.linalg.inv(cam2car_mat)
     car2cam_mat = np.dot(waymo2kitti_RT, car2cam_mat)
     cam2car_mat = np.linalg.inv(car2cam_mat)
 
-    car2global_mat = np.array(frame.pose.transform).reshape(4, 4)
+    car2global_mat = np.array(frame.pose.transform, dtype=np.float64).reshape(
+        4, 4
+    )
     cam2global_mat = np.dot(car2global_mat, cam2car_mat)
 
     cam2car = get_extrinsics_from_matrix(cam2car_mat)
@@ -373,7 +379,8 @@ def parse_frame(
     lidar2car_mat = np.array(
         frame.context.laser_calibrations[
             lasers_name2id["TOP"]
-        ].extrinsic.transform
+        ].extrinsic.transform,
+        dtype=np.float64,
     ).reshape(4, 4)
     lidar2global_mat = np.dot(
         get_matrix_from_extrinsics(car2global), lidar2car_mat

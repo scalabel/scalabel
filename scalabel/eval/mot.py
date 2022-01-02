@@ -265,7 +265,10 @@ def compute_average(
     ave_dict: Dict[str, Union[int, float]] = {}
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
-        v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
+        v = np.array(
+            [flat_dicts[i][metric] for i in range(len(classes))],
+            dtype=np.float64,
+        )
         v = np.nan_to_num(v, nan=0, posinf=0, neginf=0)
         if dtype == int:
             value = int(v.sum())  # type: Union[int, float]

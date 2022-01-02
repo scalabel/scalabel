@@ -69,7 +69,7 @@ class ParamsV2(Params):  # type: ignore
         super().__init__(iouType)
         self.maxDets = [20]
         if sigmas is not None:
-            self.kpt_oks_sigmas = np.array(sigmas)
+            self.kpt_oks_sigmas = np.array(sigmas, dtype=np.float64)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -195,7 +195,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == area_rng]
         mind = [i for i, mDet in enumerate(p.maxDets) if mDet == max_dets]
         s = self.eval[metric]
-        cat_ids = np.array(p.catIds)
+        cat_ids = np.array(p.catIds, np.int64)
         if iou_thr is not None:
             t = np.where(iou_thr == p.iouThrs)[0]
             s = s[t]

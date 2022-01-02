@@ -32,7 +32,7 @@ class PolyrnnAdapter(SegBase):
         inputs = []
         for (img, bbox) in zip(imgs, bboxes):
             instance = {"img": img, "bbox": bbox}
-            component = {"poly": np.array([[-1.0, -1.0]])}
+            component = {"poly": np.array([[-1.0, -1.0]], dtype=np.float64)}
             instance = self.tool.preprocess_instance(instance, component)
             inputs.append(instance)
 

@@ -182,7 +182,7 @@ def main() -> None:
         print("Expected normal must be a 3 element array.")
         sys.exit(0)
 
-    expected_normal = np.array(args.expected_normal)
+    expected_normal = np.array(args.expected_normal, dtype=np.float64)
 
     # Check file extensions
     supported_ext = [".yaml", ".json"]
@@ -220,7 +220,7 @@ def main() -> None:
         url = item["url"]
         with urllib.request.urlopen(url) as http_response:
             ply_data = plyfile.PlyData.read(http_response)
-            points = np.concatenate(
+            points: NDArrayF64 = np.concatenate(
                 [
                     ply_data["vertex"]["x"][..., None],
                     ply_data["vertex"]["y"][..., None],

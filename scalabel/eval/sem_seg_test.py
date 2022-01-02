@@ -72,13 +72,14 @@ class TestScalabelSemSegEval(unittest.TestCase):
                 0.0,
                 0.0,
                 77.69367703,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([77.69367703, 85.08073851])
+        overall_scores = np.array([77.69367703, 85.08073851], dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
@@ -142,12 +143,12 @@ class TestScalabelSemSegEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([0.0] * 20)
+        aps = np.array([0.0] * 20, dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 2)
+        overall_scores = np.array([0.0] * 2, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

@@ -91,7 +91,8 @@ class TestScalabelMotEval(unittest.TestCase):
                 -4.20168067,
                 24.32420464,
                 64.20070762,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), motas).all()
@@ -109,7 +110,8 @@ class TestScalabelMotEval(unittest.TestCase):
                 47.0,
                 33.0,
                 66.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
 

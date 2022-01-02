@@ -45,7 +45,7 @@ def get_extrinsics_from_matrix(matrix: NDArrayF64) -> Extrinsics:
 def get_matrix_from_extrinsics(extrinsics: Extrinsics) -> NDArrayF64:
     """Convert Extrinsics class object to rotation matrix."""
     rot_mat = Rotation.from_euler("xyz", extrinsics.rotation).as_matrix()
-    translation = np.array(extrinsics.location)
+    translation = np.array(extrinsics.location, dtype=np.float64)
     extrinsics_mat = np.identity(4)
     extrinsics_mat[:3, :3] = rot_mat
     extrinsics_mat[:3, -1] = translation
@@ -117,7 +117,9 @@ def check_truncated(label: Label) -> bool:
 def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:
     """Nx3 points in Cartesian to Homogeneous by appending ones."""
     n = pts_3d.shape[0]
-    pts_3d_hom = np.hstack((pts_3d, np.ones((n, 1))))
+    pts_3d_hom: NDArrayF64 = np.hstack(
+        (pts_3d, np.ones((n, 1), dtype=np.float64))
+    )
     return pts_3d_hom
 
 

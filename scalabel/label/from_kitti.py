@@ -93,8 +93,8 @@ def heading_transform(box3d: Box3D, calib: NDArrayF64) -> float:
         (box3d.dimension[0], box3d.dimension[1], box3d.dimension[2]),
         rot_y,
     )
-    pt1 = np.array([-0.5, 0.5, 0, 1.0])
-    pt2 = np.array([0.5, 0.5, 0, 1.0])
+    pt1 = np.array([-0.5, 0.5, 0, 1.0], dtype=np.float64)
+    pt2 = np.array([0.5, 0.5, 0, 1.0], dtype=np.float64)
     pt1 = np.matmul(tm, pt1).tolist()
     pt2 = np.matmul(tm, pt2).tolist()
     return -math.atan2(pt2[2] - pt1[2], pt2[0] - pt1[0])
@@ -113,7 +113,7 @@ def parse_lidar_labels(
         if label.box3d is not None:
             box3d = label.box3d
 
-            center = np.array([box3d.location])
+            center = np.array([box3d.location], dtype=np.float64)
             center_lidar = tuple(
                 np.dot(cam2lidar_mat, cart2hom(center).T)[:3, 0].tolist()
             )

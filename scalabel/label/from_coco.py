@@ -54,10 +54,10 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     cat_id2name = {}
     uniq_catids = set(category["id"] for category in coco["categories"])
     assert len(uniq_catids) == len(coco["categories"])
-    uniq_catids = sorted(list(uniq_catids))
+    uniq_catids_list = sorted(list(uniq_catids))
     for category in coco["categories"]:
         cat_id2name[category["id"]] = category["name"]
-        cats[uniq_catids.index(category["id"])] = Category(
+        cats[uniq_catids_list.index(category["id"])] = Category(
             name=category["name"]
         )
     assert None not in cats

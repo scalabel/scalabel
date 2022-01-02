@@ -71,7 +71,7 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return np.bincount(  # type: ignore
+    return np.bincount(
         size * groundtruth[k].astype(int) + prediction[k], minlength=size ** 2
     ).reshape(size, size)
 
@@ -116,7 +116,7 @@ def frame_to_mask(
 ) -> NDArrayU8:
     """Convert list of labels to a mask."""
     if image_size is not None:
-        out_mask: NDArrayU8 = (  # type: ignore
+        out_mask: NDArrayU8 = (
             np.ones((image_size.height, image_size.width)) * ignore_label
         ).astype(np.uint8)
     else:
@@ -224,7 +224,7 @@ def evaluate_sem_seg(
 
     logger.info("accumulating...")
     num_classes = len(categories) + 1
-    hist = np.zeros((num_classes, num_classes))
+    hist = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
     for (hist_, gt_id_set_) in hist_and_gt_id_sets:
         hist += hist_

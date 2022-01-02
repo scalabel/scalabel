@@ -90,8 +90,8 @@ class Label3d:
     def from_box3d(cls, box3d: Box3D) -> Label3d:
         """Get 8 vertex points of a 3D bounding box."""
         x, y, z = box3d.location
-        center = np.array([x, y, z])
-        height, width, length = np.array(box3d.dimension)
+        center: NDArrayF64 = np.array([x, y, z], dtype=np.float64)
+        height, width, length = np.array(box3d.dimension, dtype=np.float64)
 
         def rotate(vector: NDArrayF64) -> NDArrayF64:
             if len(box3d.orientation) == 3:
@@ -204,10 +204,20 @@ class Label3d:
             )
             if cw1 != cw2:
                 vertices1 = np.array(
-                    [v.v3d for v in faces[face1]["v"] if isinstance(v, Vertex)]
+                    [
+                        v.v3d
+                        for v in faces[face1]["v"]
+                        if isinstance(v, Vertex)
+                    ],
+                    dtype=np.float64,
                 )
                 vertices2 = np.array(
-                    [v.v3d for v in faces[face2]["v"] if isinstance(v, Vertex)]
+                    [
+                        v.v3d
+                        for v in faces[face2]["v"]
+                        if isinstance(v, Vertex)
+                    ],
+                    dtype=np.float64,
                 )
                 dist1 = np.linalg.norm(np.median(vertices1, axis=0))
                 dist2 = np.linalg.norm(np.median(vertices2, axis=0))

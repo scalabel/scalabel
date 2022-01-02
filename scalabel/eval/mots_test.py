@@ -64,7 +64,8 @@ class TestScalabelMotsEval(unittest.TestCase):
                 5.05050505,
                 -36.86830564,
                 64.30611079,
-            ]
+            ],
+            dtype=np.float64,
         )
         data_arr_mota = data_arr[:, 0]
         data_arr_mota[np.abs(data_arr_mota) > 100] = np.nan
@@ -84,7 +85,8 @@ class TestScalabelMotsEval(unittest.TestCase):
                 19.0,
                 11.0,
                 42.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
 
@@ -168,7 +170,8 @@ class TestScalabelMotsEvalEmpty(unittest.TestCase):
                 0.0,
                 0.0,
                 0.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         data_arr_mota = data_arr[:, 0]
         data_arr_mota[np.abs(data_arr_mota) > 100] = np.nan
@@ -188,7 +191,8 @@ class TestScalabelMotsEvalEmpty(unittest.TestCase):
                 0.0,
                 86.0,
                 0.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(

@@ -39,7 +39,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
 
     def test_mask_to_box2d(self) -> None:
         """Check the function for mask to Box2D."""
-        mask = np.zeros((10, 10))
+        mask = np.zeros((10, 10), dtype=np.uint8)
         mask[4:6, 2:8] = 1
         mask[2:8, 4:6] = 1
         box2d = mask_to_box2d(mask)

@@ -54,7 +54,8 @@ class TestScalabelDetectEval(unittest.TestCase):
                 -1.0,
                 -1.0,
                 34.02939267,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
@@ -74,7 +75,8 @@ class TestScalabelDetectEval(unittest.TestCase):
                 25.55304933,
                 58.38594872,
                 66.04261954,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(
@@ -149,13 +151,14 @@ class TestScalabelDetectEvalEmpty(unittest.TestCase):
 
         data_arr = data_frame.to_numpy()
         APs = np.array(  # pylint: disable=invalid-name
-            [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0]
+            [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
         )
 
-        overall_scores = np.array([0.0] * 12)
+        overall_scores = np.array([0.0] * 12, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

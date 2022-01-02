@@ -159,9 +159,11 @@ def transform_boxes(
 
     Note: mutates input boxes.
     """
-    translation_car = -np.array(ego_pose["translation"])
+    translation_car = -np.array(ego_pose["translation"], dtype=np.float64)
     rotation_car = Quaternion(ego_pose["rotation"]).inverse
-    translation_sensor = -np.array(car_from_sensor["translation"])
+    translation_sensor = -np.array(
+        car_from_sensor["translation"], dtype=np.float64
+    )
     rotation_sensor = Quaternion(car_from_sensor["rotation"]).inverse
     for box in boxes:
         box.translate(translation_car)
@@ -182,7 +184,9 @@ def parse_labels(
         labels = []
         # transform into the sensor coord system
         transform_boxes(boxes, ego_pose, calib_sensor)
-        intrinsic_matrix = np.array(calib_sensor["camera_intrinsic"])
+        intrinsic_matrix = np.array(
+            calib_sensor["camera_intrinsic"], dtype=np.float64
+        )
         for box in boxes:
             box_class = category_to_detection_name(box.name)
             in_image = True
@@ -249,7 +253,7 @@ def get_extrinsics(
 
 def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
     """Convert calibration ego pose to Intrinsics."""
-    matrix = np.array(calibration["camera_intrinsic"])
+    matrix = np.array(calibration["camera_intrinsic"], dtype=np.float64)
     return get_intrinsics_from_matrix(matrix)
 
 

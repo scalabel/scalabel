@@ -27,7 +27,7 @@ class TestScalabelPoseEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([14.059405940594061])
+        aps = np.array([14.059405940594061], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
@@ -44,7 +44,8 @@ class TestScalabelPoseEval(unittest.TestCase):
                 25.0,
                 27.500000000000004,
                 -1.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(
@@ -92,7 +93,7 @@ class TestScalabelPoseEvalMissing(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([6.228194247996228])
+        aps = np.array([6.228194247996228], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
@@ -109,7 +110,8 @@ class TestScalabelPoseEvalMissing(unittest.TestCase):
                 12.5,
                 16.25,
                 -1.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(
@@ -157,12 +159,12 @@ class TestScalabelPoseEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        aps = np.array([0.0])
+        aps = np.array([0.0], dtype=np.float64)
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 10)
+        overall_scores = np.array([0.0] * 10, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
