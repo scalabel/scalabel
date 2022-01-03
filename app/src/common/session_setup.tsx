@@ -334,7 +334,7 @@ function initViewerConfigs(
           2
         )
       )
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         dispatch(
           splitPane(
             state.user.layout.maxPaneId,
