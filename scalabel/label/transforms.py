@@ -11,7 +11,7 @@ from nanoid import generate  # type: ignore
 from pycocotools import mask as mask_utils  # type: ignore
 
 from ..common.typing import NDArrayU8
-from .coco_typing import CatType, PolygonType
+from .coco_typing import CatType, PolygonType, RLEType
 from .typing import RLE, Box2D, Config, Edge, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
 
@@ -29,6 +29,7 @@ __all__ = [
     "keypoints_to_nodes",
     "rle_to_box2d",
     "rle_to_mask",
+    "coco_rle_to_rle",
 ]
 matplotlib.use("agg")
 
@@ -85,6 +86,18 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
         poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
         poly2ds.append(poly2d)
     return poly2ds
+
+
+def coco_rle_to_rle(rle: RLEType) -> RLE:
+    """Convert COCO RLE into Scalabel RLE."""
+    size = rle["size"]
+    if isinstance(rle["counts"], str):
+        counts = rle["counts"]
+    elif isinstance(rle["counts"], list):
+        counts = mask_utils.frPyObjects(rle, *size)["counts"].decode("utf-8")
+    else:
+        counts = rle["counts"].decode("utf-8")
+    return RLE(counts=counts, size=size)
 
 
 def poly_to_patch(
