@@ -195,8 +195,7 @@ def mask_to_rle(mask: NDArrayU8) -> RLE:
     if len(mask.shape) == 2:
         mask = mask[:, :, None]
     rle = mask_utils.encode(np.array(mask, order="F", dtype="uint8"))[0]
-    rle_dict = dict(counts=rle["counts"].decode("utf-8"), size=rle["size"])
-    return RLE(**rle_dict)
+    return RLE(counts=rle["counts"].decode("utf-8"), size=rle["size"])
 
 
 def frame_to_rles(
