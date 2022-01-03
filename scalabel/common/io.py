@@ -27,7 +27,7 @@ def load_config(filepath: str) -> DictStrAny:
     toml is recommended for readability.
     """
     ext = os.path.splitext(filepath)[1]
-    if ext == ".yaml":
+    if ext == ".yaml" or ext == ".yml":
         with open_read_text(filepath) as fp:
             config_dict = yaml.load(fp.read(), Loader=yaml.Loader)
     elif ext == ".toml":
@@ -36,7 +36,7 @@ def load_config(filepath: str) -> DictStrAny:
         with open_read_text(filepath) as fp:
             config_dict = json.load(fp)
     else:
-        raise NotImplementedError(f"Config extention {ext} not supported")
+        raise NotImplementedError(f"Config extension {ext} not supported")
     assert isinstance(config_dict, dict)
     return config_dict
 
