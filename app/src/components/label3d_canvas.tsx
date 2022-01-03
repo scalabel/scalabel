@@ -9,11 +9,7 @@ import { DataType, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
-import {
-  Image3DViewerConfigType,
-  PointCloudViewerConfigType,
-  State
-} from "../types/state"
+import { Image3DViewerConfigType, State } from "../types/state"
 import { MAX_SCALE, MIN_SCALE, updateCanvasScale } from "../view_config/image"
 import { convertMouseToNDC } from "../view_config/point_cloud"
 import {
