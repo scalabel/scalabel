@@ -138,7 +138,7 @@ def from_mot(
             assert i + 1 == int(img_name.replace(".jpg", ""))
             relative_path = os.path.join(video, "img1", img_name)
             frame = Frame(
-                name=img_name,
+                name=video + "/" + img_name,
                 videoName=video,
                 url=relative_path,
                 frameIndex=i,
