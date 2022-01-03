@@ -2,7 +2,6 @@
 import json
 import unittest
 
-import matplotlib
 import numpy as np
 
 from ..common.io import open_read_text
@@ -24,7 +23,6 @@ from .transforms import (
 )
 from .typing import Box2D, ImageSize, Poly2D
 
-matplotlib.use("agg")
 SHAPE = ImageSize(height=720, width=1280)
 
 

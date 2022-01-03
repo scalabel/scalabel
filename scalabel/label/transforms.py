@@ -2,7 +2,6 @@
 
 from typing import Dict, List, Optional, Tuple
 
-import matplotlib
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,7 +29,6 @@ __all__ = [
     "rle_to_box2d",
     "rle_to_mask",
 ]
-matplotlib.use("agg")
 
 
 def get_coco_categories(config: Config) -> List[CatType]:
@@ -149,8 +147,6 @@ def frame_to_masks(
 ) -> List[NDArrayU8]:
     """Converting a frame of poly2ds to masks/bitmasks. Removes overlaps."""
     height, width = shape.height, shape.width
-
-    matplotlib.use("agg")
     fig = plt.figure(facecolor="0")
     fig.set_size_inches((width / fig.get_dpi()), height / fig.get_dpi())
     ax = fig.add_axes([0, 0, 1, 1])
