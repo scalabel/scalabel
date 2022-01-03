@@ -3,9 +3,8 @@
 import argparse
 import json
 import os
-from itertools import groupby
 from multiprocessing import Pool
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..common.io import open_read_text
 from ..common.parallel import NPROC
@@ -63,12 +62,13 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     assert None not in cats
     config = Config(categories=cats)
 
-    img_id2anns: Dict[int, Iterable[AnnType]] = {
-        img_id: list(anns)
-        for img_id, anns in groupby(
-            coco["annotations"], lambda ann: ann["image_id"]
-        )
+    img_id2anns: Dict[int, List[AnnType]] = {
+        img_id: [] for img_id in img_id2img
     }
+    for ann in coco["annotations"]:
+        if ann["image_id"] not in img_id2anns:
+            continue
+        img_id2anns[ann["image_id"]].append(ann)
 
     scalabel: List[Frame] = []
     img_ids = sorted(img_id2img.keys())

@@ -25,14 +25,14 @@ class TestCOCOToScalabel(unittest.TestCase):
             },
             {
                 "id": 1,
-                "image_id": 0,
+                "image_id": 1,
                 "category_id": 5,
                 "iscrowd": 0,
                 "ignore": 0,
             },
             {
                 "id": 2,
-                "image_id": 1,
+                "image_id": 0,
                 "category_id": 10,
                 "iscrowd": 0,
                 "ignore": 0,
