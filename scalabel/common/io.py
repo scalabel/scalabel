@@ -27,7 +27,7 @@ def load_config(filepath: str) -> DictStrAny:
     toml is recommended for readability.
     """
     ext = os.path.splitext(filepath)[1]
-    if ext == ".yaml" or ext == ".yml":
+    if ext in [".yaml", ".yml"]:
         with open_read_text(filepath) as fp:
             config_dict = yaml.load(fp.read(), Loader=yaml.Loader)
     elif ext == ".toml":
