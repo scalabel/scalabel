@@ -7,15 +7,13 @@ from itertools import groupby
 from multiprocessing import Pool
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from pycocotools import mask as mask_utils  # type: ignore
-
 from ..common.io import open_read_text
 from ..common.parallel import NPROC
 from ..common.tqdm import tqdm
 from .coco_typing import AnnType, GtType, ImgType
 from .io import group_and_sort, save
-from .transforms import bbox_to_box2d, polygon_to_poly2ds
-from .typing import RLE, Category, Config, Dataset, Frame, ImageSize, Label
+from .transforms import bbox_to_box2d, coco_rle_to_rle, polygon_to_poly2ds
+from .typing import Category, Config, Dataset, Frame, ImageSize, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -122,13 +120,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
                     if isinstance(ann["segmentation"], list):
                         label.poly2d = polygon_to_poly2ds(ann["segmentation"])
                     else:
-                        rle = mask_utils.frPyObjects(
-                            ann["segmentation"], *ann["segmentation"]["size"]
-                        )
-                        label.rle = RLE(
-                            counts=rle["counts"].decode("utf-8"),
-                            size=rle["size"],
-                        )
+                        label.rle = coco_rle_to_rle(ann["segmentation"])
                 labels.append(label)
 
         scalabel.append(

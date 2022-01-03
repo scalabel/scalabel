@@ -21,7 +21,7 @@ class CatType(TypedDict):
 class RLEType(TypedDict):
     """Defines types of polygons in GT."""
 
-    counts: Union[str, List[int]]
+    counts: Union[str, bytes, List[int]]
     size: Tuple[int, int]
 
 
