@@ -48,7 +48,6 @@ class Image3DViewer extends Viewer2D {
         const extrinsics = this.state.task.sensors[sensor].extrinsics
         this._camera.position.set(0, 0, 0)
         if (extrinsics !== null && extrinsics !== undefined) {
-          console.log("extrinsics", extrinsics.rotation)
           const rotation4 = new THREE.Matrix4().makeRotationFromEuler(
             new THREE.Euler(
               -extrinsics.rotation.x,
@@ -68,9 +67,6 @@ class Image3DViewer extends Viewer2D {
           this._camera.up.copy(up)
           this._camera.lookAt(forward)
           this._camera.position.copy(newPos)
-          console.log("forward", forward)
-          console.log("up", up)
-          // [0.99994538 0.0001244  0.01045127] [ 0.01044938  0.01056536 -0.99988959]
         }
       }
 
