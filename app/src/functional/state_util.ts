@@ -310,11 +310,6 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
     for (const sensorId of sensorIds) {
       if (state.task.sensors[sensorId].type === ViewerConfigTypeName.IMAGE) {
         minSensorIds[ViewerConfigTypeName.IMAGE] = sensorId
-        break
-      }
-    }
-    for (const sensorId of sensorIds) {
-      if (state.task.sensors[sensorId].type === ViewerConfigTypeName.IMAGE_3D) {
         minSensorIds[ViewerConfigTypeName.IMAGE_3D] = sensorId
         break
       }
