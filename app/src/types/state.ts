@@ -226,6 +226,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+  /** whether to overlay point cloud */
+  pointCloudOverlay: boolean
 }
 
 export interface HomographyViewerConfigType extends Image3DViewerConfigType {

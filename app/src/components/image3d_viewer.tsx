@@ -105,7 +105,10 @@ class Image3DViewer extends Viewer2D {
       const pointCloudSensors = Object.values(this.state.task.sensors).filter(
         (s) => s.type === DataType.POINT_CLOUD
       )
-      if (pointCloudSensors.length > 0) {
+      if (
+        pointCloudSensors.length > 0 &&
+        (this._viewerConfig as Image3DViewerConfigType).pointCloudOverlay
+      ) {
         views.push(
           <PointCloudOverlayCanvas
             key={`pointCloudCanvas${this.props.id}`}

@@ -143,11 +143,11 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
   /** ThreeJS Camera */
   private readonly camera: THREE.Camera
   /** Current point cloud for rendering */
-  private pointCloud: THREE.Points
-  /** drawable callback */
-  private readonly _drawableUpdateCallback: () => void
+  private readonly pointCloud: THREE.Points
   /** have points been transformed */
   private transformedPoints: boolean
+  /** have points been cloned */
+  private pointsCloned: boolean
 
   /**
    * Constructor, ons subscription to store
@@ -160,11 +160,10 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     this.scene = new THREE.Scene()
     this.camera = props.camera
     this.transformedPoints = false
+    this.pointsCloned = false
 
     this.canvas = null
     this.display = null
-
-    this._drawableUpdateCallback = this.renderThree.bind(this)
 
     const material = new THREE.ShaderMaterial({
       uniforms: {
@@ -187,18 +186,6 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     })
 
     this.pointCloud = new THREE.Points(new THREE.BufferGeometry(), material)
-  }
-
-  /** mount callback */
-  public componentDidMount(): void {
-    super.componentDidMount()
-    Session.label3dList.subscribe(this._drawableUpdateCallback)
-  }
-
-  /** mount callback */
-  public componentWillUnmount(): void {
-    super.componentWillUnmount()
-    Session.label3dList.unsubscribe(this._drawableUpdateCallback)
   }
 
   /**
@@ -264,9 +251,12 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     const item = state.user.select.item
     const sensor = this.props.sensor
 
-    this.pointCloud.geometry = Session.pointClouds[item][sensor]
-    this.pointCloud.layers.enableAll()
-    this.transformPoints()
+    if (Session.pointClouds[item][sensor] !== undefined && !this.pointsCloned) {
+      this.pointCloud.geometry = Session.pointClouds[item][sensor].clone()
+      this.pointCloud.layers.enableAll()
+      this.transformPoints()
+      this.pointsCloned = true
+    }
   }
 
   /**

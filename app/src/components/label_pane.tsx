@@ -4,6 +4,7 @@ import Fade from "@mui/material/Fade"
 import Grid from "@material-ui/core/Grid"
 import MenuItem from "@material-ui/core/MenuItem"
 import Select from "@material-ui/core/Select"
+import Button from "@material-ui/core/Button"
 import CloseIcon from "@material-ui/icons/Close"
 import ViewStreamIcon from "@material-ui/icons/ViewStream"
 import VisibilityIcon from "@material-ui/icons/Visibility"
@@ -23,7 +24,11 @@ import * as types from "../const/common"
 import { makeDefaultViewerConfig } from "../functional/states"
 import { getSensorTypes, getMinSensorIds } from "../functional/state_util"
 import { paneBarStyles, resizerStyles } from "../styles/split_pane"
-import { SplitType, ViewerConfigType } from "../types/state"
+import {
+  Image3DViewerConfigType,
+  SplitType,
+  ViewerConfigType
+} from "../types/state"
 import { Component } from "./component"
 import { viewerReactKey } from "./drawable_viewer"
 import HomographyViewer from "./homography_viewer"
@@ -112,6 +117,8 @@ interface ClassType {
   icon90: string
   /** class name for resizer */
   resizer: string
+  /** button */
+  button: string
 }
 
 interface Props {
@@ -129,6 +136,19 @@ const HIDDEN_UNIT_SIZE = 50
  * Wrapper for SplitPane
  */
 class LabelPane extends Component<Props> {
+  /** Toggle point cloud overlay */
+  private toggleOverlay(): void {
+    const pane = this.state.user.layout.panes[this.props.pane]
+    const viewerConfig = this.state.user.viewerConfigs[
+      pane.viewerId
+    ] as Image3DViewerConfigType
+    const newConfig = {
+      ...viewerConfig,
+      pointCloudOverlay: !viewerConfig.pointCloudOverlay
+    }
+    dispatch(changeViewerConfig(pane.viewerId, newConfig))
+  }
+
   /** Override render */
   public render(): React.ReactNode {
     const pane = this.state.user.layout.panes[this.props.pane]
@@ -227,6 +247,15 @@ class LabelPane extends Component<Props> {
               </MenuItem>
             ))}
         </Select>
+      )
+
+      const overlayButton = (
+        <Button
+          className={this.props.classes.button}
+          onClick={this.toggleOverlay.bind(this)}
+        >
+          Overlay
+        </Button>
       )
 
       const visibilityButton = (
@@ -357,13 +386,18 @@ class LabelPane extends Component<Props> {
         <Grid
           key={`paneMenu${pane.id}`}
           justifyContent={"flex-start"}
-          alignItems={"flex-end"}
+          alignItems={"stretch"}
           container
           direction="row"
         >
           <div hidden={pane.hide}>
             {numSensors > 1 ? viewerTypeMenu : null}
             {numSensors > 1 ? viewerIdMenu : null}
+          </div>
+          <div>
+            {viewerConfig.type === types.ViewerConfigTypeName.IMAGE_3D
+              ? overlayButton
+              : null}
           </div>
         </Grid>
       )

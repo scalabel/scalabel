@@ -346,7 +346,8 @@ export function makeImage3DViewerConfig(
   return {
     ...imageConfig,
     type: types.ViewerConfigTypeName.IMAGE_3D,
-    pointCloudSensor: -2
+    pointCloudSensor: -2,
+    pointCloudOverlay: false
   }
 }
 
@@ -367,7 +368,8 @@ export function makeHomographyViewerConfig(
     ...imageConfig,
     type: types.ViewerConfigTypeName.HOMOGRAPHY,
     pointCloudSensor: -2,
-    distance
+    distance,
+    pointCloudOverlay: false
   }
 }
 
