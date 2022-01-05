@@ -18,7 +18,6 @@ import {
   TaskType,
   ViewerConfigType
 } from "./state"
-import { Vector3D } from "../math/vector3d"
 
 export interface BaseAction {
   /** unique id for the action */
@@ -229,13 +228,6 @@ export type ActivateSpanAction = BaseAction
 
 export type DeactivateSpanAction = BaseAction
 
-export interface UpdateSpanPointAction extends BaseAction {
-  /** world coordinates of point */
-  point: Vector3D
-  /** mouse y-coordinate */
-  mouseY: number
-}
-
 export type RegisterSpanPointAction = BaseAction
 
 export type ResetSpanAction = BaseAction
@@ -272,7 +264,6 @@ export type SessionActionType =
 export type Info3DActionType =
   | ActivateSpanAction
   | DeactivateSpanAction
-  | UpdateSpanPointAction
   | RegisterSpanPointAction
   | ResetSpanAction
   | PauseSpanAction
@@ -297,13 +288,6 @@ export type TaskActionType =
   | AddTrackAction
   | MergeTrackAction
   | SubmitAction
-  | ActivateSpanAction
-  | DeactivateSpanAction
-  | UpdateSpanPointAction
-  | RegisterSpanPointAction
-  | ResetSpanAction
-  | PauseSpanAction
-  | ResumeSpanAction
 
 export type ActionType =
   | SessionActionType

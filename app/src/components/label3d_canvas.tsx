@@ -6,7 +6,7 @@ import * as THREE from "three"
 
 import Session from "../common/session"
 import { DataType, LabelTypeName, ViewerConfigTypeName } from "../const/common"
-import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
+import { registerSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { Image3DViewerConfigType, State } from "../types/state"
@@ -18,7 +18,6 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
-import { Vector3D } from "../math/vector3d"
 import { Plane3D } from "../drawable/3d/plane3d"
 import { Vector2D } from "../math/vector2d"
 
@@ -242,12 +241,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     const sensor = this.state.task.sensors[sensorIdx]
     if (sensor.type === DataType.POINT_CLOUD) {
       if (groundPlane === null) {
-        const sensorIdx = this.state.user.viewerConfigs[this.props.id].sensor
-        const sensor = this.state.task.sensors[sensorIdx]
-        if (sensor.type === DataType.POINT_CLOUD) {
-          // Estimate new ground plane
-          this._labelHandler.estimateGroundPlane()
-        }
+        // Estimate new ground plane
+        this._labelHandler.estimateGroundPlane(selectedItem)
       } else {
         // this._labelHandler.updateGroundPlaneCenter()
       }
@@ -351,9 +346,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const intersects = new THREE.Vector3()
       this._raycaster.ray.intersectPlane(plane, intersects)
       if (state.session.info3D.boxSpan !== null) {
-        Session.dispatch(
-          updateSpanPoint(new Vector3D().fromThree(intersects), y)
-        )
         state.session.info3D.boxSpan.updatePointTmp(
           new Vector2D(x, y),
           plane,

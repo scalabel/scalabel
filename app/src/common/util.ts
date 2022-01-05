@@ -162,12 +162,22 @@ export function estimateGroundPlane(vertices: number[]): THREE.Plane {
   }
   let bestPlane = new THREE.Plane()
   let maxNumPoints = 0
-  const itMax = Math.ceil(points.length / 20)
+  const itMax = Math.ceil(points.length / 40)
   const threshold = 0.01
   for (let i = 0; i < itMax; i++) {
-    const p1 = points[getRandomInt(points.length)]
-    const p2 = points[getRandomInt(points.length)]
-    const p3 = points[getRandomInt(points.length)]
+    let p1 = points[getRandomInt(points.length)]
+    let p2 = points[getRandomInt(points.length)]
+    let p3 = points[getRandomInt(points.length)]
+    // avoid sampling same points
+    while (
+      new THREE.Vector3().subVectors(p1, p2).length() < threshold ||
+      new THREE.Vector3().subVectors(p2, p3).length() < threshold ||
+      new THREE.Vector3().subVectors(p3, p1).length() < threshold
+    ) {
+      p1 = points[getRandomInt(points.length)]
+      p2 = points[getRandomInt(points.length)]
+      p3 = points[getRandomInt(points.length)]
+    }
     const plane = new THREE.Plane().setFromCoplanarPoints(p1, p2, p3)
     let numPoints = 0
     for (let p = 0; p < points.length; p++) {

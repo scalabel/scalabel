@@ -50,37 +50,6 @@ export function deactivateSpan(state: State): State {
 }
 
 /**
- * Update temporary point in span box
- *
- * @param state
- * @param action
- */
-export function updateSpanPoint(
-  state: State
-  // action: actionTypes.UpdateSpanPointAction
-): State {
-  return state
-  // const oldInfo3D = state.session.info3D
-  // const newBox = oldInfo3D.boxSpan
-  // if (newBox !== null) {
-  //   newBox.updatePointTmp(action.point, action.mouseY)
-  // }
-  // const newInfo3D = updateObject(oldInfo3D, {
-  //   ...state.session.info3D,
-  //   boxSpan: newBox
-  // })
-  // const oldSession = state.session
-  // const newSession = updateObject(oldSession, {
-  //   ...state.session,
-  //   info3D: newInfo3D
-  // })
-  // return updateObject(state, {
-  //   ...state,
-  //   session: newSession
-  // })
-}
-
-/**
  * Register new point in span box
  *
  * @param state
