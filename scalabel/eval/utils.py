@@ -1,4 +1,5 @@
 """Utility functions for eval."""
+import copy
 from functools import partial
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
@@ -210,7 +211,11 @@ def reorder_preds(
         if gt_name in pred_map:
             order_results.append(pred_map[gt_name])
         else:
-            order_results.append(Frame(name=gt_frame.name))
+            # add empty frame
+            gt_frame_copy = copy.deepcopy(gt_frame)
+            gt_frame_copy.labels = None
+            order_results.append(gt_frame_copy)
             miss_num += 1
-    logger.info("%s images are missed in the prediction.", miss_num)
+    if miss_num > 0:
+        logger.critical("%s images are missed in the prediction!", miss_num)
     return order_results
