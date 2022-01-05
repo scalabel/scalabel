@@ -3,6 +3,7 @@ import * as React from "react"
 import * as THREE from "three"
 
 import Session from "../common/session"
+import { DataType } from "../const/common"
 import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { viewerStyles } from "../styles/viewer"
@@ -10,6 +11,7 @@ import { Image3DViewerConfigType } from "../types/state"
 import ImageCanvas from "./image_canvas"
 import Label3dCanvas from "./label3d_canvas"
 import { Viewer2D, Viewer2DProps } from "./viewer2d"
+import PointCloudOverlayCanvas from "./point_cloud_overlay_canvas"
 
 /**
  * Viewer for 3d labels on images
@@ -99,6 +101,21 @@ class Image3DViewer extends Viewer2D {
           id={this.props.id}
         />
       )
+
+      const pointCloudSensors = Object.values(this.state.task.sensors).filter(
+        (s) => s.type === DataType.POINT_CLOUD
+      )
+      if (pointCloudSensors.length > 0) {
+        views.push(
+          <PointCloudOverlayCanvas
+            key={`pointCloudCanvas${this.props.id}`}
+            display={this._container}
+            id={this.props.id}
+            sensor={pointCloudSensors[0].id}
+            camera={this._camera}
+          />
+        )
+      }
       views.push(
         <Label3dCanvas
           key={`label3dCanvas${this.props.id}`}
