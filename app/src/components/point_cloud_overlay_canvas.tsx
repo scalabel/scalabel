@@ -47,9 +47,10 @@ interface Props extends DrawableProps {
 
 const vertexShader = `
     varying vec3 worldPosition;
+    attribute float size;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
+      gl_PointSize = size;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
     }
@@ -63,9 +64,19 @@ const fragmentShader = `
     uniform mat4 toSelectionFrame;
     uniform vec3 selectionSize;
 
-    vec3 getHeatMapColor(float height) {
-      float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
-      return (1.0 - val) * low + val * high;
+    vec3 hsv2rgb(vec3 c)
+    {
+        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
+
+    vec3 getHeatMapColor(float distance, float max_val) {
+      float val = min(max_val, max(0.0, distance)) / max_val;
+      vec3 hsv_val = vec3(val, 1.0, 1.0);
+      // float h = (1.0 - val) * low + val * high;
+      vec3 rgb_val = hsv2rgb(hsv_val);
+      return rgb_val;
     }
 
     bool pointInSelection(vec3 point) {
@@ -92,7 +103,11 @@ const fragmentShader = `
 
     void main() {
       float alpha = 0.5;
-      vec3 color = getHeatMapColor(worldPosition.z);
+      float distance = sqrt(
+        pow(worldPosition.x, 2.0)+
+        pow(worldPosition.y, 2.0)+
+        pow(worldPosition.z, 2.0));
+      vec3 color = getHeatMapColor(distance, 23.0);
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
@@ -251,12 +266,6 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
 
     this.pointCloud.geometry = Session.pointClouds[item][sensor]
     this.pointCloud.layers.enableAll()
-    console.log(
-      "point cloud update",
-      Session.pointClouds[item][sensor],
-      item,
-      sensor
-    )
     this.transformPoints()
   }
 
@@ -294,18 +303,22 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
       position.applyMatrix4(rotation4).multiplyScalar(-1)
       rotation4.setPosition(position)
       const newRawPoints: number[] = []
+      const sizes = new Float32Array(points.length)
       for (let i = 0; i < points.length; i += 1) {
         const point = points[i]
         point.applyMatrix4(rotation4)
         newRawPoints.push(point.x)
         newRawPoints.push(point.y)
         newRawPoints.push(point.z)
+        sizes[i] = 1.5
       }
       geometry.setAttribute(
         "position",
         new THREE.Float32BufferAttribute(newRawPoints, 3)
       )
       this.transformedPoints = true
+      geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1))
+      geometry.attributes.size.needsUpdate = true
     }
   }
 
