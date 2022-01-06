@@ -182,17 +182,35 @@ def parse_seg_objects(
 def reorder_preds(
     ann_frames: List[Frame], pred_frames: List[Frame]
 ) -> List[Frame]:
-    """Sort predictions and add empty frames for missing predictions."""
-    pred_map: Dict[str, Frame] = {
-        pred_frame.name: pred_frame for pred_frame in pred_frames
-    }
-    sorted_results: List[Frame] = []
+    """Reorder predictions and add empty frames for missing predictions."""
+    pred_names = [f.name for f in pred_frames]
+    use_video = False
+    if len(pred_names) != len(set(pred_names)):
+        # handling non-unique prediction frames names with videoName
+        use_video = all(f.videoName for f in pred_frames) and all(
+            f.videoName for f in ann_frames
+        )
+        if not use_video:
+            logger.critical(
+                "Prediction frames names are not unique, but videoName is not "
+                "specified for all frames."
+            )
+    pred_map: Dict[str, Frame] = {}
+    for pred_frame in pred_frames:
+        name = pred_frame.name
+        if use_video:
+            name = f"{pred_frame.videoName}/{name}"
+        pred_map[name] = pred_frame
+    order_results: List[Frame] = []
     miss_num = 0
     for gt_frame in ann_frames:
-        if gt_frame.name in pred_map:
-            sorted_results.append(pred_map[gt_frame.name])
+        gt_name = gt_frame.name
+        if use_video:
+            gt_name = f"{gt_frame.videoName}/{gt_name}"
+        if gt_name in pred_map:
+            order_results.append(pred_map[gt_name])
         else:
-            sorted_results.append(Frame(name=gt_frame.name))
+            order_results.append(Frame(name=gt_frame.name))
             miss_num += 1
     logger.info("%s images are missed in the prediction.", miss_num)
-    return sorted_results
+    return order_results

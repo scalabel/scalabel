@@ -63,11 +63,19 @@ def frame_to_rle(shape: ImageSize, frame: Frame) -> Frame:
         labels = sorted(
             labels, key=lambda label: float(label.score)  # type: ignore
         )
+    filt_labels, poly2ds = [], []
+    for label in labels:
+        if label.poly2d is None:
+            continue
+        filt_labels.append(label)
+        poly2ds.append(label.poly2d)
     poly2ds = [label.poly2d for label in labels if label.poly2d is not None]
     rles = frame_to_rles(shape, poly2ds)
-    for label, rle in zip(labels, rles):
+    for label, rle in zip(filt_labels, rles):
+        label.poly2d = None
         label.rle = rle
         label.box2d = rle_to_box2d(rle)
+    frame.labels = filt_labels
     return frame
 
 
