@@ -8,10 +8,10 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from scalabel.label.utils import cart2hom, rotation_y_to_alpha
-
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
+from ..label.transforms import xyxy_to_box2d
+from ..label.utils import cart2hom, rotation_y_to_alpha
 
 try:
     from simple_waymo_open_dataset_reader import (
@@ -216,11 +216,11 @@ def parse_lidar_labels(
                 alpha=rotation_y_to_alpha(heading, center_cam),  # type: ignore
             )
 
-            box2d = Box2D(
-                x1=label.box.center_x - label.box.length / 2,
-                y1=label.box.center_y - label.box.width / 2,
-                x2=label.box.center_x + label.box.length / 2,
-                y2=label.box.center_y + label.box.width / 2,
+            box2d = xyxy_to_box2d(
+                label.box.center_x - label.box.length / 2,
+                label.box.center_y - label.box.width / 2,
+                label.box.center_x + label.box.length / 2,
+                label.box.center_y + label.box.width / 2,
             )
             labels.append(
                 Label(
@@ -246,11 +246,11 @@ def parse_camera_labels(
         if not class_name:
             continue
 
-        box2d = Box2D(
-            x1=label.box.center_x - label.box.length / 2,
-            y1=label.box.center_y - label.box.width / 2,
-            x2=label.box.center_x + label.box.length / 2,
-            y2=label.box.center_y + label.box.width / 2,
+        box2d = xyxy_to_box2d(
+            label.box.center_x - label.box.length / 2,
+            label.box.center_y - label.box.width / 2,
+            label.box.center_x + label.box.length / 2,
+            label.box.center_y + label.box.width / 2,
         )
         labels.append(Label(category=class_name, box2d=box2d, id=label.id))
 

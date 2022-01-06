@@ -66,6 +66,16 @@ def mask_to_bbox(mask: NDArrayU8) -> List[float]:
     return bbox
 
 
+def xyxy_to_box2d(x1: float, y1: float, x2: float, y2: float) -> Box2D:
+    """Transform xyxy box (not incl xy_2) to scalabel (incl xy_2 in box)."""
+    return Box2D(x1=x1, y1=y1, x2=x2 - 1, y2=y2 - 1)
+
+
+def box2d_to_xyxy(box2d: Box2D) -> List[float]:
+    """Transform scalabel box (include xy_2 in box) to xyxy (not incl xy_2)."""
+    return [box2d.x1, box2d.y1, box2d.x2 + 1, box2d.y2 + 1]
+
+
 def bbox_to_box2d(bbox: List[float]) -> Box2D:
     """Convert COCO bbox into Scalabel Box2D."""
     assert len(bbox) == 4

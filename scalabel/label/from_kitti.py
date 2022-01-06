@@ -10,14 +10,13 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 
-from scalabel.label.utils import cart2hom, rotation_y_to_alpha
-
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
+from ..label.transforms import xyxy_to_box2d
+from ..label.utils import cart2hom, rotation_y_to_alpha
 from .io import save
 from .kitti_utlis import KittiPoseParser, list_from_file, read_calib, read_oxts
 from .typing import (
-    Box2D,
     Box3D,
     Category,
     Config,
@@ -128,7 +127,6 @@ def parse_lidar_labels(
         new_labels.append(
             Label(
                 category=label.category,
-                box2d=label.box2d,
                 box3d=new_box3d if label.box3d is not None else None,
                 id=label.id,
             )
@@ -195,7 +193,7 @@ def parse_label(
         else:
             track_id += 1
 
-        x1, y1, x2, y2 = (
+        box2d = xyxy_to_box2d(
             float(label[4 + offset]),
             float(label[5 + offset]),
             float(label[6 + offset]),
@@ -218,8 +216,6 @@ def parse_label(
             ),
             alpha=float(label[3 + offset]),
         )
-
-        box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
 
         labels_dict[seq_id].append(
             Label(

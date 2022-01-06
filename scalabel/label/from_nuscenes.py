@@ -10,9 +10,9 @@ import pandas as pd
 
 from ..common.parallel import NPROC, pmap
 from ..common.typing import DictStrAny, NDArrayF64
+from ..label.transforms import xyxy_to_box2d
 from .io import save
 from .typing import (
-    Box2D,
     Box3D,
     Category,
     Config,
@@ -209,9 +209,8 @@ def parse_labels(
                         .T[:, :2]
                         .tolist()
                     )
-                    # Keep only corners that fall within the image.
-                    x1, y1, x2, y2 = post_process_coords(corner_coords)
-                    box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+                    # Keep only corners that fall within the image, transform
+                    box2d = xyxy_to_box2d(*post_process_coords(corner_coords))
 
                 instance_data = data.get("sample_annotation", box.token)
                 # Attributes can be retrieved via instance_data and also the
