@@ -22,12 +22,13 @@ from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.transforms import rle_to_mask
-from ..label.typing import Edge, Frame, Intrinsics, Label, Node
+from ..label.typing import Config, Edge, Frame, Intrinsics, Label, Node
 from ..label.utils import (
     check_crowd,
     check_ignored,
     check_occluded,
     check_truncated,
+    get_leaf_categories,
 )
 from .controller import (
     ControllerConfig,
@@ -145,9 +146,20 @@ class LabelViewer:
     def __init__(
         self,
         ui_cfg: UIConfig = UIConfig(),
+        label_cfg: Optional[Config] = None,
     ) -> None:
         """Initialize the label viewer."""
         self.ui_cfg = ui_cfg
+
+        # if specified, use category colors in config
+        self._category_colors: Optional[Dict[str, NDArrayF64]] = None
+        if label_cfg:
+            self._category_colors = {
+                c.name: (np.asarray(c.color) / 255)
+                if c.color
+                else random_color()
+                for c in get_leaf_categories(label_cfg.categories)
+            }
 
         # animation
         self._label_colors: Dict[str, NDArrayF64] = {}
@@ -236,6 +248,10 @@ class LabelViewer:
 
     def _get_label_color(self, label: Label) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
+        category = label.category
+        if self._category_colors and category:
+            return self._category_colors[category]
+
         label_id = label.id
         if label_id not in self._label_colors:
             self._label_colors[label_id] = random_color()
