@@ -204,7 +204,6 @@ def compare_results(result: List[Frame], result_compare: List[Frame]) -> None:
                 assert label.category == label_ref.category
                 if label.box2d is not None:
                     assert label_ref.box2d is not None
-                    print(label.box2d, label_ref.box2d)
                     assert label.box2d.x1 == pytest.approx(label_ref.box2d.x1)
                     assert label.box2d.y1 == pytest.approx(label_ref.box2d.y1)
                     assert label.box2d.x2 == pytest.approx(label_ref.box2d.x2)
