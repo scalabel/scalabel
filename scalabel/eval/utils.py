@@ -1,4 +1,5 @@
 """Utility functions for eval."""
+import copy
 from functools import partial
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
@@ -51,7 +52,7 @@ def check_overlap_frame(
     """Check overlap of segmentation masks for a single frame."""
     if frame.labels is None:
         return False
-    overlap_mask = np.zeros((0), dtype=np.uint8)
+    overlap_mask: NDArrayU8 = np.zeros((0), dtype=np.uint8)
     for label in frame.labels:
         if label.category not in categories:
             continue
@@ -174,8 +175,8 @@ def parse_seg_objects(
         rles, labels, ids = combine_stuff_masks(rles, labels, ids, classes)
     rles_dict = [rle.dict() for rle in rles]
     ignore_rles_dict = [rle.dict() for rle in ignore_rles]
-    labels_arr = np.array(labels, dtype=np.int32)
-    ids_arr = np.array(ids, dtype=np.int32)
+    labels_arr: NDArrayI32 = np.array(labels, dtype=np.int32)
+    ids_arr: NDArrayI32 = np.array(ids, dtype=np.int32)
     return (rles_dict, labels_arr, ids_arr, ignore_rles_dict)
 
 
@@ -210,7 +211,11 @@ def reorder_preds(
         if gt_name in pred_map:
             order_results.append(pred_map[gt_name])
         else:
-            order_results.append(Frame(name=gt_frame.name))
+            # add empty frame
+            gt_frame_copy = copy.deepcopy(gt_frame)
+            gt_frame_copy.labels = None
+            order_results.append(gt_frame_copy)
             miss_num += 1
-    logger.info("%s images are missed in the prediction.", miss_num)
+    if miss_num > 0:
+        logger.critical("%s images are missed in the prediction!", miss_num)
     return order_results
