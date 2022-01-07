@@ -652,8 +652,12 @@ export function getRootLabelId(item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
 
   while (isValidId(parent)) {
-    labelId = parent
-    parent = item.labels[labelId].parent
+    if (item.labels[parent] !== undefined) {
+      labelId = parent
+      parent = item.labels[labelId].parent
+    } else {
+      break
+    }
   }
   return labelId
 }
@@ -699,8 +703,12 @@ function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
 export function getRootTrackId(item: ItemType, labelId: IdType): IdType {
   let parent = item.labels[labelId].parent
   while (isValidId(parent)) {
-    labelId = parent
-    parent = item.labels[labelId].parent
+    if (item.labels[parent] !== undefined) {
+      labelId = parent
+      parent = item.labels[labelId].parent
+    } else {
+      break
+    }
   }
   return item.labels[labelId].track
 }
