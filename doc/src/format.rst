@@ -116,6 +116,7 @@ More details about the fields
     * manualAttributes: whether the attribute of the label is created or
       modified manually
     * score: the confidence or some other ways of measuring the quality of the label.
+    * box2d: box includes the pixel at x2,y2 - width = x2 - x1 + 1, height = y2 - y1 + 1
     * box3d - follows the convention in the KITTI dataset.
         * alpha: observation angle if there is a 2D view
         * location: 3D center of the box, stored as 3D point in camera coordinates, meaning the axes (x,y,z) point right, down, and forward.

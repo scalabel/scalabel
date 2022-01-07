@@ -388,7 +388,9 @@ class LabelViewer:
                         ctrl_point_size,
                     )
 
-                patch_vertices = np.array(poly.vertices)
+                patch_vertices: NDArrayF64 = np.array(
+                    poly.vertices, dtype=np.float64
+                )
                 x1 = min(np.min(patch_vertices[:, 0]), x1)
                 y1 = min(np.min(patch_vertices[:, 1]), y1)
                 x2 = max(np.max(patch_vertices[:, 0]), x2)
@@ -430,7 +432,7 @@ class LabelViewer:
                     vert_prev = vertices[-1]
                 else:
                     vert_prev = vertices[idx - 1]
-                edge = np.concatenate(
+                edge: NDArrayF64 = np.concatenate(
                     [
                         np.array(vert_prev)[None, ...],
                         np.array(vert)[None, ...],
@@ -506,7 +508,7 @@ class LabelViewer:
         alpha: float = 0.5,
     ) -> None:
         """Draw RLE."""
-        combined_mask: NDArrayU8 = np.zeros(image.shape)
+        combined_mask: NDArrayU8 = np.zeros(image.shape, dtype=np.uint8)
 
         labels = sorted(labels, key=lambda label: float(label.score or 0))
 

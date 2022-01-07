@@ -5,8 +5,9 @@ import os
 from typing import List
 
 from ..common.typing import DictStrAny
+from ..label.transforms import bbox_to_box2d
 from .io import save
-from .typing import Box2D, Category, Config, Dataset, Frame, Label
+from .typing import Category, Config, Dataset, Frame, Label
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -35,8 +36,7 @@ def parse_annotations(annotations: List[DictStrAny]) -> List[Label]:
         if anno["extra"].get("ignore", 0) == 1:
             continue
 
-        x, y, w, h = anno["fbox"]
-        box2d = Box2D(x1=x, y1=y, x2=x + w, y2=y + h)
+        box2d = bbox_to_box2d(anno["fbox"])
         label = Label(
             id=anno["extra"]["box_id"],
             category="pedestrian",
