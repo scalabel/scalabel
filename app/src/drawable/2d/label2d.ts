@@ -381,11 +381,11 @@ export abstract class Label2D {
     }
     if (checked !== undefined && checked) {
       if (tw > 0) {
-        abbr += ", checked"
+        abbr += ", #"
       } else {
-        abbr = "checked"
+        abbr = "#"
       }
-      tw += 100
+      tw += 25
     }
     if (tw > 0) {
       ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
