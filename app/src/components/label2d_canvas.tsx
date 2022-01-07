@@ -29,7 +29,7 @@ import {
 } from "./viewer"
 import { isKeyFrame } from "./util"
 import { alert } from "../common/alert"
-import {Severity} from "../types/common";
+import { Severity } from "../types/common"
 
 interface ClassType {
   /** label canvas */
