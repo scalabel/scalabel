@@ -139,6 +139,11 @@ export class Box2D extends Label2D {
         break
     }
 
+    let checked = false
+    if (this._label !== null) {
+      checked = this._label.checked
+    }
+
     // Draw!!!
     const rect = this._rect
     rectStyle.color = assignColor(0)
@@ -154,7 +159,8 @@ export class Box2D extends Label2D {
         ratio,
         new Vector2D(rect.x1, rect.y1),
         this._color,
-        isTrackLinking
+        isTrackLinking,
+        checked
       )
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {

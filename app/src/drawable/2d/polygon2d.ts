@@ -260,6 +260,11 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+
+    let checked = false
+    if (this._label !== null) {
+      checked = this._label.checked
+    }
     if (mode === DrawMode.VIEW && this._state !== Polygon2DState.DRAW) {
       if (this._selected) {
         isTrackLinking = isTrackLinking && true
@@ -271,7 +276,8 @@ export class Polygon2D extends Label2D {
         ratio,
         this.getCentroid(),
         this._color,
-        isTrackLinking
+        isTrackLinking,
+        checked
       )
     }
   }
