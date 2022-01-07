@@ -90,7 +90,7 @@ def read_calib(
     with open_read_text(os.path.join(calib_dir, seq_id)) as f:
         fields = [line.split() for line in f]
 
-    projections = {}
+    projections: Dict[str, NDArrayF64] = {}
 
     projections[left_cam] = np.asarray(
         fields[2][1:], dtype=np.float32
@@ -104,11 +104,15 @@ def read_calib(
         - projections[left_cam][0, -1] / projections[left_cam][0, 0]
     )
 
-    rect = np.asarray(fields[4][1:], dtype=np.float32).reshape(3, 3)
+    rect: NDArrayF64 = np.asarray(fields[4][1:], dtype=np.float32).reshape(
+        3, 3
+    )
     rect = np.hstack((rect, np.zeros((3, 1))))
     rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
 
-    velo2cam = np.asarray(fields[5][1:], dtype=np.float32).reshape(3, 4)
+    velo2cam: NDArrayF64 = np.asarray(fields[5][1:], dtype=np.float32).reshape(
+        3, 4
+    )
     velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
 
     return projections, rect, velo2cam, left_to_right_offset

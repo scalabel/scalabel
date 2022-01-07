@@ -31,7 +31,7 @@ def load_images(urls: List[str]) -> Dict[str, NDArrayU8]:
     for url in urls:
         if url not in url_to_img:
             img_response = requests.get(url)
-            img = np.array(
+            img: NDArrayU8 = np.array(
                 Image.open(io.BytesIO(img_response.content)), dtype=np.uint8
             )
             url_to_img[url] = img

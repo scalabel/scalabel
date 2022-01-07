@@ -258,8 +258,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--ignore-unknown-cats",
-        type=bool,
-        default=False,
+        action="store_true",
         help="ignore unknown categories for mots evaluation",
     )
     parser.add_argument(
