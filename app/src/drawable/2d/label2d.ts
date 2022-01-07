@@ -261,7 +261,9 @@ export abstract class Label2D {
   public changeChecked(): void {
     if (this._label !== null) {
       this._label.checked = !this._label.checked
-      this._labelList.addUpdatedLabel(this)
+      if (!this.temporary) {
+        this._labelList.addUpdatedLabel(this)
+      }
     }
   }
 

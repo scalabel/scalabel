@@ -287,10 +287,12 @@ export class Label2DHandler {
       case Key.SPACE:
         if (this.hasSelectedLabels()) {
           for (const label of this._labelList.selectedLabels) {
-            label.changeChecked()
+            if (!label.temporary) {
+              label.changeChecked()
+              commit2DLabels([...this._labelList.popUpdatedLabels()])
+            }
           }
         }
-        commit2DLabels([...this._labelList.popUpdatedLabels()])
     }
   }
 
