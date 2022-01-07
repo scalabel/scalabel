@@ -9,6 +9,7 @@ from .utils import (
     check_overlap_frame,
     combine_stuff_masks,
     label_ids_to_int,
+    reorder_preds,
 )
 
 
@@ -82,3 +83,16 @@ class TestEvalUtils(unittest.TestCase):
         self.assertEqual(len(out_iid), 3)
         self.assertEqual(out_cid, [0, 34, 34])
         self.assertEqual(len(out_iid), len(set(out_iid)))
+
+    def test_reorder_preds(self) -> None:
+        """Test reorder_preds function."""
+        pred_file = f"{self.cur_dir}/testcases/utils/preds.json"
+        pred_frames = load(pred_file).frames
+        gt_file = f"{self.cur_dir}/testcases/utils/gts.json"
+        gt_frames = load(gt_file).frames
+        pred_frames = reorder_preds(gt_frames, pred_frames)
+        self.assertEqual(len(pred_frames), len(gt_frames))
+        self.assertEqual(len(set(f.videoName for f in pred_frames)), 2)
+        for frame in pred_frames:
+            assert frame.labels is not None
+            self.assertGreater(len(frame.labels), 0)
