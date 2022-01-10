@@ -342,6 +342,7 @@ export class Label3DHandler {
         Session.label3dList,
         this._selectedItemIndex,
         Session.label3dList.currentCategory,
+        this._tracking,
         center,
         undefined,
         this._sensorIds
@@ -382,6 +383,7 @@ export class Label3DHandler {
         Session.label3dList,
         item.index,
         Session.label3dList.currentCategory,
+        this._tracking,
         new Vector3D().fromThree(center),
         new Vector3D().fromThree(rotation),
         Object.keys(state.task.sensors).map((key) => Number(key))

@@ -40,18 +40,20 @@ export function makeDrawableLabel3D(
  * @param sensors
  * @param center
  * @param orientation
+ * @param tracking
  */
 export function createPlaneLabel(
   labelList: Label3DList,
   itemIndex: number,
   category: number,
+  tracking: boolean,
   center?: Vector3D,
   orientation?: Vector3D,
   sensors?: number[]
 ): void {
   const plane = new Plane3D(labelList)
   plane.init(itemIndex, category, center, orientation, sensors)
-  commitLabels([plane], false)
+  commitLabels([plane], tracking)
 }
 /**
  * Commit new Box3D label to state
