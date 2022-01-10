@@ -32,8 +32,6 @@ import { commitLabels } from "../states"
 import { Label3D } from "./label3d"
 import { alert } from "../../common/alert"
 import { Severity } from "../../types/common"
-import { addPlaneLabel } from "../../action/plane3d"
-import { addBox3dLabel } from "../../action/box3d"
 import { Plane3D } from "./plane3d"
 import { Span3D } from "./box_span/span3d"
 import {
@@ -41,6 +39,7 @@ import {
   calculatePlaneRotation,
   estimateGroundPlane
 } from "../../common/util"
+import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 
 /**
  * Handles user interactions with labels
@@ -308,7 +307,7 @@ export class Label3DHandler {
       Session.dispatch(deactivateSpan())
     }
 
-    addBox3dLabel(
+    createBox3dLabel(
       Session.label3dList,
       this._selectedItemIndex,
       this._sensorIds,
@@ -339,7 +338,7 @@ export class Label3DHandler {
       }
     } else {
       const center = new Vector3D(0, 2, 10)
-      addPlaneLabel(
+      createPlaneLabel(
         Session.label3dList,
         this._selectedItemIndex,
         Session.label3dList.currentCategory,
@@ -379,7 +378,7 @@ export class Label3DHandler {
       const center = calculatePlaneCenter(estimatedPlane, target.toThree())
       const baseNormal = new THREE.Vector3(0, 0, 1)
       const rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
-      addPlaneLabel(
+      createPlaneLabel(
         Session.label3dList,
         item.index,
         Session.label3dList.currentCategory,

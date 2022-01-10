@@ -4,7 +4,9 @@ import * as THREE from "three"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
 import { makeState } from "../../functional/states"
+import { Vector3D } from "../../math/vector3d"
 import { IdType, ShapeType, State } from "../../types/state"
+import { commitLabels } from "../states"
 import { Box3D } from "./box3d"
 import { TransformationControl } from "./control/transformation_control"
 import { Label3D, labelTypeFromString } from "./label3d"
@@ -28,6 +30,54 @@ export function makeDrawableLabel3D(
       return new Plane3D(labelList)
   }
   return null
+}
+/**
+ * Commit new plane 3D label to state
+ *
+ * @param labelList
+ * @param itemIndex
+ * @param category
+ * @param sensors
+ * @param center
+ * @param orientation
+ */
+export function createPlaneLabel(
+  labelList: Label3DList,
+  itemIndex: number,
+  category: number,
+  center?: Vector3D,
+  orientation?: Vector3D,
+  sensors?: number[]
+): void {
+  const plane = new Plane3D(labelList)
+  plane.init(itemIndex, category, center, orientation, sensors)
+  commitLabels([plane], false)
+}
+/**
+ * Commit new Box3D label to state
+ *
+ * @param labelList
+ * @param itemIndex
+ * @param sensors
+ * @param category
+ * @param center
+ * @param dimension
+ * @param orientation
+ * @param tracking
+ */
+export function createBox3dLabel(
+  labelList: Label3DList,
+  itemIndex: number,
+  sensors: number[],
+  category: number,
+  center: Vector3D,
+  dimension: Vector3D,
+  orientation: Vector3D,
+  tracking: boolean
+): void {
+  const box = new Box3D(labelList)
+  box.init(itemIndex, category, center, orientation, dimension, sensors)
+  commitLabels([box], tracking)
 }
 
 /**
