@@ -368,7 +368,7 @@ export class Label3DHandler {
     if (isLoaded && !hasGroundPlane) {
       // estimate ground plane
       let center = new THREE.Vector3(0, 2, 10)
-      let rotation = new THREE.Vector3(-Math.PI / 2, 0, 0)
+      let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
       if (isPointCloud) {
         const pointCloud = Array.from(
           new THREE.Points(
