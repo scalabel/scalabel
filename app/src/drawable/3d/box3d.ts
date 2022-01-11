@@ -76,10 +76,6 @@ export class Box3D extends Label3D {
       this._shape.rotation.copy(orientation.toThreeEuler())
     }
 
-    if (orientation !== null && orientation !== undefined) {
-      this._shape.rotation.copy(orientation.toThreeEuler())
-    }
-
     if (dimension !== null && dimension !== undefined) {
       this._shape.scale.copy(dimension.toThree())
     }

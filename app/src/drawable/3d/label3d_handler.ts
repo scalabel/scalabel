@@ -22,6 +22,7 @@ import {
 import { makePointCloudViewerConfig, makeSensor } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import {
+  Image3DViewerConfigType,
   INVALID_ID,
   PointCloudViewerConfigType,
   SensorType,
@@ -227,19 +228,17 @@ export class Label3DHandler {
   /**
    * Get axes for viewer type. Returns axes in order: up, forward, right
    */
-  private getAxes(): [Vector3D, Vector3D, Vector3D] {
-    if (this._viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
-      return [
-        new Vector3D(0, -1, 0),
-        new Vector3D(0, 0, 1),
-        new Vector3D(1, 0, 0)
-      ]
-    } else {
-      return [
-        new Vector3D(0, 0, 1),
-        new Vector3D(1, 0, 0),
-        new Vector3D(0, -1, 0)
-      ]
+  private getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
+    const config = this._viewerConfig as
+      | PointCloudViewerConfigType
+      | Image3DViewerConfigType
+    const forward = new Vector3D().fromState(config.target).normalize()
+    const up = new Vector3D().fromState(config.verticalAxis).normalize()
+    const left = up.clone().cross(forward).normalize()
+    return {
+      up,
+      forward,
+      left
     }
   }
 
@@ -253,23 +252,21 @@ export class Label3DHandler {
     boxSpan: Span3D,
     groundPlane: Plane3D
   ): THREE.Vector3 {
-    const [up, _forward, right] = this.getAxes()
+    const { up, left } = this.getAxes()
     const rotation = groundPlane.orientation.clone()
-    if (this._viewerConfig.type === ViewerConfigTypeName.IMAGE_3D) {
-      rotation.multiply(
-        new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0))
-      )
-    }
-    const rightOnPlane = right.toThree().applyQuaternion(rotation)
-    const yaw =
-      rightOnPlane.angleTo(boxSpan.v23.clone().normalize()) - Math.PI / 2
+    const defaultPlaneForward = new THREE.Vector3(0, 0, 1)
+    const planePitch = up.toThree().angleTo(defaultPlaneForward)
+    const planePitchEuler = new THREE.Euler(planePitch, 0, 0)
+    rotation.multiply(new THREE.Quaternion().setFromEuler(planePitchEuler))
 
-    const yawRotation = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler().setFromVector3(
-        new Vector3D().copy(up).abs().toThree().multiplyScalar(yaw)
-      )
-    )
+    const leftOnPlane = left.toThree().applyQuaternion(rotation)
+    const sideVec = boxSpan.sideEdge.clone().normalize()
+    const yaw = Math.PI / 2 - leftOnPlane.angleTo(sideVec)
+    const yawVec = up.clone().abs().toThree().multiplyScalar(yaw)
+    const yawEuler = new THREE.Euler().setFromVector3(yawVec)
+    const yawRotation = new THREE.Quaternion().setFromEuler(yawEuler)
     rotation.multiply(yawRotation)
+
     return new THREE.Euler().setFromQuaternion(rotation).toVector3()
   }
 
@@ -300,9 +297,9 @@ export class Label3DHandler {
       this._selectedItemIndex
     )
     if (boxSpan?.complete === true && groundPlane !== null) {
-      const [up, forward, right] = this.getAxes()
+      const { up, forward, left } = this.getAxes()
       center.fromThree(boxSpan.center)
-      dimension.fromThree(boxSpan.dimensions(up, forward, right))
+      dimension.fromThree(boxSpan.dimensions(up, forward, left))
       orientation.fromThree(this.getBoxSpanRotation(boxSpan, groundPlane))
       Session.dispatch(deactivateSpan())
     }

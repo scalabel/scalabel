@@ -71,12 +71,12 @@ export class SpanCuboid3D {
    *
    * @param up
    * @param forward
-   * @param right
+   * @param left
    * */
   public dimensions(
     up: Vector3D,
     forward: Vector3D,
-    right: Vector3D
+    left: Vector3D
   ): THREE.Vector3 {
     const [v1, v2, v3, v4] = [this._p1, this._p2, this._p3, this._p4].map((p) =>
       p.toVector3D()
@@ -84,13 +84,9 @@ export class SpanCuboid3D {
     const d12 = v1.distanceTo(v2)
     const d23 = v2.distanceTo(v3)
     const d34 = v3.distanceTo(v4)
-    const width = new Vector3D().copy(right).abs().toThree().multiplyScalar(d12)
-    const length = new Vector3D()
-      .copy(forward)
-      .abs()
-      .toThree()
-      .multiplyScalar(d23)
-    const height = new Vector3D().copy(up).abs().toThree().multiplyScalar(d34)
+    const width = left.clone().abs().toThree().multiplyScalar(d12)
+    const length = forward.clone().abs().toThree().multiplyScalar(d23)
+    const height = up.clone().abs().toThree().multiplyScalar(d34)
     return width.add(length).add(height)
   }
 

@@ -183,15 +183,15 @@ export class Span3D {
    *
    * @param up
    * @param forward
-   * @param right
+   * @param left
    * */
   public dimensions(
     up: Vector3D,
     forward: Vector3D,
-    right: Vector3D
+    left: Vector3D
   ): THREE.Vector3 {
     if (this._cuboid !== null) {
-      return this._cuboid.dimensions(up, forward, right)
+      return this._cuboid.dimensions(up, forward, left)
     }
 
     throw new Error("Span3D: cannot get cuboid dimensions")
@@ -200,7 +200,7 @@ export class Span3D {
   /**
    * Get side line
    */
-  public get v23(): THREE.Vector3 {
+  public get sideEdge(): THREE.Vector3 {
     if (this._points.length < 3) {
       throw new Error("Point 3 has not been set yet")
     }
