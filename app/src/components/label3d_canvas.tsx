@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { DataType, LabelTypeName, ViewerConfigTypeName } from "../const/common"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
@@ -237,14 +237,14 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private updateGroundPlane(): void {
     const selectedItem = this.state.user.select.item
     const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
-    const sensorIdx = this.state.user.viewerConfigs[this.props.id].sensor
-    const sensor = this.state.task.sensors[sensorIdx]
-    if (sensor.type === DataType.POINT_CLOUD) {
-      if (groundPlane === null) {
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    if (groundPlane === null) {
+      if (
+        viewerConfig.type === ViewerConfigTypeName.POINT_CLOUD ||
+        viewerConfig.type === ViewerConfigTypeName.IMAGE_3D
+      ) {
         // Estimate new ground plane
-        this._labelHandler.estimateGroundPlane(selectedItem)
-      } else {
-        // this._labelHandler.updateGroundPlaneCenter()
+        this._labelHandler.createGroundPlane(selectedItem)
       }
     }
   }
