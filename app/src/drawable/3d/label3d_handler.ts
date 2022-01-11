@@ -307,16 +307,17 @@ export class Label3DHandler {
       Session.dispatch(deactivateSpan())
     }
 
-    createBox3dLabel(
+    const label = createBox3dLabel(
       Session.label3dList,
       this._selectedItemIndex,
       this._sensorIds,
       Session.label3dList.currentCategory,
       center,
       dimension,
-      orientation,
-      this._tracking
+      orientation
     )
+    commitLabels([label], this._tracking)
+
     alert(Severity.SUCCESS, "Box successfully created")
   }
 
@@ -338,15 +339,15 @@ export class Label3DHandler {
       }
     } else {
       const center = new Vector3D(0, 2, 10)
-      createPlaneLabel(
+      const label = createPlaneLabel(
         Session.label3dList,
         this._selectedItemIndex,
         Session.label3dList.currentCategory,
-        this._tracking,
         center,
         undefined,
         this._sensorIds
       )
+      commitLabels([label], this._tracking)
     }
   }
 
@@ -379,15 +380,15 @@ export class Label3DHandler {
       const center = calculatePlaneCenter(estimatedPlane, target.toThree())
       const baseNormal = new THREE.Vector3(0, 0, 1)
       const rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
-      createPlaneLabel(
+      const label = createPlaneLabel(
         Session.label3dList,
         item.index,
         Session.label3dList.currentCategory,
-        this._tracking,
         new Vector3D().fromThree(center),
         new Vector3D().fromThree(rotation),
         Object.keys(state.task.sensors).map((key) => Number(key))
       )
+      commitLabels([label], this._tracking)
     }
   }
 
