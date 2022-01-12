@@ -228,6 +228,8 @@ export type ActivateSpanAction = BaseAction
 
 export type DeactivateSpanAction = BaseAction
 
+export type UpdateSpanPoint = BaseAction
+
 export type RegisterSpanPointAction = BaseAction
 
 export type ResetSpanAction = BaseAction
