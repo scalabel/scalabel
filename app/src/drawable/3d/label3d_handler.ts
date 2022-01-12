@@ -262,7 +262,7 @@ export class Label3DHandler {
     const leftOnPlane = left.toThree().applyQuaternion(rotation)
     const sideVec = boxSpan.sideEdge.clone().normalize()
     const yaw = Math.PI / 2 - leftOnPlane.angleTo(sideVec)
-    const yawVec = up.clone().abs().toThree().multiplyScalar(yaw)
+    const yawVec = up.clone().toThree().multiplyScalar(yaw)
     const yawEuler = new THREE.Euler().setFromVector3(yawVec)
     const yawRotation = new THREE.Quaternion().setFromEuler(yawEuler)
     rotation.multiply(yawRotation)
