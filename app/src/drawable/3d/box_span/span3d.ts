@@ -18,6 +18,8 @@ export class Span3D {
   private _pTmp: SpanPoint3D
   /** Line between first and second point */
   private _line: SpanLine3D | null
+  /** Rectangle formed by first three points */
+  private _rect: SpanRect3D | null
   /** Cuboid formed by the four points */
   private _cuboid: SpanCuboid3D | null
   /** Whether span box is complete */
@@ -28,6 +30,7 @@ export class Span3D {
     this._points = []
     this._pTmp = new SpanPoint3D(new Vector3D(0, 0, 0))
     this._line = null
+    this._rect = null
     this._cuboid = null
     this._complete = false
   }
@@ -49,6 +52,7 @@ export class Span3D {
         break
       case 1: {
         // render line between first point and temp point
+        this._line?.removeFromScene(scene)
         const line = new SpanLine3D(this._points[0], this._pTmp)
         this._line = line
         line.render(scene)
@@ -56,16 +60,19 @@ export class Span3D {
       }
       case 2: {
         // render plane formed by first, second point and temp point
-        const plane = new SpanRect3D(
+        this._rect?.removeFromScene(scene)
+        const rect = new SpanRect3D(
           this._points[0],
           this._points[1],
           this._pTmp
         )
-        plane.render(scene)
+        this._rect = rect
+        rect.render(scene)
         break
       }
       case 3: {
         // render cuboid formed by first, second, third point and temp point
+        this._cuboid?.removeFromScene(scene)
         const cuboid = new SpanCuboid3D(
           this._points[0],
           this._points[1],
@@ -95,6 +102,9 @@ export class Span3D {
     plane: THREE.Plane,
     camera: THREE.Camera
   ): this {
+    if (this._pTmp === null) {
+      this._pTmp = new SpanPoint3D(new Vector3D())
+    }
     const projection = projectionFromNDC(coords.x, coords.y, camera)
     const point3d = new THREE.Vector3()
     projection.intersectPlane(plane, point3d)
@@ -104,7 +114,7 @@ export class Span3D {
         // make second point orthogonal to line
         if (this._line !== null) {
           const newCoords = this._line.alignPointToNormal(point, plane)
-          this._pTmp = new SpanPoint3D(newCoords)
+          this._pTmp.update(newCoords)
         }
         break
       case 3: {
@@ -120,13 +130,11 @@ export class Span3D {
         const normal = plane.normal.clone()
         normal.setLength(distance)
         const newPoint = normal.add(this._points[2].toVector3D().toThree())
-        this._pTmp = new SpanPoint3D(
-          new Vector3D(newPoint.x, newPoint.y, newPoint.z)
-        )
+        this._pTmp.update(new Vector3D(newPoint.x, newPoint.y, newPoint.z))
         break
       }
       default:
-        this._pTmp = new SpanPoint3D(point)
+        this._pTmp.update(point)
     }
     return this
   }
@@ -152,6 +160,7 @@ export class Span3D {
         }
     }
     this._points.push(this._pTmp)
+    this._pTmp = new SpanPoint3D(new Vector3D())
     return this
   }
 
