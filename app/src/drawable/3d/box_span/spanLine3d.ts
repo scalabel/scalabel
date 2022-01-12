@@ -15,6 +15,8 @@ export class SpanLine3D {
   private readonly _color: number
   /** line width */
   private readonly _lineWidth: number
+  /** line object */
+  private _line: THREE.Object3D | null
 
   /**
    * Constructor
@@ -27,6 +29,18 @@ export class SpanLine3D {
     this._p2 = p2
     this._color = 0x00ff00
     this._lineWidth = 0.1
+    this._line = null
+  }
+
+  /**
+   * Remove line from Three.js scene
+   *
+   * @param scene
+   */
+  public removeFromScene(scene: THREE.Scene): void {
+    if (this._line !== null) {
+      scene.remove(this._line)
+    }
   }
 
   /**
@@ -46,8 +60,8 @@ export class SpanLine3D {
       color: this._color,
       linewidth: this._lineWidth
     })
-    const line = new THREE.Line(geometry, material)
-    scene.add(line)
+    this._line = new THREE.Line(geometry, material)
+    scene.add(this._line)
   }
 
   /**

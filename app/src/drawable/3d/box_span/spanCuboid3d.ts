@@ -19,6 +19,12 @@ export class SpanCuboid3D {
   private readonly _p4: SpanPoint3D
   /** cuboid center */
   private _center: THREE.Vector3
+  /** lines in the rect */
+  private _lines: SpanLine3D[] | null
+  /** bottom face rectangle */
+  private _bottomFace: SpanRect3D | null
+  /** top face rectangle */
+  private _topFace: SpanRect3D | null
 
   /**
    * Constructor
@@ -39,6 +45,26 @@ export class SpanCuboid3D {
     this._p3 = p3
     this._p4 = p4
     this._center = new THREE.Vector3(0, 0, 0)
+    this._lines = null
+    this._bottomFace = null
+    this._topFace = null
+  }
+
+  /**
+   * Remove rect from Three.js scene
+   *
+   * @param scene
+   */
+  public removeFromScene(scene: THREE.Scene): void {
+    if (this._lines !== null) {
+      this._lines.forEach((line) => line.removeFromScene(scene))
+    }
+    if (this._bottomFace !== null) {
+      this._bottomFace.removeFromScene(scene)
+    }
+    if (this._topFace !== null) {
+      this._topFace.removeFromScene(scene)
+    }
   }
 
   /**
@@ -55,6 +81,10 @@ export class SpanCuboid3D {
     const topFacePoints = topFace.points
     this.calcCenter([...bottomFacePoints, ...topFacePoints])
     const newLines = this.connectingLines(bottomFacePoints, topFacePoints)
+
+    this._lines = newLines
+    this._bottomFace = bottomFace
+    this._topFace = topFace
 
     bottomFace.render(scene)
     topFace.render(scene)
