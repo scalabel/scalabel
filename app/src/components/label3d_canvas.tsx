@@ -6,7 +6,7 @@ import * as THREE from "three"
 
 import Session from "../common/session"
 import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
-import { registerSpanPoint } from "../action/span3d"
+import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { Image3DViewerConfigType, State } from "../types/state"
@@ -351,6 +351,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
           plane,
           this.camera
         )
+        Session.dispatch(updateSpanPoint())
       }
     } else {
       this.setCursor("default")

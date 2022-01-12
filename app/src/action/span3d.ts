@@ -22,6 +22,11 @@ export function registerSpanPoint(): actionTypes.RegisterSpanPointAction {
   return makeBaseAction(actionConsts.REGISTER_SPAN_POINT)
 }
 
+/** Register updated span point */
+export function updateSpanPoint(): actionTypes.UpdateSpanPoint {
+  return makeBaseAction(actionConsts.UPDATE_SPAN_POINT)
+}
+
 /** Reset span box generation */
 export function resetSpan(): actionTypes.ResetSpanAction {
   return makeBaseAction(actionConsts.RESET_SPAN)
