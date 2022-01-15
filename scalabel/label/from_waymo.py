@@ -392,6 +392,7 @@ def parse_frame(
         FrameGroup(
             name=frame_name,
             videoName=sequence,
+            frameIndex=frame_id,
             url=url,
             extrinsics=lidar2global,
             frames=frame_names,
@@ -424,7 +425,7 @@ def parse_record(
         frames.extend(frame)
         groups.extend(group)
 
-    return frames, group
+    return frames, groups
 
 
 def from_waymo(
