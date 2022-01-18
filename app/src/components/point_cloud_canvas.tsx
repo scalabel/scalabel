@@ -3,9 +3,12 @@ import createStyles from "@material-ui/core/styles/createStyles"
 import * as React from "react"
 import { connect } from "react-redux"
 import * as THREE from "three"
+import { Sensor } from "../common/sensor"
 
 import Session from "../common/session"
+import { DataType, ItemTypeName } from "../const/common"
 import {
+  getMinSensorIds,
   isCurrentFrameLoaded,
   isCurrentItemLoaded
 } from "../functional/state_util"
@@ -43,11 +46,14 @@ interface Props extends DrawableProps {
 
 const vertexShader = `
     varying vec3 worldPosition;
+    attribute vec3 setColor;
+    varying vec3 setColor2;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
       gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
+      setColor2 = setColor;
     }
   `
 const fragmentShader = `
@@ -58,6 +64,8 @@ const fragmentShader = `
 
     uniform mat4 toSelectionFrame;
     uniform vec3 selectionSize;
+
+    varying vec3 setColor2;
 
     vec3 getHeatMapColor(float height) {
       float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
@@ -88,7 +96,8 @@ const fragmentShader = `
 
     void main() {
       float alpha = 0.5;
-      vec3 color = getHeatMapColor(worldPosition.z);
+      // vec3 color = getHeatMapColor(worldPosition.z);
+      vec3 color = setColor2;
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
@@ -129,6 +138,12 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private pointCloud: THREE.Points
   /** drawable callback */
   private readonly _drawableUpdateCallback: () => void
+  /** have points been transformed */
+  private readonly pointsTransformed: boolean
+  /** context of image canvas */
+  private _hiddenContext: CanvasRenderingContext2D | null
+  /** canvas for drawing image & getting colors */
+  private _hiddenCanvas: HTMLCanvasElement
 
   /**
    * Constructor, ons subscription to store
@@ -142,6 +157,9 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.camera = props.camera
     this.target = new THREE.AxesHelper(0.5)
     this.scene.add(this.target)
+    this.pointsTransformed = false
+    this._hiddenContext = null
+    this._hiddenCanvas = document.createElement("canvas")
 
     this.canvas = null
     this.display = null
@@ -248,13 +266,110 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     const item = select.item
     const sensor = this.state.user.viewerConfigs[this.props.id].sensor
 
-    this.pointCloud.geometry = Session.pointClouds[item][sensor]
-    this.pointCloud.layers.enableAll()
-
     const config = state.user.viewerConfigs[
       this.props.id
     ] as PointCloudViewerConfigType
     this.target.position.set(config.target.x, config.target.y, config.target.z)
+
+    if (Session.pointClouds[item][sensor] !== undefined) {
+      this.pointCloud.geometry = Session.pointClouds[item][sensor].clone()
+      this.pointCloud.layers.enableAll()
+
+      const itemType = this.state.task.config.itemType
+      if (itemType === ItemTypeName.IMAGE) {
+        const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
+        const minSensorIds = getMinSensorIds(this.state)
+        const imageSensorId = minSensorIds[DataType.IMAGE]
+        const image = Session.images[item][imageSensorId]
+        if (this._hiddenContext === null) {
+          this._hiddenCanvas.width = image.width
+          this._hiddenCanvas.height = image.height
+          this._hiddenContext = this._hiddenCanvas.getContext("2d")
+        }
+        if (this._hiddenContext !== null) {
+          this._hiddenContext.drawImage(image, 0, 0)
+          this.transformPoints(sensorId)
+          this.colorPoints()
+        }
+      }
+    }
+  }
+
+  /**
+   * Set color for points based on image
+   */
+  private colorPoints(): void {
+    const minSensorIds = getMinSensorIds(this.state)
+    const sensorId = minSensorIds[DataType.IMAGE]
+    const sensorType = this.state.task.sensors[sensorId]
+    const item = this.state.user.select.item
+    const image = Session.images[item][sensorId]
+    const sensor = Sensor.fromSensorType(sensorType, image)
+    if (sensor.hasIntrinsics()) {
+      const geometry = this.pointCloud.geometry
+      const points = Array.from(geometry.getAttribute("position").array)
+      const colors: number[] = []
+      for (let i = 0; i < points.length; i += 3) {
+        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+        const pixel = sensor.project(point)
+        pixel.divideScalar(pixel.z)
+        let color = new THREE.Vector3(0, 0, 1)
+        if (
+          point.z > 0 &&
+          this._hiddenContext !== null &&
+          pixel.x < 1 &&
+          pixel.x > 0 &&
+          pixel.y < 1 &&
+          pixel.y > 0
+        ) {
+          const x = pixel.x * image.width
+          const y = pixel.y * image.height
+          const rgb = this._hiddenContext.getImageData(x, y, 1, 1).data
+          color = new THREE.Vector3(rgb[0], rgb[1], rgb[2])
+          color.divideScalar(255.0)
+        }
+        colors.push(color.x, color.y, color.z)
+      }
+      geometry.setAttribute(
+        "setColor",
+        new THREE.Float32BufferAttribute(colors, 3)
+      )
+    }
+  }
+
+  /**
+   * Transform points with sensor extrinsics
+   *
+   * @param sensorId
+   */
+  private transformPoints(sensorId: number): void {
+    const sensorType = this.state.task.sensors[sensorId]
+    const sensor = Sensor.fromSensorType(sensorType)
+    if (
+      !this.pointsTransformed &&
+      sensor.hasExtrinsics() &&
+      this.pointCloud.geometry !== undefined
+    ) {
+      const geometry = this.pointCloud.geometry
+      const points = Array.from(geometry.getAttribute("position").array)
+      const newPoints: number[] = []
+      const sizes: number[] = []
+      for (let i = 0; i < points.length; i += 3) {
+        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+        const newPoint = sensor.transform(point)
+        newPoints.push(newPoint.x, newPoint.y, newPoint.z)
+        sizes.push(1.5)
+      }
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(newPoints, 3)
+      )
+      geometry.setAttribute(
+        "size",
+        new THREE.BufferAttribute(new Float32Array(sizes), 1)
+      )
+      geometry.attributes.size.needsUpdate = true
+    }
   }
 
   /**

@@ -35,6 +35,8 @@ import Label3dCanvas from "./label3d_canvas"
 import PointCloudCanvas from "./point_cloud_canvas"
 import Tag3dCanvas from "./tag_3d_canvas"
 import { isCurrentItemLoaded } from "../functional/state_util"
+import { getMainSensor } from "../common/util"
+import { Sensor } from "../common/sensor"
 
 interface ClassType extends ViewerClassTypes {
   /** camera z lock */
@@ -130,6 +132,8 @@ class Viewer3D extends DrawableViewer<Props> {
   private _scrollTimer: ReturnType<typeof setTimeout> | null
   /** Whether the camera is being moved */
   private _movingCamera: boolean
+  /** Whether the camera has been transformed */
+  private cameraTransformed: boolean
 
   /**
    * Constructor
@@ -145,6 +149,7 @@ class Viewer3D extends DrawableViewer<Props> {
     this._pointCloud = null
     this._scrollTimer = null
     this._movingCamera = false
+    this.cameraTransformed = false
   }
 
   /** Called when component updates */
@@ -740,6 +745,7 @@ class Viewer3D extends DrawableViewer<Props> {
     }
 
     this._target.set(config.target.x, config.target.y, config.target.z)
+    const mainSensor = getMainSensor(this.state)
 
     if (
       lockedToSelection(config) &&
@@ -786,12 +792,20 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.up = up
       this._camera.lookAt(target)
     } else {
-      this._camera.up.x = config.verticalAxis.x
-      this._camera.up.y = config.verticalAxis.y
-      this._camera.up.z = config.verticalAxis.z
+      this._camera.up.copy(mainSensor.up)
       this._camera.position.x = config.position.x
       this._camera.position.y = config.position.y
       this._camera.position.z = config.position.z
+
+      if (
+        this.state.task.config.itemType === types.ItemTypeName.IMAGE &&
+        !this.cameraTransformed
+      ) {
+        const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
+        this.transformCamera(sensorId)
+        this.commitCamera()
+        this.cameraTransformed = true
+      }
       this._camera.lookAt(this._target)
     }
 
@@ -804,6 +818,20 @@ class Viewer3D extends DrawableViewer<Props> {
         this.forceUpdate()
       }
     }
+  }
+
+  /**
+   * Transform points with sensor extrinsics
+   *
+   * @param sensorId
+   */
+  private transformCamera(sensorId: number): void {
+    const sensorType = this.state.task.sensors[sensorId]
+    const sensor = Sensor.fromSensorType(sensorType)
+
+    this._target.copy(sensor.transform(this._target))
+    this._camera.position.copy(sensor.transform(this._camera.position))
+    this._camera.up.copy(sensor.transform(this._camera.up))
   }
 
   /**
@@ -883,11 +911,13 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.position.z
     )
 
-    offset.sub(target)
+    const sensor = getMainSensor(this.state)
+    const up = sensor.up
 
+    offset.sub(target)
     // Rotate so that positive y-axis is vertical
     const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, 1),
+      up,
       new THREE.Vector3(0, 1, 0)
     )
     offset.applyQuaternion(rotVertQuat)
@@ -920,6 +950,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
     this._camera.position.copy(offset)
     this._camera.lookAt(this._target)
+    this._camera.up.copy(up)
   }
 
   /**

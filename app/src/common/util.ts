@@ -4,7 +4,10 @@ import {
   LabelTypeName,
   ViewerConfigTypeName
 } from "../const/common"
+import { getMinSensorIds } from "../functional/state_util"
 import { ActionPacketType } from "../types/message"
+import { State } from "../types/state"
+import { Sensor } from "./sensor"
 
 /**
  * Handle invalid page request
@@ -146,4 +149,17 @@ export function doesPacketTriggerModel(
     }
   }
   return false
+}
+
+/**
+ * Get main sensor object from state
+ *
+ * @param state
+ */
+export function getMainSensor(state: State): Sensor {
+  const itemType = state.task.config.itemType
+  const minSensorIds = getMinSensorIds(state)
+  const mainSensor = state.task.sensors[minSensorIds[itemType]]
+  const sensor = Sensor.fromSensorType(mainSensor)
+  return sensor
 }

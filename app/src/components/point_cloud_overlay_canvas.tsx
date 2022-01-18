@@ -17,6 +17,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { ViewerConfigTypeName } from "../const/common"
+import { Sensor } from "../common/sensor"
 
 const styles = (): StyleRules<"point_cloud_canvas", {}> =>
   createStyles({
@@ -263,51 +264,32 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
    * Transform points with sensor extrinsics
    */
   private transformPoints(): void {
-    const sensor = this.state.task.sensors[this.props.sensor]
-    const extrinsics = sensor.extrinsics
+    const sensorType = this.state.task.sensors[this.props.sensor]
+    const sensor = Sensor.fromSensorType(sensorType)
     if (
       !this.transformedPoints &&
-      extrinsics !== undefined &&
+      sensor.hasExtrinsics() &&
       this.pointCloud.geometry !== undefined
     ) {
       const geometry = this.pointCloud.geometry
-      const rawPoints = Array.from(geometry.getAttribute("position").array)
-      const points: THREE.Vector3[] = []
-      for (let i = 0; i < rawPoints.length; i += 3) {
-        points.push(
-          new THREE.Vector3(rawPoints[i], rawPoints[i + 1], rawPoints[i + 2])
-        )
-      }
-      const rotation4 = new THREE.Matrix4().makeRotationFromEuler(
-        new THREE.Euler(
-          -extrinsics.rotation.x,
-          -extrinsics.rotation.y,
-          -extrinsics.rotation.z
-        )
-      )
-      const position = new THREE.Vector3(
-        extrinsics.translation.x,
-        extrinsics.translation.y,
-        extrinsics.translation.z
-      )
-      position.applyMatrix4(rotation4).multiplyScalar(-1)
-      rotation4.setPosition(position)
-      const newRawPoints: number[] = []
-      const sizes = new Float32Array(points.length)
-      for (let i = 0; i < points.length; i += 1) {
-        const point = points[i]
-        point.applyMatrix4(rotation4)
-        newRawPoints.push(point.x)
-        newRawPoints.push(point.y)
-        newRawPoints.push(point.z)
-        sizes[i] = 1.5
+      const points = Array.from(geometry.getAttribute("position").array)
+      const newPoints: number[] = []
+      const sizes: number[] = []
+      for (let i = 0; i < points.length; i += 3) {
+        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+        const newPoint = sensor.transform(point)
+        newPoints.push(newPoint.x, newPoint.y, newPoint.z)
+        sizes.push(1.5)
       }
       geometry.setAttribute(
         "position",
-        new THREE.Float32BufferAttribute(newRawPoints, 3)
+        new THREE.Float32BufferAttribute(newPoints, 3)
       )
       this.transformedPoints = true
-      geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1))
+      geometry.setAttribute(
+        "size",
+        new THREE.BufferAttribute(new Float32Array(sizes), 1)
+      )
       geometry.attributes.size.needsUpdate = true
     }
   }
