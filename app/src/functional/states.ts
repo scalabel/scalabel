@@ -6,6 +6,7 @@ import * as types from "../const/common"
 import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
+  ColorSchemeType,
   ConfigType,
   ConnectionStatus,
   CubeType,
@@ -328,7 +329,8 @@ export function makePointCloudViewerConfig(
     pane,
     synchronized: false,
     hideLabels: false,
-    cameraRotateDir: false
+    cameraRotateDir: false,
+    colorScheme: ColorSchemeType.HEIGHT
   }
 }
 

@@ -6,13 +6,18 @@ import * as THREE from "three"
 import { Sensor } from "../common/sensor"
 
 import Session from "../common/session"
+import { getMainSensor } from "../common/util"
 import { DataType, ItemTypeName } from "../const/common"
 import {
   getMinSensorIds,
   isCurrentFrameLoaded,
   isCurrentItemLoaded
 } from "../functional/state_util"
-import { PointCloudViewerConfigType, State } from "../types/state"
+import {
+  ColorSchemeType,
+  PointCloudViewerConfigType,
+  State
+} from "../types/state"
 import {
   DrawableCanvas,
   DrawableProps,
@@ -138,12 +143,14 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private pointCloud: THREE.Points
   /** drawable callback */
   private readonly _drawableUpdateCallback: () => void
-  /** have points been transformed */
-  private readonly pointsTransformed: boolean
+  /** have points been set or transformed */
+  private _pointsUpdated: boolean
   /** context of image canvas */
   private _hiddenContext: CanvasRenderingContext2D | null
   /** canvas for drawing image & getting colors */
   private _hiddenCanvas: HTMLCanvasElement
+  /** point cloud color scheme */
+  private _colorScheme: ColorSchemeType | null
 
   /**
    * Constructor, ons subscription to store
@@ -157,9 +164,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.camera = props.camera
     this.target = new THREE.AxesHelper(0.5)
     this.scene.add(this.target)
-    this.pointsTransformed = false
+    this._pointsUpdated = false
     this._hiddenContext = null
     this._hiddenCanvas = document.createElement("canvas")
+    this._colorScheme = null
 
     this.canvas = null
     this.display = null
@@ -271,7 +279,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     ] as PointCloudViewerConfigType
     this.target.position.set(config.target.x, config.target.y, config.target.z)
 
-    if (Session.pointClouds[item][sensor] !== undefined) {
+    if (
+      Session.pointClouds[item][sensor] !== undefined &&
+      !this._pointsUpdated
+    ) {
       this.pointCloud.geometry = Session.pointClouds[item][sensor].clone()
       this.pointCloud.layers.enableAll()
 
@@ -289,16 +300,109 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         if (this._hiddenContext !== null) {
           this._hiddenContext.drawImage(image, 0, 0)
           this.transformPoints(sensorId)
-          this.colorPoints()
         }
       }
+      this._pointsUpdated = true
     }
+    if (this._pointsUpdated && this._colorScheme !== config.colorScheme) {
+      this._colorScheme = ColorSchemeType.HEIGHT
+      this.updatePointCloudColors()
+    }
+  }
+
+  /**
+   * Update point cloud color scheme
+   */
+  private updatePointCloudColors(): void {
+    if (this._colorScheme === null) {
+      return
+    }
+    let colors: number[] = []
+    switch (this._colorScheme) {
+      case ColorSchemeType.IMAGE:
+        colors = this.getImageColors()
+        break
+      case ColorSchemeType.DEPTH:
+        colors = this.getDepthColors()
+        break
+      case ColorSchemeType.HEIGHT:
+        colors = this.getHeightColors()
+    }
+    const geometry = this.pointCloud.geometry
+    geometry.setAttribute(
+      "setColor",
+      new THREE.Float32BufferAttribute(colors, 3)
+    )
+  }
+
+  /**
+   * Set color for points based on depth
+   */
+  private getDepthColors(): number[] {
+    const geometry = this.pointCloud.geometry
+    const points = Array.from(geometry.getAttribute("position").array)
+    const depths: number[] = []
+    for (let i = 0; i < points.length; i += 3) {
+      const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+      const depth = point.length()
+      depths.push(depth)
+    }
+    const maxDepth = Math.max.apply(Math, depths)
+    const minDepth = Math.min.apply(Math, depths)
+    const colors: number[] = []
+    for (let i = 0; i < depths.length; i += 1) {
+      const depth = depths[i]
+      const hue = Math.max(0, 0.66 - (depth - minDepth) / (maxDepth - minDepth))
+      const color = new THREE.Color().setHSL(hue, 1.0, 0.5)
+      colors.push(color.r, color.g, color.b)
+    }
+    return colors
+  }
+
+  /**
+   * Set color for points based on height
+   */
+  private getHeightColors(): number[] {
+    const quantile = (arr: number[], q: number): number => {
+      const sorted = arr.sort((a, b) => a - b)
+      const pos = (sorted.length - 1) * q
+      const base = Math.floor(pos)
+      const rest = pos - base
+      if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base])
+      } else {
+        return sorted[base]
+      }
+    }
+    const mainSensor = getMainSensor(this.state)
+    const up = mainSensor.up.clone().normalize()
+    const geometry = this.pointCloud.geometry
+    const points = Array.from(geometry.getAttribute("position").array)
+    const heights: number[] = []
+    for (let i = 0; i < points.length; i += 3) {
+      const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+      const height = point.dot(up)
+      heights.push(height)
+    }
+    const maxHeight = quantile(heights, 0.95)
+    const minHeight = quantile(heights, 0.05)
+    const colors: number[] = []
+    for (let i = 0; i < heights.length; i += 1) {
+      const height = heights[i]
+      const hue = Math.min(
+        1.0,
+        Math.max(0.0, 0.66 - (height - minHeight) / (maxHeight - minHeight))
+      )
+      const color = new THREE.Color().setHSL(hue, 1.0, 0.5)
+      colors.push(color.r, color.g, color.b)
+    }
+    return colors
   }
 
   /**
    * Set color for points based on image
    */
-  private colorPoints(): void {
+  private getImageColors(): number[] {
     const minSensorIds = getMinSensorIds(this.state)
     const sensorId = minSensorIds[DataType.IMAGE]
     const sensorType = this.state.task.sensors[sensorId]
@@ -330,11 +434,9 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         }
         colors.push(color.x, color.y, color.z)
       }
-      geometry.setAttribute(
-        "setColor",
-        new THREE.Float32BufferAttribute(colors, 3)
-      )
+      return colors
     }
+    return []
   }
 
   /**
@@ -346,7 +448,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     const sensorType = this.state.task.sensors[sensorId]
     const sensor = Sensor.fromSensorType(sensorType)
     if (
-      !this.pointsTransformed &&
+      !this._pointsUpdated &&
       sensor.hasExtrinsics() &&
       this.pointCloud.geometry !== undefined
     ) {
