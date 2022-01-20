@@ -20,6 +20,8 @@ export class Sensor {
   private _projectionMatrix: THREE.Matrix4 | null
   /** Transformation matrix */
   private _transformationMatrix: THREE.Matrix4 | null
+  /** Inverse transformation matrix */
+  private _inverseTransformationMatrix: THREE.Matrix4 | null
   /** up direction for sensor coordinates */
   private readonly _up: THREE.Vector3
   /** forward direction for sensor coordinates */
@@ -50,6 +52,7 @@ export class Sensor {
     this._extrinsics = extrinsics ?? null
     this._projectionMatrix = null
     this._transformationMatrix = null
+    this._inverseTransformationMatrix = null
 
     if (image !== undefined) {
       this.calculateProjectionMatrix(image)
@@ -117,6 +120,7 @@ export class Sensor {
       position.applyMatrix4(matrix).multiplyScalar(-1)
       matrix.setPosition(position)
       this._transformationMatrix = matrix
+      this._inverseTransformationMatrix = matrix.clone().invert()
     }
   }
 
@@ -141,6 +145,51 @@ export class Sensor {
   public transform(v: THREE.Vector3): THREE.Vector3 {
     if (this._transformationMatrix !== null) {
       return v.clone().applyMatrix4(this._transformationMatrix)
+    } else {
+      return v
+    }
+  }
+
+  /**
+   * Transform from sensor to global coordinates using extrinsics
+   *
+   * @param v
+   */
+  public inverseTransform(v: THREE.Vector3): THREE.Vector3 {
+    if (this._inverseTransformationMatrix !== null) {
+      return v.clone().applyMatrix4(this._inverseTransformationMatrix)
+    } else {
+      return v
+    }
+  }
+
+  /**
+   * Rotate vector with extrinsic rotation
+   *
+   * @param v
+   */
+  public rotate(v: THREE.Vector3): THREE.Vector3 {
+    if (this._transformationMatrix !== null) {
+      const rotationMatrix = new THREE.Matrix4().extractRotation(
+        this._transformationMatrix
+      )
+      return v.clone().applyMatrix4(rotationMatrix)
+    } else {
+      return v
+    }
+  }
+
+  /**
+   * Inverse rotate vector with extrinsic rotation
+   *
+   * @param v
+   */
+  public inverseRotate(v: THREE.Vector3): THREE.Vector3 {
+    if (this._inverseTransformationMatrix !== null) {
+      const rotationMatrix = new THREE.Matrix4().extractRotation(
+        this._inverseTransformationMatrix
+      )
+      return v.clone().applyMatrix4(rotationMatrix)
     } else {
       return v
     }
