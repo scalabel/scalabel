@@ -373,7 +373,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
    */
   private getHeightColors(): number[] {
     const quantile = (arr: number[], q: number): number => {
-      const sorted = arr.sort((a, b) => a - b)
+      const sorted = [...arr].sort((a, b) => a - b)
       const pos = (sorted.length - 1) * q
       const base = Math.floor(pos)
       const rest = pos - base

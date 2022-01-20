@@ -145,7 +145,7 @@ class Image3DViewer extends Viewer2D {
    */
   protected getMenuComponents(): JSX.Element[] | [] {
     if (this._viewerConfig !== undefined) {
-      const components = super.getMenuComponents()
+      let components = super.getMenuComponents()
 
       const overlayButton = (
         <Tooltip
@@ -177,7 +177,13 @@ class Image3DViewer extends Viewer2D {
           </IconButton>
         </Tooltip>
       )
-      return [...components, overlayButton]
+      const sensorTypes = Object.values(this.state.task.sensors).map(
+        (s) => s.type
+      )
+      if (sensorTypes.includes(DataType.POINT_CLOUD)) {
+        components = [...components, overlayButton]
+      }
+      return components
     }
     return []
   }
