@@ -236,6 +236,10 @@ export interface Image3DViewerConfigType extends ImageViewerConfigType {
   pointCloudSensor: number
   /** whether to overlay point cloud */
   pointCloudOverlay: boolean
+  /** Viewing direction */
+  target: Vector3Type
+  /** Up direction of the camera */
+  verticalAxis: Vector3Type
 }
 
 export interface HomographyViewerConfigType extends Image3DViewerConfigType {
@@ -542,8 +546,6 @@ export interface Info3DType {
   boxSpan: Span3D | null
   /** Ground plane toggled */
   showGroundPlane: boolean
-  /** Ground plane */
-  groundPlane: number[] | null
 }
 
 /**

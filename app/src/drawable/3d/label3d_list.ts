@@ -4,6 +4,7 @@ import * as THREE from "three"
 import { policyFromString } from "../../common/track"
 import { LabelTypeName, TrackPolicyType } from "../../const/common"
 import { makeState } from "../../functional/states"
+import { Vector3D } from "../../math/vector3d"
 import { IdType, ShapeType, State } from "../../types/state"
 import { Box3D } from "./box3d"
 import { TransformationControl } from "./control/transformation_control"
@@ -28,6 +29,56 @@ export function makeDrawableLabel3D(
       return new Plane3D(labelList)
   }
   return null
+}
+
+/**
+ * Create and init new Plane3D
+ *
+ * @param labelList
+ * @param itemIndex
+ * @param category
+ * @param sensors
+ * @param center
+ * @param orientation
+ * @param tracking
+ */
+export function createPlaneLabel(
+  labelList: Label3DList,
+  itemIndex: number,
+  category: number,
+  center?: Vector3D,
+  orientation?: Vector3D,
+  sensors?: number[]
+): Plane3D {
+  const plane = new Plane3D(labelList)
+  plane.init(itemIndex, category, center, orientation, sensors)
+  return plane
+}
+
+/**
+ * Create and init new Box3D
+ *
+ * @param labelList
+ * @param itemIndex
+ * @param sensors
+ * @param category
+ * @param center
+ * @param dimension
+ * @param orientation
+ * @param tracking
+ */
+export function createBox3dLabel(
+  labelList: Label3DList,
+  itemIndex: number,
+  sensors: number[],
+  category: number,
+  center: Vector3D,
+  dimension: Vector3D,
+  orientation: Vector3D
+): Box3D {
+  const box = new Box3D(labelList)
+  box.init(itemIndex, category, center, orientation, dimension, sensors)
+  return box
 }
 
 /**
@@ -349,5 +400,18 @@ export class Label3DList {
     const label =
       item.labels[state.user.select.labels[state.user.select.item][0]]
     return _.cloneDeep(item.shapes[label.shapes[0]])
+  }
+
+  /**
+   * Get ground plane for item
+   *
+   * @param itemIndex
+   */
+  public getItemGroundPlane(itemIndex: number): Plane3D | null {
+    const labels = this.labels()
+    const itemPlanes = labels.filter(
+      (l) => l.item === itemIndex && l.label.type === LabelTypeName.PLANE_3D
+    )
+    return (itemPlanes[0] as Plane3D) ?? null
   }
 }

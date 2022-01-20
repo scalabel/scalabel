@@ -1,4 +1,4 @@
-import { AttributeToolType } from "../../src/const/common"
+import { AttributeToolType, ViewerConfigTypeName } from "../../src/const/common"
 import { DeepPartialState } from "../../src/types/state"
 
 export const testJson: DeepPartialState = {
@@ -633,7 +633,12 @@ export const testJson: DeepPartialState = {
         }
       }
     },
-    viewerConfigs: []
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.IMAGE,
+        sensor: -1
+      }
+    }
   },
   session: {
     id: "",
@@ -884,7 +889,12 @@ export const emptyTrackingTask: DeepPartialState = {
         }
       }
     },
-    viewerConfigs: []
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.IMAGE,
+        sensor: -1
+      }
+    }
   },
   session: {
     id: "",

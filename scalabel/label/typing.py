@@ -148,6 +148,7 @@ class Category(BaseModel):
     name: str
     subcategories: Optional[List["Category"]]
     isThing: Optional[bool] = None  # for panoptic segmentation
+    color: Optional[Tuple[float, float, float]]
 
 
 Category.update_forward_refs()
