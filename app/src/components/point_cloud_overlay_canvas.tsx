@@ -277,7 +277,7 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
       const sizes: number[] = []
       for (let i = 0; i < points.length; i += 3) {
         const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
-        const newPoint = sensor.transform(point)
+        const newPoint = sensor.inverseTransform(point)
         newPoints.push(newPoint.x, newPoint.y, newPoint.z)
         sizes.push(1.5)
       }

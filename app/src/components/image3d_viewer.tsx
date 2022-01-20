@@ -18,6 +18,8 @@ import Label3dCanvas from "./label3d_canvas"
 import { Viewer2D, Viewer2DProps } from "./viewer2d"
 import PointCloudOverlayCanvas from "./point_cloud_overlay_canvas"
 import { changeViewerConfig } from "../action/common"
+import { Sensor } from "../common/sensor"
+import { getMainSensor } from "../common/util"
 
 /**
  * Viewer for 3d labels on images
@@ -43,7 +45,7 @@ class Image3DViewer extends Viewer2D {
   public componentDidUpdate(): void {
     if (this._viewerConfig !== null) {
       const img3dConfig = this._viewerConfig as Image3DViewerConfigType
-      const sensor = img3dConfig.sensor
+      const sensorId = img3dConfig.sensor
 
       if (isCurrentFrameLoaded(this.state, img3dConfig.sensor)) {
         const image =
@@ -51,27 +53,23 @@ class Image3DViewer extends Viewer2D {
         this._camera.width = image.width
         this._camera.height = image.height
       }
-      if (sensor in this.state.task.sensors) {
-        this._camera.intrinsics = this.state.task.sensors[sensor].intrinsics
-        const extrinsics = this.state.task.sensors[sensor].extrinsics
+      if (sensorId in this.state.task.sensors) {
+        const sensorType = this.state.task.sensors[sensorId]
+        this._camera.intrinsics = sensorType.intrinsics
+        const extrinsics = sensorType.extrinsics
         this._camera.position.set(0, 0, 0)
-        if (extrinsics !== null && extrinsics !== undefined) {
-          const rotation4 = new THREE.Matrix4().makeRotationFromEuler(
-            new THREE.Euler(
-              -extrinsics.rotation.x,
-              -extrinsics.rotation.y,
-              -extrinsics.rotation.z
-            )
-          )
-          const rotation = new THREE.Matrix3().setFromMatrix4(rotation4)
-          const forward = new THREE.Vector3(0, 0, 1).applyMatrix3(rotation)
-          const up = new THREE.Vector3(0, -1, 0).applyMatrix3(rotation)
-          const newPos = new THREE.Vector3(
+        const mainSensor = getMainSensor(this.state)
+        const isMainSensor = mainSensor.id === sensorId
+        if (!isMainSensor && extrinsics !== null && extrinsics !== undefined) {
+          const s = Sensor.fromSensorType(sensorType)
+          const forward = s.rotate(new THREE.Vector3(0, 0, 1))
+          const up = s.rotate(new THREE.Vector3(0, -1, 0))
+          const translation = new THREE.Vector3(
             extrinsics.translation.x,
             extrinsics.translation.y,
             extrinsics.translation.z
           )
-          newPos.applyMatrix3(rotation).multiplyScalar(-1)
+          const newPos = s.rotate(translation).multiplyScalar(-1)
           this._camera.up.copy(up)
           this._camera.lookAt(forward)
           this._camera.position.copy(newPos)
