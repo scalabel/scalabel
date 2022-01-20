@@ -7,6 +7,7 @@ import SyncIcon from "@material-ui/icons/Sync"
 import ThreeDRotationSharpIcon from "@material-ui/icons/ThreeDRotationSharp"
 import ThreeSixtyIcon from "@material-ui/icons/ThreeSixty"
 import TripOriginIcon from "@material-ui/icons/TripOrigin"
+import ColorLensIcon from "@material-ui/icons/ColorLens"
 import { withStyles } from "@material-ui/styles"
 import React from "react"
 import * as THREE from "three"
@@ -25,7 +26,11 @@ import Session from "../common/session"
 import * as types from "../const/common"
 import { Vector3D } from "../math/vector3d"
 import { viewerStyles } from "../styles/viewer"
-import { PointCloudViewerConfigType, State } from "../types/state"
+import {
+  ColorSchemeType,
+  PointCloudViewerConfigType,
+  State
+} from "../types/state"
 import {
   DrawableViewer,
   ViewerClassTypes,
@@ -234,7 +239,8 @@ class Viewer3D extends DrawableViewer<Props> {
         this.getSynchronizationButton(config),
         this.getSelectionLockButton(config),
         this.getOriginButton(config),
-        this.getViewerConfigButton(config)
+        this.getViewerConfigButton(config),
+        this.getColorSchemeButton(config)
       ]
     }
 
@@ -542,6 +548,43 @@ class Viewer3D extends DrawableViewer<Props> {
             <ThreeDRotationSharpIcon />,
             config.cameraRotateDir === true
           )}
+        </IconButton>
+      </Tooltip>
+    )
+  }
+
+  /**
+   * color scheme button
+   *
+   * @param config
+   */
+  protected getColorSchemeButton(
+    config: PointCloudViewerConfigType
+  ): JSX.Element {
+    return (
+      <Tooltip
+        key={`colorSchemeButton${this.props.id}`}
+        title="Color scheme"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            const colorSchemes = Object.values(ColorSchemeType)
+            const currentIndex = colorSchemes.indexOf(config.colorScheme)
+            const nextIndex = (currentIndex + 1) % colorSchemes.length
+            const newConfig = {
+              ...config,
+              colorScheme: colorSchemes[nextIndex]
+            }
+            Session.dispatch(changeViewerConfig(this.props.id, newConfig))
+          }}
+          edge={"start"}
+        >
+          <ColorLensIcon />
         </IconButton>
       </Tooltip>
     )

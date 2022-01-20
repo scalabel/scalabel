@@ -151,6 +151,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private _hiddenCanvas: HTMLCanvasElement
   /** point cloud color scheme */
   private _colorScheme: ColorSchemeType | null
+  /** image data */
+  private _imageData: Uint8ClampedArray | null
 
   /**
    * Constructor, ons subscription to store
@@ -168,6 +170,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this._hiddenContext = null
     this._hiddenCanvas = document.createElement("canvas")
     this._colorScheme = null
+    this._imageData = null
 
     this.canvas = null
     this.display = null
@@ -299,13 +302,19 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         }
         if (this._hiddenContext !== null) {
           this._hiddenContext.drawImage(image, 0, 0)
+          this._imageData = this._hiddenContext.getImageData(
+            0,
+            0,
+            this._hiddenCanvas.width,
+            this._hiddenCanvas.height
+          ).data
           this.transformPoints(sensorId)
         }
       }
       this._pointsUpdated = true
     }
     if (this._pointsUpdated && this._colorScheme !== config.colorScheme) {
-      this._colorScheme = ColorSchemeType.HEIGHT
+      this._colorScheme = config.colorScheme
       this.updatePointCloudColors()
     }
   }
@@ -409,7 +418,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     const item = this.state.user.select.item
     const image = Session.images[item][sensorId]
     const sensor = Sensor.fromSensorType(sensorType, image)
-    if (sensor.hasIntrinsics()) {
+    if (sensor.hasIntrinsics() && this._imageData !== null) {
       const geometry = this.pointCloud.geometry
       const points = Array.from(geometry.getAttribute("position").array)
       const colors: number[] = []
@@ -426,9 +435,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
           pixel.y < 1 &&
           pixel.y > 0
         ) {
-          const x = pixel.x * image.width
-          const y = pixel.y * image.height
-          const rgb = this._hiddenContext.getImageData(x, y, 1, 1).data
+          const x = Math.floor(pixel.x * image.width)
+          const y = Math.floor(pixel.y * image.height)
+          const imageIndex = (y * this._hiddenCanvas.width + x) * 4
+          const rgb = this._imageData.slice(imageIndex, imageIndex + 3)
           color = new THREE.Vector3(rgb[0], rgb[1], rgb[2])
           color.divideScalar(255.0)
         }
