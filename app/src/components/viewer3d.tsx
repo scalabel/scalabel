@@ -25,7 +25,7 @@ import Session from "../common/session"
 import * as types from "../const/common"
 import { Vector3D } from "../math/vector3d"
 import { viewerStyles } from "../styles/viewer"
-import { PointCloudViewerConfigType } from "../types/state"
+import { PointCloudViewerConfigType, State } from "../types/state"
 import {
   DrawableViewer,
   ViewerClassTypes,
@@ -78,17 +78,31 @@ function underlineElement(
  * Calculate forward vector
  *
  * @param viewerConfig
+ * @param state
  */
 function calculateForward(
-  viewerConfig: PointCloudViewerConfigType
+  viewerConfig: PointCloudViewerConfigType,
+  state: State
 ): THREE.Vector3 {
-  // Get vector pointing from camera to target projected to horizontal plane
-  let forwardX = viewerConfig.target.x - viewerConfig.position.x
-  let forwardY = viewerConfig.target.y - viewerConfig.position.y
-  const forwardDist = Math.sqrt(forwardX * forwardX + forwardY * forwardY)
-  forwardX *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
-  forwardY *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
-  return new THREE.Vector3(forwardX, forwardY, 0)
+  const mainSensor = getMainSensor(state)
+  const up = mainSensor.up
+  const origin = new THREE.Vector3(0, 0, 0)
+  const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(up, origin)
+  const target = new THREE.Vector3(
+    viewerConfig.target.x,
+    viewerConfig.target.y,
+    viewerConfig.target.z
+  )
+  const camPosition = new THREE.Vector3(
+    viewerConfig.position.x,
+    viewerConfig.position.y,
+    viewerConfig.position.z
+  )
+  const camDirection = target.clone().sub(camPosition)
+  const forward = new THREE.Vector3()
+  plane.projectPoint(camDirection, forward)
+  forward.normalize().multiplyScalar(CameraMovementParameters.MOVE_AMOUNT)
+  return forward
 }
 
 /**
@@ -96,17 +110,12 @@ function calculateForward(
  *
  * @param viewerConfig
  * @param forward
+ * @param state
  */
-function calculateLeft(
-  viewerConfig: PointCloudViewerConfigType,
-  forward: THREE.Vector3
-): THREE.Vector3 {
+function calculateLeft(forward: THREE.Vector3, state: State): THREE.Vector3 {
   // Get vector pointing up
-  const vertical = new THREE.Vector3(
-    viewerConfig.verticalAxis.x,
-    viewerConfig.verticalAxis.y,
-    viewerConfig.verticalAxis.z
-  )
+  const mainSensor = getMainSensor(state)
+  const vertical = mainSensor.up
 
   // Handle movement in three dimensions
   const left = new THREE.Vector3()
@@ -1030,9 +1039,9 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveForward(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
+        this._viewerConfig as PointCloudViewerConfigType,
+        this.state
       )
-      forward.z = 0
       this._camera.position.add(forward)
       this._target.add(forward)
       Session.label3dList.onDrawableUpdate()
@@ -1043,9 +1052,9 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveBackward(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
+        this._viewerConfig as PointCloudViewerConfigType,
+        this.state
       )
-      forward.z = 0
       this._camera.position.sub(forward)
       this._target.sub(forward)
       Session.label3dList.onDrawableUpdate()
@@ -1056,12 +1065,10 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveLeft(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
-      )
-      const left = calculateLeft(
         this._viewerConfig as PointCloudViewerConfigType,
-        forward
+        this.state
       )
+      const left = calculateLeft(forward, this.state)
       this._camera.position.add(left)
       this._target.add(left)
       Session.label3dList.onDrawableUpdate()
@@ -1072,12 +1079,10 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveRight(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
-      )
-      const left = calculateLeft(
         this._viewerConfig as PointCloudViewerConfigType,
-        forward
+        this.state
       )
+      const left = calculateLeft(forward, this.state)
       this._camera.position.sub(left)
       this._target.sub(left)
       Session.label3dList.onDrawableUpdate()

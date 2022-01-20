@@ -22,6 +22,8 @@ export class Sensor {
   private _transformationMatrix: THREE.Matrix4 | null
   /** up direction for sensor coordinates */
   private readonly _up: THREE.Vector3
+  /** forward direction for sensor coordinates */
+  private readonly _forward: THREE.Vector3
 
   /**
    * Constructor
@@ -54,10 +56,13 @@ export class Sensor {
     }
     this.calculateTransformationMatrix()
 
+    // Pass in as config variable later
     if (this._type === DataType.POINT_CLOUD) {
       this._up = new THREE.Vector3(0, 0, 1)
+      this._forward = new THREE.Vector3(1, 0, 0)
     } else {
       this._up = new THREE.Vector3(0, -1, 0)
+      this._forward = new THREE.Vector3(0, 0, 1)
     }
   }
 
@@ -159,6 +164,13 @@ export class Sensor {
    */
   public get up(): THREE.Vector3 {
     return this._up
+  }
+
+  /**
+   * Forward direction for sensor
+   */
+  public get forward(): THREE.Vector3 {
+    return this._forward
   }
 
   /**
