@@ -1,6 +1,11 @@
 import { withStyles } from "@material-ui/styles"
 import * as React from "react"
 import * as THREE from "three"
+import LayersIcon from "@material-ui/icons/Layers"
+import LayersClearIcon from "@material-ui/icons/LayersClear"
+import { IconButton } from "@material-ui/core"
+import Tooltip from "@mui/material/Tooltip"
+import Fade from "@mui/material/Fade"
 
 import Session from "../common/session"
 import { DataType } from "../const/common"
@@ -12,6 +17,7 @@ import ImageCanvas from "./image_canvas"
 import Label3dCanvas from "./label3d_canvas"
 import { Viewer2D, Viewer2DProps } from "./viewer2d"
 import PointCloudOverlayCanvas from "./point_cloud_overlay_canvas"
+import { changeViewerConfig } from "../action/common"
 
 /**
  * Viewer for 3d labels on images
@@ -130,6 +136,50 @@ class Image3DViewer extends Viewer2D {
     }
 
     return views
+  }
+
+  /**
+   * Render function
+   *
+   * @return {React.Fragment} React fragment
+   */
+  protected getMenuComponents(): JSX.Element[] | [] {
+    if (this._viewerConfig !== undefined) {
+      const components = super.getMenuComponents()
+
+      const overlayButton = (
+        <Tooltip
+          key={`overlayButton${this.props.id}`}
+          title="Point cloud data"
+          enterDelay={500}
+          TransitionComponent={Fade}
+          TransitionProps={{ timeout: 600 }}
+          arrow
+        >
+          <IconButton
+            onClick={() => {
+              const config = this._viewerConfig as Image3DViewerConfigType
+              const newConfig = {
+                ...config,
+                pointCloudOverlay: !config.pointCloudOverlay
+              }
+              Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
+            }}
+            className={this.props.classes.viewer_button}
+            edge={"start"}
+          >
+            {(this._viewerConfig as Image3DViewerConfigType)
+              .pointCloudOverlay ? (
+              <LayersClearIcon />
+            ) : (
+              <LayersIcon />
+            )}
+          </IconButton>
+        </Tooltip>
+      )
+      return [...components, overlayButton]
+    }
+    return []
   }
 }
 
