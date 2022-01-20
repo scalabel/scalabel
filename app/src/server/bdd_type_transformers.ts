@@ -40,7 +40,11 @@ export function transformBox3D(shape: types.ShapeType): bdd.Box3DType {
   return {
     location: [box3d.center.x, box3d.center.y, box3d.center.z],
     dimension: [box3d.size.x, box3d.size.y, box3d.size.z],
-    orientation: [box3d.orientation.x, box3d.orientation.y, box3d.orientation.z]
+    orientation: [
+      box3d.orientation.x,
+      box3d.orientation.y - Math.PI / 2,
+      box3d.orientation.z
+    ]
   }
 }
 
@@ -58,7 +62,7 @@ export function box3dToCube(box3d: bdd.Box3DType): types.SimpleCube {
     },
     orientation: {
       x: box3d.orientation[0],
-      y: box3d.orientation[1],
+      y: box3d.orientation[1] + Math.PI / 2,
       z: box3d.orientation[2]
     },
     center: {
