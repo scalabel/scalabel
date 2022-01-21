@@ -279,9 +279,8 @@ export class Label3DHandler {
           const shape = Session.label3dList.getCurrentShape()
           Session.label3dList.addShapeToHistShapes(shape)
 
-          const quaternionInverse = Session.label3dList.selectedLabel.orientation
-            .clone()
-            .invert()
+          const quaternionInverse =
+            Session.label3dList.selectedLabel.orientation.clone().invert()
           Session.label3dList.selectedLabel.rotate(quaternionInverse)
           commitLabels(
             [...Session.label3dList.updatedLabels.values()],

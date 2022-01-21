@@ -344,7 +344,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const intersects = this._raycaster.intersectObjects(
         // Need to do this middle conversion because ThreeJS does not specify
         // as readonly, but this should be readonly for all other purposes
-        (shapes as unknown) as THREE.Object3D[],
+        shapes as unknown as THREE.Object3D[],
         false
       )
 
@@ -439,8 +439,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const boxSpan = Session.getState().session.info3D.boxSpan
       if (boxSpan !== null) {
         boxSpan.render(Session.label3dList.scene)
-        const showGroundPlane = Session.getState().session.info3D
-          .showGroundPlane
+        const showGroundPlane =
+          Session.getState().session.info3D.showGroundPlane
         if (showGroundPlane && this.groundPlane !== null) {
           this.groundPlane.render(Session.label3dList.scene)
         }

@@ -371,9 +371,9 @@ function mergeTracksInItems(
 
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const firstItem = Number(Object.keys(tracks[0].labels)[0])
   const firstLabelId = tracks[0].labels[firstItem]
@@ -438,9 +438,9 @@ function splitTrackInItems(
   const splitedTrack1 = makeTrack({ type: track.type, id: newTrackId }, false)
 
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const prop: Partial<LabelType> = {
     track: splitedTrack1.id

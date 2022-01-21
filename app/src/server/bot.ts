@@ -235,9 +235,9 @@ export class Bot {
    *
    * @param queries
    */
-  private groupQueriesByEndpoint(
-    queries: ModelQuery[]
-  ): { [key: string]: ModelQuery[] } {
+  private groupQueriesByEndpoint(queries: ModelQuery[]): {
+    [key: string]: ModelQuery[]
+  } {
     const endpointToQuery: { [key: string]: ModelQuery[] } = {}
     for (const query of queries) {
       if (!(query.endpoint in endpointToQuery)) {

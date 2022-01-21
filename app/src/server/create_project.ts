@@ -231,7 +231,7 @@ export async function readConfig<T>(
 
   const file = await storage.load(filePath)
   try {
-    const fileData = (yaml.load(file, { json: true }) as unknown) as T
+    const fileData = yaml.load(file, { json: true }) as T
     return fileData
   } catch {
     throw new Error(`Improper formatting for file: ${filePath}`)
@@ -388,7 +388,7 @@ export async function createProject(
     itemGroups: formFileData.itemGroups,
     sensors
   }
-  return Promise.resolve(project)
+  return await Promise.resolve(project)
 }
 
 /**
@@ -459,9 +459,9 @@ function getCategoryMap(configCategories: string[]): { [key: string]: number } {
  *
  * @param items
  */
-function getItemNameMap(
-  items: Array<Partial<ItemExport>>
-): { [key: string]: number } {
+function getItemNameMap(items: Array<Partial<ItemExport>>): {
+  [key: string]: number
+} {
   const itemNameMap: { [key: string]: number } = {}
   for (let itemInd = 0; itemInd < items.length; itemInd++) {
     const item = items[itemInd]
@@ -817,5 +817,5 @@ export async function createTasks(
       tasks.push(task)
     }
   }
-  return Promise.resolve(tasks)
+  return await Promise.resolve(tasks)
 }

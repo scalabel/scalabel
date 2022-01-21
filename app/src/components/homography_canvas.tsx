@@ -315,9 +315,8 @@ class HomographyCanvas extends ImageCanvas {
               const imageStart = (srcY * this._hiddenCanvas.width + srcX) * 4
               const homographyStart = (dstY * this.imageCanvas.width + dstX) * 4
               for (let i = 0; i < 4; i++) {
-                homographyData.data[homographyStart + i] = this._imageData[
-                  imageStart + i
-                ]
+                homographyData.data[homographyStart + i] =
+                  this._imageData[imageStart + i]
               }
             }
           }
