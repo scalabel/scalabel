@@ -187,6 +187,11 @@ export function getPolicy(
           case LabelTypeName.CUSTOM_2D:
             labelTypes[0] = Object.keys(templates2d)[0]
             return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.BOX_3D:
+            return [
+              [TrackPolicyType.LINEAR_INTERPOLATION],
+              [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
+            ]
         }
       }
       return [policyTypes, labelTypes]
