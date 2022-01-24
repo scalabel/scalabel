@@ -259,11 +259,13 @@ class HomographyCanvas extends ImageCanvas {
             1
           )
           src.applyMatrix3(this._homographyMatrix)
-          src.multiplyScalar(1 / src.z)
+          const z = src.z
+          src.multiplyScalar(1 / z)
 
           const srcX = Math.floor(src.x)
           const srcY = Math.floor(src.y)
           if (
+            z > 0 &&
             srcX >= 0 &&
             srcY >= 0 &&
             srcX < this._hiddenCanvas.width &&
