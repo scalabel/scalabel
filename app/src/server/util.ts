@@ -125,7 +125,8 @@ export function getHandlerUrl(itemType: string, labelType: string): string {
       if (
         labelType === LabelTypeName.BOX_2D ||
         labelType === LabelTypeName.POLYGON_2D ||
-        labelType === LabelTypeName.CUSTOM_2D
+        labelType === LabelTypeName.CUSTOM_2D ||
+        labelType === LabelTypeName.BOX_3D
       ) {
         return HandlerUrl.LABEL
       }
