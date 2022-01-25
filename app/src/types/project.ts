@@ -29,6 +29,8 @@ export interface CreationForm {
   pageTitle: string
   /** task size */
   taskSize: number
+  /** keyframe interval */
+  keyInterval: number
   /** instruction url */
   instructionUrl: string
   /** whether demo mode is true */
