@@ -303,6 +303,7 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
   const minSensorIds: { [type: string]: number } = {
     [ViewerConfigTypeName.IMAGE]: -1,
     [ViewerConfigTypeName.IMAGE_3D]: -1,
+    [ViewerConfigTypeName.HOMOGRAPHY]: -1,
     [ViewerConfigTypeName.POINT_CLOUD]: -1
   }
 
@@ -311,6 +312,7 @@ export function getMinSensorIds(state: State): { [type: string]: number } {
       if (state.task.sensors[sensorId].type === ViewerConfigTypeName.IMAGE) {
         minSensorIds[ViewerConfigTypeName.IMAGE] = sensorId
         minSensorIds[ViewerConfigTypeName.IMAGE_3D] = sensorId
+        minSensorIds[ViewerConfigTypeName.HOMOGRAPHY] = sensorId
         break
       }
     }

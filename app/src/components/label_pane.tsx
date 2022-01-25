@@ -191,6 +191,17 @@ class LabelPane extends Component<Props> {
               Image 3D
             </MenuItem>
           ) : undefined}
+          {getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+          this.state.task.config.labelTypes.includes(
+            types.LabelTypeName.BOX_3D
+          ) ? (
+            <MenuItem
+              key={`homographyTypeMenuItem${pane.id}`}
+              value={types.ViewerConfigTypeName.HOMOGRAPHY}
+            >
+              Homography
+            </MenuItem>
+          ) : undefined}
         </Select>
       )
 
@@ -316,30 +327,22 @@ class LabelPane extends Component<Props> {
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
-      const imageOnly =
-        numSensors === 1 &&
-        this.state.task.config.itemType === types.ItemTypeName.IMAGE
-      let paneControl: JSX.Element
-      if (imageOnly) {
-        paneControl = <></>
-      } else {
-        paneControl = (
-          <List>
-            <ListItem dense disableGutters>
-              {deleteButton}
-            </ListItem>
-            <ListItem dense disableGutters>
-              <div hidden={pane.hide}>{verticalSplitButton}</div>
-            </ListItem>
-            <ListItem dense disableGutters>
-              <div hidden={pane.hide}>{horizontalSplitButton}</div>
-            </ListItem>
-            <ListItem dense disableGutters>
-              {visibilityButton}
-            </ListItem>
-          </List>
-        )
-      }
+      const paneControl = (
+        <List>
+          <ListItem dense disableGutters>
+            {deleteButton}
+          </ListItem>
+          <ListItem dense disableGutters>
+            <div hidden={pane.hide}>{verticalSplitButton}</div>
+          </ListItem>
+          <ListItem dense disableGutters>
+            <div hidden={pane.hide}>{horizontalSplitButton}</div>
+          </ListItem>
+          <ListItem dense disableGutters>
+            {visibilityButton}
+          </ListItem>
+        </List>
+      )
 
       const configBar = (
         <Grid
@@ -355,6 +358,9 @@ class LabelPane extends Component<Props> {
         </Grid>
       )
 
+      const isImage3d =
+        getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+        this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
       const paneBar = (
         <Grid
           key={`paneMenu${pane.id}`}
@@ -364,7 +370,7 @@ class LabelPane extends Component<Props> {
           direction="row"
         >
           <div hidden={pane.hide}>
-            {numSensors > 1 ? viewerTypeMenu : null}
+            {numSensors > 1 || isImage3d ? viewerTypeMenu : null}
             {numSensors > 1 ? viewerIdMenu : null}
           </div>
         </Grid>
