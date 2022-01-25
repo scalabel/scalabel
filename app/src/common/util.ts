@@ -153,6 +153,36 @@ export function doesPacketTriggerModel(
 }
 
 /**
+ * Transform point cloud with sensor extrinsics
+ *
+ * @param fromGeometry
+ * @param fromSensorId
+ * @param state
+ */
+export function transformPointCloud(
+  fromGeometry: THREE.BufferGeometry,
+  fromSensorId: number,
+  state: State
+): THREE.BufferGeometry {
+  const sensorType = state.task.sensors[fromSensorId]
+  const sensor = Sensor.fromSensorType(sensorType)
+  const mainSensor = getMainSensor(state)
+  const geometry = fromGeometry.clone()
+  const points = Array.from(geometry.getAttribute("position").array)
+  const newPoints: number[] = []
+  for (let i = 0; i < points.length; i += 3) {
+    const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+    const newPoint = mainSensor.inverseTransform(sensor.transform(point))
+    newPoints.push(newPoint.x, newPoint.y, newPoint.z)
+  }
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(newPoints, 3)
+  )
+  return geometry
+}
+
+/**
  * Get main sensor object from state
  *
  * @param state
@@ -219,21 +249,20 @@ function getRandomInt(max: number): number {
 
 /**
  * Calculate rotation for estimated plane
- * Assume no rotation around z axis (up)
  *
- * @param baseNormal
+ * @param forward
+ * @param up
  * @param estimatedNormal
  */
 export function calculatePlaneRotation(
-  baseNormal: THREE.Vector3,
+  forward: THREE.Vector3,
   estimatedNormal: THREE.Vector3
 ): THREE.Vector3 {
   const rotation = new THREE.Quaternion().setFromUnitVectors(
-    baseNormal,
+    forward,
     estimatedNormal
   )
   const rotationEuler = new THREE.Euler().setFromQuaternion(rotation)
-  rotationEuler.z = 0
   return rotationEuler.toVector3()
 }
 
@@ -243,12 +272,13 @@ export function calculatePlaneRotation(
  *
  * @param plane
  * @param target
+ * @param down
  */
 export function calculatePlaneCenter(
   plane: THREE.Plane,
-  target: THREE.Vector3
+  target: THREE.Vector3,
+  down: THREE.Vector3
 ): THREE.Vector3 {
-  const down = new THREE.Vector3(0, 0, -1)
   const ray = new THREE.Ray(target, down)
   const center = new THREE.Vector3()
   ray.intersectPlane(plane, center)

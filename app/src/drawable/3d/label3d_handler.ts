@@ -38,7 +38,9 @@ import { Span3D } from "./box_span/span3d"
 import {
   calculatePlaneCenter,
   calculatePlaneRotation,
-  estimateGroundPlane
+  estimateGroundPlane,
+  getMainSensor,
+  transformPointCloud
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 
@@ -333,6 +335,13 @@ export class Label3DHandler {
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
+        Session.dispatch(
+          selectLabel(
+            Session.label3dList.selectedLabelIds,
+            this._selectedItemIndex,
+            groundPlane.labelId
+          )
+        )
       } else {
         groundPlane.visible = true
       }
@@ -372,16 +381,20 @@ export class Label3DHandler {
       let center = new THREE.Vector3(0, 1.5, 10)
       let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
       if (isPointCloud) {
+        const rawGeometry = Session.pointClouds[item.index][sensorIdx]
+        const geometry = transformPointCloud(rawGeometry, sensorIdx, state)
         const pointCloud = Array.from(
-          new THREE.Points(
-            Session.pointClouds[item.index][sensorIdx]
-          ).geometry.getAttribute("position").array
+          new THREE.Points(geometry).geometry.getAttribute("position").array
         )
         const estimatedPlane = estimateGroundPlane(pointCloud)
         const target = new Vector3D().fromState(config.target)
-        const baseNormal = new THREE.Vector3(0, 0, 1)
-        center = calculatePlaneCenter(estimatedPlane, target.toThree())
-        rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
+        const mainSensor = getMainSensor(state)
+        const down = mainSensor.up.clone().multiplyScalar(-1)
+        center = calculatePlaneCenter(estimatedPlane, target.toThree(), down)
+        rotation = calculatePlaneRotation(
+          mainSensor.forward,
+          estimatedPlane.normal
+        )
       }
       const label = createPlaneLabel(
         Session.label3dList,

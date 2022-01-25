@@ -6,7 +6,7 @@ import * as THREE from "three"
 import { Sensor } from "../common/sensor"
 
 import Session from "../common/session"
-import { getMainSensor } from "../common/util"
+import { getMainSensor, transformPointCloud } from "../common/util"
 import { DataType, ItemTypeName } from "../const/common"
 import {
   getMinSensorIds,
@@ -140,7 +140,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   /** ThreeJS sphere mesh for indicating camera target location */
   private readonly target: THREE.AxesHelper
   /** Current point cloud for rendering */
-  private pointCloud: THREE.Points
+  private readonly pointCloud: THREE.Points
   /** drawable callback */
   private readonly _drawableUpdateCallback: () => void
   /** have points been set or transformed */
@@ -286,12 +286,14 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       Session.pointClouds[item][sensor] !== undefined &&
       !this._pointsUpdated
     ) {
-      this.pointCloud.geometry = Session.pointClouds[item][sensor].clone()
+      const rawGeometry = Session.pointClouds[item][sensor].clone()
+      const geometry = transformPointCloud(rawGeometry, sensor, this.state)
+      this.pointCloud.geometry.copy(geometry)
       this.pointCloud.layers.enableAll()
+      this._pointsUpdated = true
 
       const itemType = this.state.task.config.itemType
       if (itemType === ItemTypeName.IMAGE) {
-        const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
         const minSensorIds = getMinSensorIds(this.state)
         const imageSensorId = minSensorIds[DataType.IMAGE]
         const image = Session.images[item][imageSensorId]
@@ -308,10 +310,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
             this._hiddenCanvas.width,
             this._hiddenCanvas.height
           ).data
-          this.transformPoints(sensorId)
         }
       }
-      this._pointsUpdated = true
     }
     if (this._pointsUpdated && this._colorScheme !== config.colorScheme) {
       this._colorScheme = config.colorScheme
@@ -447,42 +447,6 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       return colors
     }
     return []
-  }
-
-  /**
-   * Transform points with sensor extrinsics
-   *
-   * @param sensorId
-   */
-  private transformPoints(sensorId: number): void {
-    const sensorType = this.state.task.sensors[sensorId]
-    const sensor = Sensor.fromSensorType(sensorType)
-    const mainSensor = getMainSensor(this.state)
-    if (
-      !this._pointsUpdated &&
-      (sensor.hasExtrinsics() || mainSensor.hasExtrinsics()) &&
-      this.pointCloud.geometry !== undefined
-    ) {
-      const geometry = this.pointCloud.geometry
-      const points = Array.from(geometry.getAttribute("position").array)
-      const newPoints: number[] = []
-      const sizes: number[] = []
-      for (let i = 0; i < points.length; i += 3) {
-        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
-        const newPoint = mainSensor.inverseTransform(sensor.transform(point))
-        newPoints.push(newPoint.x, newPoint.y, newPoint.z)
-        sizes.push(1.5)
-      }
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(newPoints, 3)
-      )
-      geometry.setAttribute(
-        "size",
-        new THREE.BufferAttribute(new Float32Array(sizes), 1)
-      )
-      geometry.attributes.size.needsUpdate = true
-    }
   }
 
   /**

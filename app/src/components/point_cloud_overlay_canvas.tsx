@@ -17,8 +17,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { ViewerConfigTypeName } from "../const/common"
-import { Sensor } from "../common/sensor"
-import { getMainSensor } from "../common/util"
+import { transformPointCloud } from "../common/util"
 
 const styles = (): StyleRules<"point_cloud_canvas", {}> =>
   createStyles({
@@ -49,10 +48,9 @@ interface Props extends DrawableProps {
 
 const vertexShader = `
     varying vec3 worldPosition;
-    attribute float size;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = size;
+      gl_PointSize = 1.5;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
     }
@@ -146,8 +144,6 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
   private readonly camera: THREE.Camera
   /** Current point cloud for rendering */
   private readonly pointCloud: THREE.Points
-  /** have points been transformed */
-  private transformedPoints: boolean
   /** have points been cloned */
   private pointsCloned: boolean
 
@@ -161,7 +157,6 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = props.camera
-    this.transformedPoints = false
     this.pointsCloned = false
 
     this.canvas = null
@@ -254,45 +249,11 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     const sensor = this.props.sensor
 
     if (Session.pointClouds[item][sensor] !== undefined && !this.pointsCloned) {
-      this.pointCloud.geometry = Session.pointClouds[item][sensor].clone()
+      const rawGeometry = Session.pointClouds[item][sensor].clone()
+      const geometry = transformPointCloud(rawGeometry, sensor, state)
+      this.pointCloud.geometry.copy(geometry)
       this.pointCloud.layers.enableAll()
-      this.transformPoints()
       this.pointsCloned = true
-    }
-  }
-
-  /**
-   * Transform points with sensor extrinsics
-   */
-  private transformPoints(): void {
-    const sensorType = this.state.task.sensors[this.props.sensor]
-    const sensor = Sensor.fromSensorType(sensorType)
-    const mainSensor = getMainSensor(this.state)
-    if (
-      !this.transformedPoints &&
-      (sensor.hasExtrinsics() || mainSensor.hasExtrinsics()) &&
-      this.pointCloud.geometry !== undefined
-    ) {
-      const geometry = this.pointCloud.geometry
-      const points = Array.from(geometry.getAttribute("position").array)
-      const newPoints: number[] = []
-      const sizes: number[] = []
-      for (let i = 0; i < points.length; i += 3) {
-        const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
-        const newPoint = mainSensor.inverseTransform(sensor.transform(point))
-        newPoints.push(newPoint.x, newPoint.y, newPoint.z)
-        sizes.push(1.5)
-      }
-      geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(newPoints, 3)
-      )
-      this.transformedPoints = true
-      geometry.setAttribute(
-        "size",
-        new THREE.BufferAttribute(new Float32Array(sizes), 1)
-      )
-      geometry.attributes.size.needsUpdate = true
     }
   }
 
