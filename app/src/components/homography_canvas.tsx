@@ -35,6 +35,8 @@ class HomographyCanvas extends ImageCanvas {
   private _hiddenContext: CanvasRenderingContext2D | null
   /** image data */
   private _imageData: Uint8ClampedArray | null
+  /** image canvas width */
+  private _canvasWidth: number
 
   /**
    * Constructor
@@ -51,6 +53,7 @@ class HomographyCanvas extends ImageCanvas {
     this._imageData = null
     this._planeState = ""
     this._updated = false
+    this._canvasWidth = 0
   }
 
   /**
@@ -67,6 +70,10 @@ class HomographyCanvas extends ImageCanvas {
         ref={(canvas) => {
           if (canvas !== null && this.display !== null) {
             this.imageCanvas = canvas
+            if (canvas.width !== this._canvasWidth) {
+              this._canvasWidth = canvas.width
+              this._updated = true
+            }
             this.imageContext = canvas.getContext("2d")
             const displayRect = this.display.getBoundingClientRect()
             const item = this.state.user.select.item
@@ -259,11 +266,13 @@ class HomographyCanvas extends ImageCanvas {
             1
           )
           src.applyMatrix3(this._homographyMatrix)
-          src.multiplyScalar(1 / src.z)
+          const z = src.z
+          src.multiplyScalar(1 / z)
 
           const srcX = Math.floor(src.x)
           const srcY = Math.floor(src.y)
           if (
+            z > 0 &&
             srcX >= 0 &&
             srcY >= 0 &&
             srcX < this._hiddenCanvas.width &&

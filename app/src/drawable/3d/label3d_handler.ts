@@ -256,7 +256,9 @@ export class Label3DHandler {
     const rotation = groundPlane.orientation.clone()
     const defaultPlaneForward = new THREE.Vector3(0, 0, 1)
     const planePitch = up.toThree().angleTo(defaultPlaneForward)
-    const planePitchEuler = new THREE.Euler(planePitch, 0, 0)
+    const planePitchEuler = new THREE.Euler().setFromVector3(
+      left.toThree().clone().normalize().multiplyScalar(planePitch)
+    )
     rotation.multiply(new THREE.Quaternion().setFromEuler(planePitchEuler))
 
     const leftOnPlane = left.toThree().applyQuaternion(rotation)
@@ -335,7 +337,7 @@ export class Label3DHandler {
         groundPlane.visible = true
       }
     } else {
-      const center = new Vector3D(0, 2, 10)
+      const center = new Vector3D(0, 1.5, 10)
       const label = createPlaneLabel(
         Session.label3dList,
         this._selectedItemIndex,
@@ -367,7 +369,7 @@ export class Label3DHandler {
     const isPointCloud = sensor.type === DataType.POINT_CLOUD
     if (isLoaded && !hasGroundPlane) {
       // estimate ground plane
-      let center = new THREE.Vector3(0, 2, 10)
+      let center = new THREE.Vector3(0, 1.5, 10)
       let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
       if (isPointCloud) {
         const pointCloud = Array.from(
