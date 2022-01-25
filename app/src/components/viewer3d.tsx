@@ -887,10 +887,17 @@ class Viewer3D extends DrawableViewer<Props> {
   private transformCamera(sensorId: number): void {
     const sensorType = this.state.task.sensors[sensorId]
     const sensor = Sensor.fromSensorType(sensorType)
+    const mainSensor = getMainSensor(this.state)
 
-    this._target.copy(sensor.inverseTransform(this._target))
-    this._camera.position.copy(sensor.inverseTransform(this._camera.position))
-    this._camera.up.copy(sensor.inverseTransform(this._camera.up))
+    this._target.copy(
+      mainSensor.inverseTransform(sensor.transform(this._target))
+    )
+    this._camera.position.copy(
+      mainSensor.inverseTransform(sensor.transform(this._camera.position))
+    )
+    this._camera.up.copy(
+      mainSensor.inverseTransform(sensor.transform(this._camera.up))
+    )
   }
 
   /**

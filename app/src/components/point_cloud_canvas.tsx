@@ -457,9 +457,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private transformPoints(sensorId: number): void {
     const sensorType = this.state.task.sensors[sensorId]
     const sensor = Sensor.fromSensorType(sensorType)
+    const mainSensor = getMainSensor(this.state)
     if (
       !this._pointsUpdated &&
-      sensor.hasExtrinsics() &&
+      (sensor.hasExtrinsics() || mainSensor.hasExtrinsics()) &&
       this.pointCloud.geometry !== undefined
     ) {
       const geometry = this.pointCloud.geometry
@@ -468,7 +469,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       const sizes: number[] = []
       for (let i = 0; i < points.length; i += 3) {
         const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
-        const newPoint = sensor.inverseTransform(point)
+        const newPoint = mainSensor.inverseTransform(sensor.transform(point))
         newPoints.push(newPoint.x, newPoint.y, newPoint.z)
         sizes.push(1.5)
       }

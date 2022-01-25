@@ -119,6 +119,7 @@ export class Sensor {
       )
       position.applyMatrix4(matrix).multiplyScalar(-1)
       matrix.setPosition(position)
+      matrix.invert()
       this._transformationMatrix = matrix
       this._inverseTransformationMatrix = matrix.clone().invert()
     }
