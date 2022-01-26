@@ -25,6 +25,7 @@ describe("test general utility methods", () => {
       LabelTypeName.BOX_2D,
       "sampleTitle",
       5,
+      1,
       "instructions.com",
       false
     )

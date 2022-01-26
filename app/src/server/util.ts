@@ -77,6 +77,7 @@ export async function makeStorage(
  * @param labelType
  * @param pageTitle
  * @param taskSize
+ * @param keyInterval
  * @param instructionUrl
  * @param demoMode
  */
@@ -86,6 +87,7 @@ export function makeCreationForm(
   labelType = "",
   pageTitle = "",
   taskSize = 0,
+  keyInterval = 1,
   instructionUrl = "",
   demoMode = false
 ): CreationForm {
@@ -96,6 +98,7 @@ export function makeCreationForm(
     pageTitle,
     instructionUrl,
     taskSize,
+    keyInterval,
     demoMode
   }
   return form

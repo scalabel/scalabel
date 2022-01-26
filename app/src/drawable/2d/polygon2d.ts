@@ -102,12 +102,14 @@ export class Polygon2D extends Label2D {
    * @param context
    * @param ratio
    * @param mode
+   * @param isTrackLinking
    * @param sessionMode
    */
   public draw(
     context: Context2D,
     ratio: number,
     mode: DrawMode,
+    isTrackLinking: boolean,
     sessionMode: ModeStatus | undefined
   ): void {
     const numPoints = this._points.length
@@ -258,8 +260,25 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+
+    let checked = false
+    if (this._label !== null) {
+      checked = this._label.checked
+    }
     if (mode === DrawMode.VIEW && this._state !== Polygon2DState.DRAW) {
-      this.drawTag(context, ratio, this.getCentroid(), this._color)
+      if (this._selected) {
+        isTrackLinking = isTrackLinking && true
+      } else {
+        isTrackLinking = isTrackLinking && false
+      }
+      this.drawTag(
+        context,
+        ratio,
+        this.getCentroid(),
+        this._color,
+        isTrackLinking,
+        checked
+      )
     }
   }
 

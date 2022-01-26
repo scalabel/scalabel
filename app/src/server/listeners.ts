@@ -126,7 +126,7 @@ export class Listeners {
             dataset.config.attributes = state.task.config.attributes
           }
           if (dataset.config.categories?.length === 0) {
-            dataset.config.categories = state.task.config.categories
+            dataset.config.categories = state.task.config.treeCategories
           }
         } catch (error) {
           Logger.info(error.message)

@@ -48,6 +48,8 @@ export interface LabelType {
   manual: boolean
   /** Has shape changed? e.g. vertex is added/deleted. */
   changed: boolean
+  /** whether the label has been annotated as checked. */
+  checked: boolean
 }
 
 export interface TrackType {
@@ -355,6 +357,8 @@ export interface ConfigType {
   policyTypes: string[]
   /** Task size */
   taskSize: number
+  /** Keyframe interval */
+  keyInterval: number
   /** Whether to track */
   tracking: boolean
   /** Handler URL */
