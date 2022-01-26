@@ -803,6 +803,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
     this._target.set(config.target.x, config.target.y, config.target.z)
     const mainSensor = getMainSensor(this.state)
+    this.cameraTransformed = config.cameraTransformed
 
     if (
       lockedToSelection(config) &&
@@ -860,8 +861,8 @@ class Viewer3D extends DrawableViewer<Props> {
       ) {
         const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
         this.transformCamera(sensorId)
-        this.commitCamera()
         this.cameraTransformed = true
+        this.commitCamera()
       }
       this._camera.lookAt(this._target)
     }
@@ -1149,7 +1150,8 @@ class Viewer3D extends DrawableViewer<Props> {
     const newConfig = {
       ...(this._viewerConfig as PointCloudViewerConfigType),
       position: new Vector3D().fromThree(this._camera.position).toState(),
-      target: new Vector3D().fromThree(this._target).toState()
+      target: new Vector3D().fromThree(this._target).toState(),
+      cameraTransformed: this.cameraTransformed
     }
     Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
   }

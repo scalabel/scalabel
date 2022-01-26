@@ -229,6 +229,8 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   cameraRotateDir?: boolean
   /** Color scheme for the point cloud */
   colorScheme: ColorSchemeType
+  /** Has the camera been transformed */
+  cameraTransformed: boolean
 }
 
 export interface Image3DViewerConfigType extends ImageViewerConfigType {

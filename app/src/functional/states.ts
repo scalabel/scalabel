@@ -330,7 +330,8 @@ export function makePointCloudViewerConfig(
     synchronized: false,
     hideLabels: false,
     cameraRotateDir: false,
-    colorScheme: ColorSchemeType.HEIGHT
+    colorScheme: ColorSchemeType.HEIGHT,
+    cameraTransformed: false
   }
 }
 
