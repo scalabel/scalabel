@@ -239,7 +239,7 @@ test("Move axis aligned 3d bbox along z axis", () => {
 
   raycaster.setFromCamera(new THREE.Vector2(0, 0.15), camera)
   let intersections = raycaster.intersectObjects(
-    (raycastableShapes as unknown) as THREE.Object3D[]
+    raycastableShapes as unknown as THREE.Object3D[]
   )
   expect(intersections.length).toBeGreaterThan(0)
 
@@ -261,7 +261,7 @@ test("Move axis aligned 3d bbox along z axis", () => {
 
   raycaster.setFromCamera(new THREE.Vector2(0, 0.5), camera)
   intersections = raycaster.intersectObjects(
-    (raycastableShapes as unknown) as THREE.Object3D[]
+    raycastableShapes as unknown as THREE.Object3D[]
   )
   expect(intersections.length).toBeGreaterThan(0)
 
@@ -357,7 +357,7 @@ test("Move axis aligned 3d bbox along all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
       let intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 
@@ -387,7 +387,7 @@ test("Move axis aligned 3d bbox along all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(5 * vecX, 5 * vecY), camera)
       intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 
@@ -481,7 +481,7 @@ test("Scale axis aligned 3d bbox along all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
       let intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 
@@ -517,7 +517,7 @@ test("Scale axis aligned 3d bbox along all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(5 * vecX, 5 * vecY), camera)
       intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 
@@ -620,7 +620,7 @@ test("Rotate axis aligned 3d bbox around all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(vecX, vecY), camera)
       let intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 
@@ -653,7 +653,7 @@ test("Rotate axis aligned 3d bbox around all axes", () => {
 
       raycaster.setFromCamera(new THREE.Vector2(2 * vecX, 2 * vecY), camera)
       intersections = raycaster.intersectObjects(
-        (raycastableShapes as unknown) as THREE.Object3D[]
+        raycastableShapes as unknown as THREE.Object3D[]
       )
       expect(intersections.length).toBeGreaterThan(0)
 

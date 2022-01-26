@@ -359,7 +359,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const intersects = this._raycaster.intersectObjects(
         // Need to do this middle conversion because ThreeJS does not specify
         // as readonly, but this should be readonly for all other purposes
-        (shapes as unknown) as THREE.Object3D[],
+        shapes as unknown as THREE.Object3D[],
         false
       )
 

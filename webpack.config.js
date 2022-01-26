@@ -60,7 +60,7 @@ let config = {
       {
         test: /\.t(s|sx)$/,
         use: {
-          loader: 'awesome-typescript-loader',
+          loader: 'ts-loader',
         },
       },
       {

@@ -126,8 +126,8 @@ function shapeIdToString(shape: ShapeType): ShapeType {
   newShape.label = shape.label.map((l) => l.toString())
   /** to be compatible with the old indexed shape type */
   if ("shape" in shape) {
-    // eslint-disable-next-line @typescript-eslint/dot-notation
-    const shapeInfo = shape["shape"] as ShapeType
+    // @ts-expect-error
+    const shapeInfo = shape.shape as ShapeType
     newShape = { ...newShape, ...shapeInfo }
   }
   if ("shape" in newShape) {
