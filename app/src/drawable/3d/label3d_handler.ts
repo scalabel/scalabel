@@ -385,11 +385,12 @@ export class Label3DHandler {
         )
         const estimatedPlane = estimateGroundPlane(pointCloud)
         const target = new Vector3D().fromState(config.target)
-        const mainSensor = getMainSensor(state)
-        const down = mainSensor.up.clone().multiplyScalar(-1)
+        const { up, left, forward } = this.getAxes()
+        const down = up.toThree().clone().multiplyScalar(-1)
         center = calculatePlaneCenter(estimatedPlane, target.toThree(), down)
         rotation = calculatePlaneRotation(
-          mainSensor.forward,
+          left.toThree(),
+          forward.toThree(),
           estimatedPlane.normal
         )
       }

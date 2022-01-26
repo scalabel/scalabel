@@ -250,19 +250,43 @@ function getRandomInt(max: number): number {
 /**
  * Calculate rotation for estimated plane
  *
+ * @param left
  * @param forward
- * @param up
  * @param estimatedNormal
  */
 export function calculatePlaneRotation(
+  left: THREE.Vector3,
   forward: THREE.Vector3,
   estimatedNormal: THREE.Vector3
 ): THREE.Vector3 {
   const rotation = new THREE.Quaternion().setFromUnitVectors(
-    forward,
+    forward.clone().multiplyScalar(-1),
     estimatedNormal
   )
   const rotationEuler = new THREE.Euler().setFromQuaternion(rotation)
+  // Positive rotation around side axis
+  if (left.x !== 0 && rotationEuler.x < 0) {
+    rotationEuler.reorder("YZX")
+    rotationEuler.x = Math.PI * 2 - rotationEuler.x
+  } else if (left.y !== 0 && rotationEuler.y < 0) {
+    rotationEuler.reorder("XZY")
+    rotationEuler.y = Math.PI * 2 - rotationEuler.y
+  } else if (left.z !== 0 && rotationEuler.y < 0) {
+    rotationEuler.reorder("XYZ")
+    rotationEuler.z = Math.PI * 2 - rotationEuler.z
+  }
+  // No rotation around vertical axis
+  if (forward.x !== 0) {
+    rotationEuler.reorder("YZX")
+    rotationEuler.x = 0
+  } else if (forward.y !== 0) {
+    rotationEuler.reorder("XZY")
+    rotationEuler.y = 0
+  } else if (forward.z !== 0) {
+    rotationEuler.reorder("XYZ")
+    rotationEuler.z = 0
+  }
+  rotationEuler.reorder("XYZ")
   return rotationEuler.toVector3()
 }
 
