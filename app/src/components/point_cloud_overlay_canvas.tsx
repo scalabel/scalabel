@@ -74,7 +74,6 @@ const fragmentShader = `
     vec3 getHeatMapColor(float distance, float max_val) {
       float val = min(max_val, max(0.0, distance)) / max_val;
       vec3 hsv_val = vec3(1.0 - val, 1.0, 1.0);
-      // float h = (1.0 - val) * low + val * high;
       vec3 rgb_val = hsv2rgb(hsv_val);
       return rgb_val;
     }

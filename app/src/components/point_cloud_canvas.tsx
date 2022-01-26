@@ -51,14 +51,14 @@ interface Props extends DrawableProps {
 
 const vertexShader = `
     varying vec3 worldPosition;
-    attribute vec3 setColor;
-    varying vec3 setColor2;
+    attribute vec3 color;
+    varying vec3 pointColor;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
       gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
-      setColor2 = setColor;
+      pointColor = color;
     }
   `
 const fragmentShader = `
@@ -70,12 +70,7 @@ const fragmentShader = `
     uniform mat4 toSelectionFrame;
     uniform vec3 selectionSize;
 
-    varying vec3 setColor2;
-
-    vec3 getHeatMapColor(float height) {
-      float val = min(1.0, max(0.0, (height + 3.0) / 6.0));
-      return (1.0 - val) * low + val * high;
-    }
+    varying vec3 pointColor;
 
     bool pointInSelection(vec3 point) {
       vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
@@ -101,8 +96,7 @@ const fragmentShader = `
 
     void main() {
       float alpha = 0.5;
-      // vec3 color = getHeatMapColor(worldPosition.z);
-      vec3 color = setColor2;
+      vec3 color = pointColor;
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
@@ -338,10 +332,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
         colors = this.getHeightColors()
     }
     const geometry = this.pointCloud.geometry
-    geometry.setAttribute(
-      "setColor",
-      new THREE.Float32BufferAttribute(colors, 3)
-    )
+    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3))
   }
 
   /**
