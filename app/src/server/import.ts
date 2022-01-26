@@ -28,6 +28,7 @@ import {
   ShapeIdMap,
   ShapeType
 } from "../types/state"
+import { uid } from "../common/uid"
 import {
   box3dToCube,
   extrinsicsFromExport,
@@ -120,7 +121,10 @@ export function convertItemToImport(
     }
     if (labelsExport !== undefined) {
       for (const labelExport of labelsExport) {
-        const labelId = labelExport.id.toString()
+        let labelId = labelExport.id.toString()
+        if (tracking) {
+          labelId = uid()
+        }
         // Each label may appear in multiple sensors
         if (tracking && labelExport.id in labels) {
           labels[labelId].sensors.push(sensorId)
@@ -148,9 +152,10 @@ export function convertItemToImport(
           labelExport,
           itemIndex,
           sensorId,
+          labelTypes,
           categories,
           attributes,
-          labelTypes
+          labelId
         )
         if (isTagging) {
           importedLabel.type = "tag"
@@ -246,19 +251,25 @@ function parseExportAttributes(
  * @param item
  * @param sensorId
  * @param category
+ * @param attributes
+ * @param newLabelId
  * @param labelTypes
  */
 function convertLabelToImport(
   labelExport: LabelExport,
   item: number,
   sensorId: number,
-  category: number[],
-  attributes: { [key: number]: number[] },
-  labelTypes: string[]
+  labelTypes: string[],
+  category?: number[],
+  attributes?: { [key: number]: number[] },
+  newLabelId?: string
 ): [LabelType, ShapeType[]] {
   let labelType = LabelTypeName.EMPTY
   let shapes: null | ShapeType[] = null
-  const labelId = labelExport.id.toString()
+  let labelId = labelExport.id.toString()
+  if (newLabelId !== undefined) {
+    labelId = newLabelId
+  }
 
   /**
    * Convert each import shape based on their type
@@ -297,7 +308,7 @@ function convertLabelToImport(
     labelType = LabelTypeName.BOX_3D
     shapes = [makeCube(box3dToCube(labelExport.box3d))]
   } else if (
-    labelTypes.includes(LabelTypeName.PLANE_3D) &&
+    labelTypes.includes(LabelTypeName.BOX_3D) &&
     labelExport.plane3d !== null &&
     labelExport.plane3d !== undefined
   ) {

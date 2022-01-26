@@ -4,7 +4,6 @@ import { LabelTypeName } from "../../const/common"
 import { makeLabel } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import { IdType, INVALID_ID, ShapeType, State } from "../../types/state"
-import { Box3D } from "./box3d"
 import { Grid3D } from "./grid3d"
 import Label3D from "./label3d"
 import { Label3DList } from "./label3d_list"
@@ -15,9 +14,7 @@ import { Shape3D } from "./shape3d"
  */
 export class Plane3D extends Label3D {
   /** ThreeJS object for rendering shape */
-  private _shape: Grid3D
-  /** temporary shape */
-  private _temporaryLabel: Label3D | null
+  private readonly _shape: Grid3D
 
   /**
    * Constructor
@@ -27,7 +24,45 @@ export class Plane3D extends Label3D {
   constructor(labelList: Label3DList) {
     super(labelList)
     this._shape = new Grid3D(this)
-    this._temporaryLabel = null
+  }
+
+  /**
+   * Initialize label
+   *
+   * @param {State} state
+   * @param itemIndex
+   * @param _category
+   * @param center
+   * @param orientation
+   * @param sensors
+   */
+  public init(
+    itemIndex: number,
+    _category: number,
+    center?: Vector3D,
+    orientation?: Vector3D,
+    sensors?: number[]
+  ): void {
+    if (sensors === null || sensors === undefined || sensors.length === 0) {
+      sensors = [-1]
+    }
+
+    this._label = makeLabel({
+      type: LabelTypeName.PLANE_3D,
+      id: INVALID_ID,
+      item: itemIndex,
+      category: [],
+      sensors,
+      shapes: [this._shape.shapeId]
+    })
+    if (center !== undefined && center !== null) {
+      // this._shape.center = center
+      this._shape.position.copy(center.toThree())
+    }
+
+    this._shape.rotation.copy(
+      (orientation ?? new Vector3D(Math.PI / 2, 0, 0)).toThreeEuler()
+    )
   }
 
   /** Override set selected method */
@@ -63,31 +98,8 @@ export class Plane3D extends Label3D {
 
   /**
    * Handle mouse move
-   *
-   * @param projection
-   * @param x
-   * @param y
-   * @param camera
    */
-  public onMouseDown(x: number, y: number, camera: THREE.Camera): boolean {
-    if (
-      (this.selected || this.anyChildSelected()) &&
-      this._labelList.currentLabelType === LabelTypeName.BOX_3D
-    ) {
-      this._temporaryLabel = new Box3D(this._labelList)
-      this._temporaryLabel.init(
-        this._label.item,
-        0,
-        undefined,
-        this._label.sensors,
-        true
-      )
-      this.addChild(this._temporaryLabel)
-      for (const shape of this._temporaryLabel.internalShapes()) {
-        this._labelList.scene.add(shape)
-      }
-      return this._temporaryLabel.onMouseDown(x, y, camera)
-    }
+  public onMouseDown(): boolean {
     return false
   }
 
@@ -96,25 +108,12 @@ export class Plane3D extends Label3D {
    *
    * @param projection
    */
-  public onMouseUp(): void {
-    if (this._temporaryLabel !== null) {
-      this._temporaryLabel.onMouseUp()
-      this._temporaryLabel = null
-    }
-  }
+  public onMouseUp(): void {}
 
   /**
    * Handle mouse move
-   *
-   * @param projection
-   * @param x
-   * @param y
-   * @param camera
    */
-  public onMouseMove(x: number, y: number, camera: THREE.Camera): boolean {
-    if (this._temporaryLabel !== null) {
-      return this._temporaryLabel.onMouseMove(x, y, camera)
-    }
+  public onMouseMove(): boolean {
     return false
   }
 
@@ -179,6 +178,11 @@ export class Plane3D extends Label3D {
     return this._shape.quaternion
   }
 
+  /** rotation of plane */
+  public get rotation(): THREE.Euler {
+    return this._shape.rotation
+  }
+
   /** scale of plane */
   public get size(): THREE.Vector3 {
     return this._shape.scale
@@ -220,48 +224,12 @@ export class Plane3D extends Label3D {
   ): void {
     super.updateState(state, itemIndex, labelId)
 
+    const label = state.task.items[itemIndex].labels[labelId]
     this._shape.updateState(
-      state.task.items[itemIndex].shapes[this._label.shapes[0]],
-      this._label.shapes[0],
+      state.task.items[itemIndex].shapes[label.shapes[0]],
+      label.shapes[0],
       activeCamera
     )
-
-    const currentChildren = [...this._children]
-    for (const child of currentChildren) {
-      if (!this._label.children.includes(child.labelId)) {
-        this.removeChild(child)
-        for (const shape of child.internalShapes()) {
-          this._shape.remove(shape)
-        }
-      }
-    }
-  }
-
-  /**
-   * Initialize label
-   *
-   * @param {State} state
-   * @param itemIndex
-   * @param category
-   * @param center
-   * @param sensors
-   */
-  public init(
-    itemIndex: number,
-    category: number,
-    center?: Vector3D,
-    sensors?: number[]
-  ): void {
-    this._label = makeLabel({
-      type: LabelTypeName.PLANE_3D,
-      id: INVALID_ID,
-      item: itemIndex,
-      category: [category],
-      sensors
-    })
-    if (center !== undefined) {
-      this._shape.center = center
-    }
   }
 
   /**
@@ -279,10 +247,23 @@ export class Plane3D extends Label3D {
      * Also store the shape id properly so that the generated shape state has
      * the right id directly.
      */
+    if (this._label === null || this._label === undefined) {
+      throw new Error("Uninitialized label")
+    }
     const shape = this._shape.toState()
     if (!this._temporary) {
       shape.id = this._label.shapes[0]
     }
     return [shape]
+  }
+
+  /** Get visible */
+  public get visible(): boolean {
+    return this._shape.lines.visible
+  }
+
+  /** Set visible */
+  public set visible(v: boolean) {
+    this._shape.lines.visible = v
   }
 }

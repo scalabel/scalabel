@@ -1,8 +1,12 @@
 import { withStyles } from "@material-ui/styles"
-import React from "react"
+import * as React from "react"
+import * as THREE from "three"
 
 import { changeViewerConfig } from "../action/common"
 import Session from "../common/session"
+import { LabelTypeName } from "../const/common"
+import { Grid3D } from "../drawable/3d/grid3d"
+import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { viewerStyles } from "../styles/viewer"
 import {
   HomographyViewerConfigType,
@@ -11,11 +15,71 @@ import {
 import { SCROLL_ZOOM_RATIO } from "../view_config/image"
 import { DrawableViewer, ViewerProps } from "./drawable_viewer"
 import HomographyCanvas from "./homography_canvas"
+import Label3dCanvas from "./label3d_canvas"
 
 /**
  * Viewer for images and 2d labels
  */
 class HomographyViewer extends DrawableViewer<ViewerProps> {
+  /** Intrinsic camera */
+  private readonly _camera: IntrinsicCamera
+
+  /**
+   * Constructor
+   *
+   * @param {Object} props: react props
+   * @param props
+   */
+  constructor(props: ViewerProps) {
+    super(props)
+    this._camera = new IntrinsicCamera()
+    this._camera.up = new THREE.Vector3(0, -1, 0)
+    this._camera.lookAt(new THREE.Vector3(0, 0, 1))
+  }
+
+  /** Component update function */
+  public componentDidUpdate(): void {
+    if (this._viewerConfig !== null) {
+      if (this._container !== null) {
+        const displayRect = this._container.getBoundingClientRect()
+        this._camera.width = displayRect.width
+        this._camera.height = displayRect.height
+        this._camera.intrinsics = {
+          focalLength: {
+            x: displayRect.width,
+            y: displayRect.height
+          },
+          focalCenter: {
+            x: displayRect.width / 2,
+            y: displayRect.height / 2
+          }
+        }
+      }
+
+      const state = Session.getState()
+      const labels = Session.label3dList.labels()
+      const plane =
+        labels.filter(
+          (l) =>
+            l.item === state.user.select.item &&
+            l.label.type === LabelTypeName.PLANE_3D
+        )[0] ?? null
+
+      if (plane !== null) {
+        const grid = plane.internalShapes()[0] as Grid3D
+        const normal = new THREE.Vector3(0, 0, 1)
+        normal.applyQuaternion(grid.quaternion)
+        normal.setLength(50)
+        const position = grid.position.clone()
+        position.add(normal)
+        this._camera.up = new THREE.Vector3(0, 0, 1)
+        this._camera.position.copy(position)
+        this._camera.lookAt(grid.position)
+      }
+      this._camera.calculateProjectionMatrix()
+    }
+  }
+
   /**
    * Render function
    *
@@ -36,6 +100,14 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
           key={`homographyCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
+        />
+      )
+      views.push(
+        <Label3dCanvas
+          key={`label3dCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+          camera={this._camera}
         />
       )
     }

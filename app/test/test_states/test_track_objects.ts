@@ -1,4 +1,4 @@
-import { AttributeToolType } from "../../src/const/common"
+import { AttributeToolType, ViewerConfigTypeName } from "../../src/const/common"
 import { DeepPartialState } from "../../src/types/state"
 
 export const testJson: DeepPartialState = {
@@ -633,7 +633,12 @@ export const testJson: DeepPartialState = {
         }
       }
     },
-    viewerConfigs: []
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.IMAGE,
+        sensor: -1
+      }
+    }
   },
   session: {
     id: "",
@@ -669,6 +674,145 @@ export const testJson: DeepPartialState = {
           "-1": false
         }
       }
+    ]
+  }
+}
+
+export const testJson3DTracking: DeepPartialState = {
+  task: {
+    config: {
+      projectName: "Redux0",
+      itemType: "pointcloud",
+      labelTypes: ["box3d"],
+      label2DTemplates: {},
+      policyTypes: ["linear_interpolation_box_3d"],
+      tracking: true,
+      taskSize: 5,
+      handlerUrl: "label3dv2",
+      pageTitle: "Scalabel Annotation",
+      instructionPage: "undefined",
+      demoMode: false,
+      attributes: [
+        {
+          name: "Occluded",
+          type: AttributeToolType.SWITCH,
+          tag: "o"
+        },
+        {
+          name: "Truncated",
+          type: AttributeToolType.SWITCH,
+          tag: "t"
+        }
+      ],
+      taskId: "000000"
+    },
+    items: [
+      {
+        id: "id0",
+        index: 0,
+        urls: {
+          "-1":
+            "https://s3-us-west-2.amazonaws.com" +
+            "/scalabel-public/demo/luminar/1525401598139528987.ply"
+        },
+        labels: {}
+      },
+      {
+        id: "1",
+        index: 1,
+        urls: {
+          "-1":
+            "https://s3-us-west-2.amazonaws.com" +
+            "/scalabel-public/demo/luminar/1525401599138308593.ply"
+        },
+        labels: {}
+      },
+      {
+        id: "id2",
+        index: 2,
+        urls: {
+          "-1":
+            "https://s3-us-west-2.amazonaws.com" +
+            "/scalabel-public/demo/luminar/1525401600135798773.ply"
+        },
+        labels: {}
+      },
+      {
+        id: "id3",
+        index: 3,
+        urls: {
+          "-1":
+            "https://s3-us-west-2.amazonaws.com" +
+            "/scalabel-public/demo/luminar/1525401601134108834.ply"
+        },
+        labels: {}
+      },
+      {
+        id: "abc",
+        index: 4,
+        urls: {
+          "-1":
+            "https://s3-us-west-2.amazonaws.com" +
+            "/scalabel-public/demo/luminar/1525401602133158775.ply"
+        },
+        labels: {}
+      }
+    ],
+    tracks: {},
+    sensors: {
+      "-1": {
+        id: -1,
+        name: "default",
+        type: "pointcloud"
+      }
+    },
+    progress: {
+      submissions: []
+    }
+  },
+  user: {
+    id: "",
+    select: {
+      item: 0,
+      labels: {},
+      shapes: {},
+      category: 0,
+      attributes: {},
+      labelType: 0,
+      policyType: 0
+    },
+    layout: {
+      toolbarWidth: 200,
+      maxViewerConfigId: 0,
+      maxPaneId: 0,
+      rootPane: 0,
+      panes: {
+        0: {
+          id: 0,
+          viewerId: 0,
+          parent: -1,
+          hide: false,
+          numHorizontalChildren: 0,
+          numVerticalChildren: 0
+        }
+      }
+    },
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.POINT_CLOUD,
+        sensor: -1
+      }
+    }
+  },
+  session: {
+    id: "",
+    startTime: 0,
+    itemStatuses: [
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} },
+      { sensorDataLoaded: {} }
     ]
   }
 }
@@ -884,7 +1028,12 @@ export const emptyTrackingTask: DeepPartialState = {
         }
       }
     },
-    viewerConfigs: []
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.IMAGE,
+        sensor: -1
+      }
+    }
   },
   session: {
     id: "",

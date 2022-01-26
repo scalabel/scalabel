@@ -14,5 +14,6 @@ export const enum FormField {
   SENSORS = "sensors",
   LABEL_SPEC = "label_spec",
   SINGLE_FILE = "single_file",
-  DATASET = "dataset"
+  DATASET = "dataset",
+  KEY_INTERVAL = "key_interval"
 }

@@ -1,5 +1,6 @@
 import {
   Attribute,
+  Category,
   ConfigType,
   ItemType,
   TaskStatus,
@@ -154,11 +155,11 @@ export interface LabelExport {
 
 export interface ConfigExport {
   /** image sizes */
-  image_size?: ImageSizeType
+  imageSize?: ImageSizeType
   /** attributes */
   attributes?: Attribute[]
   /** categories */
-  categories: string[]
+  categories: Category[]
   /** sensors */
   sensors?: SensorExportType[]
 }
