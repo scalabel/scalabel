@@ -231,11 +231,9 @@ export class Label3DHandler {
    * Get axes for viewer type. Returns axes in order: up, forward, right
    */
   private getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
-    const config = this._viewerConfig as
-      | PointCloudViewerConfigType
-      | Image3DViewerConfigType
-    const forward = new Vector3D().fromState(config.target).normalize()
-    const up = new Vector3D().fromState(config.verticalAxis).normalize()
+    const mainSensor = getMainSensor(this._state)
+    const forward = new Vector3D().fromThree(mainSensor.forward).normalize()
+    const up = new Vector3D().fromThree(mainSensor.up).normalize()
     const left = up.clone().cross(forward).normalize()
     return {
       up,
