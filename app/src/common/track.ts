@@ -3,6 +3,7 @@ import _ from "lodash"
 import { TrackInterp } from "../auto/track/interp/interp"
 import { Box2DLinearInterp } from "../auto/track/interp/linear/box2d"
 import { Box3DLinearInterp } from "../auto/track/interp/linear/box3d"
+import { Plane3DLinearInterp } from "../auto/track/interp/linear/plane3d"
 import { Points2DLinearInterp } from "../auto/track/interp/linear/points2d"
 import { LabelTypeName, TrackPolicyType } from "../const/common"
 import Label2D from "../drawable/2d/label2d"
@@ -61,6 +62,8 @@ function linearInterpolationPolicyFactory(type: string): TrackInterp {
     case LabelTypeName.POLYGON_2D:
     case LabelTypeName.POLYLINE_2D:
       return new Points2DLinearInterp()
+    case LabelTypeName.PLANE_3D:
+      return new Plane3DLinearInterp()
     default:
       throw new Error(`Unknown policy type ${type}`)
   }

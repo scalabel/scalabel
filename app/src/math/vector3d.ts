@@ -162,4 +162,12 @@ export class Vector3D extends Vector {
     }
     return this
   }
+
+  /** Absolute value */
+  public abs(): this {
+    this[0] = Math.abs(this[0])
+    this[1] = Math.abs(this[1])
+    this[2] = Math.abs(this[2])
+    return this
+  }
 }

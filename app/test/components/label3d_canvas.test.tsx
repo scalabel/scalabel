@@ -43,7 +43,10 @@ beforeEach(() => {
   Session.subscribe(() => Session.label3dList.updateState(Session.getState()))
   Session.activeViewerId = canvasId
   Session.pointClouds.length = 0
-  Session.pointClouds.push({ [-1]: new THREE.BufferGeometry() })
+  const geometry = new THREE.BufferGeometry()
+  const points = [0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1]
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3))
+  Session.pointClouds.push({ [-1]: geometry })
   Session.dispatch(action.loadItem(0, -1))
 })
 
@@ -153,8 +156,8 @@ test("Add 3d bbox", () => {
 
   canvas.onKeyDown(spaceEvent)
   let state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(1)
-  let labelId = Object.keys(state.task.items[0].labels)[0]
+  expect(_.size(state.task.items[0].labels)).toEqual(2)
+  let labelId = Object.keys(state.task.items[0].labels)[1]
   let cube = getShape(state, 0, labelId, 0) as CubeType
   let canvasConfig = getCurrentViewerConfig(
     state,
@@ -185,7 +188,7 @@ test("Add 3d bbox", () => {
 
     canvas.onKeyDown(spaceEvent)
     state = Session.getState()
-    expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
+    expect(_.size(state.task.items[0].labels)).toEqual(i + 2)
     Object.keys(state.task.items[0].labels).forEach((id) => {
       if (!visited.has(id)) {
         labelId = id
@@ -231,9 +234,9 @@ test("Move axis aligned 3d bbox along z axis", () => {
   const spaceEvent = new KeyboardEvent("keydown", { key: " " })
   canvas.onKeyDown(spaceEvent)
   state = Session.getState()
-  expect(_.size(state.task.items[0].labels)).toEqual(1)
+  expect(_.size(state.task.items[0].labels)).toEqual(2)
 
-  const labelId = Object.keys(state.task.items[0].labels)[0]
+  const labelId = Object.keys(state.task.items[0].labels)[1]
   Session.dispatch(selectLabel(state.user.select.labels, 0, labelId))
 
   const tEvent = new KeyboardEvent("keydown", { key: "t" })

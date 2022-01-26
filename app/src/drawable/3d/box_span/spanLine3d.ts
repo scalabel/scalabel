@@ -15,6 +15,8 @@ export class SpanLine3D {
   private readonly _color: number
   /** line width */
   private readonly _lineWidth: number
+  /** line object */
+  private _line: THREE.Object3D | null
 
   /**
    * Constructor
@@ -27,6 +29,18 @@ export class SpanLine3D {
     this._p2 = p2
     this._color = 0x00ff00
     this._lineWidth = 0.1
+    this._line = null
+  }
+
+  /**
+   * Remove line from Three.js scene
+   *
+   * @param scene
+   */
+  public removeFromScene(scene: THREE.Scene): void {
+    if (this._line !== null) {
+      scene.remove(this._line)
+    }
   }
 
   /**
@@ -46,69 +60,29 @@ export class SpanLine3D {
       color: this._color,
       linewidth: this._lineWidth
     })
-    const line = new THREE.Line(geometry, material)
-    scene.add(line)
+    this._line = new THREE.Line(geometry, material)
+    scene.add(this._line)
   }
 
   /**
    * align point to unit normal
    *
    * @param point
+   * @param plane
    */
-  public alignPointToNormal(point: Vector3D): Vector3D {
-    const unitNormal = this.calculateUnitNormal()
-    const footPerpendicular = this.footPerpendicular(point, unitNormal)
-    return footPerpendicular
-  }
-
-  /**
-   * calculate unit normal of line
-   *
-   * @param point
-   */
-  private calculateUnitNormal(): Vector3D {
-    const [v1, v2] = [this._p1, this._p2].map((p) => p.toVector3D())
-    const v12 = v2.clone().subtract(v1)
-    return new Vector3D(-v12.y, v12.x, 0).normalize()
-  }
-
-  /**
-   * calculate perpendicular distance between point and normal of line
-   *
-   * @param point
-   * @param unitNormal
-   */
-  private perpendicularDist(point: Vector3D, unitNormal: Vector3D): number {
-    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-    const vTmp = point.clone().subtract(v2)
-    const perpendicularDist = vTmp.clone().cross(unitNormal).magnitude()
-    return perpendicularDist
-  }
-
-  /**
-   * calculate foot of perpendicular between point and normal of line
-   *
-   * @param point
-   * @param unitNormal
-   */
-  private footPerpendicular(point: Vector3D, unitNormal: Vector3D): Vector3D {
-    const v2 = new Vector3D(this._p2.x, this._p2.y, this._p2.z)
-    const perpendicularDist = this.perpendicularDist(point, unitNormal)
-    const dTmp = point.clone().distanceTo(v2)
-    const dist = Math.sqrt(dTmp * dTmp - perpendicularDist * perpendicularDist)
-    const normalDist = unitNormal.clone()
-    normalDist.multiplyScalar(dist)
-    let footPerpendicular = v2.clone().add(normalDist)
-    const dPoint = point.distanceTo(footPerpendicular)
-
-    // flip normal if it is not facing the right direction
-    const errorDeg = 0.01
-    if (
-      Math.abs(dPoint - this.perpendicularDist(point, unitNormal)) > errorDeg
-    ) {
-      normalDist.multiplyScalar(-1)
-      footPerpendicular = v2.clone().add(normalDist)
-    }
-    return footPerpendicular
+  public alignPointToNormal(point: Vector3D, plane: THREE.Plane): Vector3D {
+    const [first, second] = [this._p1, this._p2].map((p) =>
+      p.toVector3D().toThree()
+    )
+    const firstToSecond = second.clone().sub(first)
+    const normal = plane.normal
+    const cross = new THREE.Vector3()
+    cross.crossVectors(normal, firstToSecond)
+    cross.setLength(1)
+    const perpendicularPlane = new THREE.Plane()
+    perpendicularPlane.setFromNormalAndCoplanarPoint(cross, first)
+    const distance = perpendicularPlane.distanceToPoint(point.toThree())
+    const p3 = second.clone().add(cross.clone().setLength(distance))
+    return new Vector3D(p3.x, p3.y, p3.z)
   }
 }

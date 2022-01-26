@@ -5,7 +5,6 @@ import * as THREE from "three"
 
 import Session from "../common/session"
 import { LabelTypeName } from "../const/common"
-import { Grid3D } from "../drawable/3d/grid3d"
 import { Plane3D } from "../drawable/3d/plane3d"
 import { isCurrentFrameLoaded, isFrameLoaded } from "../functional/state_util"
 import { imageViewStyle } from "../styles/label"
@@ -15,41 +14,6 @@ import { ImageCanvas, Props } from "./image_canvas"
 import { mapStateToDrawableProps } from "./viewer"
 
 /**
- * Get basis matrix for use with homography
- *
- * @param homogeneousPoints
- */
-function getBasisMatrix(homogeneousPoints: THREE.Vector3[]): THREE.Matrix3 {
-  const homogeneousMatrix = new THREE.Matrix3()
-
-  for (let i = 0; i < 3; i++) {
-    const offset = i * 3
-    homogeneousMatrix.elements[offset] = homogeneousPoints[i].x
-    homogeneousMatrix.elements[offset + 1] = homogeneousPoints[i].y
-    homogeneousMatrix.elements[offset + 2] = 1
-  }
-
-  const homogeneousInverse = new THREE.Matrix3()
-  homogeneousInverse.getInverse(homogeneousMatrix)
-
-  const target = new THREE.Vector3()
-  target.copy(homogeneousPoints[3])
-  target.applyMatrix3(homogeneousInverse)
-  const scalars = target.toArray()
-
-  const basis = new THREE.Matrix3()
-  basis.copy(homogeneousMatrix)
-
-  for (let i = 0; i < 9; i += 3) {
-    for (let j = 0; j < 3; j++) {
-      basis.elements[i + j] *= scalars[i / 3]
-    }
-  }
-
-  return basis
-}
-
-/**
  * Component for displaying birds eye view homography
  */
 class HomographyCanvas extends ImageCanvas {
@@ -57,10 +21,12 @@ class HomographyCanvas extends ImageCanvas {
   private _image?: HTMLImageElement
   /** selected plane */
   private _plane: Plane3D | null
+  /** previous plane state */
+  private _planeState: string
+  /** updated */
+  private _updated: boolean
   /** intrinsic matrix */
-  private readonly _intrinsicProjection: THREE.Matrix3
-  /** inverse of intrinsic */
-  private readonly _intrinsicInverse: THREE.Matrix3
+  private readonly _intrinsicMatrix: THREE.Matrix4
   /** homography matrix */
   private readonly _homographyMatrix: THREE.Matrix3
   /** canvas for drawing image & getting colors */
@@ -69,6 +35,8 @@ class HomographyCanvas extends ImageCanvas {
   private _hiddenContext: CanvasRenderingContext2D | null
   /** image data */
   private _imageData: Uint8ClampedArray | null
+  /** image canvas width */
+  private _canvasWidth: number
 
   /**
    * Constructor
@@ -78,12 +46,14 @@ class HomographyCanvas extends ImageCanvas {
   constructor(props: Props) {
     super(props)
     this._plane = null
-    this._intrinsicProjection = new THREE.Matrix3()
-    this._intrinsicInverse = new THREE.Matrix3()
+    this._intrinsicMatrix = new THREE.Matrix4()
     this._homographyMatrix = new THREE.Matrix3()
     this._hiddenCanvas = document.createElement("canvas")
     this._hiddenContext = null
     this._imageData = null
+    this._planeState = ""
+    this._updated = false
+    this._canvasWidth = 0
   }
 
   /**
@@ -100,6 +70,10 @@ class HomographyCanvas extends ImageCanvas {
         ref={(canvas) => {
           if (canvas !== null && this.display !== null) {
             this.imageCanvas = canvas
+            if (canvas.width !== this._canvasWidth) {
+              this._canvasWidth = canvas.width
+              this._updated = true
+            }
             this.imageContext = canvas.getContext("2d")
             const displayRect = this.display.getBoundingClientRect()
             const item = this.state.user.select.item
@@ -149,7 +123,10 @@ class HomographyCanvas extends ImageCanvas {
         this._image = Session.images[item][sensor]
         // Redraw imageCanvas
         if (this._plane !== null) {
-          this.drawHomography()
+          if (this._updated) {
+            this.drawHomography()
+            this._updated = false
+          }
         } else {
           drawImageOnCanvas(this.imageCanvas, this.imageContext, this._image)
         }
@@ -161,6 +138,44 @@ class HomographyCanvas extends ImageCanvas {
   }
 
   /**
+   * Update homography matrix
+   *
+   * @param state
+   */
+  protected updateHomography(state: State): void {
+    const sensorId = Object.keys(state.task.sensors).map((key) =>
+      parseInt(key)
+    )[0]
+
+    const sensor = this.state.task.sensors[sensorId]
+    const intrinsics = sensor?.intrinsics ?? null
+    if (this._plane !== null && intrinsics !== null) {
+      // Set intrinsics
+      const fx = intrinsics.focalLength.x
+      const cx = intrinsics.focalCenter.x
+      const fy = intrinsics.focalLength.y
+      const cy = intrinsics.focalCenter.y
+      const intrinsicArr = [fx, 0, 0, 0, 0, fy, 0, 0, cx, cy, 1, 0, 0, 0, 0, 0]
+      this._intrinsicMatrix.fromArray(intrinsicArr)
+
+      const grid = this._plane.internalShapes()[0]
+      const matrix = new THREE.Matrix4()
+      matrix.makeRotationFromQuaternion(grid.quaternion)
+      matrix.setPosition(grid.position.x, grid.position.y, grid.position.z)
+
+      const extrinsics = new THREE.Matrix4()
+      extrinsics.copy(matrix)
+
+      const projection = new THREE.Matrix4()
+      projection.multiplyMatrices(this._intrinsicMatrix, extrinsics)
+      const projArray = projection.toArray()
+      const indices = [0, 1, 2, 4, 5, 6, 12, 13, 14]
+      const homographyValues = indices.map((i) => projArray[i])
+      this._homographyMatrix.fromArray(homographyValues)
+    }
+  }
+
+  /**
    * Override update state function
    *
    * @param state
@@ -168,17 +183,30 @@ class HomographyCanvas extends ImageCanvas {
   protected updateState(state: State): void {
     super.updateState(state)
 
-    const selectedLabel = Session.label3dList.selectedLabel
-    if (
-      selectedLabel !== null &&
-      selectedLabel.label.type === LabelTypeName.PLANE_3D
-    ) {
-      this._plane = selectedLabel as Plane3D
+    const labels = Session.label3dList.labels()
+    const plane =
+      labels.filter(
+        (l) =>
+          l.item === state.user.select.item &&
+          l.label.type === LabelTypeName.PLANE_3D
+      )[0] ?? null
+    if (plane !== null) {
+      this._plane = plane as Plane3D
+      const planeState = JSON.stringify(plane.internalShapes()[0].toState())
+      if (this._planeState !== planeState) {
+        this._updated = true
+        this._planeState = planeState
+      }
+    } else {
+      this._plane = null
+      this._planeState = ""
+      this._updated = true
     }
 
     if (
       this._plane !== null &&
-      this.props.id in this.state.user.viewerConfigs
+      this.props.id in this.state.user.viewerConfigs &&
+      this._updated
     ) {
       const viewerConfig = this.state.user.viewerConfigs[
         this.props.id
@@ -205,71 +233,8 @@ class HomographyCanvas extends ImageCanvas {
         }
       }
 
-      if (this._image !== null && sensorId in this.state.task.sensors) {
-        const sensor = this.state.task.sensors[sensorId]
-        if (
-          sensor.intrinsics !== null &&
-          sensor.intrinsics !== undefined &&
-          sensor.extrinsics !== null &&
-          sensor.extrinsics !== undefined &&
-          isCurrentFrameLoaded(state, sensorId)
-        ) {
-          const image = Session.images[item][sensorId]
-
-          // Set intrinsics
-          const intrinsics = sensor.intrinsics
-          const fx = intrinsics.focalLength.x / image.width
-          const cx = intrinsics.focalCenter.x / image.width
-          const fy = intrinsics.focalLength.y / image.height
-          const cy = intrinsics.focalCenter.y / image.height
-          this._intrinsicProjection.set(fx, 0, cx, 0, fy, cy, 0, 0, 1)
-          this._intrinsicInverse.getInverse(this._intrinsicProjection)
-
-          // Extrinsics
-          const extrinsicTranslation = new THREE.Vector3(
-            sensor.extrinsics.translation.x,
-            sensor.extrinsics.translation.y,
-            sensor.extrinsics.translation.z
-          )
-          const extrinsicQuaternion = new THREE.Quaternion(
-            sensor.extrinsics.rotation.x,
-            sensor.extrinsics.rotation.y,
-            sensor.extrinsics.rotation.z,
-            sensor.extrinsics.rotation.w
-          )
-          const extrinsicQuaternionInverse = extrinsicQuaternion.invert()
-
-          const grid = this._plane.internalShapes()[0] as Grid3D
-
-          const sourcePoints = []
-          for (let y = 0.5; y >= -0.5; y--) {
-            for (let x = 0.5; x >= -0.5; x--) {
-              const point = new THREE.Vector3(y, x, 0)
-              point.applyMatrix4(grid.matrixWorld)
-              point.sub(extrinsicTranslation)
-              point.applyQuaternion(extrinsicQuaternionInverse)
-              point.applyMatrix3(this._intrinsicProjection)
-              point.multiplyScalar(1.0 / point.z)
-              sourcePoints.push(point)
-            }
-          }
-          const sourceBasis = getBasisMatrix(sourcePoints)
-          const sourceBasisInverse = new THREE.Matrix3()
-          sourceBasisInverse.getInverse(sourceBasis)
-
-          const destinationPoints = [
-            new THREE.Vector3(0, 0, 1),
-            new THREE.Vector3(1, 0, 1),
-            new THREE.Vector3(0, 1, 1),
-            new THREE.Vector3(1, 1, 1)
-          ]
-          const destinationBasis = getBasisMatrix(destinationPoints)
-
-          this._homographyMatrix.multiplyMatrices(
-            destinationBasis,
-            sourceBasisInverse
-          )
-        }
+      if (isCurrentFrameLoaded(state, sensorId)) {
+        this.updateHomography(state)
       }
     }
   }
@@ -281,52 +246,53 @@ class HomographyCanvas extends ImageCanvas {
     if (
       this.imageCanvas !== null &&
       this.imageContext !== null &&
-      this._imageData !== null
+      this._imageData !== null &&
+      this._plane !== null &&
+      this._image !== null
     ) {
-      if (this._plane !== null && this._image !== null) {
-        const homographyData = this.imageContext.createImageData(
-          this.imageCanvas.width,
-          this.imageCanvas.height
-        )
-        const homographyInverse = new THREE.Matrix3()
-        homographyInverse.getInverse(this._homographyMatrix)
-        for (let dstX = 0; dstX < this.imageCanvas.width; dstX++) {
-          for (let dstY = 0; dstY < this.imageCanvas.height; dstY++) {
-            // Get source coordinates
-            const src = new THREE.Vector3(
-              dstX / this.imageCanvas.width,
-              dstY / this.imageCanvas.height,
-              1
-            )
-            // Src.applyMatrix3(this._intrinsicInverse)
-            src.applyMatrix3(homographyInverse)
-            // Src.applyMatrix3(this._intrinsicProjection)
-            src.multiplyScalar(1 / src.z)
+      const homographyData = this.imageContext.createImageData(
+        this.imageCanvas.width,
+        this.imageCanvas.height
+      )
 
-            const srcX = Math.floor(src.x * this._hiddenCanvas.width)
-            const srcY = Math.floor(src.y * this._hiddenCanvas.height)
+      const width = 50
+      const height = 50
+      for (let dstX = 0; dstX < this.imageCanvas.width; dstX++) {
+        for (let dstY = 0; dstY < this.imageCanvas.height; dstY++) {
+          // Get source coordinates
+          const src = new THREE.Vector3(
+            (dstX * width) / this.imageCanvas.width - width / 2,
+            (dstY * height) / this.imageCanvas.height - height / 2,
+            1
+          )
+          src.applyMatrix3(this._homographyMatrix)
+          const z = src.z
+          src.multiplyScalar(1 / z)
 
-            if (
-              srcX >= 0 &&
-              srcY >= 0 &&
-              srcX < this._hiddenCanvas.width &&
-              srcY < this._hiddenCanvas.height
-            ) {
-              const imageStart = (srcY * this._hiddenCanvas.width + srcX) * 4
-              const homographyStart = (dstY * this.imageCanvas.width + dstX) * 4
-              for (let i = 0; i < 4; i++) {
-                homographyData.data[homographyStart + i] = this._imageData[
-                  imageStart + i
-                ]
-              }
+          const srcX = Math.floor(src.x)
+          const srcY = Math.floor(src.y)
+          if (
+            z > 0 &&
+            srcX >= 0 &&
+            srcY >= 0 &&
+            srcX < this._hiddenCanvas.width &&
+            srcY < this._hiddenCanvas.height
+          ) {
+            const imageStart = (srcY * this._hiddenCanvas.width + srcX) * 4
+            const homographyStart =
+              ((this.imageCanvas.height - dstY - 1) * this.imageCanvas.width +
+                dstX) *
+              4
+            for (let i = 0; i < 4; i++) {
+              homographyData.data[homographyStart + i] = this._imageData[
+                imageStart + i
+              ]
             }
           }
         }
-
-        this.imageContext.putImageData(homographyData, 0, 0)
-      } else {
-        clearCanvas(this.imageCanvas, this.imageContext)
       }
+
+      this.imageContext.putImageData(homographyData, 0, 0)
     }
   }
 }

@@ -228,6 +228,10 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+  /** Viewing direction */
+  target: Vector3Type
+  /** Up direction of the camera */
+  verticalAxis: Vector3Type
 }
 
 export interface HomographyViewerConfigType extends Image3DViewerConfigType {
@@ -536,8 +540,6 @@ export interface Info3DType {
   boxSpan: Span3D | null
   /** Ground plane toggled */
   showGroundPlane: boolean
-  /** Ground plane */
-  groundPlane: number[] | null
 }
 
 /**
