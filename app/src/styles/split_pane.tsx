@@ -34,7 +34,6 @@ export const paneBarStyles = (): StyleRules<
       border: "1px solid #ced4da",
       color: "#ced4da",
       borderRadius: 4,
-      // padding: "0px 12px 0px 12px",
       height: "100%",
       "z-index": 1001,
       margin: "0px 0px 0px 20px",

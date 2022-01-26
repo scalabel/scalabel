@@ -674,7 +674,6 @@ export async function createTasks(
 
   const items = filterInvalidItems(project.items, itemType, sensors)
 
-  console.log("project", project)
   // Update sensor info
   if (itemType !== ItemTypeName.FUSION) {
     if (Object.keys(sensors).length === 0) {
@@ -707,7 +706,6 @@ export async function createTasks(
       }
     }
   }
-  console.log("updated sensors", sensors)
 
   const itemGroups = makeItemGroups(items, project.itemGroups)
   const itemGroupIndices = partitionItemsIntoTasks(

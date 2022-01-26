@@ -262,7 +262,6 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
    */
   private renderThree(): void {
     if (this.renderer !== undefined && this.pointCloud.geometry !== undefined) {
-      console.log("rendering!")
       this.scene.children = []
       this.scene.add(this.pointCloud)
 
