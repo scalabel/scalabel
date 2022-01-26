@@ -574,10 +574,8 @@ class Viewer3D extends DrawableViewer<Props> {
           className={this.props.classes.viewer_button}
           onClick={() => {
             const colorSchemes = Object.values(ColorSchemeType)
-            const sensorTypes = Object.values(this.state.task.sensors).map(
-              (s) => s.type
-            )
-            if (!sensorTypes.includes(types.DataType.IMAGE)) {
+            const mainSensor = getMainSensor(this.state)
+            if (mainSensor.type === types.DataType.IMAGE) {
               const imageIndex = colorSchemes.indexOf(ColorSchemeType.IMAGE)
               colorSchemes.splice(imageIndex, 1)
             }
