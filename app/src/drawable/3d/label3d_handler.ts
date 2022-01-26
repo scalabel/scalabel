@@ -22,7 +22,6 @@ import {
 import { makePointCloudViewerConfig, makeSensor } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import {
-  Image3DViewerConfigType,
   INVALID_ID,
   PointCloudViewerConfigType,
   SensorType,
