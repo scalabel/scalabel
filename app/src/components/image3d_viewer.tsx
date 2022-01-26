@@ -62,14 +62,14 @@ class Image3DViewer extends Viewer2D {
         const isMainSensor = mainSensor.id === sensorId
         if (!isMainSensor && extrinsics !== null && extrinsics !== undefined) {
           const s = Sensor.fromSensorType(sensorType)
-          const forward = s.rotate(new THREE.Vector3(0, 0, 1))
-          const up = s.rotate(new THREE.Vector3(0, -1, 0))
+          const forward = s.inverseRotate(s.forward)
+          const up = s.inverseRotate(s.up)
           const translation = new THREE.Vector3(
             extrinsics.translation.x,
             extrinsics.translation.y,
             extrinsics.translation.z
           )
-          const newPos = s.rotate(translation).multiplyScalar(-1)
+          const newPos = s.inverseRotate(translation).multiplyScalar(-1)
           this._camera.up.copy(up)
           this._camera.lookAt(forward)
           this._camera.position.copy(newPos)
