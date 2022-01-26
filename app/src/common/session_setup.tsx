@@ -274,7 +274,7 @@ function initViewerConfigs(
         )
       )
       let primarySize = "33%"
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "25%"
       }
       dispatch(
@@ -304,7 +304,7 @@ function initViewerConfigs(
         )
       )
       primarySize = "50%"
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "33%"
       }
       dispatch(
