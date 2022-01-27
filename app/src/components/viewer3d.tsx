@@ -861,7 +861,6 @@ class Viewer3D extends DrawableViewer<Props> {
       ) {
         const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
         this.transformCamera(sensorId)
-        this.cameraTransformed = true
         this.commitCamera()
       }
       this._camera.lookAt(this._target)
@@ -897,6 +896,7 @@ class Viewer3D extends DrawableViewer<Props> {
     this._camera.up.copy(
       mainSensor.inverseTransform(sensor.transform(this._camera.up))
     )
+    this.cameraTransformed = true
   }
 
   /**
