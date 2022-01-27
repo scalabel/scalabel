@@ -381,7 +381,11 @@ export class Label3DHandler {
         const { up, left } = this.getAxes()
         const down = up.toThree().clone().multiplyScalar(-1)
         center = calculatePlaneCenter(estimatedPlane, target.toThree(), down)
-        rotation = calculatePlaneRotation(left.toThree(), estimatedPlane.normal)
+        rotation = calculatePlaneRotation(
+          up.toThree(),
+          left.toThree(),
+          estimatedPlane.normal
+        )
       }
       const label = createPlaneLabel(
         Session.label3dList,
