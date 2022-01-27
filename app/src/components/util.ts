@@ -22,3 +22,13 @@ export function getSubmissionTime(submissions: SubmitData[]): number {
   }
   return -1
 }
+
+/**
+ * Check whether current frame is keyframe
+ *
+ * @param currFrame
+ * @param keyInterval
+ */
+export function isKeyFrame(currFrame: number, keyInterval: number): boolean {
+  return currFrame % keyInterval === 0
+}

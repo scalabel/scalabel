@@ -5,8 +5,9 @@ from collections import defaultdict
 from typing import Dict, List, Tuple, Union
 
 from ..common.io import load_file_as_list
+from ..label.transforms import bbox_to_box2d
 from .io import save
-from .typing import Box2D, Category, Config, Dataset, Frame, Label
+from .typing import Category, Config, Dataset, Frame, Label
 
 # Classes in MOT:
 #   1: 'pedestrian'
@@ -73,9 +74,7 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
         if class_name in IGNORE:
             continue
         frame_id, ins_id = map(int, gt[:2])
-        x1, y1, width, height = tuple(map(float, gt[2:6]))
-        x2, y2 = x1 + width, y1 + height
-        box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+        box2d = bbox_to_box2d(list(map(float, gt[2:6])))
         attrs: Dict[str, Union[bool, float, str]] = dict(
             visibility=float(gt[8])
         )
@@ -138,7 +137,7 @@ def from_mot(
             assert i + 1 == int(img_name.replace(".jpg", ""))
             relative_path = os.path.join(video, "img1", img_name)
             frame = Frame(
-                name=img_name,
+                name=video + "/" + img_name,
                 videoName=video,
                 url=relative_path,
                 frameIndex=i,

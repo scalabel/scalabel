@@ -67,6 +67,8 @@ def frame_to_rle(shape: ImageSize, frame: Frame) -> Frame:
     for label in labels:
         if label.poly2d is None:
             continue
+        for p in label.poly2d:
+            p.closed = True
         filt_labels.append(label)
         poly2ds.append(label.poly2d)
     poly2ds = [label.poly2d for label in labels if label.poly2d is not None]
@@ -85,14 +87,20 @@ def frames_to_rle(
     nproc: int = NPROC,
 ) -> List[Frame]:
     """Execute the rle conversion in parallel."""
-    with Pool(nproc) as pool:
-        frames = pool.starmap(
-            partial(frame_to_rle),
-            tqdm(
-                zip(shapes, frames),
-                total=len(frames),
-            ),
-        )
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            frames = pool.starmap(
+                partial(frame_to_rle),
+                tqdm(
+                    zip(shapes, frames),
+                    total=len(frames),
+                ),
+            )
+    else:
+        frames = [
+            frame_to_rle(shape, frame)
+            for shape, frame in tqdm(zip(shapes, frames), total=len(frames))
+        ]
 
     sorted(frames, key=lambda frame: frame.name)
     return frames

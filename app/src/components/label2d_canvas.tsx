@@ -27,6 +27,9 @@ import {
   DrawableProps,
   mapStateToDrawableProps
 } from "./viewer"
+import { isKeyFrame } from "./util"
+import { alert } from "../common/alert"
+import { Severity } from "../types/common"
 
 interface ClassType {
   /** label canvas */
@@ -267,6 +270,18 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
    */
   public onMouseDown(e: React.MouseEvent<HTMLCanvasElement>): void {
     if (e.button !== 0 || this.checkFreeze()) {
+      return
+    }
+    if (
+      !isKeyFrame(
+        this.state.user.select.item,
+        this.state.task.config.keyInterval
+      )
+    ) {
+      alert(
+        Severity.WARNING,
+        "You can not edit label in non-keyframe, please press CTRL + left/right arrow to the nearest keyframe"
+      )
       return
     }
     // Control + click for dragging

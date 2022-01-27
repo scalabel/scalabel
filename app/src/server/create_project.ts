@@ -88,6 +88,19 @@ export async function parseForm(
     }
   }
 
+  // In tracking case, set the interval between keyframes
+  let keyInterval = 1
+  if (
+    fields[FormField.ITEM_TYPE] === ItemTypeName.VIDEO ||
+    fields[FormField.ITEM_TYPE] === ItemTypeName.POINT_CLOUD_TRACKING
+  ) {
+    if (fields[FormField.KEY_INTERVAL] === "") {
+      throw Error("Please specify a task size")
+    } else {
+      keyInterval = parseInt(fields[FormField.KEY_INTERVAL], 10)
+    }
+  }
+
   // Derived fields
   const pageTitle = getPageTitle(labelType, itemType)
   const instructionUrl = getInstructionUrl(labelType)
@@ -104,6 +117,7 @@ export async function parseForm(
     labelType,
     pageTitle,
     taskSize,
+    keyInterval,
     instructionUrl,
     demoMode
   )
@@ -195,10 +209,6 @@ export async function parseSingleFile(
   )
 
   return await dataset.then((dataset: DatasetExport) => {
-    const categories: Category[] = []
-    dataset.config.categories.forEach((category) =>
-      categories.push({ name: category })
-    )
     return {
       items: dataset.frames as Array<Partial<ItemExport>>,
       itemGroups: dataset.frameGroups !== undefined ? dataset.frameGroups : [],
@@ -206,7 +216,7 @@ export async function parseSingleFile(
         dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
       attributes: (dataset.config.attributes as Attribute[]) ?? [],
-      categories: categories
+      categories: dataset.config.categories
     }
   })
 }
@@ -350,6 +360,7 @@ export async function createProject(
     labelTypes: [form.labelType],
     label2DTemplates: templates,
     taskSize: form.taskSize,
+    keyInterval: form.keyInterval,
     handlerUrl,
     pageTitle: form.pageTitle,
     instructionPage: form.instructionUrl,

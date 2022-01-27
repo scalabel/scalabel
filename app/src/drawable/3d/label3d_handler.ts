@@ -37,9 +37,9 @@ import { Span3D } from "./box_span/span3d"
 import {
   calculatePlaneCenter,
   calculatePlaneRotation,
-  estimateGroundPlane,
   getMainSensor,
-  transformPointCloud
+  transformPointCloud,
+  estimateGroundPlane
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 
@@ -331,13 +331,6 @@ export class Label3DHandler {
         groundPlane.visible = false
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
-        )
-        Session.dispatch(
-          selectLabel(
-            Session.label3dList.selectedLabelIds,
-            this._selectedItemIndex,
-            groundPlane.labelId
-          )
         )
       } else {
         groundPlane.visible = true

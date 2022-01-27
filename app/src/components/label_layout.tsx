@@ -222,6 +222,7 @@ class LabelLayout extends React.Component<Props, LayoutState> {
       <PlayerControl
         key="player-control"
         numFrames={Session.getState().task.items.length}
+        keyInterval={Session.getState().task.config.keyInterval}
       />
     )
 
