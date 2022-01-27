@@ -16,7 +16,8 @@ const errorHandler =
   (config: ServerConfig) =>
   (error: HttpException, _request: Request, response: Response) => {
     const status = error.status !== 0 ? error.status : 500
-    const message = error.message !== "" ? error.message : "Something went wrong"
+    const message =
+      error.message !== "" ? error.message : "Something went wrong"
     const resData: { [k: string]: string } = {
       code: status.toString(),
       data: message
