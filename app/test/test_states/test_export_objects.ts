@@ -389,7 +389,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [2.921483, 0.755883, 6.348542],
         dimension: [1.50992, 1.85, 4.930564],
-        orientation: [0, -1.570796, 0]
+        orientation: [0, 3.2679489647691184e-7, 0]
       }
     },
     {
@@ -402,7 +402,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [2.994469, 0.8304805, 13.169745],
         dimension: [1.404795, 1.612032, 3.772344],
-        orientation: [0, -1.570796, 0]
+        orientation: [0, 3.2679489647691184e-7, 0]
       }
     },
     {
@@ -415,7 +415,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [2.908125, 0.8767944999999999, 19.299001],
         dimension: [1.413269, 1.567278, 3.158158],
-        orientation: [0, -1.511817, 0]
+        orientation: [0, 0.05897932679489659, 0]
       }
     },
     {
@@ -428,7 +428,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [-6.037999, 1.4392370000000003, 23.712843],
         dimension: [1.527328, 1.555003, 3.57675],
-        orientation: [0, 1.587202, 0]
+        orientation: [0, 3.1579983267948966, 0]
       }
     },
     {
@@ -441,7 +441,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [-6.310451, 1.7865565, 46.486705],
         dimension: [1.417371, 1.540476, 3.504344],
-        orientation: [0, 1.5615160000000001, 0]
+        orientation: [0, 3.1323123267948967, 0]
       }
     },
     {
@@ -454,7 +454,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [2.822686, 1.2086425, 50.003616],
         dimension: [1.512623, 1.746309, 3.775171],
-        orientation: [0, -1.572189, 0]
+        orientation: [0, -0.0013926732051035007, 0]
       }
     },
     {
@@ -467,7 +467,7 @@ export const sampleItemExportImage3dBox: ItemExport = {
       box3d: {
         location: [-6.285505, 1.7774785, 52.066669],
         dimension: [1.360295, 1.513462, 4.017021],
-        orientation: [0, 1.583558, 0]
+        orientation: [0, 3.1543543267948966, 0]
       }
     }
   ],
@@ -502,7 +502,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [2.921483, 0.755883, 6.348542],
           dimension: [1.50992, 1.85, 4.930564],
-          orientation: [0, -1.570796, 0]
+          orientation: [0, 3.2679489647691184e-7, 0]
         }
       },
       {
@@ -515,7 +515,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [2.994469, 0.8304805, 13.169745],
           dimension: [1.404795, 1.612032, 3.772344],
-          orientation: [0, -1.570796, 0]
+          orientation: [0, 3.2679489647691184e-7, 0]
         }
       },
       {
@@ -528,7 +528,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [2.908125, 0.8767944999999999, 19.299001],
           dimension: [1.413269, 1.567278, 3.158158],
-          orientation: [0, -1.511817, 0]
+          orientation: [0, 0.05897932679489659, 0]
         }
       },
       {
@@ -541,7 +541,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [-6.037999, 1.4392370000000003, 23.712843],
           dimension: [1.527328, 1.555003, 3.57675],
-          orientation: [0, 1.587202, 0]
+          orientation: [0, 3.1579983267948966, 0]
         }
       },
       {
@@ -554,7 +554,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [-6.310451, 1.7865565, 46.486705],
           dimension: [1.417371, 1.540476, 3.504344],
-          orientation: [0, 1.5615160000000001, 0]
+          orientation: [0, 3.1323123267948967, 0]
         }
       },
       {
@@ -567,7 +567,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [2.822686, 1.2086425, 50.003616],
           dimension: [1.512623, 1.746309, 3.775171],
-          orientation: [0, -1.572189, 0]
+          orientation: [0, -0.0013926732051035007, 0]
         }
       },
       {
@@ -580,7 +580,7 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
         box3d: {
           location: [-6.285505, 1.7774785, 52.066669],
           dimension: [1.360295, 1.513462, 4.017021],
-          orientation: [0, 1.583558, 0]
+          orientation: [0, 3.1543543267948966, 0]
         }
       }
     ],
