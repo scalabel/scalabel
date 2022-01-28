@@ -843,9 +843,8 @@ export class Polygon2D extends Label2D {
           : this._points[(selectedLabelIndex + numPoints - 1) % numPoints]
 
       if (prevPoint !== null && prevPoint.type !== PathPointType.CURVE) {
-        const prevVertex = this._points[
-          (selectedLabelIndex + numPoints - 2) % numPoints
-        ]
+        const prevVertex =
+          this._points[(selectedLabelIndex + numPoints - 2) % numPoints]
         prevPoint.copy(this.getMidpoint(prevVertex, point))
       }
       if (nextPoint !== null && nextPoint.type !== PathPointType.CURVE) {
@@ -938,12 +937,10 @@ export class Polygon2D extends Label2D {
     switch (point.type) {
       case PathPointType.MID: {
         // From midpoint to curve
-        const prevPoint = this._points[
-          this.getPreviousIndex(highlightedHandleIndex)
-        ]
-        const nextPoint = this._points[
-          this.getNextIndex(highlightedHandleIndex)
-        ]
+        const prevPoint =
+          this._points[this.getPreviousIndex(highlightedHandleIndex)]
+        const nextPoint =
+          this._points[this.getNextIndex(highlightedHandleIndex)]
         const controlPoints = this.getCurvePoints(
           prevPoint.vector(),
           nextPoint.vector()

@@ -87,10 +87,12 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
    */
   protected getDrawableComponents(): React.ReactElement[] {
     if (this._container !== null && this._viewerConfig !== null) {
-      this._container.scrollTop = (this
-        ._viewerConfig as ImageViewerConfigType).displayTop
-      this._container.scrollLeft = (this
-        ._viewerConfig as ImageViewerConfigType).displayLeft
+      this._container.scrollTop = (
+        this._viewerConfig as ImageViewerConfigType
+      ).displayTop
+      this._container.scrollLeft = (
+        this._viewerConfig as ImageViewerConfigType
+      ).displayLeft
     }
 
     const views: React.ReactElement[] = []

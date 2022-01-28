@@ -48,10 +48,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    */
   protected getDrawableComponents(): React.ReactElement[] {
     if (this._container !== null && this._viewerConfig !== undefined) {
-      this._container.scrollTop = (this
-        ._viewerConfig as ImageViewerConfigType).displayTop
-      this._container.scrollLeft = (this
-        ._viewerConfig as ImageViewerConfigType).displayLeft
+      this._container.scrollTop = (
+        this._viewerConfig as ImageViewerConfigType
+      ).displayTop
+      this._container.scrollLeft = (
+        this._viewerConfig as ImageViewerConfigType
+      ).displayLeft
     }
 
     const views: React.ReactElement[] = []

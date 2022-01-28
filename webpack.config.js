@@ -1,6 +1,7 @@
 /* global module __dirname process */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 let config = {
   devtool: false,
@@ -47,7 +48,10 @@ let config = {
           from: __dirname + '/app/dev',
           to: __dirname + '/app/dist/dev',
         },
-    ]})
+    ]}),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
+    new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
     hints: false,
@@ -60,7 +64,9 @@ let config = {
       {
         test: /\.t(s|sx)$/,
         use: {
-          loader: 'awesome-typescript-loader',
+          loader: 'ts-loader',
+          // Temporary fix to avoid memory errors
+          options: { transpileOnly: true }
         },
       },
       {
@@ -95,6 +101,9 @@ let serverConfig = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
+    new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
     hints: false,
@@ -107,6 +116,7 @@ let serverConfig = {
       test: /\.node|t(s|sx)$/,
       use: {
         loader: 'ts-loader',
+        options: { transpileOnly: true }
       },
     }],
   },

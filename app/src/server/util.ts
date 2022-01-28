@@ -38,7 +38,7 @@ export async function makeStorage(
         await s3Store.makeBucket()
         storage = s3Store
       } catch (error) {
-        Logger.error(error)
+        Logger.error(error as Error)
         Logger.info("s3 failed, using file storage by default")
         storage = new FileStorage(dir)
       }
@@ -225,7 +225,7 @@ export function safeParseJSON(data: string): unknown {
     return parsed
   } catch (e) {
     Logger.error(Error("JSON parsed failed"))
-    Logger.error(e)
+    Logger.error(e as Error)
   }
 }
 
