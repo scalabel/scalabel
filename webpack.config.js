@@ -65,6 +65,7 @@ let config = {
         test: /\.t(s|sx)$/,
         use: {
           loader: 'ts-loader',
+          // Temporary fix to avoid memory errors
           options: { transpileOnly: true }
         },
       },
