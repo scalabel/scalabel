@@ -49,6 +49,8 @@ let config = {
           to: __dirname + '/app/dist/dev',
         },
     ]}),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
     new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
@@ -98,6 +100,8 @@ let serverConfig = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
     new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
