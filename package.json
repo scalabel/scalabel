@@ -130,6 +130,7 @@
     "express": "^4.17.1",
     "express-formidable": "^1.2.0",
     "express-jwt": "^6.0.0",
+    "fork-ts-checker-webpack-plugin": "^6.5.0",
     "fs": "0.0.1-security",
     "fs-extra": "^9.1.0",
     "husky": "^6.0.0",
