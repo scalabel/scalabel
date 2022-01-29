@@ -284,9 +284,8 @@ class HomographyCanvas extends ImageCanvas {
                 dstX) *
               4
             for (let i = 0; i < 4; i++) {
-              homographyData.data[homographyStart + i] = this._imageData[
-                imageStart + i
-              ]
+              homographyData.data[homographyStart + i] =
+                this._imageData[imageStart + i]
             }
           }
         }

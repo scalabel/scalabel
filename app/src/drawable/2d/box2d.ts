@@ -229,9 +229,8 @@ export class Box2D extends Label2D {
       }
     } else {
       // Move a vertex
-      const oppVertex = this._controlPoints[
-        ((this._highlightedHandle + 12) % 8) - 1
-      ]
+      const oppVertex =
+        this._controlPoints[((this._highlightedHandle + 12) % 8) - 1]
       x1 = Math.min(x, oppVertex.x)
       x2 = Math.max(x, oppVertex.x)
       y1 = Math.min(y, oppVertex.y)

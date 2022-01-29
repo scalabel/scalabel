@@ -79,14 +79,10 @@ class DataTable<DataType extends string | User> extends React.Component<
               row = (
                 <React.Fragment>
                   <TableCell align={"left"}>
-                    <Typography variant={"body2"}>
-                      {(value as User).email}
-                    </Typography>
+                    <Typography variant={"body2"}>{value.email}</Typography>
                   </TableCell>
                   <TableCell align={"right"}>
-                    <Typography variant={"body2"}>
-                      {(value as User).group}
-                    </Typography>
+                    <Typography variant={"body2"}>{value.group}</Typography>
                   </TableCell>
                 </React.Fragment>
               )
