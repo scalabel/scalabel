@@ -4,14 +4,15 @@ import json
 from typing import Dict, List
 
 import numpy as np
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report  # type: ignore
 
-from .result import Result
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
+from ..common.typing import NDArrayI32
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
+from .result import Result
 
 
 class TaggingResult(Result):
@@ -53,12 +54,12 @@ def evaluate_tagging(
         if g.attributes is None:
             continue
         assert p.attributes is not None
-        p.attributes = {tag_attr: p.attributes[tag_attr]}
         p_attr, g_attr = p.attributes[tag_attr], g.attributes[tag_attr]
         assert isinstance(p_attr, str) and isinstance(g_attr, str)
         preds_cls.append(classes.index(p_attr))
         gts_cls.append(classes.index(g_attr))
-    parray, garray = np.array(preds_cls), np.array(gts_cls)
+    parray: NDArrayI32 = np.array(preds_cls, dtype=np.int32)
+    garray: NDArrayI32 = np.array(gts_cls, dtype=np.int32)
     gt_classes = [classes[cid] for cid in sorted(set(gts_cls + preds_cls))]
     scores = classification_report(
         garray, parray, target_names=gt_classes, output_dict=True
