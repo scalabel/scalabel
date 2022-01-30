@@ -23,6 +23,7 @@ PyWavelets
 PyYAML
 requests
 scikit-image
+scikit-learn
 scipy
 setuptools
 tabulate

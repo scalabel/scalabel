@@ -90,10 +90,10 @@ def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="Tagging evaluation.")
     parser.add_argument(
-        "--gt", "-g", required=True, help="path to detection ground truth"
+        "--gt", "-g", required=True, help="path to tagging ground truth"
     )
     parser.add_argument(
-        "--result", "-r", required=True, help="path to detection results"
+        "--result", "-r", required=True, help="path to tagging results"
     )
     parser.add_argument(
         "--tag-attr", required=True, help="tagging attribute to evaluate"
@@ -104,19 +104,19 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",
         default="",
-        help="Output file for detection evaluation results.",
+        help="Output file for tagging evaluation results.",
     )
     parser.add_argument(
         "--nproc",
         "-p",
         type=int,
         default=NPROC,
-        help="number of processes for detection evaluation",
+        help="number of processes for tagging evaluation",
     )
     return parser.parse_args()
 
