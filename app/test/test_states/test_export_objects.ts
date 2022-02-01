@@ -1,10 +1,8 @@
 import { ItemExport } from "../../src/types/export"
 
 export const sampleItemExportImage: ItemExport = {
-  name:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
-  url:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+  name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+  url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
   videoName: "b",
   attributes: {},
   timestamp: 0,
@@ -57,10 +55,8 @@ export const sampleItemExportImage: ItemExport = {
 
 export const sampleStateExportImage: ItemExport[] = [
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 0,
@@ -111,10 +107,8 @@ export const sampleStateExportImage: ItemExport[] = [
     ]
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 1,
@@ -122,10 +116,8 @@ export const sampleStateExportImage: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 2,
@@ -133,10 +125,8 @@ export const sampleStateExportImage: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 3,
@@ -144,10 +134,8 @@ export const sampleStateExportImage: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 4,
@@ -157,10 +145,8 @@ export const sampleStateExportImage: ItemExport[] = [
 ]
 
 export const sampleItemExportImagePolygon: ItemExport = {
-  name:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
-  url:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+  name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+  url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
   videoName: "b",
   attributes: {},
   timestamp: 0,
@@ -234,10 +220,8 @@ export const sampleItemExportImagePolygon: ItemExport = {
 
 export const sampleStateExportImagePolygon: ItemExport[] = [
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 0,
@@ -309,10 +293,8 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     ]
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000052.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 1,
@@ -320,10 +302,8 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000053.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 2,
@@ -331,10 +311,8 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000054.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 3,
@@ -342,10 +320,8 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
     sensor: -1
   },
   {
-    name:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
-    url:
-      "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+    name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000055.jpg",
     videoName: "b",
     attributes: {},
     timestamp: 4,
@@ -355,10 +331,8 @@ export const sampleStateExportImagePolygon: ItemExport[] = [
 ]
 
 export const sampleItemExportImageTagging: ItemExport = {
-  name:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
-  url:
-    "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  name: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+  url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
   videoName: "",
   attributes: {
     Weather: "Rainy",
@@ -371,10 +345,8 @@ export const sampleItemExportImageTagging: ItemExport = {
 }
 
 export const sampleItemExportImage3dBox: ItemExport = {
-  name:
-    "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
-  url:
-    "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
+  name: "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
+  url: "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
   videoName: "",
   timestamp: 0,
   attributes: {},
@@ -484,10 +456,8 @@ export const sampleItemExportImage3dBox: ItemExport = {
 
 export const sampleStateExportImage3dBox: ItemExport[] = [
   {
-    name:
-      "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
-    url:
-      "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
+    name: "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
+    url: "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
     videoName: "",
     timestamp: 0,
     attributes: {},

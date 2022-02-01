@@ -81,7 +81,7 @@ export class FileStorage extends Storage {
       await fs.ensureDir(this.fullDir(path.dirname(key)), undefined)
     } catch (error) {
       // No need to reject if dir existed
-      if (error.code !== "EEXIST") {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
         throw error
       }
     }

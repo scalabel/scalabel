@@ -81,8 +81,7 @@ export const testJson: DeepPartialState = {
         index: 0,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
         },
         labels: {
           id23: {
@@ -164,8 +163,7 @@ export const testJson: DeepPartialState = {
         index: 1,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
         },
         labels: {
           24: {
@@ -247,8 +245,7 @@ export const testJson: DeepPartialState = {
         index: 2,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
         },
         labels: {
           25: {
@@ -330,8 +327,7 @@ export const testJson: DeepPartialState = {
         index: 3,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
         },
         labels: {
           26: {
@@ -413,8 +409,7 @@ export const testJson: DeepPartialState = {
         index: 4,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
         },
         labels: {
           27: {
@@ -473,8 +468,7 @@ export const testJson: DeepPartialState = {
         index: 5,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
         },
         labels: {
           28: {
@@ -897,8 +891,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 0,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
         },
         labels: {},
         shapes: {},
@@ -909,8 +902,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 1,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
         },
         labels: {},
         shapes: {},
@@ -921,8 +913,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 2,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
         },
         labels: {},
         shapes: {},
@@ -933,8 +924,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 3,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
         },
         labels: {},
         shapes: {},
@@ -945,8 +935,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 4,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
         },
         labels: {},
         shapes: {},
@@ -957,8 +946,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 5,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
         },
         labels: {},
         shapes: {},
@@ -969,8 +957,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 6,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
         },
         labels: {},
         shapes: {},
@@ -981,8 +968,7 @@ export const emptyTrackingTask: DeepPartialState = {
         index: 7,
         videoName: "",
         urls: {
-          "-1":
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
         },
         labels: {},
         shapes: {},
