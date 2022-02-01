@@ -352,7 +352,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",
