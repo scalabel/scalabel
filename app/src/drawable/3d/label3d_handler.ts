@@ -6,7 +6,6 @@ import {
   pauseSpan,
   resetSpan,
   resumeSpan,
-  toggleGroundPlane,
   undoSpan
 } from "../../action/span3d"
 import Session from "../../common/session"
@@ -16,10 +15,14 @@ import {
   LabelTypeName,
   ViewerConfigTypeName
 } from "../../const/common"
-import { getCurrentViewerConfig } from "../../functional/state_util"
+import {
+  getCurrentViewerConfig,
+  isItemLoaded
+} from "../../functional/state_util"
 import { makePointCloudViewerConfig, makeSensor } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import {
+  Image3DViewerConfigType,
   INVALID_ID,
   PointCloudViewerConfigType,
   SensorType,
@@ -28,9 +31,16 @@ import {
 } from "../../types/state"
 import { commitLabels } from "../states"
 import { Label3D } from "./label3d"
-import { makeDrawableLabel3D } from "./label3d_list"
 import { alert } from "../../common/alert"
 import { Severity } from "../../types/common"
+import { Plane3D } from "./plane3d"
+import { Span3D } from "./box_span/span3d"
+import {
+  calculatePlaneCenter,
+  calculatePlaneRotation,
+  estimateGroundPlane
+} from "../../common/util"
+import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 
 /**
  * Handles user interactions with labels
@@ -216,6 +226,176 @@ export class Label3DHandler {
   }
 
   /**
+   * Get axes for viewer type. Returns axes in order: up, forward, right
+   */
+  private getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
+    const config = this._viewerConfig as
+      | PointCloudViewerConfigType
+      | Image3DViewerConfigType
+    const forward = new Vector3D().fromState(config.target).normalize()
+    const up = new Vector3D().fromState(config.verticalAxis).normalize()
+    const left = up.clone().cross(forward).normalize()
+    return {
+      up,
+      forward,
+      left
+    }
+  }
+
+  /**
+   * Calculate box span rotation, given box, plane, and viewer type
+   *
+   * @param boxSpan
+   * @param groundPlane
+   */
+  private getBoxSpanRotation(
+    boxSpan: Span3D,
+    groundPlane: Plane3D
+  ): THREE.Vector3 {
+    const { up, left } = this.getAxes()
+    const rotation = groundPlane.orientation.clone()
+    const defaultPlaneForward = new THREE.Vector3(0, 0, 1)
+    const planePitch = up.toThree().angleTo(defaultPlaneForward)
+    const planePitchEuler = new THREE.Euler().setFromVector3(
+      left.toThree().clone().normalize().multiplyScalar(planePitch)
+    )
+    rotation.multiply(new THREE.Quaternion().setFromEuler(planePitchEuler))
+
+    const leftOnPlane = left.toThree().applyQuaternion(rotation)
+    const sideVec = boxSpan.sideEdge.clone().normalize()
+    const yaw = Math.PI / 2 - leftOnPlane.angleTo(sideVec)
+    const yawVec = up.clone().toThree().multiplyScalar(yaw)
+    const yawEuler = new THREE.Euler().setFromVector3(yawVec)
+    const yawRotation = new THREE.Quaternion().setFromEuler(yawEuler)
+    rotation.multiply(yawRotation)
+
+    return new THREE.Euler().setFromQuaternion(rotation).toVector3()
+  }
+
+  /**
+   * Create new box3D label
+   */
+  private createLabel(): void {
+    const center = new Vector3D()
+    if (this._viewerConfig.type === ViewerConfigTypeName.POINT_CLOUD) {
+      center.fromState(
+        (this._viewerConfig as PointCloudViewerConfigType).target
+      )
+    } else {
+      center.copy(new Vector3D(0, 0, 10))
+      if (this._sensor.extrinsics !== undefined) {
+        const worldDirection = new THREE.Vector3()
+        this._camera.getWorldDirection(worldDirection)
+        worldDirection.normalize()
+        worldDirection.multiplyScalar(5)
+        center.fromState(this._sensor.extrinsics.translation)
+        center.add(new Vector3D().fromThree(worldDirection))
+      }
+    }
+    const dimension = new Vector3D(1, 1, 1)
+    const orientation = new Vector3D()
+    const boxSpan = this._state.session.info3D.boxSpan
+    const groundPlane = Session.label3dList.getItemGroundPlane(
+      this._selectedItemIndex
+    )
+    if (boxSpan?.complete === true && groundPlane !== null) {
+      const { up, forward, left } = this.getAxes()
+      center.fromThree(boxSpan.center)
+      dimension.fromThree(boxSpan.dimensions(up, forward, left))
+      orientation.fromThree(this.getBoxSpanRotation(boxSpan, groundPlane))
+      Session.dispatch(deactivateSpan())
+    }
+
+    const label = createBox3dLabel(
+      Session.label3dList,
+      this._selectedItemIndex,
+      this._sensorIds,
+      Session.label3dList.currentCategory,
+      center,
+      dimension,
+      orientation
+    )
+    commitLabels([label], this._tracking)
+
+    alert(Severity.SUCCESS, "Box successfully created")
+  }
+
+  /**
+   * Toggle showing ground plane. If no ground plane, create one.
+   */
+  private toggleGroundPlane(): void {
+    const groundPlane = Session.label3dList.getItemGroundPlane(
+      this._selectedItemIndex
+    )
+    if (groundPlane !== null) {
+      if (groundPlane.visible) {
+        groundPlane.visible = false
+        Session.dispatch(
+          selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
+        )
+      } else {
+        groundPlane.visible = true
+      }
+    } else {
+      const center = new Vector3D(0, 1.5, 10)
+      const label = createPlaneLabel(
+        Session.label3dList,
+        this._selectedItemIndex,
+        Session.label3dList.currentCategory,
+        center,
+        undefined,
+        this._sensorIds
+      )
+      commitLabels([label], this._tracking)
+    }
+  }
+
+  /**
+   * Create ground plane
+   *
+   * @param itemIndex
+   */
+  public createGroundPlane(itemIndex: number): void {
+    const state = this._state
+    const item = state.task.items[itemIndex]
+    const isLoaded = isItemLoaded(state, item.index)
+    const hasGroundPlane =
+      Object.values(item.labels).filter(
+        (label) => label.type === LabelTypeName.PLANE_3D
+      ).length > 0
+    const config = this._viewerConfig as PointCloudViewerConfigType
+    const sensorIdx = config.sensor
+    const sensor = state.task.sensors[sensorIdx]
+    const isPointCloud = sensor.type === DataType.POINT_CLOUD
+    if (isLoaded && !hasGroundPlane) {
+      // estimate ground plane
+      let center = new THREE.Vector3(0, 1.5, 10)
+      let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
+      if (isPointCloud) {
+        const pointCloud = Array.from(
+          new THREE.Points(
+            Session.pointClouds[item.index][sensorIdx]
+          ).geometry.getAttribute("position").array
+        )
+        const estimatedPlane = estimateGroundPlane(pointCloud)
+        const target = new Vector3D().fromState(config.target)
+        const baseNormal = new THREE.Vector3(0, 0, 1)
+        center = calculatePlaneCenter(estimatedPlane, target.toThree())
+        rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
+      }
+      const label = createPlaneLabel(
+        Session.label3dList,
+        item.index,
+        Session.label3dList.currentCategory,
+        new Vector3D().fromThree(center),
+        new Vector3D().fromThree(rotation),
+        Object.keys(state.task.sensors).map((key) => Number(key))
+      )
+      commitLabels([label], this._tracking)
+    }
+  }
+
+  /**
    * Handle keyboard events
    *
    * @param {KeyboardEvent} e
@@ -225,6 +405,11 @@ export class Label3DHandler {
     const state = Session.getState()
     // TODO: break the cases into functions
     switch (e.key) {
+      case Key.G_UP:
+      case Key.G_LOW: {
+        this.toggleGroundPlane()
+        return true
+      }
       case Key.SPACE: {
         if (
           state.session.info3D.boxSpan !== null &&
@@ -232,7 +417,8 @@ export class Label3DHandler {
         ) {
           break
         } else {
-          return this.createLabel()
+          this.createLabel()
+          return true
         }
       }
       case Key.ESCAPE:
@@ -279,9 +465,8 @@ export class Label3DHandler {
           const shape = Session.label3dList.getCurrentShape()
           Session.label3dList.addShapeToHistShapes(shape)
 
-          const quaternionInverse = Session.label3dList.selectedLabel.orientation
-            .clone()
-            .invert()
+          const quaternionInverse =
+            Session.label3dList.selectedLabel.orientation.clone().invert()
           Session.label3dList.selectedLabel.rotate(quaternionInverse)
           commitLabels(
             [...Session.label3dList.updatedLabels.values()],
@@ -312,11 +497,6 @@ export class Label3DHandler {
       case Key.U_LOW:
         if (state.session.info3D.isBoxSpan) {
           Session.dispatch(undoSpan())
-        }
-        break
-      case Key.G_LOW:
-        if (state.session.info3D.isBoxSpan) {
-          Session.dispatch(toggleGroundPlane())
         }
         break
       default:
@@ -447,64 +627,5 @@ export class Label3DHandler {
       fn()
       setTimeout(() => this.timedRepeat(fn, key, timeout), timeout)
     }
-  }
-
-  /** Create new label */
-  private createLabel(): boolean {
-    const label = makeDrawableLabel3D(
-      Session.label3dList,
-      Session.label3dList.currentLabelType
-    )
-    if (label !== null) {
-      const center = new Vector3D()
-      switch (this._viewerConfig.type) {
-        case ViewerConfigTypeName.POINT_CLOUD:
-          center.fromState(
-            (this._viewerConfig as PointCloudViewerConfigType).target
-          )
-          break
-        case ViewerConfigTypeName.IMAGE_3D:
-          if (this._sensor.extrinsics !== undefined) {
-            const worldDirection = new THREE.Vector3()
-            this._camera.getWorldDirection(worldDirection)
-            worldDirection.normalize()
-            worldDirection.multiplyScalar(5)
-            center.fromState(this._sensor.extrinsics.translation)
-            center.add(new Vector3D().fromThree(worldDirection))
-          }
-      }
-      label.init(
-        this._selectedItemIndex,
-        Session.label3dList.currentCategory,
-        center,
-        this._sensorIds,
-        undefined,
-        this._state.task.config.tracking
-      )
-
-      const box = Session.getState().session.info3D.boxSpan
-      if (box !== null) {
-        if (box.complete) {
-          try {
-            label.move(box.center)
-            label.rotate(box.rotation)
-            label.scale(box.dimensions, box.center, true)
-            Session.dispatch(deactivateSpan())
-          } catch (err) {
-            alert(Severity.ERROR, err.message)
-          }
-        }
-      }
-
-      Session.label3dList.addUpdatedLabel(label)
-      commitLabels(
-        [...Session.label3dList.updatedLabels.values()],
-        this._tracking
-      )
-      Session.label3dList.clearUpdatedLabels()
-      alert(Severity.SUCCESS, "Box successfully created")
-      return true
-    }
-    return false
   }
 }

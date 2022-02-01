@@ -161,15 +161,22 @@ export class Label2DList {
     hideLabels?: boolean,
     sessionMode?: ModeStatus
   ): void {
+    const isTrackLinking = this._state.session.trackLinking
     const labelsToDraw =
       hideLabels !== null && hideLabels !== undefined && hideLabels
         ? this._labelList.filter((label) => label.selected)
         : this._labelList
     labelsToDraw.forEach((v) =>
-      v.draw(labelContext, ratio, DrawMode.VIEW, sessionMode)
+      v.draw(labelContext, ratio, DrawMode.VIEW, isTrackLinking, sessionMode)
     )
     labelsToDraw.forEach((v) =>
-      v.draw(controlContext, ratio, DrawMode.CONTROL, sessionMode)
+      v.draw(
+        controlContext,
+        ratio,
+        DrawMode.CONTROL,
+        isTrackLinking,
+        sessionMode
+      )
     )
   }
 

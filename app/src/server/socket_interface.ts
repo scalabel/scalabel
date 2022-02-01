@@ -18,9 +18,7 @@ export interface SocketServer {
   /** Message broadcaster */
   broadcast: {
     /** Object for specifying target */
-    to: (
-      room: string
-    ) => {
+    to: (room: string) => {
       /** Message echoer */
       emit: (event: string, data: serverEmitType) => void
     }

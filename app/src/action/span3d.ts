@@ -1,7 +1,6 @@
 import * as actionConsts from "../const/action"
 import * as actionTypes from "../types/action"
 import { makeBaseAction } from "./common"
-import { Vector3D } from "../math/vector3d"
 
 /** Activate box spanning mode */
 export function activateSpan(): actionTypes.ActivateSpanAction {
@@ -14,23 +13,6 @@ export function deactivateSpan(): actionTypes.DeactivateSpanAction {
 }
 
 /**
- * Update temporary point in span box
- *
- * @param point
- * @param mouseY
- */
-export function updateSpanPoint(
-  point: Vector3D,
-  mouseY: number
-): actionTypes.UpdateSpanPointAction {
-  return {
-    ...makeBaseAction(actionConsts.UPDATE_SPAN_POINT),
-    point,
-    mouseY
-  }
-}
-
-/**
  * Register new point in span box
  *
  * @param mX - mouse X
@@ -38,6 +20,11 @@ export function updateSpanPoint(
  */
 export function registerSpanPoint(): actionTypes.RegisterSpanPointAction {
   return makeBaseAction(actionConsts.REGISTER_SPAN_POINT)
+}
+
+/** Register updated span point */
+export function updateSpanPoint(): actionTypes.UpdateSpanPoint {
+  return makeBaseAction(actionConsts.UPDATE_SPAN_POINT)
 }
 
 /** Reset span box generation */

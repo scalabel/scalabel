@@ -13,6 +13,8 @@ import { Shape3D } from "./shape3d"
 export class Grid3D extends Shape3D {
   /** grid lines */
   private readonly _lines: THREE.GridHelper
+  /** internal shape state */
+  private _planeShape: Plane3DType
 
   /**
    * Constructor
@@ -31,6 +33,12 @@ export class Grid3D extends Shape3D {
     this.add(this._lines)
     this.scale.x = 6
     this.scale.y = 6
+    this._planeShape = makePlane()
+  }
+
+  /** get the shape id */
+  public get shapeId(): IdType {
+    return this._planeShape.id
   }
 
   /** Get lines object */
@@ -90,10 +98,12 @@ export class Grid3D extends Shape3D {
    * Object representation
    */
   public toState(): ShapeType {
-    return makePlane({
-      center: new Vector3D().fromThree(this.position).toState(),
-      orientation: new Vector3D().fromThree(this.rotation.toVector3()).toState()
-    })
+    const plane = this._planeShape
+    plane.center = new Vector3D().fromThree(this.center.toThree()).toState()
+    plane.orientation = new Vector3D()
+      .fromThree(this.rotation.toVector3())
+      .toState()
+    return plane
   }
 
   /**
@@ -106,41 +116,26 @@ export class Grid3D extends Shape3D {
     raycaster: THREE.Raycaster,
     intersects: THREE.Intersection[]
   ): void {
-    if (this.label.selected || this.label.anyChildSelected()) {
-      const ray = raycaster.ray
-      const normal = new THREE.Vector3(0, 0, 1)
-      normal.applyEuler(this.rotation)
-      const plane = new THREE.Plane()
-      plane.setFromNormalAndCoplanarPoint(normal, this.position)
-      const target = new THREE.Vector3()
-      const intersection = ray.intersectPlane(plane, target)
-      if (intersection !== null) {
-        // DO NOT REMOVE: Used for checking whether ray intersects within the
-        // bounds of the grid. Code below assumes grid is boundless
-
-        // Const worldToPlane = new THREE.Matrix4()
-        // worldToPlane.getInverse(this.matrixWorld)
-        // const intersectionPlane = new THREE.Vector3()
-        // intersectionPlane.copy(intersection)
-        // intersectionPlane.applyMatrix4(worldToPlane)
-        // if (
-        //   intersectionPlane.x <= 0.5 &&
-        //   intersectionPlane.x >= -0.5 &&
-        //   intersectionPlane.y >= -0.5 &&
-        //   intersectionPlane.y >= -0.5
-        // ) {
-        //   const difference = new THREE.Vector3()
-        //   difference.copy(intersection)
-        //   difference.sub(ray.origin)
-        //   const distance = difference.length()
-        //   if (distance < raycaster.far && distance > raycaster.near) {
-        //     intersects.push({
-        //       distance,
-        //       point: intersection,
-        //       object: this._lines
-        //     })
-        //   }
-        // }
+    const ray = raycaster.ray
+    const normal = new THREE.Vector3(0, 0, 1)
+    normal.applyEuler(this.rotation)
+    const plane = new THREE.Plane()
+    plane.setFromNormalAndCoplanarPoint(normal, this.position)
+    const target = new THREE.Vector3()
+    const intersection = ray.intersectPlane(plane, target)
+    if (intersection !== null) {
+      // Check for intersection within bounds
+      const worldToPlane = new THREE.Matrix4()
+      worldToPlane.copy(this.matrixWorld.clone().invert())
+      const intersectionPlane = new THREE.Vector3()
+      intersectionPlane.copy(intersection)
+      intersectionPlane.applyMatrix4(worldToPlane)
+      if (
+        intersectionPlane.x <= 0.5 &&
+        intersectionPlane.x >= -0.5 &&
+        intersectionPlane.y >= -0.5 &&
+        intersectionPlane.y <= 0.5
+      ) {
         const difference = new THREE.Vector3()
         difference.copy(intersection)
         difference.sub(ray.origin)
@@ -153,8 +148,6 @@ export class Grid3D extends Shape3D {
           })
         }
       }
-    } else {
-      this._lines.raycast(raycaster, intersects)
     }
 
     for (const child of this.children) {
@@ -177,8 +170,10 @@ export class Grid3D extends Shape3D {
     super.updateState(shape, id)
     const newShape = shape as Plane3DType
     this.position.copy(new Vector3D().fromState(newShape.center).toThree())
-    this.rotation.setFromVector3(
-      new Vector3D().fromState(newShape.orientation).toThree()
+    this.rotation.copy(
+      new Vector3D().fromState(newShape.orientation).toThreeEuler()
     )
+    // Also update the _planeShape
+    this._planeShape = newShape
   }
 }
