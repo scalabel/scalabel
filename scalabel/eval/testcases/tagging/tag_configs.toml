@@ -1,0 +1,24 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "rainy"
+
+[[categories]]
+name = "snowy"
+
+[[categories]]
+name = "clear"
+
+[[categories]]
+name = "overcast"
+
+[[categories]]
+name = "undefined"
+
+[[categories]]
+name = "partly cloudy"
+
+[[categories]]
+name = "foggy"
