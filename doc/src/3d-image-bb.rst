@@ -11,6 +11,11 @@ After creation the box will be automatically selected and can be adjusted.
 * Spanning mode: Click the ``Activate Span`` button to activate spannings mode. In this mode
 you can define a custom bounding box by clicking on the pane to generate four points. These points will be automatically connected by lines and define a cuboidal skeleton of the bounding box. Once the skeleton has been generated, press ``Space`` to convert it to a bounding box. Press ``Enter`` to finish the creation.
 
+.. figure:: ../media/doc/videos/image_3d_bounding_box.gif
+   :alt: Creating image 3d bounding box
+
+   Create a new bounding box via spanning
+
 Note that spanning mode requires a ground plane label to be present in the image.
 See below for how to edit the image ground plane.
 
@@ -27,9 +32,19 @@ This can be done by selecting the plane with a double click and using the rotati
 handles to rotate the plane. A ground plane that matches the ground orientation 
 should result in higher 3d Bounding Box accuracy.
 
+.. figure:: ../media/doc/videos/adjust_ground_plane.gif
+   :alt: Adjust image ground plane
+
+   Adjust image ground plane
+
 Top View Homography
 ~~~~~~~~~~~~~~~~~~~
 To assist with 3D labeling on images, a top-view homography is available. This
 can be opened to the side or below the current view by opening a split view and
 selecting ``HOMOGRAPHY``. As with spanning mode, the top view homography requires
 that the image has a ground plane label. 
+
+.. figure:: ../media/doc/videos/top_view_homography.gif
+   :alt: Top view homography
+
+   Show top view homography

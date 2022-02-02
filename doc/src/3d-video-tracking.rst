@@ -3,6 +3,11 @@
 Similar to 2D video tracking, 3D video tracking allows 3D bounding box labels
 that are present in multiple frames. The labels of the same instance in the exported label file will have the same label id.
 
+.. figure:: ../media/doc/videos/3d_video_tracking.gif
+    :alt: 3d video tracking
+
+   Example of 3d video tracking
+
 3D Bounding Box Tracking
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To get started, create a ``Video Tracking`` project, with the ``3D Bounding Box``
@@ -25,4 +30,4 @@ deleted.
 Track linking, breaking and single frame addition/deletion
 ==========================================================
 The functionality to link and break tracks or to create and delete labels in a single
-frame are the same as in 2D video tracking. See the documentation here.
+frame are the same as in 2D video tracking.
