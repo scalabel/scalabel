@@ -1,10 +1,9 @@
 3D Video Tracking
----------------
+-----------------
 Similar to 2D video tracking, 3D video tracking allows 3D bounding box labels
 that are present in multiple frames. The labels of the same instance in the exported label file will have the same label id.
 
 .. figure:: ../media/doc/videos/3d_video_tracking.gif
-    :alt: 3d video tracking
 
    Example of 3d video tracking
 
@@ -13,16 +12,16 @@ that are present in multiple frames. The labels of the same instance in the expo
 To get started, create a ``Video Tracking`` project, with the ``3D Bounding Box``
 label type. 
 
-Bounding box interpolation
-==========================
+3D bounding box interpolation
+=============================
 
 Create a 3D bounding box in the first frame that an object appears, and adjust the bounding
 boxes in the subsequent frames. For a given bounding box track, the frames in
 which the box is edited are considered a keyframe. The frames between keyframes
 are automatically interpolated using linear interpolation.
 
-Ending object track
-=====================================
+Ending label track
+===================
 For an object that disappears after certain frame, press ``Backspace`` at the
 frame of its last occurrence. The bounding box labels after this frame will be
 deleted.

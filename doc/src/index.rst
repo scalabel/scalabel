@@ -15,7 +15,10 @@ Scalabel is an open-source web annotation tool.
    /2d-bb.rst
    /instance-segmentation.rst
    /video-tracking.rst
+   /3d-video-tracking.rst
    /3d-bb.rst
+   /3d-image-bb.rst
+   /hybrid.rst
    /keyboard.rst
    /format.rst
    /config.rst

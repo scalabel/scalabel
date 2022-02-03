@@ -1,18 +1,15 @@
-3D Bounding Box
----------------
+Image 3D Bounding Box
+----------------------
 
 As with point clouds, we allow creating 3D bouding boxes on images.
 
 Creating a Bounding Box
 ~~~~~~~~~~~~~~~~~~~~~~~
-* Default creation: Press ``Space`` to create a new bounding box with size 1x1x1 at position ``(0, 0, 10)`` (10m in front of the camera).
-After creation the box will be automatically selected and can be adjusted.
+* Default creation: Press ``Space`` to create a new bounding box with size 1x1x1 at position ``(0, 0, 10)`` (10m in front of the camera). After creation the box will be automatically selected and can be adjusted.
 
-* Spanning mode: Click the ``Activate Span`` button to activate spannings mode. In this mode
-you can define a custom bounding box by clicking on the pane to generate four points. These points will be automatically connected by lines and define a cuboidal skeleton of the bounding box. Once the skeleton has been generated, press ``Space`` to convert it to a bounding box. Press ``Enter`` to finish the creation.
+* Spanning mode: Click the ``Activate Span`` button to activate spannings mode. In this mode you can define a custom bounding box by clicking on the pane to generate four points. These points will be automatically connected by lines and define a cuboidal skeleton of the bounding box. Once the skeleton has been generated, press ``Space`` to convert it to a bounding box. Press ``Enter`` to finish the creation.
 
 .. figure:: ../media/doc/videos/image_3d_bounding_box.gif
-   :alt: Creating image 3d bounding box
 
    Create a new bounding box via spanning
 
@@ -33,7 +30,6 @@ handles to rotate the plane. A ground plane that matches the ground orientation
 should result in higher 3d Bounding Box accuracy.
 
 .. figure:: ../media/doc/videos/adjust_ground_plane.gif
-   :alt: Adjust image ground plane
 
    Adjust image ground plane
 
@@ -45,6 +41,5 @@ selecting ``HOMOGRAPHY``. As with spanning mode, the top view homography require
 that the image has a ground plane label. 
 
 .. figure:: ../media/doc/videos/top_view_homography.gif
-   :alt: Top view homography
 
    Show top view homography
