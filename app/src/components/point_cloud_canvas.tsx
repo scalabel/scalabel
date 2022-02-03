@@ -387,13 +387,18 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     const maxHeight = quantile(heights, 0.95)
     const minHeight = quantile(heights, 0.05)
     const colors: number[] = []
+    const lowColor = new THREE.Color(0x0000ff)
+    const highColor = new THREE.Color(0xffff00)
     for (let i = 0; i < heights.length; i += 1) {
       const height = heights[i]
-      const hue = Math.min(
+      const fraction = Math.min(
         1.0,
-        Math.max(0.0, 0.66 - (height - minHeight) / (maxHeight - minHeight))
+        Math.max(0.0, (height - minHeight) / (maxHeight - minHeight))
       )
-      const color = new THREE.Color().setHSL(hue, 1.0, 0.5)
+      const color = lowColor
+        .clone()
+        .multiplyScalar(1.0 - fraction)
+        .add(highColor.clone().multiplyScalar(fraction))
       colors.push(color.r, color.g, color.b)
     }
     return colors
