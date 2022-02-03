@@ -327,22 +327,30 @@ class LabelPane extends Component<Props> {
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
-      const paneControl = (
-        <List>
-          <ListItem dense disableGutters>
-            {deleteButton}
-          </ListItem>
-          <ListItem dense disableGutters>
-            <div hidden={pane.hide}>{verticalSplitButton}</div>
-          </ListItem>
-          <ListItem dense disableGutters>
-            <div hidden={pane.hide}>{horizontalSplitButton}</div>
-          </ListItem>
-          <ListItem dense disableGutters>
-            {visibilityButton}
-          </ListItem>
-        </List>
+      const is3dProject = this.state.task.config.labelTypes.includes(
+        types.LabelTypeName.BOX_3D
       )
+      let paneControl: JSX.Element
+      if (is3dProject) {
+        paneControl = (
+          <List>
+            <ListItem dense disableGutters>
+              {deleteButton}
+            </ListItem>
+            <ListItem dense disableGutters>
+              <div hidden={pane.hide}>{verticalSplitButton}</div>
+            </ListItem>
+            <ListItem dense disableGutters>
+              <div hidden={pane.hide}>{horizontalSplitButton}</div>
+            </ListItem>
+            <ListItem dense disableGutters>
+              {visibilityButton}
+            </ListItem>
+          </List>
+        )
+      } else {
+        paneControl = <></>
+      }
 
       const configBar = (
         <Grid
