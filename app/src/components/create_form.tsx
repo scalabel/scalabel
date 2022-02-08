@@ -297,6 +297,26 @@ export default class CreateForm extends React.Component<Props, State> {
           </FormGroup>
           <FormGroup row={true} className={classes.formGroup}>
             <TextField
+              required={!this.state.showTaskSize}
+              type="number"
+              name={FormField.KEY_INTERVAL}
+              label="Keyframe Interval"
+              className={
+                this.state.showTaskSize ? classes.hidden : classes.halfWidthText
+              }
+              InputProps={{
+                inputProps: {
+                  min: 1,
+                  "data-testid": "tasksize-input"
+                }
+              }}
+              defaultValue={1}
+              margin="normal"
+              data-testid="keyinterval"
+            />
+          </FormGroup>
+          <FormGroup row={true} className={classes.formGroup}>
+            <TextField
               name={FormField.INSTRUCTIONS_URL}
               label="Instruction URL"
               className={classes.fullWidthText}

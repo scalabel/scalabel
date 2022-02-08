@@ -381,6 +381,9 @@ function header(props: HeaderProps): JSX.Element {
   const { classes, totalLabels, totalTaskLabeled, numUsers, vendor } = props
   return (
     <>
+      <IconButton color="inherit" href={`./create`}>
+        <FontAwesomeIcon icon={fa.faChevronLeft} size="xs" transform="grow-6" />
+      </IconButton>
       <Typography variant="h6" noWrap>
         {vendor !== undefined && vendor
           ? "Vendor Dashboard"
@@ -488,7 +491,7 @@ function listEntry(props: ListEntryProps): JSX.Element {
       <Grid
         spacing={1}
         alignItems={"baseline"}
-        justify={"space-around"}
+        justifyContent={"space-around"}
         className={classes.listContainer}
         container
       >

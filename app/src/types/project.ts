@@ -1,11 +1,5 @@
-import { ItemExport, ItemGroupExport } from "./export"
-import {
-  Attribute,
-  Category,
-  ConfigType,
-  Label2DTemplateType,
-  SensorType
-} from "./state"
+import { ItemExport, ItemGroupExport, SensorExportType } from "./export"
+import { Attribute, Category, ConfigType, Label2DTemplateType } from "./state"
 
 /**
  * Stores specifications of project
@@ -18,7 +12,7 @@ export interface Project {
   /** frontend config */
   config: ConfigType
   /** map between data source id and data sources */
-  sensors: { [id: number]: SensorType }
+  sensors: { [id: number]: SensorExportType }
 }
 
 /**
@@ -35,6 +29,8 @@ export interface CreationForm {
   pageTitle: string
   /** task size */
   taskSize: number
+  /** keyframe interval */
+  keyInterval: number
   /** instruction url */
   instructionUrl: string
   /** whether demo mode is true */
@@ -48,7 +44,7 @@ export interface FormFileData {
   /** categories parsed from form file */
   categories: Category[]
   /** sensors */
-  sensors: SensorType[]
+  sensors: SensorExportType[]
   /** custom label template */
   templates: Label2DTemplateType[]
   /** attributes parsed from form file */

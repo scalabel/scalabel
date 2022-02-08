@@ -235,6 +235,24 @@ export interface RemoveAlertAction extends BaseAction {
   alertId: string
 }
 
+export type ActivateSpanAction = BaseAction
+
+export type DeactivateSpanAction = BaseAction
+
+export type UpdateSpanPoint = BaseAction
+
+export type RegisterSpanPointAction = BaseAction
+
+export type ResetSpanAction = BaseAction
+
+export type PauseSpanAction = BaseAction
+
+export type ResumeSpanAction = BaseAction
+
+export type UndoSpanAction = BaseAction
+
+export type ToggleGroundPlaneAction = BaseAction
+
 /**
  * These actions are event-driven messages intercepted by the sync middleware
  */
@@ -255,6 +273,16 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
+
+export type Info3DActionType =
+  | ActivateSpanAction
+  | DeactivateSpanAction
+  | RegisterSpanPointAction
+  | ResetSpanAction
+  | PauseSpanAction
+  | ResumeSpanAction
+  | UndoSpanAction
+  | ToggleGroundPlaneAction
 
 export type UserActionType =
   | ChangeSelectAction

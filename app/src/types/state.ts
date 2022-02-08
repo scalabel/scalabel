@@ -1,4 +1,5 @@
 import { AttributeToolType } from "../const/common"
+import { Span3D } from "../drawable/3d/box_span/span3d"
 
 export type IdType = string
 export const INVALID_ID: IdType = ""
@@ -47,6 +48,8 @@ export interface LabelType {
   manual: boolean
   /** Has shape changed? e.g. vertex is added/deleted. */
   changed: boolean
+  /** whether the label has been annotated as checked. */
+  checked: boolean
 }
 
 export interface TrackType {
@@ -225,6 +228,10 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
 export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+  /** Viewing direction */
+  target: Vector3Type
+  /** Up direction of the camera */
+  verticalAxis: Vector3Type
 }
 
 export interface HomographyViewerConfigType extends Image3DViewerConfigType {
@@ -350,6 +357,8 @@ export interface ConfigType {
   policyTypes: string[]
   /** Task size */
   taskSize: number
+  /** Keyframe interval */
+  keyInterval: number
   /** Whether to track */
   tracking: boolean
   /** Handler URL */
@@ -531,6 +540,15 @@ export interface AlertType {
   timeout: number
 }
 
+export interface Info3DType {
+  /** Box span toggled */
+  isBoxSpan: boolean
+  /** Bounding box created by spanning mode */
+  boxSpan: Span3D | null
+  /** Ground plane toggled */
+  showGroundPlane: boolean
+}
+
 /**
  * Information for this particular session
  */
@@ -557,6 +575,8 @@ export interface SessionType {
   numUpdates: number
   /** Alerts */
   alerts: AlertType[]
+  /** 3D-specific information */
+  info3D: Info3DType
 }
 
 export interface State {

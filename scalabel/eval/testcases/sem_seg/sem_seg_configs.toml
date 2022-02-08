@@ -45,16 +45,16 @@ name = "rider"
 name = "car"
 
 [[categories]]
-name = "bicycle"
+name = "truck"
 
 [[categories]]
 name = "bus"
 
 [[categories]]
-name = "motorcycle"
-
-[[categories]]
 name = "train"
 
 [[categories]]
-name = "truck"
+name = "motorcycle"
+
+[[categories]]
+name = "bicycle"

@@ -80,7 +80,7 @@ export class S3Storage extends Storage {
       try {
         await this.s3.createBucket(bucketParams).promise()
       } catch (error) {
-        Logger.error(error)
+        Logger.error(error as Error)
       }
     }
   }

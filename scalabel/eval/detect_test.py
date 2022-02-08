@@ -4,13 +4,14 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
 from .detect import evaluate_det
 
 
-class TestBDD100KDetectEval(unittest.TestCase):
-    """Test cases for BDD100K detection evaluation."""
+class TestScalabelDetectEval(unittest.TestCase):
+    """Test cases for Scalabel detection evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
@@ -41,7 +42,7 @@ class TestBDD100KDetectEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
+        aps: NDArrayF64 = np.array(
             [
                 41.37670388,
                 41.70985554,
@@ -54,13 +55,14 @@ class TestBDD100KDetectEval(unittest.TestCase):
                 -1.0,
                 -1.0,
                 34.02939267,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 34.02939267,
                 55.32390041,
@@ -74,7 +76,8 @@ class TestBDD100KDetectEval(unittest.TestCase):
                 25.55304933,
                 58.38594872,
                 66.04261954,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(
@@ -116,8 +119,8 @@ class TestBDD100KDetectEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KDetectEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K detection evaluation on empty test cases."""
+class TestScalabelDetectEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel detection evaluation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
@@ -148,14 +151,15 @@ class TestBDD100KDetectEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
-            [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0]
+        aps: NDArrayF64 = np.array(
+            [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0],
+            dtype=np.float64,
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 12)
+        overall_scores: NDArrayF64 = np.array([0.0] * 12, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

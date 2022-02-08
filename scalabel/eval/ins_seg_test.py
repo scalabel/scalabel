@@ -4,13 +4,14 @@ import unittest
 
 import numpy as np
 
+from ..common.typing import NDArrayF64
 from ..label.io import load, load_label_config
 from ..unittest.util import get_test_file
 from .ins_seg import evaluate_ins_seg
 
 
-class TestBDD100KInsSegEval(unittest.TestCase):
-    """Test cases for BDD100K instance segmentation evaluation."""
+class TestScalabelInsSegEval(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
@@ -39,7 +40,7 @@ class TestBDD100KInsSegEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
+        aps: NDArrayF64 = np.array(
             [
                 60.198019801980195,
                 49.99999999999999,
@@ -50,13 +51,14 @@ class TestBDD100KInsSegEval(unittest.TestCase):
                 -1.0,
                 29.999999999999993,
                 48.77227722772277,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 48.77227722772277,
                 86.73267326732673,
@@ -70,7 +72,8 @@ class TestBDD100KInsSegEval(unittest.TestCase):
                 0.0,
                 53.333333333333336,
                 50.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(
@@ -110,8 +113,8 @@ class TestBDD100KInsSegEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestBDD100KInsSegEvalEmpty(unittest.TestCase):
-    """Test cases for BDD100K instance segmentation on empty test cases."""
+class TestScalabelInsSegEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
@@ -140,14 +143,14 @@ class TestBDD100KInsSegEvalEmpty(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        APs = np.array(  # pylint: disable=invalid-name
-            [0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0]
+        aps: NDArrayF64 = np.array(
+            [0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float64
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), APs).all()
+            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
         )
 
-        overall_scores = np.array([0.0] * 12)
+        overall_scores: NDArrayF64 = np.array([0.0] * 12, dtype=np.float64)
         self.assertTrue(
             np.isclose(
                 np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores

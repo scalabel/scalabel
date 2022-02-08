@@ -1,4 +1,4 @@
-import { AttributeToolType } from "../../src/const/common"
+import { AttributeToolType, ViewerConfigTypeName } from "../../src/const/common"
 import { DeepPartialState } from "../../src/types/state"
 
 export const testJson: DeepPartialState = {
@@ -198,6 +198,12 @@ export const testJson: DeepPartialState = {
     select: {
       item: 0,
       labelType: 0
+    },
+    viewerConfigs: {
+      0: {
+        type: ViewerConfigTypeName.IMAGE,
+        sensor: -1
+      }
     }
   }
 }

@@ -19,7 +19,8 @@ import {
   DatasetExport,
   ItemExport,
   ItemGroupExport,
-  LabelExport
+  LabelExport,
+  SensorExportType
 } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
 import {
@@ -40,6 +41,11 @@ import { Storage } from "./storage"
 import * as util from "./util"
 import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
 import Logger from "./logger"
+import {
+  extrinsicsFromExport,
+  intrinsicsFromExport,
+  sensorsFromExport
+} from "./bdd_type_transformers"
 
 /**
  * convert fields to form and validate input
@@ -82,6 +88,19 @@ export async function parseForm(
     }
   }
 
+  // In tracking case, set the interval between keyframes
+  let keyInterval = 1
+  if (
+    fields[FormField.ITEM_TYPE] === ItemTypeName.VIDEO ||
+    fields[FormField.ITEM_TYPE] === ItemTypeName.POINT_CLOUD_TRACKING
+  ) {
+    if (fields[FormField.KEY_INTERVAL] === "") {
+      throw Error("Please specify a task size")
+    } else {
+      keyInterval = parseInt(fields[FormField.KEY_INTERVAL], 10)
+    }
+  }
+
   // Derived fields
   const pageTitle = getPageTitle(labelType, itemType)
   const instructionUrl = getInstructionUrl(labelType)
@@ -99,6 +118,7 @@ export async function parseForm(
     labelType,
     pageTitle,
     taskSize,
+    keyInterval,
     instructionUrl,
     demoMode,
     useModel
@@ -127,7 +147,7 @@ export async function parseFiles(
     getDefaultCategories(labelType)
   )
 
-  const sensors: Promise<SensorType[]> = readConfig(
+  const sensors: Promise<SensorExportType[]> = readConfig(
     storage,
     _.get(files, FormField.SENSORS),
     []
@@ -155,7 +175,7 @@ export async function parseFiles(
     (
       result: [
         [Array<Partial<ItemExport>>, Array<Partial<ItemGroupExport>>],
-        SensorType[],
+        SensorExportType[],
         Label2DTemplateType[],
         Attribute[],
         Category[]
@@ -191,10 +211,6 @@ export async function parseSingleFile(
   )
 
   return await dataset.then((dataset: DatasetExport) => {
-    const categories: Category[] = []
-    dataset.config.categories.forEach((category) =>
-      categories.push({ name: category })
-    )
     return {
       items: dataset.frames as Array<Partial<ItemExport>>,
       itemGroups: dataset.frameGroups !== undefined ? dataset.frameGroups : [],
@@ -202,7 +218,7 @@ export async function parseSingleFile(
         dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
       attributes: dataset.config.attributes as Attribute[],
-      categories: categories
+      categories: dataset.config.categories
     }
   })
 }
@@ -227,7 +243,7 @@ export async function readConfig<T>(
 
   const file = await storage.load(filePath)
   try {
-    const fileData = (yaml.load(file, { json: true }) as unknown) as T
+    const fileData = yaml.load(file, { json: true }) as T
     return fileData
   } catch {
     throw new Error(`Improper formatting for file: ${filePath}`)
@@ -350,6 +366,7 @@ export async function createProject(
     labelTypes: labelTypes,
     label2DTemplates: templates,
     taskSize: form.taskSize,
+    keyInterval: form.keyInterval,
     handlerUrl,
     pageTitle: form.pageTitle,
     instructionPage: form.instructionUrl,
@@ -373,7 +390,7 @@ export async function createProject(
     }
   })
 
-  const sensors: { [id: number]: SensorType } = {}
+  const sensors: { [id: number]: SensorExportType } = {}
   for (const sensor of formFileData.sensors) {
     sensors[sensor.id] = sensor
   }
@@ -388,7 +405,7 @@ export async function createProject(
     itemGroups: formFileData.itemGroups,
     sensors
   }
-  return Promise.resolve(project)
+  return await Promise.resolve(project)
 }
 
 /**
@@ -459,9 +476,9 @@ function getCategoryMap(configCategories: string[]): { [key: string]: number } {
  *
  * @param items
  */
-function getItemNameMap(
-  items: Array<Partial<ItemExport>>
-): { [key: string]: number } {
+function getItemNameMap(items: Array<Partial<ItemExport>>): {
+  [key: string]: number
+} {
   const itemNameMap: { [key: string]: number } = {}
   for (let itemInd = 0; itemInd < items.length; itemInd++) {
     const item = items[itemInd]
@@ -669,8 +686,8 @@ export async function createTasks(
   itemStartNum: number = 0,
   returnTask: boolean = false
 ): Promise<TaskType[]> {
-  const sensors = project.sensors
-  const { itemType, taskSize, tracking } = project.config
+  const sensors = sensorsFromExport(project.sensors)
+  const { itemType, taskSize, tracking, labelTypes } = project.config
 
   const items = filterInvalidItems(project.items, itemType, sensors)
 
@@ -688,8 +705,12 @@ export async function createTasks(
           maxSensorId,
           "",
           itemExport.dataType,
-          itemExport.intrinsics,
-          itemExport.extrinsics
+          itemExport.intrinsics === undefined || itemExport.intrinsics === null
+            ? undefined
+            : intrinsicsFromExport(itemExport.intrinsics),
+          itemExport.extrinsics === undefined || itemExport.extrinsics === null
+            ? undefined
+            : extrinsicsFromExport(itemExport.extrinsics)
         )
         itemExport.sensor = maxSensorId
         itemExport.dataType = undefined
@@ -772,7 +793,8 @@ export async function createTasks(
         attributeNameMap,
         attributeValueMap,
         categoryNameMap,
-        tracking
+        tracking,
+        labelTypes
       )
 
       if (tracking) {
@@ -812,5 +834,5 @@ export async function createTasks(
       tasks.push(task)
     }
   }
-  return Promise.resolve(tasks)
+  return await Promise.resolve(tasks)
 }

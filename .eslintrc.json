@@ -26,7 +26,7 @@
     "spaced-comment": ["error", "always"],
     "max-lines-per-function": [
       "error",
-      { "max": 160, "skipBlankLines": true, "skipComments": true }
+      { "max": 180, "skipBlankLines": true, "skipComments": true }
     ],
     "max-statements": ["error", 80],
     "require-jsdoc": [

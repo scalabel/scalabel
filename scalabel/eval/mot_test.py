@@ -3,7 +3,9 @@ import os
 import unittest
 
 import numpy as np
+import pytest
 
+from ..common.typing import NDArrayF64
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.typing import Category
 from ..unittest.util import get_test_file
@@ -38,8 +40,8 @@ class TestComputeAverage(unittest.TestCase):
         self.assertDictEqual(ave_dict, dict(a=3, b=3, c=0.75))
 
 
-class TestBDD100KMotEval(unittest.TestCase):
-    """Test cases for BDD100K MOT evaluation."""
+class TestScalabelMotEval(unittest.TestCase):
+    """Test cases for Scalabel MOT evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     gts = group_and_sort(
@@ -76,7 +78,7 @@ class TestBDD100KMotEval(unittest.TestCase):
         self.assertSetEqual(categories, set(data_frame.index.values))
 
         data_arr = data_frame.to_numpy()
-        motas = np.array(
+        motas: NDArrayF64 = np.array(
             [
                 36.12565445,
                 43.69747899,
@@ -91,13 +93,14 @@ class TestBDD100KMotEval(unittest.TestCase):
                 -4.20168067,
                 24.32420464,
                 64.20070762,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), motas).all()
         )
 
-        overall_scores = np.array(
+        overall_scores: NDArrayF64 = np.array(
             [
                 64.20070762,
                 87.16143945,
@@ -109,7 +112,8 @@ class TestBDD100KMotEval(unittest.TestCase):
                 47.0,
                 33.0,
                 66.0,
-            ]
+            ],
+            dtype=np.float64,
         )
         self.assertTrue(np.isclose(data_arr[-1], overall_scores).all())
 
@@ -133,4 +137,4 @@ class TestBDD100KMotEval(unittest.TestCase):
         }
         self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
         for name, score in overall_reference.items():
-            self.assertAlmostEqual(score, summary[name])
+            self.assertTrue(score == pytest.approx(summary[name]))

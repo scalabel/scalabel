@@ -1,7 +1,7 @@
 """Evaluation procedures for semantic segmentation.
 
 For dataset with `n` classes, we treat the index `n` as the ignored class.
-When compute IoUs, this ignored class is considered.
+When computing IoUs, this ignored class is considered.
 However, IoU(ignored) doesn't influence mIoU.
 """
 import argparse
@@ -13,17 +13,17 @@ from typing import AbstractSet, Dict, List, Optional, Set, Tuple, Union, cast
 import numpy as np
 from tqdm import tqdm
 
+from scalabel.common.io import open_write_text
+from scalabel.common.logger import logger
 from scalabel.common.parallel import NPROC
 from scalabel.common.typing import NDArrayF64, NDArrayI32, NDArrayU8
-from scalabel.eval.result import AVERAGE, Result, Scores, ScoresList
+from scalabel.label.io import load, load_label_config
+from scalabel.label.transforms import poly2ds_to_mask, rle_to_mask
+from scalabel.label.typing import Config, Frame, ImageSize
+from scalabel.label.utils import get_leaf_categories
 
-from ..common.io import open_write_text
-from ..common.logger import logger
-from ..common.parallel import NPROC
-from ..label.io import load, load_label_config
-from ..label.transforms import poly2ds_to_mask, rle_to_mask
-from ..label.typing import Config, Frame, ImageSize
-from .result import Result
+from .result import AVERAGE, Result, Scores, ScoresList
+from .utils import reorder_preds
 
 
 class SegResult(Result):
@@ -57,9 +57,7 @@ class SegResult(Result):
 
 
 def fast_hist(
-    groundtruth: NDArrayU8,
-    prediction: NDArrayU8,
-    size: int,
+    groundtruth: NDArrayU8, prediction: NDArrayU8, size: int
 ) -> NDArrayI32:
     """Compute the histogram."""
     prediction = prediction.copy()
@@ -71,12 +69,12 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return np.bincount(  # type: ignore
-        size * groundtruth[k].astype(int) + prediction[k], minlength=size ** 2
+    return np.bincount(
+        size * groundtruth[k].astype(int) + prediction[k], minlength=size**2
     ).reshape(size, size)
 
 
-def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
+def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class iou."""
     ious: NDArrayF64 = np.diag(hist) / (
         hist.sum(1) + hist.sum(0) - np.diag(hist)
@@ -86,7 +84,7 @@ def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
     return ious[:-1]  # type: ignore
 
 
-def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
+def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class accuracy."""
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
@@ -94,13 +92,13 @@ def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
     return accs[:-1]  # type: ignore
 
 
-def whole_acc(hist: NDArrayU8) -> float:
+def whole_acc(hist: NDArrayI32) -> float:
     """Calculate whole accuray."""
     hist = hist[:-1]
     return cast(float, np.diag(hist).sum() / hist.sum())
 
 
-def freq_iou(hist: NDArrayU8) -> float:
+def freq_iou(hist: NDArrayI32) -> float:
     """Calculate frequency iou."""
     ious = per_class_iou(hist)
     hist = hist[:-1]
@@ -111,13 +109,16 @@ def freq_iou(hist: NDArrayU8) -> float:
 def frame_to_mask(
     frame: Frame,
     categories: Dict[str, int],
-    image_size: ImageSize,
+    image_size: Optional[ImageSize] = None,
     ignore_label: int = 255,
 ) -> NDArrayU8:
     """Convert list of labels to a mask."""
-    out_mask: NDArrayU8 = (  # type: ignore
-        np.ones((image_size.height, image_size.width)) * ignore_label
-    ).astype(np.uint8)
+    if image_size is not None:
+        out_mask: NDArrayU8 = (
+            np.ones((image_size.height, image_size.width)) * ignore_label
+        ).astype(np.uint8)
+    else:
+        out_mask = np.zeros((0), dtype=np.uint8)
     if frame.labels is None:
         return out_mask
     for label in frame.labels:
@@ -128,7 +129,13 @@ def frame_to_mask(
         cat_id = categories[label.category]
         if label.rle is not None:
             mask = rle_to_mask(label.rle)
+            if len(out_mask) == 0:
+                out_mask = np.empty_like(mask)
+                out_mask.fill(ignore_label)
         elif label.poly2d is not None:
+            assert (
+                image_size is not None
+            ), "Requires ImageSize for Poly2D conversion to RLE"
             mask = poly2ds_to_mask(image_size, label.poly2d)
         out_mask[mask > 0] = cat_id
     return out_mask
@@ -138,7 +145,7 @@ def per_image_hist(
     ann_frame: Frame,
     pred_frame: Frame,
     categories: Dict[str, int],
-    image_size: ImageSize,
+    image_size: Optional[ImageSize] = None,
     ignore_label: int = 255,
 ) -> Tuple[NDArrayI32, Set[int]]:
     """Calculate per image hist."""
@@ -155,6 +162,10 @@ def per_image_hist(
         gt_id_set.remove(num_classes - 1)
 
     pred = frame_to_mask(pred_frame, categories, image_size, ignore_label)
+    if len(pred) == 0:
+        # empty mask
+        pred = np.empty_like(gt)
+        pred.fill(ignore_label)
     hist = fast_hist(gt.flatten(), pred.flatten(), num_classes)
     return hist, gt_id_set
 
@@ -165,30 +176,23 @@ def evaluate_sem_seg(
     config: Config,
     nproc: int = NPROC,
 ) -> SegResult:
-    """Load the ground truth and prediction results.
+    """Evaluate segmentation with Scalabel format.
 
     Args:
-        ann_frames: the ground truth annotations in Scalabel format
-        pred_frames: the prediction results in Scalabel format.
+        ann_frames: the ground truth frames.
+        pred_frames: the prediction frames.
         config: Metadata config.
         nproc: the number of process.
 
     Returns:
-        SegResult: rendered eval results.
-
-    Example usage:
-        evaluate_sem_seg(
-            "/path/to/gts",
-            "/path/to/results",
-            "/path/to/cfg",
-            nproc=4,
-        )
+        SegResult: evaluation results.
     """
-    assert (
-        config.imageSize is not None
-    ), "Segmentation evaluation requires imageSize to be defined in config"
-    categories = {cat.name: id for id, cat in enumerate(config.categories)}
+    categories = {
+        cat.name: id
+        for id, cat in enumerate(get_leaf_categories(config.categories))
+    }
     ignore_label = 255
+    pred_frames = reorder_preds(ann_frames, pred_frames)
 
     logger.info("evaluating...")
     if nproc > 1:
@@ -218,7 +222,7 @@ def evaluate_sem_seg(
 
     logger.info("accumulating...")
     num_classes = len(categories) + 1
-    hist = np.zeros((num_classes, num_classes))
+    hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
     for (hist_, gt_id_set_) in hist_and_gt_id_sets:
         hist += hist_
@@ -260,7 +264,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",

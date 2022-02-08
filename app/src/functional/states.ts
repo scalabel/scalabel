@@ -14,6 +14,7 @@ import {
   IdType,
   Image3DViewerConfigType,
   ImageViewerConfigType,
+  Info3DType,
   IntrinsicsType,
   INVALID_ID,
   ItemStatus,
@@ -72,6 +73,7 @@ export function makeLabel(
     order: 0,
     manual: true, // By default, manual is true
     changed: false, // If shape has changed, then interpolation will not apply
+    checked: false,
     ..._.cloneDeep(params)
   }
   if (newId && params.id !== undefined) {
@@ -345,6 +347,8 @@ export function makeImage3DViewerConfig(
   const imageConfig = makeImageViewerConfig(pane, sensor)
   return {
     ...imageConfig,
+    target: { x: 0.0, y: 0.0, z: 1.0 },
+    verticalAxis: { x: 0.0, y: -1.0, z: 0.0 },
     type: types.ViewerConfigTypeName.IMAGE_3D,
     pointCloudSensor: -2
   }
@@ -365,6 +369,8 @@ export function makeHomographyViewerConfig(
   const imageConfig = makeImageViewerConfig(pane, sensor)
   return {
     ...imageConfig,
+    target: { x: 0.0, y: 0.0, z: 1.0 },
+    verticalAxis: { x: 0.0, y: -1.0, z: 0.0 },
     type: types.ViewerConfigTypeName.HOMOGRAPHY,
     pointCloudSensor: -2,
     distance
@@ -497,6 +503,7 @@ export function makeTaskConfig(params: Partial<ConfigType> = {}): ConfigType {
     label2DTemplates: {},
     policyTypes: [],
     taskSize: 0,
+    keyInterval: 1,
     tracking: false,
     handlerUrl: "",
     pageTitle: "",
@@ -625,6 +632,21 @@ export function makeItemStatus(params: Partial<ItemStatus> = {}): ItemStatus {
 }
 
 /**
+ * Initialize a item status sate
+ *
+ * @param {{}} params
+ * @returns {ItemStatus}
+ */
+export function makeInfo3D(params: Partial<Info3DType> = {}): Info3DType {
+  return {
+    isBoxSpan: false,
+    boxSpan: null,
+    showGroundPlane: false,
+    ...params
+  }
+}
+
+/**
  * Initialize a session state
  *
  * @param {{}} params
@@ -641,6 +663,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     modelStatus: ModelStatus.INVALID,
     numUpdates: 0,
     alerts: [],
+    info3D: makeInfo3D(),
     ...params
   }
 }

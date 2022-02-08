@@ -17,12 +17,13 @@ from pycocotools.cocoeval import COCOeval, Params  # type: ignore
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import DictStrAny
+from ..common.typing import DictStrAny, NDArrayF64
 from ..label.coco_typing import GtType
 from ..label.io import load, load_label_config
 from ..label.to_coco import scalabel2coco_pose
 from ..label.typing import Config, Frame
 from .result import OVERALL, Result
+from .utils import reorder_preds
 
 
 class PoseResult(Result):
@@ -68,7 +69,9 @@ class ParamsV2(Params):  # type: ignore
         super().__init__(iouType)
         self.maxDets = [20]
         if sigmas is not None:
-            self.kpt_oks_sigmas = np.array(sigmas)
+            self.kpt_oks_sigmas: NDArrayF64 = np.array(
+                sigmas, dtype=np.float64
+            )
 
 
 class COCOV2(COCO):  # type: ignore
@@ -194,7 +197,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == area_rng]
         mind = [i for i, mDet in enumerate(p.maxDets) if mDet == max_dets]
         s = self.eval[metric]
-        cat_ids = np.array(p.catIds)
+        cat_ids: NDArrayF64 = np.array(p.catIds, dtype=np.int64)
         if iou_thr is not None:
             t = np.where(iou_thr == p.iouThrs)[0]
             s = s[t]
@@ -235,24 +238,16 @@ def evaluate_pose(
     config: Config,
     nproc: int = NPROC,
 ) -> PoseResult:
-    """Load the ground truth and prediction results.
+    """Evaluate pose estimation with Scalabel format.
 
     Args:
-        ann_frames: the ground truth annotations in Scalabel format
-        pred_frames: the prediction results in Scalabel format.
+        ann_frames: the ground truth frames.
+        pred_frames: the prediction frames.
         config: Metadata config.
         nproc: the number of process.
 
     Returns:
-        PoseResult: rendered eval results.
-
-    Example usage:
-        evaluate_pose(
-            "/path/to/gts",
-            "/path/to/results",
-            "/path/to/cfg",
-            nproc=4,
-        )
+        PoseResult: evaluation results.
     """
     # Convert the annotation file to COCO format
     ann_frames = sorted(ann_frames, key=lambda frame: frame.name)
@@ -260,7 +255,7 @@ def evaluate_pose(
     coco_gt = COCOV2(None, ann_coco)
 
     # Load results and convert the predictions
-    pred_frames = sorted(pred_frames, key=lambda frame: frame.name)
+    pred_frames = reorder_preds(ann_frames, pred_frames)
     pred_res = scalabel2coco_pose(pred_frames, config)["annotations"]
     if not pred_res:
         return PoseResult.empty(coco_gt)
@@ -299,7 +294,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",

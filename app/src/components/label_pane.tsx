@@ -350,7 +350,7 @@ class LabelPane extends Component<Props> {
       const configBar = (
         <Grid
           key={`configMenu${pane.id}`}
-          justify={"flex-end"}
+          justifyContent={"flex-end"}
           container
           direction="row"
           classes={{
@@ -364,7 +364,7 @@ class LabelPane extends Component<Props> {
       const paneBar = (
         <Grid
           key={`paneMenu${pane.id}`}
-          justify={"flex-start"}
+          justifyContent={"flex-start"}
           alignItems={"flex-end"}
           container
           direction="row"

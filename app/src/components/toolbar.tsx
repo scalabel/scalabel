@@ -13,8 +13,12 @@ import {
   mergeTracks,
   sendPredictionRequest,
   splitTrack,
-  startLinkTrack
+  startLinkTrack,
+  splitPane,
+  deletePane,
+  addViewerConfig
 } from "../action/common"
+import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
@@ -24,11 +28,21 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { Key, LabelTypeName } from "../const/common"
+import { Key, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
-import { isValidId, makeTrack } from "../functional/states"
+import {
+  isValidId,
+  makeDefaultViewerConfig,
+  makeTrack
+} from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
-import { Attribute, Category, ModeStatus, State } from "../types/state"
+import {
+  Attribute,
+  Category,
+  ModeStatus,
+  State,
+  SplitType
+} from "../types/state"
 import { makeButton } from "./button"
 import { Component } from "./component"
 import { ToolbarCategory } from "./toolbar_category"
@@ -192,6 +206,22 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
+          {(this.state.user.viewerConfigs[0].type ===
+            ViewerConfigTypeName.POINT_CLOUD ||
+            this.state.user.viewerConfigs[0].type ===
+              ViewerConfigTypeName.IMAGE_3D) && (
+            <div>
+              {this.state.session.info3D.isBoxSpan ||
+              this.state.session.info3D.boxSpan !== null
+                ? makeButton("Cancel", () => {
+                    this.deactivateSpan()
+                    alert(Severity.WARNING, "Box was not generated")
+                  })
+                : makeButton("Activate span", () => {
+                    this.activateSpan()
+                  })}
+            </div>
+          )}
           {this.state.task.config.tracking && (
             <div>
               {this.state.session.trackLinking
@@ -214,6 +244,14 @@ export class ToolBar extends Component<Props> {
             <div>
               {makeButton("Predict", () => {
                 this.startPrediction(this.state)
+              })}
+            </div>
+          )}
+          {this.state.user.viewerConfigs[0].type ===
+            ViewerConfigTypeName.IMAGE_3D && (
+            <div>
+              {makeButton("Homography", () => {
+                this.toggleHomographyView(this.state)
               })}
             </div>
           )}
@@ -402,6 +440,7 @@ export class ToolBar extends Component<Props> {
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+      alert(Severity.SUCCESS, "Selected tracks have been successfuly linked.")
     } else {
       alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
@@ -459,5 +498,74 @@ export class ToolBar extends Component<Props> {
         autoClose: 2000
       }
     )
+  }
+
+  /**
+   * Activate box spanning mode
+   */
+  private activateSpan(): void {
+    if (!this.itemHasGroundPlane()) {
+      alert(Severity.WARNING, 'First insert ground plane with "g".')
+      return
+    }
+    Session.dispatch(activateSpan())
+  }
+
+  /**
+   * Deactivate box spanning mode
+   *
+   * @param state
+   */
+  private deactivateSpan(): void {
+    Session.dispatch(deactivateSpan())
+  }
+
+  /**
+   * Toggle homography view
+   *
+   * @param state
+   */
+  private toggleHomographyView(state: State): void {
+    if (!this.itemHasGroundPlane()) {
+      alert(Severity.WARNING, 'First insert ground plane with "g".')
+      return
+    }
+    const panes = Object.keys(state.user.layout.panes).map((key) =>
+      parseInt(key)
+    )
+    const firstPane = Math.min(...panes)
+    const lastPane = state.user.layout.maxPaneId
+    if (panes.length === 1) {
+      const viewerConfigIds = Object.keys(state.user.viewerConfigs).map((key) =>
+        parseInt(key)
+      )
+      let lastViewerConfigId = state.user.layout.maxViewerConfigId
+      if (viewerConfigIds.length === 1) {
+        lastViewerConfigId += 1
+        const config = makeDefaultViewerConfig(
+          ViewerConfigTypeName.HOMOGRAPHY,
+          lastPane
+        )
+        if (config !== null) {
+          Session.dispatch(addViewerConfig(lastViewerConfigId, config))
+        }
+      }
+      Session.dispatch(
+        splitPane(firstPane, SplitType.VERTICAL, lastViewerConfigId)
+      )
+    } else {
+      Session.dispatch(
+        deletePane(lastPane, state.user.layout.maxViewerConfigId)
+      )
+    }
+  }
+
+  /**
+   * Check if current selected item has a ground plane.
+   */
+  private itemHasGroundPlane(): boolean {
+    const selectedItem = this.state.user.select.item
+    const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
+    return groundPlane !== null
   }
 }

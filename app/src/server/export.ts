@@ -11,6 +11,8 @@ import {
   State
 } from "../types/state"
 import {
+  extrinsicsToExport,
+  intrinsicsToExport,
   transformBox2D,
   transformBox3D,
   transformPlane3D
@@ -79,9 +81,13 @@ export function convertItemToExport(
       labels: [],
       sensor,
       intrinsics:
-        item.intrinsics !== undefined ? item.intrinsics[sensor] : undefined,
+        item.intrinsics !== undefined
+          ? intrinsicsToExport(item.intrinsics[sensor])
+          : undefined,
       extrinsics:
-        item.extrinsics !== undefined ? item.extrinsics[sensor] : undefined
+        item.extrinsics !== undefined
+          ? extrinsicsToExport(item.extrinsics[sensor])
+          : undefined
     }
   }
   // TODO: Clean up the export code for naming and modularity
@@ -175,7 +181,7 @@ function parseLabelAttributes(
       })
       if (selectedValues.length === 1) {
         exportAttributes[attribute.name] = selectedValues[0]
-      } else {
+      } else if (selectedValues.length > 1) {
         exportAttributes[attribute.name] = selectedValues
       }
     } else if (attribute.type === AttributeToolType.SWITCH) {

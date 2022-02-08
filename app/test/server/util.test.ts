@@ -25,6 +25,7 @@ describe("test general utility methods", () => {
       LabelTypeName.BOX_2D,
       "sampleTitle",
       5,
+      1,
       "instructions.com",
       false
     )
@@ -56,9 +57,9 @@ describe("test general utility methods", () => {
     handler = util.getHandlerUrl(ItemTypeName.VIDEO, LabelTypeName.BOX_2D)
     expect(handler).toBe(HandlerUrl.LABEL)
 
-    // Video item + other label => invalid handler
+    // Video item + other label => 3d handler
     handler = util.getHandlerUrl(ItemTypeName.VIDEO, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.INVALID)
+    expect(handler).toBe(HandlerUrl.LABEL)
 
     // Point cloud item + box3d label => 3d handler
     handler = util.getHandlerUrl(ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D)

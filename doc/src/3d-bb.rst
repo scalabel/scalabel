@@ -4,7 +4,7 @@
 Scalabel also supports 3D point cloud bounding box annotation. You can have a quick
 try by submitting `examples/point_cloud_list.yml
 <https://github.com/scalabel/scalabel/blob/master/examples/point_cloud_list.yml>`_
-and choose Point Clound  in ``Item Type`` and 3D Bounding Box in ``Label Type``.
+and choose Point Cloud  in ``Item Type`` and 3D Bounding Box in ``Label Type``.
 
 Currently we only support ``.ply`` format.
 
@@ -46,13 +46,17 @@ perspective. So we provide several options to change the position of camera.
 
 Creating a new bounding box
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Press ``Space`` to add a new bounding box with size 1x1x1 at the origin. After that,
-this newly created bounding box will be automatically selected and you can adjust it.
-Press ``Enter`` to finish the creation.
+* Default creation: Press ``Space`` to add a new bounding box with size 1x1x1 at the origin. After that, this newly created bounding box will be automatically selected and you can adjust it. Press ``Enter`` to finish the creation.
 
 .. figure:: ../media/doc/videos/box3d_creation.gif
 
    Create a new bounding box
+
+* Spanning mode: Click the ``Activate Span`` button to activate the spanning mode. In this mode, you can define a custom bounding box by clicking on the pane to generate four points. These points will be automatically connected by lines and define a cuboidal skeleton of the bounding box. Once the skeleton has been generated, press ``Space`` to convert it to a bounding box. Press ``Enter`` to finish the creation.
+
+.. figure:: ../media/doc/videos/box3d_spanning.gif
+
+   Create a new bounding box via spanning
 
 Editing the bounding box
 ~~~~~~~~~~~~~~~~~~~~~~~~

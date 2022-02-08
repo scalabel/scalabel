@@ -10,14 +10,13 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 
-from scalabel.label.utils import cart2hom, rotation_y_to_alpha
-
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64
+from ..label.transforms import xyxy_to_box2d
+from ..label.utils import cart2hom, rotation_y_to_alpha
 from .io import save
 from .kitti_utlis import KittiPoseParser, list_from_file, read_calib, read_oxts
 from .typing import (
-    Box2D,
     Box3D,
     Category,
     Config,
@@ -93,8 +92,8 @@ def heading_transform(box3d: Box3D, calib: NDArrayF64) -> float:
         (box3d.dimension[0], box3d.dimension[1], box3d.dimension[2]),
         rot_y,
     )
-    pt1 = np.array([-0.5, 0.5, 0, 1.0])
-    pt2 = np.array([0.5, 0.5, 0, 1.0])
+    pt1: NDArrayF64 = np.array([-0.5, 0.5, 0, 1.0], dtype=np.float64)
+    pt2: NDArrayF64 = np.array([0.5, 0.5, 0, 1.0], dtype=np.float64)
     pt1 = np.matmul(tm, pt1).tolist()
     pt2 = np.matmul(tm, pt2).tolist()
     return -math.atan2(pt2[2] - pt1[2], pt2[0] - pt1[0])
@@ -113,7 +112,7 @@ def parse_lidar_labels(
         if label.box3d is not None:
             box3d = label.box3d
 
-            center = np.array([box3d.location])
+            center: NDArrayF64 = np.array([box3d.location], dtype=np.float64)
             center_lidar = tuple(
                 np.dot(cam2lidar_mat, cart2hom(center).T)[:3, 0].tolist()
             )
@@ -128,7 +127,6 @@ def parse_lidar_labels(
         new_labels.append(
             Label(
                 category=label.category,
-                box2d=label.box2d,
                 box3d=new_box3d if label.box3d is not None else None,
                 id=label.id,
             )
@@ -177,7 +175,7 @@ def parse_label(
         else:
             seq_id = 0
 
-        if seq_id not in labels_dict.keys():
+        if seq_id not in labels_dict:
             labels_dict[seq_id] = []
 
         cat = label[0 + offset]
@@ -195,7 +193,7 @@ def parse_label(
         else:
             track_id += 1
 
-        x1, y1, x2, y2 = (
+        box2d = xyxy_to_box2d(
             float(label[4 + offset]),
             float(label[5 + offset]),
             float(label[6 + offset]),
@@ -218,8 +216,6 @@ def parse_label(
             ),
             alpha=float(label[3 + offset]),
         )
-
-        box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
 
         labels_dict[seq_id].append(
             Label(
