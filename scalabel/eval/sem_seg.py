@@ -70,7 +70,7 @@ def fast_hist(
         np.less(groundtruth, size - 1),
     )
     return np.bincount(
-        size * groundtruth[k].astype(int) + prediction[k], minlength=size**2
+        size * groundtruth[k].astype(int) + prediction[k], minlength=size ** 2
     ).reshape(size, size)
 
 
