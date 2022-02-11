@@ -19,9 +19,7 @@ class TestScalabelTaggingEval(unittest.TestCase):
     gts = load(gts_path).frames
     preds = load(preds_path).frames
     config = load_label_config(get_test_file("tagging/tag_configs.toml"))
-    result = evaluate_tagging(
-        gts, preds, config, ["weather", "scene"], nproc=1
-    )
+    result = evaluate_tagging(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""

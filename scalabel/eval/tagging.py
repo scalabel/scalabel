@@ -12,7 +12,7 @@ from ..common.parallel import NPROC
 from ..common.typing import NDArrayI32
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
-from ..label.utils import get_leaf_categories, get_parent_categories
+from ..label.utils import get_parent_categories
 from .result import AVERAGE, Result, Scores, ScoresList
 
 
@@ -49,7 +49,6 @@ def evaluate_tagging(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
     config: Config,
-    tag_attr: List[str],
     nproc: int = NPROC,  # pylint: disable=unused-argument
 ) -> TaggingResult:
     """Evaluate image tagging with Scalabel format.
@@ -58,22 +57,18 @@ def evaluate_tagging(
         ann_frames: the ground truth frames.
         pred_frames: the prediction frames.
         config: Metadata config.
-        tag_attr: image attributes to evaluate.
         nproc: the number of process.
 
     Returns:
         TaggingResult: evaluation results.
     """
     tag_classes = get_parent_categories(config.categories)
-    if not tag_classes:
-        cats = get_leaf_categories(config.categories)
-        tag_classes = {tag: cats for tag in tag_attr}
+    assert tag_classes, "Tag attributes must be specified as supercategories"
     metrics = ["precision", "recall", "f1_score", "accuracy"]
     outputs: Dict[str, ScoresList] = {m: [] for m in metrics}
     avgs: Dict[str, Scores] = {m: {} for m in metrics}
-    for tag in tag_attr:
-        assert tag in tag_classes
-        classes = [c.name for c in tag_classes[tag]]
+    for tag, class_list in tag_classes.items():
+        classes = [c.name for c in class_list]
         preds_cls, gts_cls = [], []
         for p, g in zip(pred_frames, ann_frames):
             if g.attributes is None:
@@ -123,12 +118,6 @@ def parse_arguments() -> argparse.Namespace:
         "--result", "-r", required=True, help="path to tagging results"
     )
     parser.add_argument(
-        "--tag-attr",
-        nargs="+",
-        required=True,
-        help="tagging attribute(s) to evaluate",
-    )
-    parser.add_argument(
         "--config",
         "-c",
         default=None,
@@ -163,7 +152,7 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_tagging(gts, preds, cfg, args.tag_attr, args.nproc)
+    eval_result = evaluate_tagging(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
