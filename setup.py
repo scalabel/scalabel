@@ -46,7 +46,7 @@ setuptools.setup(
         "python-dateutil",
         "PyYAML",
         "requests",
-        "sklearn",
+        "scikit-learn",
         "tabulate",
         "tqdm",
         "toml",
