@@ -1,0 +1,45 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "direction"
+    [[categories.subcategories]]
+    name = "parallel"
+
+    [[categories.subcategories]]
+    name = "vertical"
+
+[[categories]]
+name = "style"
+    [[categories.subcategories]]
+    name = "solid"
+
+    [[categories.subcategories]]
+    name = "dashed"
+
+[[categories]]
+name = "category"
+    [[categories.subcategories]]
+    name = "crosswalk"
+
+    [[categories.subcategories]]
+    name = "double other"
+
+    [[categories.subcategories]]
+    name = "double white"
+
+    [[categories.subcategories]]
+    name = "double yellow"
+
+    [[categories.subcategories]]
+    name = "road curb"
+
+    [[categories.subcategories]]
+    name = "single other"
+
+    [[categories.subcategories]]
+    name = "single white"
+
+    [[categories.subcategories]]
+    name = "single yellow"

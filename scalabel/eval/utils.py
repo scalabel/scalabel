@@ -219,3 +219,14 @@ def reorder_preds(
     if miss_num > 0:
         logger.critical("%s images are missed in the prediction!", miss_num)
     return order_results
+
+
+def filter_labels(frames: List[Frame], cats: List[Category]) -> List[Frame]:
+    """Filter frame labels by categories."""
+    cat_names = [c.name for c in cats]
+    filt_frames = []
+    for f in frames:
+        if f.labels is not None:
+            f.labels = [l for l in f.labels if l.category in cat_names]
+        filt_frames.append(f)
+    return filt_frames

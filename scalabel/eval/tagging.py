@@ -14,6 +14,7 @@ from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
 from ..label.utils import get_parent_categories
 from .result import AVERAGE, Result, Scores, ScoresList
+from .utils import reorder_preds
 
 
 class TaggingResult(Result):
@@ -62,6 +63,7 @@ def evaluate_tagging(
     Returns:
         TaggingResult: evaluation results.
     """
+    pred_frames = reorder_preds(ann_frames, pred_frames)
     tag_classes = get_parent_categories(config.categories)
     assert tag_classes, "Tag attributes must be specified as supercategories"
     metrics = ["precision", "recall", "f1_score", "accuracy"]
