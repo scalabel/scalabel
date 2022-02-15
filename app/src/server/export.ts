@@ -4,6 +4,7 @@ import { ItemExport, LabelExport, PolygonExportType } from "../types/export"
 import {
   Attribute,
   ConfigType,
+  IdType,
   ItemType,
   Node2DType,
   PathPoint2DType,
@@ -17,6 +18,7 @@ import {
   transformBox3D,
   transformPlane3D
 } from "./bdd_type_transformers"
+import { getChildLabelIds } from "../functional/common"
 
 /**
  * Converts a polygon label to export format
@@ -27,7 +29,7 @@ import {
 export function convertPolygonToExport(
   pathPoints: PathPoint2DType[],
   labelType: string
-): PolygonExportType[] {
+): PolygonExportType {
   const typeCharacters = pathPoints.map((point) => {
     switch (point.pointType) {
       case PathPointType.CURVE:
@@ -43,13 +45,11 @@ export function convertPolygonToExport(
     point.x,
     point.y
   ])
-  return [
-    {
-      vertices,
-      types,
-      closed: labelType === LabelTypeName.POLYGON_2D
-    }
-  ]
+  return {
+    vertices,
+    types,
+    closed: labelType === LabelTypeName.POLYGON_2D
+  }
 }
 
 /**
@@ -102,7 +102,15 @@ export function convertItemToExport(
       poly2d: null,
       box3d: null
     }
-    if (label.shapes.length > 0) {
+
+    // if it is not a parent label, ignore it
+    let labelIds: IdType[] = []
+    if (isValidId(label.parent)) {
+      continue
+    } else {
+      labelIds = getChildLabelIds(item, key)
+    }
+    if (label.shapes.length > 0 || labelIds.length > 0) {
       const shapeId0 = label.shapes[0]
       const shape0 = item.shapes[shapeId0]
       switch (label.type) {
@@ -111,10 +119,14 @@ export function convertItemToExport(
           break
         case LabelTypeName.POLYGON_2D:
         case LabelTypeName.POLYLINE_2D:
-          labelExport.poly2d = convertPolygonToExport(
-            label.shapes.map((s) => item.shapes[s]) as PathPoint2DType[],
-            label.type
-          )
+        case LabelTypeName.EMPTY:
+          labelExport.poly2d = labelIds.map((labelId) => {
+            const childLabel = item.labels[labelId]
+            return convertPolygonToExport(
+              childLabel.shapes.map((s) => item.shapes[s]) as PathPoint2DType[],
+              childLabel.type
+            )
+          })
           break
         case LabelTypeName.BOX_3D:
           labelExport.box3d = transformBox3D(shape0)

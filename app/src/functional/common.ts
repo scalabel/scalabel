@@ -678,7 +678,7 @@ export function getLinkedLabelIds(item: ItemType, labelId: IdType): string[] {
  * @param item
  * @param labelId
  */
-function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
+export function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
   const labelIds: IdType[] = []
   const label = item.labels[labelId]
   if (label.children.length === 0) {
