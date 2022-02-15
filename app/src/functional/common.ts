@@ -800,7 +800,7 @@ export function linkLabels(
   const children = [
     ...new Set(action.labelIds.map((labelId) => getRootLabelId(item, labelId)))
   ]
-  if ([...new Set(children)].length === 1) {
+  if (children.length === 1) {
     return state
   }
   const baseLabel = item.labels[children[0]]
