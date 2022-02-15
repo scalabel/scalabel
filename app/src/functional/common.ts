@@ -797,9 +797,9 @@ export function linkLabels(
   }
   // Add a new label to the state
   const item = state.task.items[action.itemIndex]
-  const children = action.labelIds.map((labelId) =>
-    getRootLabelId(item, labelId)
-  )
+  const children = [
+    ...new Set(action.labelIds.map((labelId) => getRootLabelId(item, labelId)))
+  ]
   if ([...new Set(children)].length === 1) {
     return state
   }
