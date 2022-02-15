@@ -72,7 +72,7 @@ describe("Label operations", () => {
 
     // Link multiple labels
     let children = [label1.id, label2.id, label3.id]
-    Session.dispatch(action.linkLabels(itemIndex, children))
+    Session.dispatch(action.linkLabels(itemIndex, children, "parent"))
     let state = Session.getState()
     let item = state.task.items[itemIndex]
     const parent1Maybe = _.find(
@@ -88,7 +88,7 @@ describe("Label operations", () => {
 
     // Test recursive linking
     children = [label1.id, label4.id]
-    Session.dispatch(action.linkLabels(itemIndex, children))
+    Session.dispatch(action.linkLabels(itemIndex, children, "parent2"))
     state = Session.getState()
 
     item = state.task.items[itemIndex]

@@ -16,7 +16,7 @@ test("Test task action checker", () => {
   // Test some subset of task actions
   const taskActions: BaseAction[] = [
     addLabel(0, makeLabel()),
-    linkLabels(0, []),
+    linkLabels(0, [], ""),
     addTrack([], "", [], []),
     submit()
   ]

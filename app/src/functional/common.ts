@@ -720,6 +720,7 @@ export function getRootTrackId(item: ItemType, labelId: IdType): IdType {
  * @param {State} state Redux state
  * @param {number} index Index of the item
  * @param {string[]} idList ID list of labels to the parent
+ * @param parentLabelId
  * @param {LabelType} label Label template for the parent label
  * @param {string} [trackId] track id of the parent label if given
  */
@@ -727,6 +728,7 @@ function createParentLabel(
   state: State,
   index: number,
   idList: string[],
+  parentLabelId: IdType,
   label: LabelType,
   trackId?: string
 ): State {
@@ -736,6 +738,7 @@ function createParentLabel(
 
   // Make parent label
   const parentLabel: LabelType = makeLabel(label)
+  parentLabel.id = parentLabelId
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
@@ -797,6 +800,9 @@ export function linkLabels(
   const children = action.labelIds.map((labelId) =>
     getRootLabelId(item, labelId)
   )
+  if ([...new Set(children)].length === 1) {
+    return state
+  }
   const baseLabel = item.labels[children[0]]
   const toLinkTrackIds = [
     ...new Set(
@@ -824,6 +830,7 @@ export function linkLabels(
           state,
           idx,
           labelIdsToMerge,
+          action.parentLabelId,
           baseLabel,
           baseTrackId
         )
@@ -836,7 +843,13 @@ export function linkLabels(
     )
   } else {
     // No track. Only link labels.
-    state = createParentLabel(state, action.itemIndex, children, baseLabel)
+    state = createParentLabel(
+      state,
+      action.itemIndex,
+      children,
+      action.parentLabelId,
+      baseLabel
+    )
   }
   return { ...state }
 }

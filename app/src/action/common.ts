@@ -335,15 +335,18 @@ export function changeLabelsProps(
  *
  * @param {number} itemIndex
  * @param {[]number} labelIds labels to link
+ * @param parentLabelId
  */
 export function linkLabels(
   itemIndex: number,
-  labelIds: IdType[]
+  labelIds: IdType[],
+  parentLabelId: IdType
 ): actionTypes.LinkLabelsAction {
   return {
     ...makeBaseAction(actionConsts.LINK_LABELS),
     itemIndex,
-    labelIds
+    labelIds,
+    parentLabelId
   }
 }
 

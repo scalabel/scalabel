@@ -44,7 +44,7 @@ describe("Test link labels", () => {
     label2 = state.task.items[1].labels[labelId2]
     expect(label1.parent).toBe("")
     expect(label2.parent).toBe("")
-    dispatch(action.linkLabels(1, [labelId1, labelId2]))
+    dispatch(action.linkLabels(1, [labelId1, labelId2], "parent"))
     state = getState()
     label1 = state.task.items[1].labels[labelId1]
     label2 = state.task.items[1].labels[labelId2]
@@ -68,7 +68,7 @@ describe("Test link labels", () => {
     const track1Labels = state.task.tracks[track1].labels
     const track2 = label2.track
     const track2Labels = state.task.tracks[track2].labels
-    dispatch(action.linkLabels(1, ["24", "47"]))
+    dispatch(action.linkLabels(1, ["24", "47"], "parent"))
     state = getState()
     expect(state.task.tracks[track2]).toBeUndefined()
     expect(state.task.tracks[track1]).not.toBeUndefined()
