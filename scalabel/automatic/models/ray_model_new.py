@@ -26,7 +26,7 @@ import ray
 from ray import serve
 
 
-@serve.deployment(ray_actor_options={"num_cpus": 32, "num_gpus": 1})
+@serve.deployment(ray_actor_options={"num_cpus": 4, "num_gpus": 1})
 class RayModel(object):
     def __init__(self, cfg, logger):
         self.logger = logger
@@ -96,6 +96,19 @@ class RayModel(object):
                 item_indices = request_data["item_indices"]
                 action_packet_id = request_data["action_packet_id"]
                 self.redis.publish(model_response_channel, json.dumps([pred_boxes, item_indices, action_packet_id]))
+        elif self.cfg.TASK_TYPE == "box3d":
+            if request_type == QueryConsts.QUERY_TYPES["inference"]:
+                results = await self.handle_batch_detection(inputs)
+
+                # self.logger.info(f"results {results}")
+                print("results", results)
+
+                model_response_channel = self.model_response_channel % request_data["name"]
+
+                boxes3d = results["instances"].pred_boxes3d.vectorize().cpu().numpy().tolist()
+                item_indices = request_data["item_indices"]
+                action_packet_id = request_data["action_packet_id"]
+                self.redis.publish(model_response_channel, json.dumps([boxes3d, item_indices, action_packet_id]))
         else:
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
                 results = await self.handle_batch_polygon(inputs)

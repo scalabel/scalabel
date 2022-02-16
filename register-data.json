@@ -1,0 +1,127 @@
+{
+    "projectName": "test-bot-dd3d",
+    "taskId": 0,
+    "items": [
+        {
+            "id": "0",
+            "index": 0,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "1",
+            "index": 1,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000102.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "2",
+            "index": 2,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000103.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "3",
+            "index": 3,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000104.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "4",
+            "index": 4,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000105.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "5",
+            "index": 5,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000106.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "6",
+            "index": 6,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000107.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "7",
+            "index": 7,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000108.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "8",
+            "index": 8,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000109.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        },
+        {
+            "id": "9",
+            "index": 9,
+            "videoName": "",
+            "urls": {
+                "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000110.jpg"
+            },
+            "labels": {},
+            "shapes": {},
+            "timestamp": 0,
+            "names": {}
+        }
+    ],
+    "taskType": "box3d"
+}

@@ -23,7 +23,7 @@ import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
 from scalabel.automatic.consts import ModelStatus
 
-from scalabel.automatic.model_repo import add_general_config, add_polyrnnpp_config
+from scalabel.automatic.model_repo import add_general_config, add_polyrnnpp_config, add_dd3d_config
 
 ray.init()
 serve.start(http_options={"port": 8001})
@@ -73,6 +73,8 @@ class RayModelServerScheduler(object):
     # restore when server restarts, connects to redis channels.
     def restore(self):
         for task_name in self.redis_task_names:
+            if task_name in ["a-poly-31_000000", "test-bot_0"]:
+                continue
             task_config = self.get_task_config(task_name)
 
             # if it is not a active task, do not restore it
@@ -89,6 +91,7 @@ class RayModelServerScheduler(object):
             self.task_configs[task_name] = task_config
 
             model_request_channel = self.model_request_channel % task_name
+            self.logger.info(f"Setting up handler for channel {model_request_channel}")
             self.setup_handler_for_channel(model_request_channel, self.request_handler)
 
             # send notification message to let them know the model is ready
@@ -102,6 +105,8 @@ class RayModelServerScheduler(object):
         # TODO: need to judge whether model_dir exists or not
         # if not, use the original config
         cfg.MODEL.WEIGHTS = model_dir
+
+        self.logger.info(f"Model config {cfg.MODEL}")
 
         num_replicas = task_config["deploy_config"]["num_replicas"]
         RayModel.options(name=task_name, num_replicas=num_replicas).deploy(
@@ -168,7 +173,7 @@ class RayModelServerScheduler(object):
         task_id = status_message["taskId"]
         active = status_message["active"]
 
-        task_name = f'{project_name}_{task_id}'
+        task_name = f"{project_name}_{task_id}"
 
         model_notify_channel = self.model_notify_channel % task_name
         # if the corresponding task does not exist, return INVALID
@@ -205,16 +210,18 @@ class RayModelServerScheduler(object):
         action_packet_id = request_message["actionPacketId"]
         request_type = request_message["type"]
 
+        self.logger.info("Handling request!", request_message)
+
         if request_type == QueryConsts.QUERY_TYPES["inference"]:
             request_data = {
-                "name": f'{project_name}_{task_id}',
+                "name": f"{project_name}_{task_id}",
                 "items": items,
                 "item_indices": item_indices,
                 "action_packet_id": action_packet_id,
-                "request_type": request_type
+                "request_type": request_type,
             }
 
-            task_name = f'{project_name}_{task_id}'
+            task_name = f"{project_name}_{task_id}"
 
             task_config = self.task_configs[task_name]
             task_images = self.task_images[task_name]
@@ -228,12 +235,20 @@ class RayModelServerScheduler(object):
                     box = items[0]["labels"][0]["box2d"]
                     inputs.update({"bbox": [box["x1"], box["y1"], box["x2"], box["y2"]]})
 
+            # for box3d annotation
+            if task_config["task_type"] == "box3d":
+                if items[0]["intrinsics"] is not None:
+                    intrinsics = items[0]["intrinsics"]
+                    inputs.update({"intrinsics": torch.tensor(intrinsics)})
+
             model = self.task_models[task_name]
             model.remote(inputs, request_data, request_type)
 
     def register_task(self, task_type, project_name, task_id, item_list):
         # register task
+
         task_name = f"{project_name}_{task_id}"
+        self.logger.info(f"Handling register! {task_name}")
         model_notify_channel = self.model_notify_channel % task_name
 
         # if current task name is in configs, just check whether it is active no
@@ -287,10 +302,15 @@ class RayModelServerScheduler(object):
             cfg.TASK_TYPE = "polygon2d"
             add_polyrnnpp_config(cfg)
             cfg.merge_from_file(model_name)
+        elif task_type == "box3d":
+            cfg.TASK_TYPE = "box3d"
+            add_dd3d_config(cfg)
+            cfg.merge_from_file(model_name)
         else:
             raise NotImplementedError
 
         num_replicas = deploy_config["num_replicas"]
+        self.logger.info(f"Model config {cfg.MODEL}")
         RayModel.options(name=task_name, num_replicas=num_replicas).deploy(
             cfg,
             self.logger,
@@ -305,7 +325,7 @@ class RayModelServerScheduler(object):
             "model_cfg": cfg,
             "model_dir": task_name + ".pth",
             "image_dir": task_name + "_image.pkl",
-            "active": True
+            "active": True,
         }
         self.task_models[task_name] = deploy_model
 
@@ -328,16 +348,13 @@ def launch() -> None:
     # logger.addHandler(fh)
 
     # scheduler config
-    server_config = {
-        "redis_host": RedisConsts.REDIS_HOST,
-        "redis_port": RedisConsts.REDIS_PORT
-    }
+    server_config = {"redis_host": RedisConsts.REDIS_HOST, "redis_port": RedisConsts.REDIS_PORT}
     model_registry_config = {
         "tasks": ["box2d", "polygon2d", "Mask"],
         "box2d": {
             "models": {
                 "R50-FPN": "COCO-Detection/faster_rcnn_R_50_FPN_3x.yaml",
-                "R101-FPN": "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"
+                "R101-FPN": "COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml",
             },
             "defaults": {
                 "model": "R50-FPN",
@@ -346,21 +363,18 @@ def launch() -> None:
                     "bs_train": 1,
                     "batch_wait_time": 1,  # second
                     # above are currently useless
-                    "num_replicas": 1
-                }
-            }
+                    "num_replicas": 1,
+                },
+            },
         },
         "polygon2d": {
-            "models": {
-                "POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"
-            },
-            "defaults": {
-                "model": "POLYRNN-PP",
-                "deploy_config": {
-                    "num_replicas": 1
-                }
-            }
-        }
+            "models": {"POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"},
+            "defaults": {"model": "POLYRNN-PP", "deploy_config": {"num_replicas": 1}},
+        },
+        "box3d": {
+            "models": {"DD3D": "scalabel/automatic/model_repo/configs/dd3d/dd3d.yaml"},
+            "defaults": {"model": "DD3D", "deploy_config": {"num_replicas": 1}},
+        },
     }
 
     # create scheduler

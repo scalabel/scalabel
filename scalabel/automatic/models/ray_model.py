@@ -24,7 +24,7 @@ import ray
 from ray import serve
 
 
-@serve.deployment(num_replicas=4, ray_actor_options={"num_cpus": 32, "num_gpus": 1})
+@serve.deployment(num_replicas=2, ray_actor_options={"num_cpus": 4, "num_gpus": 1})
 class RayModel(object):
     def __init__(self, cfg_path: str, item_list: List, num_workers: int, logger) -> None:
         cfg = get_cfg()
@@ -47,9 +47,7 @@ class RayModel(object):
         checkpointer = DetectionCheckpointer(self.model)
         checkpointer.load(cfg.MODEL.WEIGHTS)
 
-        self.aug = T.ResizeShortestEdge(
-            [cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST
-        )
+        self.aug = T.ResizeShortestEdge([cfg.INPUT.MIN_SIZE_TEST, cfg.INPUT.MIN_SIZE_TEST], cfg.INPUT.MAX_SIZE_TEST)
 
         self.image_dict = {}
         self.load_inputs(item_list, num_workers)
@@ -73,11 +71,9 @@ class RayModel(object):
         urls = [item["urls"]["-1"] for item in item_list]
         if num_workers > 1:
             pool = Pool(num_workers)
-            image_list = list(pool.starmap(self.url_to_img,
-                                           zip(urls,
-                                               [self.aug] * len(urls),
-                                               [self.cfg.MODEL.DEVICE] * len(urls)
-                                               )))
+            image_list = list(
+                pool.starmap(self.url_to_img, zip(urls, [self.aug] * len(urls), [self.cfg.MODEL.DEVICE] * len(urls)))
+            )
         else:
             image_list = [self.url_to_img(url, self.aug, self.cfg.MODEL.DEVICE) for url in urls]
 

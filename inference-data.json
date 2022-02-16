@@ -1,0 +1,26 @@
+{
+    "projectName": "test-bot-dd3d",
+    "taskId": 0,
+    "items": [
+        {
+            "id": "0",
+            "index": 0,
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000101.jpg",
+            "labels": [
+                {
+                    "box2d": {
+                        "x1": 0,
+                        "x2": 100,
+                        "y1": 0,
+                        "y2": 100
+                    }
+                }
+            ]
+        }
+    ],
+    "itemIndices": [
+        0
+    ],
+    "actionPacketId": "test",
+    "type": "inference"
+}

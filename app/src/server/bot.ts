@@ -195,9 +195,12 @@ export class Bot {
       return
     }
 
+    console.log("Handling action broadcast")
+
     this.ackedPackets.add(actionPacket.id)
 
     const modelRequests = this.packetToRequests(actionPacket)
+    console.log("model requests:", modelRequests)
     // Send the requests for execution on the model server
     this.executeRequests(modelRequests, actionPacket.id)
   }
@@ -365,6 +368,7 @@ export class Bot {
     const itemIndex = action.itemIndices[0]
     const item = state.task.items[itemIndex]
     const url = Object.values(item.urls)[0]
+    console.log("Image action request")
 
     return this.modelInterface.makeImageRequest(url, itemIndex)
   }
@@ -416,6 +420,14 @@ export class Bot {
         const action = this.modelInterface.makeRectAction(shape, itemIndices[0])
         actions.push(action)
       })
+    } else if (this.labelType === LabelTypeName.BOX_3D) {
+      const box = [2, 2, 2, 2, 2, 2]
+      const action = this.modelInterface.makeBox3dAction(box, itemIndices[0])
+      actions.push(action)
+      // for (const box of shapes) {
+      //   const action = this.modelInterface.makeBox3dAction(box, itemIndices[0])
+      //   actions.push(action)
+      // }
     } else {
       const action = this.modelInterface.makePolyAction(shapes, itemIndices[0])
       actions.push(action)

@@ -1,4 +1,5 @@
 import { addBox2dLabel } from "../action/box2d"
+import { addBox3dLabel } from "../action/box3d"
 import { addPolygon2dLabel } from "../action/polygon2d"
 import { ModelEndpoint } from "../const/connection"
 import {
@@ -6,6 +7,7 @@ import {
   makeLabelExport,
   makeSimplePathPoint2D
 } from "../functional/states"
+import { Vector3D } from "../math/vector3d"
 import { AddLabelsAction } from "../types/action"
 import { ModelQuery, ModelRequest } from "../types/message"
 import {
@@ -145,6 +147,31 @@ export class ModelInterface {
     })
 
     const action = addPolygon2dLabel(itemIndex, -1, [0], points, true, false)
+    action.sessionId = this.sessionId
+    return action
+  }
+
+  /**
+   * Translate box3d response to an action
+   *
+   * @param box3d
+   * @param itemIndex
+   */
+  public makeBox3dAction(
+    box3d: number[], // W, L, H, x, y, z, rot_y, alpha
+    itemIndex: number
+  ): AddLabelsAction {
+    const size = new Vector3D(box3d[0], box3d[1], box3d[2])
+    const center = new Vector3D(box3d[3], box3d[4], box3d[5])
+    const orientation = new Vector3D()
+    const action = addBox3dLabel(
+      itemIndex,
+      [-1],
+      [0],
+      center,
+      size,
+      orientation
+    )
     action.sessionId = this.sessionId
     return action
   }

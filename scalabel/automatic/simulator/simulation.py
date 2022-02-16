@@ -65,6 +65,7 @@ class Simulator(object):
         self.state["type"] = QueryConsts.QUERY_TYPES["inference"]
         for i in range(1000):
             model_request_message = json.dumps(self.state)
+            self.logger.info("sending request to ", model_request_message)
             self.redis.publish(self.model_request_channel, model_request_message)
 
     def send_inference_and_training_requests(self):
@@ -73,7 +74,7 @@ class Simulator(object):
         # But the training does not need to happen every step after a inference step.
         # See the two queues in server for detail.
         for i in range(1000):
-            if i % 2 in (0, ):
+            if i % 2 in (0,):
                 self.state["type"] = QueryConsts.QUERY_TYPES["inference"]
             else:
                 self.state["type"] = QueryConsts.QUERY_TYPES["training"]
