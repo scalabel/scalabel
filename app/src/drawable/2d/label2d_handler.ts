@@ -230,7 +230,7 @@ export class Label2DHandler {
         if (this.isKeyDown(Key.CONTROL)) {
           // Track link mode
           Session.dispatch(startLinkTrack())
-        } else if (!this._state.task.config.tracking) {
+        } else {
           // Linking
           this.linkLabels()
         }
@@ -362,9 +362,12 @@ export class Label2DHandler {
   private selectHighlighted(): void {
     if (this._highlightedLabel !== null) {
       const item = this._state.task.items[this._state.user.select.item]
-      const labelIds = this._highlightedLabel.isValid()
+      let labelIds = this._highlightedLabel.isValid()
         ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
         : [this._highlightedLabel.labelId]
+      if (this.isKeyDown(Key.S_LOW)) {
+        labelIds = [this._highlightedLabel.labelId]
+      }
       const highlightedAlreadySelected =
         this._labelList.selectedLabels.includes(this._highlightedLabel)
       if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {

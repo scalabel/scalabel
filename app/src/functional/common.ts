@@ -1034,21 +1034,28 @@ function deleteLabelsFromItem(
     ...labelIds.map((labelId) => item.labels[labelId].children)
   )
 
-  const deletedLabels = pickObject(item.labels, labelIds)
+  const removedLabels = pickObject(item.labels, labelIds)
+  const deletedLabels: { [key: string]: LabelType } = {}
 
   // Find related labels and shapes
   const updatedLabels: { [key: string]: LabelType } = {}
   const updatedShapes: { [key: string]: ShapeType } = {}
   const deletedShapes: { [key: string]: ShapeType } = {}
-  _.forEach(deletedLabels, (label) => {
-    if (isValidId(label.parent)) {
-      // TODO: consider multiple level parenting
+  _.forEach(removedLabels, (label) => {
+    let parentId = label.parent
+    let labelId = label.id
+    if (!isValidId(parentId)) {
+      deletedLabels[label.id] = label
+    }
+    while (isValidId(parentId)) {
       const parentLabel =
-        label.parent in updatedLabels
-          ? updatedLabels[label.parent]
-          : _.cloneDeep(labels[label.parent])
-      parentLabel.children = removeListItems(parentLabel.children, [label.id])
+        parentId in updatedLabels
+          ? updatedLabels[parentId]
+          : _.cloneDeep(labels[parentId])
+      parentLabel.children = removeListItems(parentLabel.children, [labelId])
       updatedLabels[parentLabel.id] = parentLabel
+      parentId = parentLabel.parent
+      labelId = parentLabel.id
     }
     label.shapes.forEach((shapeId: IdType) => {
       if (!(shapeId in updatedShapes)) {
@@ -1065,6 +1072,7 @@ function deleteLabelsFromItem(
   _.forEach(updatedLabels, (label) => {
     if (label.type === LabelTypeName.EMPTY && label.children.length === 0) {
       deletedLabels[label.id] = label
+      removedLabels[label.id] = label
     }
   })
   // Remove orphan shapes
@@ -1076,7 +1084,7 @@ function deleteLabelsFromItem(
 
   labels = removeObjectFields(
     updateObject(item.labels, updatedLabels),
-    _.keys(deletedLabels)
+    _.keys(removedLabels)
   )
   const shapes = removeObjectFields(
     updateObject(item.shapes, updatedShapes),
