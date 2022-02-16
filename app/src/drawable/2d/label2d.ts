@@ -255,6 +255,26 @@ export abstract class Label2D {
     this._highlightedHandle = handleIndex
   }
 
+  /**
+   * change the checked flag
+   */
+  public changeChecked(): void {
+    if (this._label !== null) {
+      this._label.checked = !this._label.checked
+      if (!this.temporary) {
+        this._labelList.addUpdatedLabel(this)
+      }
+    }
+  }
+
+  /** Whether label checked */
+  public isChecked(): boolean {
+    if (this._label !== null) {
+      return this._label.checked
+    }
+    return false
+  }
+
   /** Whether label valid */
   public isValid(): boolean {
     return true
@@ -273,12 +293,14 @@ export abstract class Label2D {
    * @param {Context2D} canvas
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
+   * @param {boolean} isTrackLinking
    * @param {ModeStatus} sessionMode
    */
   public abstract draw(
     canvas: Context2D,
     ratio: number,
     mode: DrawMode,
+    isTrackLinking: boolean,
     sessionMode: ModeStatus | undefined
   ): void
 
@@ -289,12 +311,16 @@ export abstract class Label2D {
    * @param {Vector2D} position
    * @param {number} ratio
    * @param {number[]} fillStyle
+   * @param {boolean} isTrackLinking
+   * @param checked
    */
   public drawTag(
     ctx: Context2D,
     ratio: number,
     position: Vector2D,
-    fillStyle: number[]
+    fillStyle: number[],
+    isTrackLinking: boolean = false,
+    checked?: boolean
   ): void {
     const TAG_WIDTH = 50
     const TAG_HEIGHT = 28
@@ -336,17 +362,34 @@ export abstract class Label2D {
       }
     }
 
+    if (isTrackLinking) {
+      abbr += ", selected"
+      tw += 100
+    }
+
     ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
     ctx.fillRect(x * ratio, y * ratio - TAG_HEIGHT, tw, TAG_HEIGHT)
     ctx.fillStyle = "rgb(0,0,0)"
     ctx.font = `${20}px Verdana`
     ctx.fillText(abbr, x * ratio + 6, y * ratio - 6)
+    tw = 0
     if (config.tracking) {
       if (this._label !== null) {
         abbr = this._label?.track.substring(0, 3)
+        tw += 60
       }
+    }
+    if (checked !== undefined && checked) {
+      if (tw > 0) {
+        abbr += ", #"
+      } else {
+        abbr = "#"
+      }
+      tw += 25
+    }
+    if (tw > 0) {
       ctx.fillStyle = `rgb(${fillStyle[0]}, ${fillStyle[1]}, ${fillStyle[2]})`
-      ctx.fillRect(x * ratio, y * ratio, 60, TAG_HEIGHT)
+      ctx.fillRect(x * ratio, y * ratio, tw, TAG_HEIGHT)
       ctx.fillStyle = "rgb(0,0,0)"
       ctx.fillText(abbr, x * ratio + 6, y * ratio + TAG_HEIGHT - 6)
     }

@@ -2,15 +2,16 @@
 import json
 import unittest
 
-import matplotlib
 import numpy as np
 
 from ..common.io import open_read_text
+from ..common.typing import NDArrayU8
 from ..unittest.util import get_test_file
 from .io import load
 from .transforms import (
     bbox_to_box2d,
     box2d_to_bbox,
+    coco_rle_to_rle,
     frame_to_masks,
     frame_to_rles,
     keypoints_to_nodes,
@@ -23,7 +24,6 @@ from .transforms import (
 )
 from .typing import Box2D, ImageSize, Poly2D
 
-matplotlib.use("agg")
 SHAPE = ImageSize(height=720, width=1280)
 
 
@@ -39,7 +39,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
 
     def test_mask_to_box2d(self) -> None:
         """Check the function for mask to Box2D."""
-        mask = np.zeros((10, 10))
+        mask: NDArrayU8 = np.zeros((10, 10), dtype=np.uint8)
         mask[4:6, 2:8] = 1
         mask[2:8, 4:6] = 1
         box2d = mask_to_box2d(mask)
@@ -62,6 +62,18 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
             self.assertAlmostEqual(vertice[1], polygon[0][2 * i + 1])
         for c in types:
             self.assertEqual(c, "L")
+
+    def test_coco_rle_to_rle(self) -> None:
+        """Check the function for COCO RLE to Scalabel RLE."""
+        json_file = get_test_file("coco_rle.json")
+        with open(json_file, "r", encoding="utf-8") as fp:
+            mask = json.load(fp)
+        rle = coco_rle_to_rle(mask)
+        gt_file = get_test_file("scalabel_rle.json")
+        with open(gt_file, "r", encoding="utf-8") as fp:
+            gt_rle = json.load(fp)
+        self.assertEqual(rle.counts, gt_rle["counts"])
+        self.assertEqual(rle.size, tuple(gt_rle["size"]))
 
     def test_keypoints_to_nodes(self) -> None:
         """Check the function for keypoints to Nodes."""

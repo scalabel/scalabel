@@ -206,7 +206,6 @@ function loadPointClouds(
         attemptsMap[sensorId] = 0
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
-
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent

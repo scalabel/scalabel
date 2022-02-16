@@ -1,4 +1,4 @@
-import * as actionTypes from "../types/action"
+// import * as actionTypes from "../types/action"
 import { State } from "../types/state"
 import { updateObject } from "./util"
 import { Span3D } from "../drawable/3d/box_span/span3d"
@@ -9,13 +9,19 @@ import { Span3D } from "../drawable/3d/box_span/span3d"
  * @param state
  */
 export function activateSpan(state: State): State {
-  const oldSession = state.session
-  const newSession = updateObject(oldSession, {
-    ...state.session,
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
     isBoxSpan: true,
     boxSpan: new Span3D()
   })
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    info3D: newInfo3D
+  })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -26,37 +32,19 @@ export function activateSpan(state: State): State {
  * @param state
  */
 export function deactivateSpan(state: State): State {
-  const oldSession = state.session
-  const newSession = updateObject(oldSession, {
-    ...state.session,
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
     isBoxSpan: false,
     boxSpan: null
   })
-  return updateObject(state, {
-    session: newSession
-  })
-}
-
-/**
- * Update temporary point in span box
- *
- * @param state
- * @param action
- */
-export function updateSpanPoint(
-  state: State,
-  action: actionTypes.UpdateSpanPointAction
-): State {
   const oldSession = state.session
-  const newBox = oldSession.boxSpan
-  if (newBox !== null) {
-    newBox.updatePointTmp(action.point, action.mouseY)
-  }
   const newSession = updateObject(oldSession, {
     ...state.session,
-    boxSpan: newBox
+    info3D: newInfo3D
   })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -67,16 +55,22 @@ export function updateSpanPoint(
  * @param state
  */
 export function registerSpanPoint(state: State): State {
-  const oldSession = state.session
-  const newBox = oldSession.boxSpan
+  const oldInfo3D = state.session.info3D
+  const newBox = oldInfo3D.boxSpan
   if (newBox !== null) {
     newBox.registerPoint()
   }
-  const newSession = updateObject(oldSession, {
-    ...state.session,
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
     boxSpan: newBox
   })
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...state.session,
+    info3D: newInfo3D
+  })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -87,12 +81,18 @@ export function registerSpanPoint(state: State): State {
  * @param state
  */
 export function resetSpan(state: State): State {
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...state.session.info3D,
+    boxSpan: new Span3D()
+  })
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
     ...state.session,
-    boxSpan: new Span3D()
+    info3D: newInfo3D
   })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -103,12 +103,18 @@ export function resetSpan(state: State): State {
  * @param state
  */
 export function pauseSpan(state: State): State {
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...state.session.info3D,
+    isBoxSpan: false
+  })
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
     ...state.session,
-    isBoxSpan: false
+    info3D: newInfo3D
   })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -119,12 +125,18 @@ export function pauseSpan(state: State): State {
  * @param state
  */
 export function resumeSpan(state: State): State {
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...state.session.info3D,
+    isBoxSpan: true
+  })
   const oldSession = state.session
   const newSession = updateObject(oldSession, {
     ...state.session,
-    isBoxSpan: true
+    info3D: newInfo3D
   })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }
@@ -135,16 +147,22 @@ export function resumeSpan(state: State): State {
  * @param state
  */
 export function undoSpan(state: State): State {
-  const oldSession = state.session
-  const box = oldSession.boxSpan
-  if (box !== null) {
-    box.removeLastPoint()
+  const oldInfo3D = state.session.info3D
+  const newBox = oldInfo3D.boxSpan
+  if (newBox !== null) {
+    newBox.removeLastPoint()
   }
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...state.session.info3D,
+    boxSpan: newBox
+  })
+  const oldSession = state.session
   const newSession = updateObject(oldSession, {
     ...state.session,
-    boxSpan: box
+    info3D: newInfo3D
   })
   return updateObject(state, {
+    ...state,
     session: newSession
   })
 }

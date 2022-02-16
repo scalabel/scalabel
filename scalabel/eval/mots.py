@@ -237,7 +237,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes as well as resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",
@@ -258,8 +258,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--ignore-unknown-cats",
-        type=bool,
-        default=False,
+        action="store_true",
         help="ignore unknown categories for mots evaluation",
     )
     parser.add_argument(

@@ -90,16 +90,16 @@ def parse_objects(
         else:
             if not ignore_unknown_cats:
                 raise KeyError(f"Unknown category: {category}")
-    bboxes_arr = np.array(bboxes, dtype=np.float32)
-    labels_arr = np.array(labels, dtype=np.int32)
-    ids_arr = np.array(ids, dtype=np.int32)
-    ignore_bboxes_arr = np.array(ignore_bboxes, dtype=np.float32)
+    bboxes_arr: NDArrayF64 = np.array(bboxes, dtype=np.float64)
+    labels_arr: NDArrayI32 = np.array(labels, dtype=np.int32)
+    ids_arr: NDArrayI32 = np.array(ids, dtype=np.int32)
+    ignore_bboxes_arr: NDArrayF64 = np.array(ignore_bboxes, dtype=np.float64)
     return (bboxes_arr, labels_arr, ids_arr, ignore_bboxes_arr)
 
 
 def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
     """Returns the intersection over the area of the predicted box."""
-    out = np.zeros((len(preds), len(gts)), dtype=np.float32)
+    out: NDArrayF64 = np.zeros((len(preds), len(gts)), dtype=np.float64)
     for i, p in enumerate(preds):
         for j, g in enumerate(gts):
             w = min(p[0] + p[2], g[0] + g[2]) - max(p[0], g[0])
@@ -265,7 +265,10 @@ def compute_average(
     ave_dict: Dict[str, Union[int, float]] = {}
     for metric in metrics:
         dtype = type(flat_dicts[-1][metric])
-        v = np.array([flat_dicts[i][metric] for i in range(len(classes))])
+        v: NDArrayF64 = np.array(
+            [flat_dicts[i][metric] for i in range(len(classes))],
+            dtype=np.float64,
+        )
         v = np.nan_to_num(v, nan=0, posinf=0, neginf=0)
         if dtype == int:
             value = int(v.sum())  # type: Union[int, float]
@@ -420,7 +423,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes as well as resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",

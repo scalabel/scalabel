@@ -149,6 +149,7 @@ def pq_per_image(
     ann_frame: Frame,
     pred_frame: Frame,
     categories: List[Category],
+    ignore_unknown_cats: bool = False,
     image_size: Optional[ImageSize] = None,
 ) -> PQStat:
     """Calculate PQStar for each image."""
@@ -156,6 +157,7 @@ def pq_per_image(
     gt_rles, gt_labels, _, _ = parse_seg_objects(
         ann_frame.labels if ann_frame.labels is not None else [],
         categories,
+        ignore_unknown_cats=ignore_unknown_cats,
         image_size=image_size,
     )
 
@@ -175,6 +177,7 @@ def pq_per_image(
     pred_rles, pred_labels, _, _ = parse_seg_objects(
         pred_frame.labels if pred_frame.labels is not None else [],
         categories,
+        ignore_unknown_cats=ignore_unknown_cats,
         image_size=image_size,
     )
 
@@ -215,6 +218,7 @@ def evaluate_pan_seg(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
     config: Config,
+    ignore_unknown_cats: bool = False,
     nproc: int = NPROC,
 ) -> PanSegResult:
     """Evaluate panoptic segmentation with Scalabel format.
@@ -223,6 +227,7 @@ def evaluate_pan_seg(
         ann_frames: the ground truth frames.
         pred_frames: the prediction frames.
         config: Metadata config.
+        ignore_unknown_cats: ignore unknown categories.
         nproc: the number of process.
 
     Returns:
@@ -256,6 +261,7 @@ def evaluate_pan_seg(
                 partial(
                     pq_per_image,
                     categories=categories,
+                    ignore_unknown_cats=ignore_unknown_cats,
                     image_size=config.imageSize,
                 ),
                 tqdm(zip(ann_frames, pred_frames), total=len(ann_frames)),
@@ -266,6 +272,7 @@ def evaluate_pan_seg(
                 ann_frame,
                 pred_frame,
                 categories=categories,
+                ignore_unknown_cats=ignore_unknown_cats,
                 image_size=config.imageSize,
             )
             for ann_frame, pred_frame in tqdm(
@@ -315,12 +322,17 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",
         default="",
         help="Output file for panseg evaluation results.",
+    )
+    parser.add_argument(
+        "--ignore-unknown-cats",
+        action="store_true",
+        help="ignore unknown categories for panseg evaluation",
     )
     parser.add_argument(
         "--nproc",
@@ -340,7 +352,9 @@ if __name__ == "__main__":
     if args.config is not None:
         cfg = load_label_config(args.config)
     assert cfg is not None
-    eval_result = evaluate_pan_seg(gts, preds, cfg, args.nproc)
+    eval_result = evaluate_pan_seg(
+        gts, preds, cfg, args.ignore_unknown_cats, args.nproc
+    )
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:

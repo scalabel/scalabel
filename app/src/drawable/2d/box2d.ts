@@ -99,12 +99,14 @@ export class Box2D extends Label2D {
    * @param context
    * @param ratio
    * @param mode
+   * @param isTrackLinking
    * @param sessionMode
    */
   public draw(
     context: Context2D,
     ratio: number,
     mode: DrawMode,
+    isTrackLinking: boolean,
     sessionMode: ModeStatus | undefined
   ): void {
     // Set proper drawing styles
@@ -137,12 +139,29 @@ export class Box2D extends Label2D {
         break
     }
 
+    let checked = false
+    if (this._label !== null) {
+      checked = this._label.checked
+    }
+
     // Draw!!!
     const rect = this._rect
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
     if (mode === DrawMode.VIEW) {
-      this.drawTag(context, ratio, new Vector2D(rect.x1, rect.y1), this._color)
+      if (this._selected) {
+        isTrackLinking = isTrackLinking && true
+      } else {
+        isTrackLinking = isTrackLinking && false
+      }
+      this.drawTag(
+        context,
+        ratio,
+        new Vector2D(rect.x1, rect.y1),
+        this._color,
+        isTrackLinking,
+        checked
+      )
     }
     if (mode === DrawMode.CONTROL || this._selected || this._highlighted) {
       if (
@@ -210,9 +229,8 @@ export class Box2D extends Label2D {
       }
     } else {
       // Move a vertex
-      const oppVertex = this._controlPoints[
-        ((this._highlightedHandle + 12) % 8) - 1
-      ]
+      const oppVertex =
+        this._controlPoints[((this._highlightedHandle + 12) % 8) - 1]
       x1 = Math.min(x, oppVertex.x)
       x2 = Math.max(x, oppVertex.x)
       y1 = Math.min(y, oppVertex.y)

@@ -8,11 +8,11 @@ import { Vector3D } from "../../../math/vector3d"
 export class SpanPoint3D {
   private readonly _point: THREE.Mesh
   /** x coordinate in 3D space */
-  private readonly _x: number
+  private _x: number
   /** y coordinate in 3D space */
-  private readonly _y: number
+  private _y: number
   /** z coordinate in 3D space */
-  private readonly _z: number
+  private _z: number
 
   /**
    * Constructor
@@ -29,15 +29,26 @@ export class SpanPoint3D {
   }
 
   /**
+   * Update point coordinates
+   *
+   * @param point
+   */
+  public update(point: Vector3D): void {
+    this._x = point.x
+    this._y = point.y
+    this._z = point.z
+  }
+
+  /**
    * Add to scene for rendering
    *
    * @param scene
-   * @param camera
-   * @param pointCloud
    */
   public render(scene: THREE.Scene): void {
     this._point.position.set(this.x, this.y, this.z)
-    scene.add(this._point)
+    if (!scene.children.includes(this._point)) {
+      scene.add(this._point)
+    }
   }
 
   /** get x */

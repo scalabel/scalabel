@@ -85,7 +85,7 @@ export class Listeners {
         projects = defaultProjects
       }
     } catch (err) {
-      Logger.error(err)
+      Logger.error(err as Error)
       projects = defaultProjects
     }
     const projectNames = JSON.stringify(projects)
@@ -126,10 +126,10 @@ export class Listeners {
             dataset.config.attributes = state.task.config.attributes
           }
           if (dataset.config.categories?.length === 0) {
-            dataset.config.categories = state.task.config.categories
+            dataset.config.categories = state.task.config.treeCategories
           }
         } catch (error) {
-          Logger.info(error.message)
+          Logger.info((error as Error).message)
           for (const itemToLoad of task.items) {
             const url = Object.values(itemToLoad.urls)[0]
             const timestamp = getSubmissionTime(task.progress.submissions)
@@ -152,7 +152,7 @@ export class Listeners {
       res.end(Buffer.from(exportJson, "binary"), "binary")
     } catch (error) {
       // TODO: Be more specific about what this error may be
-      Logger.error(error)
+      Logger.error(error as Error)
       res.end()
     }
   }
@@ -247,7 +247,7 @@ export class Listeners {
     try {
       storage = new S3Storage(s3Path)
     } catch (err) {
-      Logger.error(err)
+      Logger.error(err as Error)
       return this.badFormResponse(res)
     }
     storage.setExt("")
@@ -282,6 +282,7 @@ export class Listeners {
     for (const key of Object.keys(formFiles)) {
       const file = formFiles[key]
       if (file !== undefined && file.size !== 0) {
+        // @ts-expect-error
         files[key] = file.path
       }
     }
@@ -331,7 +332,7 @@ export class Listeners {
       projectName = parseProjectName(req.body.projectName)
       project = await this.projectStore.loadProject(projectName)
     } catch (err) {
-      Logger.error(err)
+      Logger.error(err as Error)
       this.badTaskResponse(res)
       return
     }
@@ -367,8 +368,8 @@ export class Listeners {
       const stats = getProjectStats(savedTasks)
       res.send(JSON.stringify(stats))
     } catch (err) {
-      Logger.error(err)
-      res.send(filterXSS(err.message))
+      Logger.error(err as Error)
+      res.send(filterXSS((err as Error).message))
     }
   }
 
@@ -406,8 +407,8 @@ export class Listeners {
 
       res.send(JSON.stringify(contents))
     } catch (err) {
-      Logger.error(err)
-      res.send(filterXSS(err.message))
+      Logger.error(err as Error)
+      res.send(filterXSS((err as Error).message))
     }
   }
 
@@ -453,8 +454,8 @@ export class Listeners {
 
       res.send(JSON.stringify(taskOption))
     } catch (err) {
-      Logger.error(err)
-      res.send(filterXSS(err.message))
+      Logger.error(err as Error)
+      res.send(filterXSS((err as Error).message))
     }
   }
 
@@ -491,9 +492,9 @@ export class Listeners {
       ])
       res.send()
     } catch (err) {
-      Logger.error(err)
+      Logger.error(err as Error)
       // Alert the user that something failed
-      res.status(400).send(filterXSS(err.message))
+      res.status(400).send(filterXSS((err as Error).message))
     }
   }
 }

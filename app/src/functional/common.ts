@@ -371,9 +371,9 @@ function mergeTracksInItems(
 
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const firstItem = Number(Object.keys(tracks[0].labels)[0])
   const firstLabelId = tracks[0].labels[firstItem]
@@ -438,9 +438,9 @@ function splitTrackInItems(
   const splitedTrack1 = makeTrack({ type: track.type, id: newTrackId }, false)
 
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const prop: Partial<LabelType> = {
     track: splitedTrack1.id
@@ -931,6 +931,35 @@ export function changeSelect(
           }
           action.select.labels[newItem] = newLabelId
         }
+      }
+    }
+  }
+  if (state.session.trackLinking) {
+    for (const key of Object.keys(state.user.select.labels)) {
+      const index = Number(key)
+      const selectedLabelIds = state.user.select.labels[index]
+      const newItem = action.select.item !== undefined ? action.select.item : 0
+      if (newItem === index && state.user.select.item === action.select.item) {
+        continue
+      }
+      const newLabelId = selectedLabelIds
+        .map((labelId) => {
+          if (labelId in state.task.items[index].labels) {
+            const track = state.task.items[index].labels[labelId].track
+            if (newItem in state.task.tracks[track].labels) {
+              return state.task.tracks[track].labels[newItem]
+            }
+          }
+          return ""
+        })
+        .filter(Boolean)
+      if (action.select.labels === undefined) {
+        action.select.labels = {}
+      }
+      if (newLabelId.length > 0) {
+        action.select.labels[newItem] = newLabelId
+      } else {
+        action.select.labels[index] = selectedLabelIds
       }
     }
   }
@@ -1615,6 +1644,28 @@ export function removeAlert(
   const newSession = updateObject(oldSession, {
     ...state.session,
     alerts: newAlerts
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Toggle ground plane
+ *
+ * @param state
+ * @param action
+ */
+export function toggleGroundPlane(state: State): State {
+  const oldInfo3D = state.session.info3D
+  const newInfo3D = updateObject(oldInfo3D, {
+    ...oldInfo3D,
+    showGroundPlane: !oldInfo3D.showGroundPlane
+  })
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    ...oldSession,
+    info3D: newInfo3D
   })
   return updateObject(state, {
     session: newSession
