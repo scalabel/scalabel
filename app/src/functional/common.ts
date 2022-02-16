@@ -797,12 +797,19 @@ export function linkLabels(
   }
   // Add a new label to the state
   const item = state.task.items[action.itemIndex]
-  const children = [
+  let childrenList = action.labelIds.map((labelId) =>
+    getLinkedLabelIds(item, labelId)
+  )
+  let children = [...new Set(_.flatten(childrenList))]
+  let prevParents = [
     ...new Set(action.labelIds.map((labelId) => getRootLabelId(item, labelId)))
   ]
-  if (children.length === 1) {
+  if (prevParents.length <= 1) {
     return state
   }
+  let toRemoveParents = prevParents.filter(
+    (parentId) => item.labels[parentId].children.length > 0
+  )
   const baseLabel = item.labels[children[0]]
   const toLinkTrackIds = [
     ...new Set(
@@ -818,21 +825,36 @@ export function linkLabels(
     const toLinkTracks = toLinkTrackIds.map((tId) => state.task.tracks[tId])
     // If multiple tracks to be linked, all of the labels should be linked.
     state.task.items.forEach((taskItem, idx) => {
-      const labelIdsToMerge = toLinkTracks
+      childrenList = toLinkTracks
+        .map((track) =>
+          idx in track.labels
+            ? getLinkedLabelIds(taskItem, track.labels[idx])
+            : null
+        )
+        .filter((lbl) => lbl !== null) as string[][]
+      children = [...new Set(_.flatten(childrenList))]
+      prevParents = toLinkTracks
         .map((track) =>
           idx in track.labels
             ? getRootLabelId(taskItem, track.labels[idx])
             : null
         )
         .filter((lbl) => lbl !== null) as string[]
-      if (labelIdsToMerge.length > 0) {
+      toRemoveParents = prevParents.filter(
+        (parentId) => taskItem.labels[parentId].children.length > 0
+      )
+      if (prevParents.length > 0) {
         state = createParentLabel(
           state,
           idx,
-          labelIdsToMerge,
+          children,
           action.parentLabelId,
           baseLabel,
           baseTrackId
+        )
+        state.task.items[idx].labels = removeObjectFields(
+          state.task.items[idx].labels,
+          toRemoveParents
         )
       }
     })
@@ -849,6 +871,10 @@ export function linkLabels(
       children,
       action.parentLabelId,
       baseLabel
+    )
+    state.task.items[action.itemIndex].labels = removeObjectFields(
+      state.task.items[action.itemIndex].labels,
+      toRemoveParents
     )
   }
   return { ...state }

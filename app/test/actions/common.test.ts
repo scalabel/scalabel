@@ -98,13 +98,10 @@ describe("Label operations", () => {
     )
     expect(parent2Maybe).not.toBe(undefined)
     const parent2 = parent2Maybe as LabelType
-    children = [parent1.id, label4.id]
+    children = [label1.id, label2.id, label3.id, label4.id]
     expect(item.labels[parent2.id].children).toEqual(children)
     for (const label of children) {
       expect(item.labels[label].parent).toEqual(parent2.id)
-    }
-    for (const label of [label1, label2, label3]) {
-      expect(item.labels[label.id].parent).toEqual(parent1.id)
     }
   })
 })
