@@ -23,7 +23,7 @@ from scalabel.label.typing import Config, Frame, ImageSize
 from scalabel.label.utils import get_leaf_categories
 
 from .result import AVERAGE, Result, Scores, ScoresList
-from .utils import reorder_preds
+from .utils import filter_labels, reorder_preds
 
 
 class SegResult(Result):
@@ -187,12 +187,12 @@ def evaluate_sem_seg(
     Returns:
         SegResult: evaluation results.
     """
-    categories = {
-        cat.name: id
-        for id, cat in enumerate(get_leaf_categories(config.categories))
-    }
+    categories = get_leaf_categories(config.categories)
+    cat_map = {cat.name: id for id, cat in enumerate(categories)}
     ignore_label = 255
     pred_frames = reorder_preds(ann_frames, pred_frames)
+    ann_frames = filter_labels(ann_frames, categories)
+    pred_frames = filter_labels(pred_frames, categories)
 
     logger.info("evaluating...")
     if nproc > 1:
@@ -200,7 +200,7 @@ def evaluate_sem_seg(
             hist_and_gt_id_sets = pool.starmap(
                 partial(
                     per_image_hist,
-                    categories=categories,
+                    categories=cat_map,
                     image_size=config.imageSize,
                     ignore_label=ignore_label,
                 ),
@@ -211,7 +211,7 @@ def evaluate_sem_seg(
             per_image_hist(
                 ann_frame,
                 pred_frame,
-                categories=categories,
+                categories=cat_map,
                 image_size=config.imageSize,
                 ignore_label=ignore_label,
             )
@@ -221,7 +221,7 @@ def evaluate_sem_seg(
         ]
 
     logger.info("accumulating...")
-    num_classes = len(categories) + 1
+    num_classes = len(cat_map) + 1
     hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
     for (hist_, gt_id_set_) in hist_and_gt_id_sets:
@@ -230,17 +230,17 @@ def evaluate_sem_seg(
 
     ious = per_class_iou(hist)
     accs = per_class_acc(hist)
-    IoUs = [  # pylint: disable=invalid-name
-        {cat_name: 100 * score for cat_name, score in zip(categories, ious)},
+    iou_scores = [
+        {cat_name: 100 * score for cat_name, score in zip(cat_map, ious)},
         {AVERAGE: np.multiply(np.mean(ious[list(gt_id_set)]), 100)},
     ]
-    Accs = [  # pylint: disable=invalid-name
-        {cat_name: 100 * score for cat_name, score in zip(categories, accs)},
+    acc_scores = [
+        {cat_name: 100 * score for cat_name, score in zip(cat_map, accs)},
         {AVERAGE: np.multiply(np.mean(accs[list(gt_id_set)]), 100)},
     ]
     res_dict: Dict[str, Union[float, ScoresList]] = dict(
-        IoU=IoUs,
-        Acc=Accs,
+        IoU=iou_scores,
+        Acc=acc_scores,
         fIoU=np.multiply(freq_iou(hist), 100),  # pylint: disable=invalid-name
         pAcc=np.multiply(whole_acc(hist), 100),  # pylint: disable=invalid-name
     )

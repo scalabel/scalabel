@@ -223,6 +223,7 @@ def reorder_preds(
 
 def filter_labels(frames: List[Frame], cats: List[Category]) -> List[Frame]:
     """Filter frame labels by categories."""
+    cats = get_leaf_categories(cats)
     cat_names = [c.name for c in cats]
     filt_frames = []
     for f in frames:
