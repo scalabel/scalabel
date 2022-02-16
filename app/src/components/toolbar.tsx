@@ -21,7 +21,6 @@ import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
-  deleteSelectedLabelsfromTracks,
   terminateSelectedTracks
 } from "../action/select"
 import { addLabelTag } from "../action/tag"
@@ -261,9 +260,7 @@ export class ToolBar extends Component<Props> {
           if (!this.isKeyDown(Key.S_LOW)) {
             Session.dispatch(terminateSelectedTracks(this.state, select.item))
           } else {
-            Session.dispatch(
-              deleteSelectedLabelsfromTracks(this.state, select.item)
-            )
+            Session.dispatch(deleteSelectedLabels(this.state))
           }
         } else {
           Session.dispatch(deleteSelectedLabels(this.state))

@@ -678,7 +678,7 @@ export function getLinkedLabelIds(item: ItemType, labelId: IdType): string[] {
  * @param item
  * @param labelId
  */
-function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
+export function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
   const labelIds: IdType[] = []
   const label = item.labels[labelId]
   if (label.children.length === 0) {
@@ -720,6 +720,7 @@ export function getRootTrackId(item: ItemType, labelId: IdType): IdType {
  * @param {State} state Redux state
  * @param {number} index Index of the item
  * @param {string[]} idList ID list of labels to the parent
+ * @param parentLabelId
  * @param {LabelType} label Label template for the parent label
  * @param {string} [trackId] track id of the parent label if given
  */
@@ -727,6 +728,7 @@ function createParentLabel(
   state: State,
   index: number,
   idList: string[],
+  parentLabelId: IdType,
   label: LabelType,
   trackId?: string
 ): State {
@@ -736,6 +738,7 @@ function createParentLabel(
 
   // Make parent label
   const parentLabel: LabelType = makeLabel(label)
+  parentLabel.id = parentLabelId
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
@@ -794,8 +797,18 @@ export function linkLabels(
   }
   // Add a new label to the state
   const item = state.task.items[action.itemIndex]
-  const children = action.labelIds.map((labelId) =>
-    getRootLabelId(item, labelId)
+  let childrenList = action.labelIds.map((labelId) =>
+    getLinkedLabelIds(item, labelId)
+  )
+  let children = [...new Set(_.flatten(childrenList))]
+  let prevParents = [
+    ...new Set(action.labelIds.map((labelId) => getRootLabelId(item, labelId)))
+  ]
+  if (prevParents.length <= 1) {
+    return state
+  }
+  let toRemoveParents = prevParents.filter(
+    (parentId) => item.labels[parentId].children.length > 0
   )
   const baseLabel = item.labels[children[0]]
   const toLinkTrackIds = [
@@ -812,20 +825,36 @@ export function linkLabels(
     const toLinkTracks = toLinkTrackIds.map((tId) => state.task.tracks[tId])
     // If multiple tracks to be linked, all of the labels should be linked.
     state.task.items.forEach((taskItem, idx) => {
-      const labelIdsToMerge = toLinkTracks
+      childrenList = toLinkTracks
+        .map((track) =>
+          idx in track.labels
+            ? getLinkedLabelIds(taskItem, track.labels[idx])
+            : null
+        )
+        .filter((lbl) => lbl !== null) as string[][]
+      children = [...new Set(_.flatten(childrenList))]
+      prevParents = toLinkTracks
         .map((track) =>
           idx in track.labels
             ? getRootLabelId(taskItem, track.labels[idx])
             : null
         )
         .filter((lbl) => lbl !== null) as string[]
-      if (labelIdsToMerge.length > 0) {
+      toRemoveParents = prevParents.filter(
+        (parentId) => taskItem.labels[parentId].children.length > 0
+      )
+      if (prevParents.length > 0) {
         state = createParentLabel(
           state,
           idx,
-          labelIdsToMerge,
+          children,
+          action.parentLabelId,
           baseLabel,
           baseTrackId
+        )
+        state.task.items[idx].labels = removeObjectFields(
+          state.task.items[idx].labels,
+          toRemoveParents
         )
       }
     })
@@ -836,7 +865,17 @@ export function linkLabels(
     )
   } else {
     // No track. Only link labels.
-    state = createParentLabel(state, action.itemIndex, children, baseLabel)
+    state = createParentLabel(
+      state,
+      action.itemIndex,
+      children,
+      action.parentLabelId,
+      baseLabel
+    )
+    state.task.items[action.itemIndex].labels = removeObjectFields(
+      state.task.items[action.itemIndex].labels,
+      toRemoveParents
+    )
   }
   return { ...state }
 }
@@ -1021,21 +1060,28 @@ function deleteLabelsFromItem(
     ...labelIds.map((labelId) => item.labels[labelId].children)
   )
 
-  const deletedLabels = pickObject(item.labels, labelIds)
+  const removedLabels = pickObject(item.labels, labelIds)
+  const deletedLabels: { [key: string]: LabelType } = {}
 
   // Find related labels and shapes
   const updatedLabels: { [key: string]: LabelType } = {}
   const updatedShapes: { [key: string]: ShapeType } = {}
   const deletedShapes: { [key: string]: ShapeType } = {}
-  _.forEach(deletedLabels, (label) => {
-    if (isValidId(label.parent)) {
-      // TODO: consider multiple level parenting
+  _.forEach(removedLabels, (label) => {
+    let parentId = label.parent
+    let labelId = label.id
+    if (!isValidId(parentId)) {
+      deletedLabels[label.id] = label
+    }
+    while (isValidId(parentId)) {
       const parentLabel =
-        label.parent in updatedLabels
-          ? updatedLabels[label.parent]
-          : _.cloneDeep(labels[label.parent])
-      parentLabel.children = removeListItems(parentLabel.children, [label.id])
+        parentId in updatedLabels
+          ? updatedLabels[parentId]
+          : _.cloneDeep(labels[parentId])
+      parentLabel.children = removeListItems(parentLabel.children, [labelId])
       updatedLabels[parentLabel.id] = parentLabel
+      parentId = parentLabel.parent
+      labelId = parentLabel.id
     }
     label.shapes.forEach((shapeId: IdType) => {
       if (!(shapeId in updatedShapes)) {
@@ -1052,6 +1098,7 @@ function deleteLabelsFromItem(
   _.forEach(updatedLabels, (label) => {
     if (label.type === LabelTypeName.EMPTY && label.children.length === 0) {
       deletedLabels[label.id] = label
+      removedLabels[label.id] = label
     }
   })
   // Remove orphan shapes
@@ -1063,7 +1110,7 @@ function deleteLabelsFromItem(
 
   labels = removeObjectFields(
     updateObject(item.labels, updatedLabels),
-    _.keys(deletedLabels)
+    _.keys(removedLabels)
   )
   const shapes = removeObjectFields(
     updateObject(item.shapes, updatedShapes),

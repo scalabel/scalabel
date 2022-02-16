@@ -71,7 +71,7 @@ export class ModelInterface {
     itemIndex: number,
     labelType: string
   ): ModelQuery {
-    const poly2d = convertPolygonToExport(points, labelType)
+    const poly2d = [convertPolygonToExport(points, labelType)]
     const label = makeLabelExport({
       poly2d
     })

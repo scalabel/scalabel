@@ -21,6 +21,7 @@ import {
   ExtrinsicsType,
   IdType,
   IntrinsicsType,
+  INVALID_ID,
   ItemType,
   LabelIdMap,
   LabelType,
@@ -148,26 +149,69 @@ export function convertItemToImport(
           )
         }
 
-        const [importedLabel, importedShapes] = convertLabelToImport(
-          labelExport,
-          itemIndex,
-          sensorId,
-          labelTypes,
-          categories,
-          attributes,
-          labelId
-        )
-        if (isTagging) {
-          importedLabel.type = "tag"
-        }
+        if (
+          labelTypes.includes(LabelTypeName.POLYGON_2D) &&
+          labelExport.poly2d !== null &&
+          labelExport.poly2d.length > 1
+        ) {
+          const parentLabelId = uid()
+          const childrenLabelIds: IdType[] = []
+          for (const polyExport of labelExport.poly2d) {
+            const tempLabelExport = { ...labelExport, poly2d: [polyExport] }
+            labelId = uid()
+            childrenLabelIds.push(labelId)
 
-        if (tracking) {
-          importedLabel.track = labelExport.id.toString()
-        }
+            const [importedLabel, importedShapes] = convertLabelToImport(
+              tempLabelExport,
+              itemIndex,
+              sensorId,
+              labelTypes,
+              categories,
+              attributes,
+              labelId
+            )
 
-        labels[labelId] = importedLabel
-        for (const indexedShape of importedShapes) {
-          shapes[indexedShape.id] = indexedShape
+            if (tracking) {
+              importedLabel.track = labelExport.id.toString()
+            }
+            importedLabel.parent = parentLabelId
+
+            labels[labelId] = importedLabel
+            for (const indexedShape of importedShapes) {
+              shapes[indexedShape.id] = indexedShape
+            }
+          }
+
+          // create parent label
+          const parentLabel: LabelType = makeLabel(labels[childrenLabelIds[0]])
+          parentLabel.id = parentLabelId
+          parentLabel.parent = INVALID_ID
+          parentLabel.shapes = []
+          parentLabel.children = [...childrenLabelIds]
+          parentLabel.type = LabelTypeName.EMPTY
+          labels[parentLabelId] = parentLabel
+        } else {
+          const [importedLabel, importedShapes] = convertLabelToImport(
+            labelExport,
+            itemIndex,
+            sensorId,
+            labelTypes,
+            categories,
+            attributes,
+            labelId
+          )
+          if (isTagging) {
+            importedLabel.type = "tag"
+          }
+
+          if (tracking) {
+            importedLabel.track = labelExport.id.toString()
+          }
+
+          labels[labelId] = importedLabel
+          for (const indexedShape of importedShapes) {
+            shapes[indexedShape.id] = indexedShape
+          }
         }
       }
     }

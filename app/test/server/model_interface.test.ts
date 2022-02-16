@@ -57,7 +57,7 @@ describe("test model interface query construction", () => {
     expect(itemData.url).toBe(url)
 
     const expectedPoly = convertPolygonToExport(points, labelType)
-    expect(itemData.labels[0].poly2d).toEqual(expectedPoly)
+    expect(itemData.labels[0].poly2d).toEqual([expectedPoly])
   })
 })
 

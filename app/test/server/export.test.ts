@@ -32,7 +32,7 @@ describe("test export functionality across multiple labeling types", () => {
     ]
     const labelType = LabelTypeName.POLYGON_2D
     const polyExport = convertPolygonToExport(points, labelType)
-    const polyPoint = polyExport[0]
+    const polyPoint = polyExport
     expect(polyPoint.closed).toBe(true)
     expect(polyPoint.types).toBe("LC")
     expect(polyPoint.vertices).toEqual([

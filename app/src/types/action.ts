@@ -135,6 +135,8 @@ export interface LinkLabelsAction extends BaseAction {
   itemIndex: number
   /** ids of the labels to link */
   labelIds: IdType[]
+  /** parent label id */
+  parentLabelId: IdType
 }
 
 export interface UnlinkLabelsAction extends BaseAction {

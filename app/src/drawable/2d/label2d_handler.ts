@@ -21,7 +21,7 @@ import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
 import { Label2D } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
-import { makeTrack } from "../../functional/states"
+import { makeLabel, makeTrack } from "../../functional/states"
 
 /**
  * List of drawable labels
@@ -230,7 +230,7 @@ export class Label2DHandler {
         if (this.isKeyDown(Key.CONTROL)) {
           // Track link mode
           Session.dispatch(startLinkTrack())
-        } else if (!this._state.task.config.tracking) {
+        } else {
           // Linking
           this.linkLabels()
         }
@@ -362,9 +362,12 @@ export class Label2DHandler {
   private selectHighlighted(): void {
     if (this._highlightedLabel !== null) {
       const item = this._state.task.items[this._state.user.select.item]
-      const labelIds = this._highlightedLabel.isValid()
+      let labelIds = this._highlightedLabel.isValid()
         ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
         : [this._highlightedLabel.labelId]
+      if (this.isKeyDown(Key.S_LOW)) {
+        labelIds = [this._highlightedLabel.labelId]
+      }
       const highlightedAlreadySelected =
         this._labelList.selectedLabels.includes(this._highlightedLabel)
       if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
@@ -404,10 +407,12 @@ export class Label2DHandler {
 
   /** link selected labels */
   private linkLabels(): void {
+    const newParentLabelId = makeLabel().id
     Session.dispatch(
       linkLabels(
         this._state.user.select.item,
-        this._labelList.selectedLabels.map((label) => label.labelId)
+        this._labelList.selectedLabels.map((label) => label.labelId),
+        newParentLabelId
       )
     )
   }
