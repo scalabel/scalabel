@@ -19,20 +19,29 @@ class TestScalabelTaggingEval(unittest.TestCase):
     gts = load(gts_path).frames
     preds = load(preds_path).frames
     config = load_label_config(get_test_file("tagging/tag_configs.toml"))
-    result = evaluate_tagging(gts, preds, config, "weather", nproc=1)
+    result = evaluate_tagging(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
         data_frame = self.result.pd_frame()
         categories = set(
             [
-                "rainy",
-                "snowy",
-                "clear",
-                "overcast",
-                "undefined",
-                "partly cloudy",
-                "foggy",
+                "weather.rainy",
+                "weather.snowy",
+                "weather.clear",
+                "weather.overcast",
+                "weather.undefined",
+                "weather.partly cloudy",
+                "weather.foggy",
+                "scene.city street",
+                "scene.gas stations",
+                "scene.parking lot",
+                "scene.residential",
+                "scene.highway",
+                "scene.tunnel",
+                "scene.undefined",
+                "WEATHER",
+                "SCENE",
                 "AVERAGE",
             ]
         )
@@ -40,19 +49,24 @@ class TestScalabelTaggingEval(unittest.TestCase):
 
         data_arr = data_frame.to_numpy()
         aps: NDArrayF64 = np.array(
-            [100.0, -1.0, 100, 100, 100, 0.0, 0.0, 66.66666667],
+            [100.0, -1.0, 100.0, 100.0, 100.0, 0.0, 0.0, -1.0, -1.0, -1.0]
+            + [-1.0, 100.0, -1.0, 100.0, 66.66667, 100.0, 83.33333],
             dtype=np.float64,
         )
         self.assertTrue(
-            np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
+            np.isclose(
+                np.nan_to_num(data_arr[:, 0], nan=-1.0), aps, atol=1e-2
+            ).all()
         )
 
         overall_scores: NDArrayF64 = np.array(
-            [66.66666667, 61.11111111, 63.33333333, 80.0], dtype=np.float64
+            [83.33333333, 80.55555556, 81.66666667, 90.0], dtype=np.float64
         )
         self.assertTrue(
             np.isclose(
-                np.nan_to_num(data_arr[-1], nan=-1.0), overall_scores
+                np.nan_to_num(data_arr[-1], nan=-1.0),
+                overall_scores,
+                atol=1e-2,
             ).all()
         )
 
@@ -60,10 +74,18 @@ class TestScalabelTaggingEval(unittest.TestCase):
         """Check evaluation scores' correctness."""
         summary = self.result.summary()
         overall_reference = {
-            "precision": 66.66666666666666,
-            "recall": 61.11111111111111,
-            "f1_score": 63.33333333333333,
-            "accuracy": 80.0,
+            "precision": 83.33333333333333,
+            "recall": 80.55555555555556,
+            "f1_score": 81.66666666666666,
+            "accuracy": 90.0,
+            "recall/WEATHER": 61.11111111111111,
+            "f1_score/SCENE": 100.0,
+            "accuracy/SCENE": 100.0,
+            "recall/SCENE": 100.0,
+            "f1_score/WEATHER": 63.33333333333333,
+            "precision/WEATHER": 66.66666666666666,
+            "precision/SCENE": 100.0,
+            "accuracy/WEATHER": 80.0,
         }
         self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
         for name, score in summary.items():
