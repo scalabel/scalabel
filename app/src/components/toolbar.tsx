@@ -258,7 +258,13 @@ export class ToolBar extends Component<Props> {
       if (trackId !== undefined) {
         if (isValidId(trackId)) {
           if (!this.isKeyDown(Key.S_LOW)) {
-            Session.dispatch(terminateSelectedTracks(this.state, select.item))
+            if (
+              confirm(
+                `Confirm to delete labels for the current frame and following frames?\n If you want to delete label only in this frame, please use s+backspace`
+              )
+            ) {
+              Session.dispatch(terminateSelectedTracks(this.state, select.item))
+            }
           } else {
             Session.dispatch(deleteSelectedLabels(this.state))
           }
