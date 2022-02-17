@@ -257,10 +257,10 @@ export class ToolBar extends Component<Props> {
       const trackId = item.labels[Object.values(select.labels)[0][0]].track
       if (trackId !== undefined) {
         if (isValidId(trackId)) {
-          if (!this.isKeyDown(Key.S_LOW)) {
+          if (!this.isKeyDown(Key.S_LOW) && !this.isKeyDown(Key.REVSLASH)) {
             if (
               confirm(
-                `Confirm to delete labels for the current frame and following frames?\n If you want to delete label only in this frame, please use s+backspace`
+                `Confirm to delete labels for the current frame and following frames?\nIf you want to delete label only in this frame, please use \n\\ + backspace or s + backspace.`
               )
             ) {
               Session.dispatch(terminateSelectedTracks(this.state, select.item))
