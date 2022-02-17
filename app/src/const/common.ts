@@ -82,6 +82,7 @@ export enum Key {
   ENTER = "Enter",
   PERIOD = ".",
   SLASH = "/",
+  REVSLASH = "\\",
   EQUAL = "=",
   PLUS = "+",
   MINUS = "-",
