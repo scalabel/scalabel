@@ -57,6 +57,8 @@ interface Props {
   attributes: Attribute[]
   /** labelType of ToolBar 'box2d' | 'polygon2d' | 'lane' */
   labelType: string
+  /** test mode */
+  testMode: boolean
 }
 /**
  * This is ToolBar component that displays
@@ -259,6 +261,7 @@ export class ToolBar extends Component<Props> {
         if (isValidId(trackId)) {
           if (!this.isKeyDown(Key.S_LOW) && !this.isKeyDown(Key.REVSLASH)) {
             if (
+              this.props.testMode ||
               confirm(
                 `Confirm to delete labels for the current frame and following frames?\nIf you want to delete label only in this frame, please use \n\\ + backspace or s + backspace.`
               )

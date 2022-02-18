@@ -71,6 +71,7 @@ test("Adding and deleting tracks", () => {
       treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
+      testMode={true}
     />
   )
   expect(toolbarRef.current).not.toBeNull()
@@ -187,6 +188,7 @@ test("Linking tracks", () => {
       treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
+      testMode={true}
     />
   )
   expect(toolbarRef.current).not.toBeNull()
@@ -271,6 +273,7 @@ test("Breaking track", () => {
       treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
+      testMode={true}
     />
   )
   expect(toolbarRef.current).not.toBeNull()
@@ -317,6 +320,7 @@ test("Changing attributes and categories of tracks", () => {
       treeCategories={null}
       attributes={(emptyTrackingTask as State).task.config.attributes}
       labelType={"labelType"}
+      testMode={true}
     />
   )
   expect(toolbarRef.current).not.toBeNull()
@@ -459,6 +463,7 @@ test("Single frame deletion", () => {
       treeCategories={null}
       attributes={[]}
       labelType={"labelType"}
+      testMode={true}
     />
   )
   expect(toolbarRef.current).not.toBeNull()

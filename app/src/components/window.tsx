@@ -59,6 +59,7 @@ export class Window extends React.Component<Props> {
         treeCategories={config.treeCategories}
         attributes={config.attributes}
         labelType={config.labelTypes[0]}
+        testMode={false}
       />
     )
 
