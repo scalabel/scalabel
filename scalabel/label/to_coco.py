@@ -17,7 +17,12 @@ from ..common.tqdm import tqdm
 from ..common.typing import NDArrayU8
 from .coco_typing import AnnType, GtType, ImgType, RLEType, VidType
 from .io import group_and_sort, load, load_label_config
-from .transforms import box2d_to_bbox, get_coco_categories, poly2ds_to_mask
+from .transforms import (
+    box2d_to_bbox,
+    get_coco_categories,
+    graph_to_keypoints,
+    poly2ds_to_mask,
+)
 from .typing import RLE, Config, Frame, Graph, ImageSize, Label, Poly2D
 from .utils import check_crowd, check_ignored, get_leaf_categories
 
@@ -132,19 +137,7 @@ def poly2ds_list_to_coco(
 
 def graph_to_coco(annotation: AnnType, graph: Graph) -> AnnType:
     """Converting Graph to coco format."""
-    keypoints = []
-    for node in graph.nodes:
-        c3 = 0.0
-        if node.score is not None:
-            c3 = node.score
-        else:
-            if graph.type is not None:
-                if graph.type.startswith("Pose2D"):
-                    if node.visibility == "V":
-                        c3 = 2.0
-                    elif node.visibility == "N":
-                        c3 = 1.0
-        keypoints.extend([node.location[0], node.location[1], c3])
+    keypoints = graph_to_keypoints(graph)
     set_keypoints(annotation, keypoints)
     return annotation
 

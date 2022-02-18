@@ -1,10 +1,41 @@
 Evaluation
 ===================
 
-We currently support evaluation of three tasks: Object detection, instance segmentation, multi-object
-tracking, and multi-object tracking and segmentation.
+We currently support evaluation of nine tasks: Image tagging, object detection,
+instance segmentation, semantic segmentation, panoptic segmentation, pose
+estimation, boundary detection, multi-object tracking, and multi-object tracking
+and segmentation.
 To evaluate your algorithms on each task, input your predictions and the
 corresponding ground truth annotations in Scalabel format.
+
+Image Tagging
+-----------------
+The tagging evaluation uses standard classification metrics.
+You can start the evaluation by running, e.g.:
+
+.. code-block:: bash
+
+    python3 -m scalabel.eval.tagging \
+        --gt scalabel/eval/testcases/tagging/tag_gts.json \
+        --result scalabel/eval/testcases/tagging/tag_preds.json \
+        --config scalabel/eval/testcases/tagging/tag_configs.toml
+
+
+Available arguments:
+
+.. code-block:: bash
+
+    --gt GT_PATH, -g GT_PATH
+                            path to ground truth annotations.
+    --result RESULT_PATH, -r RESULT_PATH
+                            path to results to be evaluated.
+    --config CFG_PATH, -c CFG_PATH
+                            Config path. Contains metadata like available categories.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            Output path for evaluation results.
+    --nproc NUM_PROCS, -p NUM_PROCS
+                            Number of processes for evaluation.
+
 
 Detection
 -----------------
@@ -131,6 +162,36 @@ in the COCO dataset. You can start the evaluation by running, e.g.:
         --gt scalabel/eval/testcases/pose/pose_sample.json \
         --result scalabel/eval/testcases/pose/pose_preds.json \
         --config scalabel/eval/testcases/pose/pose_configs.toml
+
+
+Available arguments:
+
+.. code-block:: bash
+
+    --gt GT_PATH, -g GT_PATH
+                            path to ground truth annotations.
+    --result RESULT_PATH, -r RESULT_PATH
+                            path to results to be evaluated.
+    --config CFG_PATH, -c CFG_PATH
+                            Config path. Contains metadata like available categories.
+    --out-dir OUT_DIR, -o OUT_DIR
+                            Output path for evaluation results.
+    --nproc NUM_PROCS, -p NUM_PROCS
+                            Number of processes for evaluation.
+
+
+Boundary Detection
+--------------------
+The boundary detection evaluation uses the F-measure for boundaries using
+morphological operators.
+You can start the evaluation by running, e.g.:
+
+.. code-block:: bash
+
+    python3 -m scalabel.eval.boundary \
+        --gt scalabel/eval/testcases/boundary/boundary_gts.json \
+        --result scalabel/eval/testcases/boundary/boundary_preds.json \
+        --config scalabel/eval/testcases/boundary/boundary_configs.toml
 
 
 Available arguments:

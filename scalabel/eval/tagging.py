@@ -1,7 +1,7 @@
 """Evaluation procedures for image tagging."""
 import argparse
 import json
-from typing import Dict, List
+from typing import AbstractSet, Dict, List, Optional, Union
 
 import numpy as np
 from sklearn.metrics import classification_report  # type: ignore
@@ -12,7 +12,9 @@ from ..common.parallel import NPROC
 from ..common.typing import NDArrayI32
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
-from .result import Result
+from ..label.utils import get_parent_categories
+from .result import AVERAGE, Result, Scores, ScoresList
+from .utils import reorder_preds
 
 
 class TaggingResult(Result):
@@ -28,12 +30,26 @@ class TaggingResult(Result):
         """Check whether two instances are equal."""
         return super().__eq__(other)
 
+    def summary(
+        self,
+        include: Optional[AbstractSet[str]] = None,
+        exclude: Optional[AbstractSet[str]] = None,
+    ) -> Scores:
+        """Convert tagging results into a flattened dict as the summary."""
+        summary_dict: Dict[str, Union[int, float]] = {}
+        for metric, scores_list in self.dict(
+            include=include, exclude=exclude  # type: ignore
+        ).items():
+            for category, score in scores_list[-2].items():
+                summary_dict[f"{metric}/{category}"] = score
+            summary_dict[metric] = scores_list[-1][AVERAGE]
+        return summary_dict
+
 
 def evaluate_tagging(
     ann_frames: List[Frame],
     pred_frames: List[Frame],
     config: Config,
-    tag_attr: str,
     nproc: int = NPROC,  # pylint: disable=unused-argument
 ) -> TaggingResult:
     """Evaluate image tagging with Scalabel format.
@@ -42,48 +58,56 @@ def evaluate_tagging(
         ann_frames: the ground truth frames.
         pred_frames: the prediction frames.
         config: Metadata config.
-        tag_attr: image attribute to evaluate.
         nproc: the number of process.
 
     Returns:
         TaggingResult: evaluation results.
     """
-    classes = [cat.name for cat in config.categories]
-    preds_cls, gts_cls = [], []
-    for p, g in zip(pred_frames, ann_frames):
-        if g.attributes is None:
-            continue
-        assert p.attributes is not None
-        p_attr, g_attr = p.attributes[tag_attr], g.attributes[tag_attr]
-        assert isinstance(p_attr, str) and isinstance(g_attr, str)
-        preds_cls.append(classes.index(p_attr))
-        gts_cls.append(classes.index(g_attr))
-    parray: NDArrayI32 = np.array(preds_cls, dtype=np.int32)
-    garray: NDArrayI32 = np.array(gts_cls, dtype=np.int32)
-    gt_classes = [classes[cid] for cid in sorted(set(gts_cls + preds_cls))]
-    scores = classification_report(
-        garray, parray, target_names=gt_classes, output_dict=True
-    )
-    output = {
-        metric: [
-            {
-                cat: scores[cat][metric] * 100.0 if cat in scores else np.nan
-                for cat in classes
-            },
-            {
-                "AVERAGE": scores["macro avg"][metric] * 100.0
+    pred_frames = reorder_preds(ann_frames, pred_frames)
+    tag_classes = get_parent_categories(config.categories)
+    assert tag_classes, "Tag attributes must be specified as supercategories"
+    metrics = ["precision", "recall", "f1_score", "accuracy"]
+    outputs: Dict[str, ScoresList] = {m: [] for m in metrics}
+    avgs: Dict[str, Scores] = {m: {} for m in metrics}
+    for tag, class_list in tag_classes.items():
+        classes = [c.name for c in class_list]
+        preds_cls, gts_cls = [], []
+        for p, g in zip(pred_frames, ann_frames):
+            if g.attributes is None:
+                continue
+            assert p.attributes is not None
+            p_attr, g_attr = p.attributes[tag], g.attributes[tag]
+            assert isinstance(p_attr, str) and isinstance(g_attr, str)
+            assert p_attr in classes and g_attr in classes
+            preds_cls.append(classes.index(p_attr))
+            gts_cls.append(classes.index(g_attr))
+        parray: NDArrayI32 = np.array(preds_cls, dtype=np.int32)
+        garray: NDArrayI32 = np.array(gts_cls, dtype=np.int32)
+        gt_classes = [classes[cid] for cid in sorted(set(gts_cls + preds_cls))]
+        scores = classification_report(
+            garray, parray, target_names=gt_classes, output_dict=True
+        )
+        out: Dict[str, Scores] = {}
+        for metric in ["precision", "recall", "f1-score"]:
+            met = metric if metric != "f1-score" else "f1_score"
+            out[met] = {}
+            for cat in classes:
+                out[met][f"{tag}.{cat}"] = (
+                    scores[cat][metric] * 100.0 if cat in scores else np.nan
+                )
+            avgs[met][tag.upper()] = (
+                scores["macro avg"][metric] * 100.0
                 if len(scores) > 3
                 else np.nan
-            },
-        ]
-        for metric in ["precision", "recall", "f1-score"]
-    }
-    output["accuracy"] = [
-        {cat: np.nan for cat in classes},
-        {"AVERAGE": scores["accuracy"] * 100.0},
-    ]
-    output["f1_score"] = output.pop("f1-score")
-    return TaggingResult(**output)
+            )
+        out["accuracy"] = {f"{tag}.{cat}": np.nan for cat in classes}
+        avgs["accuracy"][tag.upper()] = scores["accuracy"] * 100.0
+        for m, v in out.items():
+            outputs[m].append(v)
+    for m, v in avgs.items():
+        outputs[m].append(v)
+        outputs[m].append({AVERAGE: np.nanmean(list(v.values()))})
+    return TaggingResult(**outputs)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -94,9 +118,6 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--result", "-r", required=True, help="path to tagging results"
-    )
-    parser.add_argument(
-        "--tag-attr", required=True, help="tagging attribute to evaluate"
     )
     parser.add_argument(
         "--config",
@@ -133,7 +154,7 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_tagging(gts, preds, cfg, args.tag_attr, args.nproc)
+    eval_result = evaluate_tagging(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
