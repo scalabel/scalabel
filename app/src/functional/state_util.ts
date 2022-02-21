@@ -255,7 +255,9 @@ export function getSelectedTracks(state: State): TrackType[] {
     const itemIndex = Number(key)
     for (const labelId of selectedLabels[itemIndex]) {
       const trackId = state.task.items[itemIndex].labels[labelId].track
-      tracks.push(getTrack(state, trackId))
+      if (!tracks.map((track) => track.id).includes(trackId)) {
+        tracks.push(getTrack(state, trackId))
+      }
     }
   }
 
