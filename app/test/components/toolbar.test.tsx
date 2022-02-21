@@ -115,6 +115,7 @@ describe("test Delete", () => {
         treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
+        testMode={true}
       />
     )
     expect(toolbarRef.current).not.toBeNull()
@@ -199,6 +200,7 @@ describe("test track", () => {
         treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
+        testMode={true}
       />
     )
     expect(toolbarRef.current).not.toBeNull()
@@ -243,6 +245,7 @@ describe("test track", () => {
         treeCategories={null}
         attributes={[]}
         labelType={"labelType"}
+        testMode={true}
       />
     )
     expect(toolbarRef.current).not.toBeNull()

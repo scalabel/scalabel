@@ -8,7 +8,8 @@ import { TrackType } from "../types/state"
 export function tracksOverlapping(tracks: TrackType[]): boolean {
   const itemIndices = new Set<number>()
   for (const track of tracks) {
-    for (const key of Object.keys(track.labels)) {
+    const trackIndices = [...new Set(Object.keys(track.labels))]
+    for (const key of trackIndices) {
       const index = Number(key)
       if (itemIndices.has(index)) {
         return true
