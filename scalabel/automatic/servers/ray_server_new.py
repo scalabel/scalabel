@@ -73,7 +73,11 @@ class RayModelServerScheduler(object):
     # restore when server restarts, connects to redis channels.
     def restore(self):
         for task_name in self.redis_task_names:
-            if task_name in ["a-poly-31_000000", "test-bot_0"]:
+            if (
+                task_name in ["a-poly-31_000000", "test-bot_0", "test-bot-dd3d_0"]
+                or task_name.startswith("bot3d-")
+                or task_name.startswith("bot3d-bdd_")
+            ):
                 continue
             task_config = self.get_task_config(task_name)
 
@@ -239,7 +243,14 @@ class RayModelServerScheduler(object):
             if task_config["task_type"] == "box3d":
                 if items[0]["intrinsics"] is not None:
                     intrinsics = items[0]["intrinsics"]
-                    inputs.update({"intrinsics": torch.tensor(intrinsics)})
+                    intrinsics_tensor = torch.tensor(
+                        [
+                            [intrinsics["focal"][0], 0.0, intrinsics["center"][0]],
+                            [0.0, intrinsics["focal"][1], intrinsics["center"][1]],
+                            [0.0, 0.0, 1.0],
+                        ]
+                    )
+                    inputs.update({"intrinsics": intrinsics_tensor})
 
             model = self.task_models[task_name]
             model.remote(inputs, request_data, request_type)

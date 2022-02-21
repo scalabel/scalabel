@@ -368,9 +368,10 @@ export class Bot {
     const itemIndex = action.itemIndices[0]
     const item = state.task.items[itemIndex]
     const url = Object.values(item.urls)[0]
-    console.log("Image action request")
+    const intrinsics =
+      item.intrinsics != null ? Object.values(item.intrinsics)[0] : undefined
 
-    return this.modelInterface.makeImageRequest(url, itemIndex)
+    return this.modelInterface.makeImageRequest(url, itemIndex, intrinsics)
   }
 
   /**
@@ -421,13 +422,19 @@ export class Bot {
         actions.push(action)
       })
     } else if (this.labelType === LabelTypeName.BOX_3D) {
-      const box = [2, 2, 2, 2, 2, 2]
-      const action = this.modelInterface.makeBox3dAction(box, itemIndices[0])
-      actions.push(action)
-      // for (const box of shapes) {
-      //   const action = this.modelInterface.makeBox3dAction(box, itemIndices[0])
-      //   actions.push(action)
-      // }
+      for (const box of shapes) {
+        if (box[0] === 0 || box[1] === 0 || box[2] === 0) {
+          Logger.info(`Ignoring box with 0 dimension: ${String(box)}`)
+          continue
+        } else {
+          Logger.info(`Creating box: ${String(box)}`)
+          const action = this.modelInterface.makeBox3dAction(
+            box,
+            itemIndices[0]
+          )
+          actions.push(action)
+        }
+      }
     } else {
       const action = this.modelInterface.makePolyAction(shapes, itemIndices[0])
       actions.push(action)

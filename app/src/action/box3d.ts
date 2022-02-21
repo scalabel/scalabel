@@ -25,12 +25,13 @@ export function addBox3dLabel(
   orientation: Vector3Type
 ): AddLabelsAction {
   // Create the rect object
-  const cube = makeCube({ center, size, orientation })
   const label = makeLabel({
     type: types.LabelTypeName.BOX_3D,
     category,
     sensors
   })
+  const cube = makeCube({ center, size, orientation, label: [label.id] })
+  label.shapes = [cube.id]
 
   return addLabel(itemIndex, label, [cube])
 }

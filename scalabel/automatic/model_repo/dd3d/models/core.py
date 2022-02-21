@@ -62,8 +62,6 @@ class DD3D(nn.Module):
         return (x - self.pixel_mean) / self.pixel_std
 
     def forward(self, batched_inputs):
-        print("batched inputs", batched_inputs)
-
         images = [x["image"].to(self.device) for x in batched_inputs]
         images = [self.preprocess_image(x) for x in images]
 
@@ -95,7 +93,6 @@ class DD3D(nn.Module):
         inv_intrinsics = images.intrinsics.inverse() if images.intrinsics is not None else None
 
         if self.training:
-            print("training!")
             assert gt_instances is not None
             feature_shapes = [x.shape[-2:] for x in features]
             training_targets = self.prepare_targets(locations, gt_instances, feature_shapes)
@@ -121,7 +118,6 @@ class DD3D(nn.Module):
                 losses.update(fcos3d_loss)
             return losses
         else:
-            print("not training!", self.only_box2d)
             pred_instances, fcos2d_info = self.fcos2d_inference(
                 logits, box2d_reg, centerness, locations, images.image_sizes
             )
@@ -146,7 +142,6 @@ class DD3D(nn.Module):
             # Transpose to "image-first", i.e. (B, L)
             pred_instances = list(zip(*pred_instances))
             pred_instances = [Instances.cat(instances) for instances in pred_instances]
-            print("pred instances", pred_instances)
 
             # 2D NMS and pick top-K.
             if self.do_nms:

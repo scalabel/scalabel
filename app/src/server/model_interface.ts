@@ -11,11 +11,13 @@ import { Vector3D } from "../math/vector3d"
 import { AddLabelsAction } from "../types/action"
 import { ModelQuery, ModelRequest } from "../types/message"
 import {
+  IntrinsicsType,
   PathPoint2DType,
   PathPointType,
   RectType,
   SimpleRect
 } from "../types/state"
+import { intrinsicsToExport } from "./bdd_type_transformers"
 import { convertPolygonToExport } from "./export"
 
 /**
@@ -99,11 +101,20 @@ export class ModelInterface {
    *
    * @param url
    * @param itemIndex
+   * @param intrinsics
    */
-  public makeImageRequest(url: string, itemIndex: number): ModelRequest {
+  public makeImageRequest(
+    url: string,
+    itemIndex: number,
+    intrinsics?: IntrinsicsType
+  ): ModelRequest {
     const item = makeItemExport({
       name: this.projectName,
-      url
+      url,
+      intrinsics:
+        intrinsics !== null && intrinsics !== undefined
+          ? intrinsicsToExport(intrinsics)
+          : undefined
     })
     return {
       data: item,
@@ -161,9 +172,9 @@ export class ModelInterface {
     box3d: number[], // W, L, H, x, y, z, rot_y, alpha
     itemIndex: number
   ): AddLabelsAction {
-    const size = new Vector3D(box3d[0], box3d[1], box3d[2])
-    const center = new Vector3D(box3d[3], box3d[4], box3d[5])
-    const orientation = new Vector3D()
+    const size = new Vector3D(box3d[0], box3d[1], box3d[2]).toState()
+    const center = new Vector3D(box3d[3], box3d[4], box3d[5]).toState()
+    const orientation = new Vector3D(box3d[6], box3d[7], box3d[8]).toState()
     const action = addBox3dLabel(
       itemIndex,
       [-1],

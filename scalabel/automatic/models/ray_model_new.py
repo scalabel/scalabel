@@ -21,6 +21,7 @@ from detectron2.checkpoint import DetectionCheckpointer
 
 import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
+from scalabel.automatic.model_repo.dd3d.utils.convert import convert_3d_box_to_kitti
 
 import ray
 from ray import serve
@@ -105,10 +106,49 @@ class RayModel(object):
 
                 model_response_channel = self.model_response_channel % request_data["name"]
 
-                boxes3d = results["instances"].pred_boxes3d.vectorize().cpu().numpy().tolist()
+                # boxes3d = results["instances"].pred_boxes3d.vectorize().cpu().numpy().tolist()
+                # boxes3d = [[float(v) for v in list(convert_3d_box_to_kitti(box))] for box in instances.pred_boxes3d]
+                instances = results["instances"]
+                boxes3d = []
+                for pred_box3d in instances.pred_boxes3d:
+                    w, l, h, x, y, z, rot_y, _ = convert_3d_box_to_kitti(pred_box3d)
+                    y = y - h / 2  # Add half height to get center
+                    converted_box = [w, l, h, x, y, z, np.pi / 2, 0, np.pi / 2 - rot_y]
+                    converted_box = [float(v) for v in converted_box]
+                    boxes3d.append(converted_box)
+
+                # Filter only car labels
+                result = []
+                # for idx, pred_class in enumerate(instances.pred_classes):
+                #     if pred_class == 0:
+                #         result.append(boxes3d[idx])
+
+                def interval_overlaps(a, b):
+                    return min(a[1], b[1]) - max(a[0], b[0]) > 0
+
+                def overlaps(box1, box2):
+                    b1w, b1l, b1h, b1x, b1y, b1z = box1[:6]
+                    b2w, b2l, b2h, b2x, b2y, b2z = box2[:6]
+                    return (
+                        interval_overlaps((b1x - b1w / 2, b1x + b1w / 2), (b2x - b2w / 2, b2x + b2w / 2))
+                        and interval_overlaps((b1y - b1h / 2, b1y + b1h / 2), (b2y - b2h / 2, b2y + b2h / 2))
+                        and interval_overlaps((b1z - b1l / 2, b1z + b1l / 2), (b2z - b2l / 2, b2z + b2l / 2))
+                    )
+
+                # Filter boxes too close to origin
+                boxes3d = [box for box in boxes3d if np.linalg.norm(box[3:6]) > 4]
+
+                # Filter overlapping boxes
+                boxes3d.sort(key=lambda box: (np.linalg.norm(box[3:6]), box[3]))
+                result.append(boxes3d[1])
+                for idx in range(1, len(boxes3d)):
+                    if not overlaps(boxes3d[idx], boxes3d[idx - 1]):
+                        result.append(boxes3d[idx])
+
+                boxes = np.array([box.cpu().numpy() for box in results["instances"].pred_boxes]).tolist()
                 item_indices = request_data["item_indices"]
                 action_packet_id = request_data["action_packet_id"]
-                self.redis.publish(model_response_channel, json.dumps([boxes3d, item_indices, action_packet_id]))
+                self.redis.publish(model_response_channel, json.dumps([result, item_indices, action_packet_id]))
         else:
             if request_type == QueryConsts.QUERY_TYPES["inference"]:
                 results = await self.handle_batch_polygon(inputs)
