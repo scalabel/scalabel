@@ -389,6 +389,15 @@ function mergeTracksInItems(
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
       labelIds[Number(itemIndex)].push(labelId)
       props[Number(itemIndex)].push(prop)
+      const childrenLabels = items[Number(itemIndex)].labels[
+        labelId
+      ].children.map(
+        (childLabelId) => items[Number(itemIndex)].labels[childLabelId].id
+      )
+      _.forEach(childrenLabels, (childLabelId) => {
+        labelIds[Number(itemIndex)].push(childLabelId)
+        props[Number(itemIndex)].push(prop)
+      })
     })
     track.labels = { ...track.labels, ...tracks[i].labels }
   }
