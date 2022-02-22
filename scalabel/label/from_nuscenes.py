@@ -180,6 +180,7 @@ def parse_labels(
     ego_pose: DictStrAny,
     calib_sensor: DictStrAny,
     img_size: Optional[Tuple[int, int]] = None,
+    in_image_frame: bool = True,
 ) -> Optional[List[Label]]:
     """Parse NuScenes labels into sensor frame."""
     if len(boxes):
@@ -198,7 +199,7 @@ def parse_labels(
             if in_image and box_class is not None:
                 xyz = tuple(box.center.tolist())
                 w, l, h = box.wlh
-                roty = quaternion_to_yaw(box.orientation)
+                roty = quaternion_to_yaw(box.orientation, in_image_frame)
 
                 box2d = None
                 if img_size is not None:
@@ -340,7 +341,11 @@ def parse_sequence(
             timestamp=timestamp,
             frames=frame_names,
             labels=parse_labels(
-                data, data.get_boxes(lidar_token), ego_pose, calibration_lidar
+                data,
+                data.get_boxes(lidar_token),
+                ego_pose,
+                calibration_lidar,
+                in_image_frame=False,
             ),
         )
         groups.append(group)

@@ -219,9 +219,10 @@ def to_nuscenes(
                     sensor2global, label.box3d.location
                 ) + np.array(frame.extrinsics.location)
 
-                quat = Quaternion(
-                    axis=[0, 1, 0], radians=label.box3d.orientation[1]
-                )
+                x, y, z, w = R.from_euler(
+                    "XYZ", label.box3d.orientation
+                ).as_quat()
+                quat = Quaternion([w, x, y, z])
                 x, y, z, w = R.from_matrix(sensor2global).as_quat()
                 rotation = Quaternion([w, x, y, z]) * quat
 
