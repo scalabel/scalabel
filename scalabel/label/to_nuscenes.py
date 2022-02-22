@@ -219,6 +219,7 @@ def to_nuscenes(
                     sensor2global, label.box3d.location
                 ) + np.array(frame.extrinsics.location)
 
+                # Using extrinsic rotation here to align with Pytorch3D
                 x, y, z, w = R.from_euler(
                     "XYZ", label.box3d.orientation
                 ).as_quat()
