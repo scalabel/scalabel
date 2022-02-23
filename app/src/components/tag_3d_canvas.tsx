@@ -16,6 +16,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { Plane3D } from "../drawable/3d/plane3d"
+import { Vector3D } from "../math/vector3d"
 
 const styles = (): StyleRules<"tag3d_canvas", {}> =>
   createStyles({
@@ -169,7 +170,13 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           label.type === LabelTypeName.PLANE_3D &&
           (label as Plane3D).visible
         ) {
-          tag = "Ground plane, height:" + label.center.y.toFixed(2)
+          const viewerConfig = this.state.user.viewerConfigs[
+            this.props.id
+          ] as Image3DViewerConfigType
+          const verticalAxis = viewerConfig.verticalAxis
+          const up = new Vector3D().fromState(verticalAxis).abs()
+          const height = label.center.clone().multiply(up.toThree()).length()
+          tag = "Ground plane, height:" + height.toFixed(2)
         }
 
         const location = new THREE.Vector3().copy(label.center)

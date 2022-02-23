@@ -340,7 +340,10 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
         const itemPlane = itemPlanes[0] as Plane3D
         const normal = new THREE.Vector3(0, 0, 1)
         normal.applyQuaternion(itemPlane.orientation)
-        plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
+        // Set height under ego vehicle
+        const { up } = this._labelHandler.getAxes()
+        const centerUnderOrigin = itemPlane.center.multiply(up.abs().toThree())
+        plane.setFromNormalAndCoplanarPoint(normal, centerUnderOrigin)
       }
 
       const intersects = new THREE.Vector3()

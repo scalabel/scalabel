@@ -228,7 +228,7 @@ export class Label3DHandler {
   /**
    * Get axes for viewer type. Returns axes in order: up, forward, right
    */
-  private getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
+  public getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
     const config = this._viewerConfig as
       | PointCloudViewerConfigType
       | Image3DViewerConfigType

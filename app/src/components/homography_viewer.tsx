@@ -10,6 +10,7 @@ import { IntrinsicCamera } from "../drawable/3d/intrinsic_camera"
 import { viewerStyles } from "../styles/viewer"
 import {
   HomographyViewerConfigType,
+  Image3DViewerConfigType,
   ImageViewerConfigType
 } from "../types/state"
 import { SCROLL_ZOOM_RATIO } from "../view_config/image"
@@ -65,18 +66,29 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
             l.label.type === LabelTypeName.PLANE_3D
         )[0] ?? null
 
-      if (plane !== null) {
-        const grid = plane.internalShapes()[0] as Grid3D
-        const normal = new THREE.Vector3(0, 0, 1)
-        normal.applyQuaternion(grid.quaternion)
-        normal.setLength(50)
-        const position = grid.position.clone()
-        position.add(normal)
-        this._camera.up = new THREE.Vector3(0, 0, 1)
-        this._camera.position.copy(position)
-        this._camera.lookAt(grid.position)
+      if (this._viewerConfig !== undefined) {
+        const forwardAxis = (this._viewerConfig as Image3DViewerConfigType)
+          .target
+
+        const forward = new THREE.Vector3(
+          forwardAxis.x,
+          forwardAxis.y,
+          forwardAxis.z
+        ).normalize()
+        if (plane !== null) {
+          const grid = plane.internalShapes()[0] as Grid3D
+          const normal = new THREE.Vector3(0, 0, 1)
+          normal.applyQuaternion(grid.quaternion)
+          normal.setLength(50)
+          const origin = new THREE.Vector3()
+          const position = origin.clone()
+          position.add(forward.multiplyScalar(20)) // 20m in front of vehicle
+          this._camera.up = new THREE.Vector3(0, 0, 1)
+          this._camera.position.copy(position).add(normal)
+          this._camera.lookAt(position)
+        }
+        this._camera.calculateProjectionMatrix()
       }
-      this._camera.calculateProjectionMatrix()
     }
   }
 

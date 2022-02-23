@@ -8,7 +8,11 @@ import { LabelTypeName } from "../const/common"
 import { Plane3D } from "../drawable/3d/plane3d"
 import { isCurrentFrameLoaded, isFrameLoaded } from "../functional/state_util"
 import { imageViewStyle } from "../styles/label"
-import { HomographyViewerConfigType, State } from "../types/state"
+import {
+  HomographyViewerConfigType,
+  Image3DViewerConfigType,
+  State
+} from "../types/state"
 import { clearCanvas, drawImageOnCanvas } from "../view_config/image"
 import { ImageCanvas, Props } from "./image_canvas"
 import { mapStateToDrawableProps } from "./viewer"
@@ -147,6 +151,11 @@ class HomographyCanvas extends ImageCanvas {
       parseInt(key)
     )[0]
 
+    const viewerConfig = this.state.user.viewerConfigs[
+      this.props.id
+    ] as Image3DViewerConfigType
+    const verticalAxis = viewerConfig.verticalAxis
+    const forwardAxis = viewerConfig.target
     const sensor = this.state.task.sensors[sensorId]
     const intrinsics = sensor?.intrinsics ?? null
     if (this._plane !== null && intrinsics !== null) {
@@ -159,9 +168,28 @@ class HomographyCanvas extends ImageCanvas {
       this._intrinsicMatrix.fromArray(intrinsicArr)
 
       const grid = this._plane.internalShapes()[0]
+
+      const up = new THREE.Vector3(
+        verticalAxis.x,
+        verticalAxis.y,
+        verticalAxis.z
+      ).normalize()
+      const forward = new THREE.Vector3(
+        forwardAxis.x,
+        forwardAxis.y,
+        forwardAxis.z
+      ).normalize()
+      const position = new THREE.Vector3(
+        grid.position.x,
+        grid.position.y,
+        grid.position.z
+      )
+        .multiply(up)
+        .multiplyScalar(-1)
+        .add(forward.multiplyScalar(20)) // 20m in front of vehicle
       const matrix = new THREE.Matrix4()
       matrix.makeRotationFromQuaternion(grid.quaternion)
-      matrix.setPosition(grid.position.x, grid.position.y, grid.position.z)
+      matrix.setPosition(position.x, position.y, position.z)
 
       const extrinsics = new THREE.Matrix4()
       extrinsics.copy(matrix)
