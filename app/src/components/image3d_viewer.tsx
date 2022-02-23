@@ -9,6 +9,7 @@ import { viewerStyles } from "../styles/viewer"
 import { Image3DViewerConfigType } from "../types/state"
 import ImageCanvas from "./image_canvas"
 import Label3dCanvas from "./label3d_canvas"
+import Tag3dCanvas from "./tag_3d_canvas"
 import { Viewer2D, Viewer2DProps } from "./viewer2d"
 
 /**
@@ -100,6 +101,14 @@ class Image3DViewer extends Viewer2D {
       views.push(
         <Label3dCanvas
           key={`label3dCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+          camera={this._camera}
+        />
+      )
+      views.push(
+        <Tag3dCanvas
+          key={`tag3dCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
           camera={this._camera}
