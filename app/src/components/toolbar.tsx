@@ -236,7 +236,7 @@ export class ToolBar extends Component<Props> {
           {this.state.user.viewerConfigs[0].type ===
             ViewerConfigTypeName.IMAGE_3D && (
             <div>
-              {makeButton("Homography", () => {
+              {makeButton("BEV", () => {
                 this.toggleHomographyView(this.state)
               })}
             </div>
