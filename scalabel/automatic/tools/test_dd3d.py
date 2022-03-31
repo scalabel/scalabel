@@ -4,10 +4,14 @@ import numpy as np
 import skimage.transform as transform
 from collections import OrderedDict
 from scalabel.automatic.model_repo.dd3d.structures.boxes3d import Boxes3D
+from scalabel.automatic.tools.dd3d_to_synscapes import dd3d_to_cityscapes, kitti_label_to_synscapes
+from scalabel.automatic.tools.synscapes_to_cityscapes import synscapes_to_cityscapes
 import seaborn as sns
 import cv2
 import json
 
+import ray
+from ray import serve
 
 from detectron2.modeling import META_ARCH_REGISTRY
 from detectron2.config import get_cfg, CfgNode
@@ -19,6 +23,7 @@ from scalabel.automatic.model_repo import add_general_config, add_dd3d_config
 from scalabel.automatic.model_repo.dd3d.utils.convert import convert_3d_box_to_kitti
 from scalabel.automatic.model_repo.dd3d.utils.box3d_visualizer import draw_boxes3d_cam
 from scalabel.automatic.model_repo.dd3d.utils.visualization import float_to_uint8_color
+from scalabel.automatic.models.ray_model_new import RayModel
 
 import os
 from PIL import Image
@@ -40,7 +45,8 @@ COLORMAP = OrderedDict(
     }
 )
 
-if __name__ == "__main__":
+
+def predict(finetuned=False, samples=range(1, 100)):
     cfg = get_cfg()
     add_general_config(cfg)
     add_dd3d_config(cfg)
@@ -49,126 +55,103 @@ if __name__ == "__main__":
     print("file_path:", file_path)
     cfg.merge_from_file(file_path)
 
-    # "/Users/elrich/code/eth/scalabel/local-data/items/kitti/tracking/training/image_02/0001/000000.png"
-    # image_path = os.path.join(dir_path, "../../../local-data/items/kitti/tracking/training/image_02/0001/000000.png")
-    image_path = os.path.join(dir_path, "../../../0000000019.png")
-    image = Image.open(image_path)
-    image_tensor = TF.to_tensor(image)
+    if finetuned:
+        cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/pretrained_models/model_finetuned_nms_05.pth"
+        cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/pretrained_models/model_finetuned_nms_05.pth"
+
+    print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
+    cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH = 0.5
+    print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
 
     cfg.TASK_TYPE = "box3d"
     cfg.MODEL.WEIGHTS = os.path.join(dir_path, "../../..", cfg.MODEL.WEIGHTS)
     cfg.MODEL.CKPT = os.path.join(dir_path, "../../..", cfg.MODEL.CKPT)
+
+    print("ckpt", cfg.MODEL.CKPT)
     print("weights", cfg.MODEL)
     model = build_model(cfg)
     checkpointer = DetectionCheckpointer(model, save_to_disk=True)
     checkpointer.load(cfg.MODEL.WEIGHTS)
     model.cuda().eval()
 
-    intrinsics = (
-        torch.tensor([[721.5377, 0.0000, 609.5593], [0.0000, 721.5377, 172.854], [0.0000, 0.0000, 1.0000]])
-        .cpu()
-        .numpy()
-    )
-    batched_inputs = [
-        {
-            "image": image_tensor,
-            "intrinsics": torch.tensor(intrinsics.tolist()),
-        }
-    ]
+    # sample_id = 1001
+    for sample_id in samples:
+        print("sample_id:", sample_id)
+        synscapes_path = "/scratch-second/egroenewald/synscapes/Synscapes"
+        image_path = os.path.join(synscapes_path, f"img/rgb/{sample_id}.png")
+        meta_path = os.path.join(synscapes_path, f"meta/{sample_id}.json")
 
-    # model.eval()
-    with torch.no_grad():
-        output = model(batched_inputs)
-    instance = output[0]["instances"]
-    # result = [convert_3d_box_to_kitti(box) for box in boxes3d]
+        img = np.array(Image.open(image_path))
+        image_tensor = torch.as_tensor(img.astype("float32").transpose(2, 0, 1))
 
-    for i in range(len(instance.pred_boxes)):
-        box = instance.pred_boxes[i]
-        box3d = instance.pred_boxes3d[i]
-        kitti_box3d = convert_3d_box_to_kitti(box3d)
-        pred_class = instance.pred_classes[i]
-        # print("box,box3d,kitti_box3d,class", box, box3d.vectorize().cpu().numpy(), kitti_box3d, pred_class)
-        print("box,class", box.tensor.cpu().numpy(), pred_class.cpu().numpy())
-        print("box3d,class", box3d.vectorize().cpu().numpy(), pred_class.cpu().numpy())
-        print("kitti,class", list(kitti_box3d), pred_class.cpu().numpy())
-
-    kitti_boxes = [[float(a) for a in list(convert_3d_box_to_kitti(box3d))] for box3d in instance.pred_boxes3d]
-    print("kitti boxes", json.dumps([kitti_boxes]))
-    # Visualise 3d boxes
-    metadata = MetadataCatalog.get("kitti_3d")
-    metadata.thing_classes = VALID_CLASS_NAMES
-    metadata.thing_colors = [COLORMAP[klass] for klass in metadata.thing_classes]
-    metadata.contiguous_id_to_name = {idx: klass for idx, klass in enumerate(metadata.thing_classes)}
-    image_np = image_tensor.cpu().numpy().astype(np.uint8)
-    image_np = image_np.reshape((image_np.shape[1], image_np.shape[2], 3))
-    image_cv2 = cv2.imread(image_path)
-    print("image shape:", image_cv2.shape)
-
-    predictions = (
-        torch.tensor(
-            [
-                [
-                    0.5195724368095398,
-                    0.5127660632133484,
-                    -0.4780527651309967,
-                    0.48844754695892334,
-                    2.5968940258026123,
-                    0.8777044415473938,
-                    6.749297618865967,
-                    1.605194091796875,
-                    3.9524614810943604,
-                    1.3974783420562744,
-                ],
-                [
-                    0.49372586607933044,
-                    0.495210736989975,
-                    0.49991142749786377,
-                    -0.510969340801239,
-                    -4.852385520935059,
-                    1.1608902215957642,
-                    11.252735137939453,
-                    1.6114134788513184,
-                    4.02348518371582,
-                    1.4812047481536865,
-                ],
-                [
-                    0.49331000447273254,
-                    0.494437038898468,
-                    0.5051764845848083,
-                    -0.5069259405136108,
-                    -4.561218738555908,
-                    1.2230360507965088,
-                    32.35547637939453,
-                    1.6999049186706543,
-                    4.089993476867676,
-                    1.5372989177703857,
-                ],
-                [
-                    0.4884650707244873,
-                    0.4843449592590332,
-                    0.5070516467094421,
-                    -0.5193365812301636,
-                    -4.813807487487793,
-                    1.1826457977294922,
-                    16.36737060546875,
-                    1.5933693647384644,
-                    3.8068439960479736,
-                    1.5679268836975098,
-                ],
-            ]
+        intrinsics = (
+            torch.tensor([[1590.83437, 0.0000, 771.31406], [0.0000, 1592.79032, 360.79945], [0.0000, 0.0000, 1.0000]])
+            .cpu()
+            .numpy()
         )
-        .cpu()
-        .numpy()
-    )
-    boxes3d = Boxes3D.from_vectors(predictions, intrinsics)
-    classes = [0 for _ in boxes3d]
+        batched_inputs = [
+            {
+                "image": image_tensor,
+                "intrinsics": torch.tensor(intrinsics.tolist()),
+            }
+        ]
 
-    # vis_image = draw_boxes3d_cam(image_cv2, instance.pred_boxes3d, instance.pred_classes, metadata)
-    vis_image = draw_boxes3d_cam(image_cv2, boxes3d, classes, metadata)
-    cv2.imwrite("vis_image.png", vis_image)
+        # model.eval()
+        with torch.no_grad():
+            output = model(batched_inputs)
+        instances = output[0]["instances"]
+        # result = [convert_3d_box_to_kitti(box) for box in boxes3d]
 
-    # print("num boxes:", len(result))
-    # filtered = [box for box in result if box[0] != 0.0 and box[1] != 0.0 and box[2] != 0]
-    # print("num filtered:", len(filtered))
-    # print("filtered", filtered)
-    # print("Output", result)
+        for i in range(len(instances.pred_boxes)):
+            box = instances.pred_boxes[i]
+            box3d = instances.pred_boxes3d[i]
+            kitti_box3d = convert_3d_box_to_kitti(box3d)
+            pred_class = instances.pred_classes[i]
+            # print("box,box3d,kitti_box3d,class", box, box3d.vectorize().cpu().numpy(), kitti_box3d, pred_class)
+            print("box,class", box.tensor.cpu().numpy(), pred_class.cpu().numpy())
+            print("box3d,class", box3d.vectorize().cpu().numpy(), pred_class.cpu().numpy())
+            print("kitti,class", list(kitti_box3d), pred_class.cpu().numpy())
+
+        kitti_boxes = [[float(a) for a in list(convert_3d_box_to_kitti(box3d))] for box3d in instances.pred_boxes3d]
+        print("kitti boxes", json.dumps([kitti_boxes]))
+        # Visualise 3d boxes
+        metadata = MetadataCatalog.get("kitti_3d")
+        metadata.thing_classes = VALID_CLASS_NAMES
+        metadata.thing_colors = [COLORMAP[klass] for klass in metadata.thing_classes]
+        metadata.contiguous_id_to_name = {idx: klass for idx, klass in enumerate(metadata.thing_classes)}
+        image_np = image_tensor.cpu().numpy().astype(np.uint8)
+        image_np = image_np.reshape((image_np.shape[1], image_np.shape[2], 3))
+        image_cv2 = cv2.imread(image_path)
+        print("image shape:", image_cv2.shape)
+
+        boxes3d = instances.pred_boxes3d
+        classes = instances.pred_classes
+
+        vis_image = draw_boxes3d_cam(image_cv2, boxes3d, classes, metadata)
+
+        out_img_dir = "base_imgs"
+        out_label_dir = "base_labels"
+        if finetuned:
+            out_img_dir = "finetune_imgs"
+            out_label_dir = "finetune_labels"
+
+        cv2.imwrite(f"{out_img_dir}/vis_image_synscapes_{sample_id}.png", vis_image)
+
+        synscapes_labels = dd3d_to_cityscapes(instances)
+        with open(f"{out_label_dir}/synscapes_preds_{sample_id}.json", "w") as file:
+            json.dump(synscapes_labels, file)
+
+        with open(meta_path, "r") as f:
+            metadata = json.load(f)
+
+        get_labels = synscapes_to_cityscapes(metadata)
+
+        with open(f"groundtruth_labels/synscapes_gt_{sample_id}.json", "w") as file:
+            json.dump(get_labels, file)
+
+
+if __name__ == "__main__":
+    # samples = (63, 596, 736, 627, 630, 673, 869, 529, 901, 766)
+    samples = range(1, 100)
+    predict(samples=samples)
+    predict(finetuned=True, samples=samples)

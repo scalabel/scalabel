@@ -175,7 +175,6 @@ class DD3D(nn.Module):
             else:
                 processed_results = [{"instances": x} for x in pred_instances]
 
-            print("processed results", processed_results)
             return processed_results
 
     def compute_locations(self, features):
