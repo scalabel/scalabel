@@ -32,6 +32,7 @@ import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { parseProjectName } from "./util"
 import { QueryArg } from "../const/common"
+import * as JSONStream from "JSONStream"
 
 /**
  * Wraps HTTP listeners
@@ -147,10 +148,15 @@ export class Listeners {
         }
       }
       dataset.frames = items
-      const exportJson = JSON.stringify(dataset, null, "  ")
-      // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
-      res.end(Buffer.from(exportJson, "binary"), "binary")
+      const transformStream = JSONStream.stringifyObject()
+      transformStream.pipe(res)
+      Object.keys(dataset).forEach((key) =>
+        // @ts-expect-error
+        transformStream.write([key, dataset[key]])
+      )
+      transformStream.end()
+      res.end()
     } catch (error) {
       // TODO: Be more specific about what this error may be
       Logger.error(error as Error)
