@@ -100,6 +100,7 @@ export class Listeners {
    * @param res
    */
   public async getExportHandler(req: Request, res: Response): Promise<void> {
+    req.setTimeout(2 * 60 * 10000)
     if (this.checkInvalidGet(req, res)) {
       return
     }
