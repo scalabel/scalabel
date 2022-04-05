@@ -32,7 +32,6 @@ import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { parseProjectName } from "./util"
 import { QueryArg } from "../const/common"
-import * as JSONStream from "JSONStream"
 
 /**
  * Wraps HTTP listeners
@@ -147,16 +146,31 @@ export class Listeners {
           }
         }
       }
-      dataset.frames = items
       res.attachment(getExportName(projectName))
-      const transformStream = JSONStream.stringifyObject()
-      transformStream.pipe(res)
-      Object.keys(dataset).forEach((key) =>
-        // @ts-expect-error
-        transformStream.write([key, dataset[key]])
-      )
-      transformStream.end()
-      res.end()
+
+      // Manually stream labels to response, because JSON.stringify fails
+      // for large objects
+      res.write("{\n")
+      Object.keys(dataset)
+        .filter((key) => key !== "frames")
+        .forEach((key) => {
+          res.write(`"${key}": `)
+          // @ts-expect-error
+          res.write(JSON.stringify(dataset[key], null, 2))
+          res.write(",")
+        })
+      res.write(`"frames": [`)
+      let first = true
+      for (const item of items) {
+        if (first) {
+          first = false
+        } else {
+          res.write(",\n")
+        }
+        res.write(JSON.stringify(item, null, 2))
+      }
+      res.write("]\n")
+      res.end("}")
     } catch (error) {
       // TODO: Be more specific about what this error may be
       Logger.error(error as Error)
