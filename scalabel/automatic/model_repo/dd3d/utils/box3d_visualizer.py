@@ -12,6 +12,8 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data import detection_utils as d2_utils
 from detectron2.utils.visualizer import VisImage, _create_text_labels
 
+from scalabel.automatic.model_repo.dd3d.utils.bev import BEVImage
+
 from ..structures.boxes3d import Boxes3D, GenericBoxes3D
 from ..structures.pose import Pose
 from ..utils.geometry import project_points3d

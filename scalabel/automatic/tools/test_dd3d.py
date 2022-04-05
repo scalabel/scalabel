@@ -9,6 +9,7 @@ from scalabel.automatic.tools.synscapes_to_cityscapes import synscapes_to_citysc
 import seaborn as sns
 import cv2
 import json
+from pyquaternion import Quaternion
 
 import ray
 from ray import serve
@@ -21,7 +22,7 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 
 from scalabel.automatic.model_repo import add_general_config, add_dd3d_config
 from scalabel.automatic.model_repo.dd3d.utils.convert import convert_3d_box_to_kitti
-from scalabel.automatic.model_repo.dd3d.utils.box3d_visualizer import draw_boxes3d_cam
+from scalabel.automatic.model_repo.dd3d.utils.box3d_visualizer import draw_boxes3d_bev, draw_boxes3d_cam
 from scalabel.automatic.model_repo.dd3d.utils.visualization import float_to_uint8_color
 from scalabel.automatic.models.ray_model_new import RayModel
 
@@ -46,6 +47,34 @@ COLORMAP = OrderedDict(
 )
 
 
+def get_quaternion_from_euler(roll, pitch, yaw):
+    """
+    Convert an Euler angle to a quaternion.
+
+    Input
+      :param roll: The roll (rotation around x-axis) angle in radians.
+      :param pitch: The pitch (rotation around y-axis) angle in radians.
+      :param yaw: The yaw (rotation around z-axis) angle in radians.
+
+    Output
+      :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+    """
+    qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(
+        yaw / 2
+    )
+    qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(
+        yaw / 2
+    )
+    qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(
+        yaw / 2
+    )
+    qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(
+        yaw / 2
+    )
+
+    return [qw, qx, qy, qz]
+
+
 def predict(finetuned=False, samples=range(1, 100)):
     cfg = get_cfg()
     add_general_config(cfg)
@@ -60,7 +89,7 @@ def predict(finetuned=False, samples=range(1, 100)):
         cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/pretrained_models/model_finetuned_nms_05.pth"
 
     print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
-    cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH = 0.5
+    cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH = 0.75
     print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
 
     cfg.TASK_TYPE = "box3d"
@@ -124,10 +153,23 @@ def predict(finetuned=False, samples=range(1, 100)):
         image_cv2 = cv2.imread(image_path)
         print("image shape:", image_cv2.shape)
 
+        with open(meta_path, "r") as f:
+            sample_meta = json.load(f)
         boxes3d = instances.pred_boxes3d
         classes = instances.pred_classes
+        bev_width = 240
+        extrinsics = sample_meta["camera"]["extrinsic"]
+        roll = extrinsics["roll"]
+        pitch = extrinsics["pitch"]
+        yaw = extrinsics["yaw"]
+        x = extrinsics["x"]
+        y = extrinsics["y"]
+        z = extrinsics["z"]
+        # extrinsics = {"tvec": [x, y, z], "wxyz": get_quaternion_from_euler(roll, pitch, yaw)}
+        extrinsics = {"tvec": [0, 0, 0], "wxyz": Quaternion().elements}
 
         vis_image = draw_boxes3d_cam(image_cv2, boxes3d, classes, metadata)
+        bev_vis, bev = draw_boxes3d_bev(boxes3d, extrinsics, classes, bev_width)
 
         out_img_dir = "base_imgs"
         out_label_dir = "base_labels"
@@ -136,22 +178,24 @@ def predict(finetuned=False, samples=range(1, 100)):
             out_label_dir = "finetune_labels"
 
         cv2.imwrite(f"{out_img_dir}/vis_image_synscapes_{sample_id}.png", vis_image)
+        # cv2.imwrite(f"{out_img_dir}_bev/vis_image_synscapes_{sample_id}.png", bev_vis)
 
         synscapes_labels = dd3d_to_cityscapes(instances)
         with open(f"{out_label_dir}/synscapes_preds_{sample_id}.json", "w") as file:
             json.dump(synscapes_labels, file)
 
-        with open(meta_path, "r") as f:
-            metadata = json.load(f)
-
-        get_labels = synscapes_to_cityscapes(metadata)
+        get_labels = synscapes_to_cityscapes(sample_meta)
 
         with open(f"groundtruth_labels/synscapes_gt_{sample_id}.json", "w") as file:
             json.dump(get_labels, file)
 
 
 if __name__ == "__main__":
-    # samples = (63, 596, 736, 627, 630, 673, 869, 529, 901, 766)
-    samples = range(1, 100)
-    predict(samples=samples)
+    samples = (63, 596, 736, 627, 630, 673, 869, 529, 901, 766)
+    # Add one to the samples -> this is what the datamapper did
+    samples = [s + 1 for s in samples]
+    print("samples", samples)
+    # samples = range(1, 100)
+    # samples = [1, 2]
     predict(finetuned=True, samples=samples)
+    predict(samples=samples)
