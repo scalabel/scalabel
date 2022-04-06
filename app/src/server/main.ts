@@ -285,13 +285,14 @@ const dataset = {
   }
 }
 const projPath =
-  "/home/ubuntu/scalabel/projects/pano10k_class_correction_train/saved/"
+  "/home/ubuntu/scalabel/local-data/scalabel/projects/pano10k_class_correction_train/saved/"
 
 const tasks = fs.readdirSync(projPath)
 let items = []
 for (const task of tasks) {
   const taskDir = projPath + task
-  const taskSaved = fs.readdirSync(taskDir).at(-1)
+  const taskSavedList = fs.readdirSync(taskDir)
+  const taskSaved = taskSavedList[taskSavedList.length - 1]
   const taskFilePath = taskDir + "/" + taskSaved
   const state = JSON.parse(fs.readFileSync(taskFilePath))
   items = items.concat(convertStateToExport(state))
