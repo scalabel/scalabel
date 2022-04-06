@@ -285,7 +285,7 @@ const dataset = {
   }
 }
 const projPath =
-  "/Users/elrich/code/eth/scalabel/local-data/scalabel/projects/bdd100k-044-047/saved/"
+  "/home/ubuntu/scalabel/projects/pano10k_class_correction_train/saved/"
 
 const tasks = fs.readdirSync(projPath)
 let items = []
