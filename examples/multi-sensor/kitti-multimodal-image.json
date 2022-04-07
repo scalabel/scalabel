@@ -2,7 +2,7 @@
     "frames": [
         {
             "name": "image_2/000000",
-            "url": "http://localhost:8686/items/kitti/tracking/training/image_02/0001/000000.png",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/image_02/0001/000000.png",
             "timestamp": 6446,
             "frameIndex": 12,
             "labels": [
@@ -227,7 +227,7 @@
         },
         {
             "name": "velodyne/000000",
-            "url": "http://localhost:8686/items/kitti/tracking/training/velodyne/0001/000000.ply"
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/velodyne/0001/000000.ply"
         }
     ],
     "frameGroups": [
