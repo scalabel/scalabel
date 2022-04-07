@@ -17,7 +17,6 @@ def compute_features_locations(h, w, stride, dtype=torch.float32, device="cpu", 
     # (dennis.park)
     # locations = torch.stack((shift_x, shift_y), dim=1) + stride // 2
     locations = torch.stack((shift_x, shift_y), dim=1)
-    print("offset", offset)
     if offset == "half":
         locations += stride // 2
     elif offset is None:

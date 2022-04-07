@@ -148,7 +148,6 @@ ISO_8855 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]
 def synscapes_to_cityscapes(data):
     intrinsics = data["camera"]["intrinsic"]
     extrinsics = data["camera"]["extrinsic"]
-    print("extrinsics", extrinsics)
     width = intrinsics["resx"]
     height = intrinsics["resy"]
 
@@ -160,7 +159,6 @@ def synscapes_to_cityscapes(data):
     extrinsic_matrix = np.array(extrinsic_rotation.transformation_matrix)
     extrinsic_matrix[:3, 3] = extrinsic_translation
 
-    print("matrix", extrinsic_matrix[:3].tolist())
     sensor = {
         "fx": intrinsics["fx"],
         "fy": intrinsics["fy"],

@@ -5,6 +5,7 @@ from collections import OrderedDict, defaultdict
 from typing import Dict
 
 import cv2
+from matplotlib.pyplot import text
 import numpy as np
 import torch
 
@@ -90,23 +91,31 @@ def pretty_render_3d_box(
     front_face_as_polygon = corners.T[:4].ravel().astype(int).tolist()
     fill_color_polygon(image, front_face_as_polygon, color, alpha=0.5)
 
-    V = VisImage(img=image)
+    # V = VisImage(img=image)
 
-    if render_label:
-        # Render text label. Mostly copied from Visualizer.overlay_instances()
-        label = _create_text_labels([class_id], [score] if score is not None else None, class_names)[0]
-        # bottom-right corner
-        text_pos = tuple([points2d[:, 0].min(), points2d[:, 1].max()])
-        horiz_align = "left"
-        lighter_color = change_color_brightness(tuple([c / 255.0 for c in color]), brightness_factor=0.8)
-        H, W = image.shape[:2]
-        default_font_size = max(np.sqrt(H * W) // 90, 10)
-        height_ratio = (points2d[:, 1].max() - points2d[:, 1].min()) / np.sqrt(H * W)
-        font_size = np.clip((height_ratio - 0.02) / 0.08 + 1, 1.2, 2) * 0.5 * default_font_size
+    # if render_label:
+    #     # Render text label. Mostly copied from Visualizer.overlay_instances()
+    #     label = _create_text_labels([class_id], [score] if score is not None else None, class_names)[0]
+    #     # bottom-right corner
+    #     text_pos = tuple([points2d[:, 0].min(), points2d[:, 1].max()])
+    #     horiz_align = "left"
+    #     lighter_color = change_color_brightness(tuple([c / 255.0 for c in color]), brightness_factor=0.8)
+    #     H, W = image.shape[:2]
+    #     default_font_size = max(np.sqrt(H * W) // 90, 10)
+    #     height_ratio = (points2d[:, 1].max() - points2d[:, 1].min()) / np.sqrt(H * W)
+    #     font_size = np.clip((height_ratio - 0.02) / 0.08 + 1, 1.2, 2) * 0.5 * default_font_size
+    #     draw_text(V.ax, label, text_pos, font_size=font_size, color=lighter_color, horizontal_alignment=horiz_align)
 
-        draw_text(V.ax, label, text_pos, font_size=font_size, color=lighter_color, horizontal_alignment=horiz_align)
+    # text_pos = tuple([points2d[:, 0].min(), points2d[:, 1].max()])
+    # text_pos = (int(text_pos[0]), int(text_pos[1]))
+    # label = _create_text_labels([class_id], [score] if score is not None else None, class_names)[0]
+    # font = cv2.FONT_HERSHEY_SIMPLEX
+    # font_scale = 0.5
+    # thickness = 1
+    # text_color = (0, 0, 0)
+    # image = cv2.putText(image, label, text_pos, font, font_scale, text_color, thickness, cv2.LINE_AA)
 
-    image = V.get_image()
+    # image = V.get_image()
     return image
 
 

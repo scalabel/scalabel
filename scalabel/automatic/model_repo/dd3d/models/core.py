@@ -143,6 +143,8 @@ class DD3D(nn.Module):
             pred_instances = list(zip(*pred_instances))
             pred_instances = [Instances.cat(instances) for instances in pred_instances]
 
+            print("initial num instances", len(pred_instances[0].pred_classes))
+
             # 2D NMS and pick top-K.
             if self.do_nms:
                 pred_instances = self.fcos2d_inference.nms_and_top_k(pred_instances, score_key)
@@ -162,6 +164,8 @@ class DD3D(nn.Module):
                     iou_threshold=self.bev_nms_iou_thresh,
                     include_boxes3d_global=False,
                 )
+
+            print("final num instances", len(pred_instances[0].pred_classes))
 
             if self.postprocess_in_inference:
                 processed_results = []
