@@ -37,12 +37,12 @@ while getopts ":h" option; do
     esac
 done
 
-if [[ -z ROOT ]]; then
+if [[ $ROOT -eq 0 ]]; then
     echo [$(date +"%F %T")] ================================
     echo [$(date +"%F %T")] RUNNING AS USER $(whoami)
     echo [$(date +"%F %T")] ================================
 
-    if [ ! hash nvm 2>/dev/null ]; then
+    if [[ ! hash nvm 2>/dev/null ]]; then
         echo [$(date +"%F %T")] ================================
         echo [$(date +"%F %T")] Installing NVM
         echo [$(date +"%F %T")] ================================
@@ -53,7 +53,7 @@ if [[ -z ROOT ]]; then
 
     nvm install stable && nvm use stable
 
-    if [ ! hash redis-server 2>/dev/null ]; then
+    if [[ ! hash redis-server 2>/dev/null ]]; then
         echo [$(date +"%F %T")] ================================
         echo [$(date +"%F %T")] Installing Redis
         echo [$(date +"%F %T")] ================================
@@ -74,7 +74,7 @@ if [[ -z ROOT ]]; then
         source ~/.bash_aliases
     fi
 
-    if [ ! hash conda 2>/dev/null ]; then
+    if [[ ! hash conda 2>/dev/null ]]; then
         echo [$(date +"%F %T")] ================================
         echo [$(date +"%F %T")] Installing conda
         echo [$(date +"%F %T")] ================================
