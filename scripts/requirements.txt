@@ -2,10 +2,8 @@ black==21.4b2
 boto3==1.21.32
 coloredlogs==15.0.1
 Cython==0.29.24
-https://dl.fbaipublicfiles.com/detectron2/wheels/cu113/torch1.10/detectron2-0.6%2Bcu113-cp38-cp38-linux_x86_64.whl
 Flask==2.1.1
 Flask-Cors==3.0.10
-git+https://github.com/facebookresearch/fvcore
 hydra-core==1.1.1
 isort==5.10.1
 joblib==1.1.0
@@ -42,7 +40,5 @@ scipy==1.8.0
 seaborn==0.11.2
 tabulate==0.8.9
 tenacity==8.0.1
-https://download.pytorch.org/whl/cu113/torch-1.10.0%2Bcu113-cp38-cp38-linux_x86_64.whl
-https://download.pytorch.org/whl/cu113/torchvision-0.11.0%2Bcu113-cp38-cp38-linux_x86_64.whl
 tqdm==4.63.1
 wheel==0.37.1
