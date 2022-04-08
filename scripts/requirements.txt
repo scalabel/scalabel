@@ -28,7 +28,7 @@ pyparsing==3.0.7
 pyquaternion==0.9.9
 pytest==7.1.1
 python-dateutil==2.8.2
-pytorch3d==0.3.0
+pytorch3d
 PyWavelets==1.3.0
 PyYAML==6.0
 ray[serve]==1.11.0
