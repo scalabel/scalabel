@@ -22,7 +22,6 @@ import {
 import { makePointCloudViewerConfig, makeSensor } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import {
-  Image3DViewerConfigType,
   INVALID_ID,
   PointCloudViewerConfigType,
   SensorType,
@@ -38,6 +37,8 @@ import { Span3D } from "./box_span/span3d"
 import {
   calculatePlaneCenter,
   calculatePlaneRotation,
+  getMainSensor,
+  transformPointCloud,
   estimateGroundPlane
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
@@ -229,11 +230,9 @@ export class Label3DHandler {
    * Get axes for viewer type. Returns axes in order: up, forward, right
    */
   private getAxes(): { up: Vector3D; forward: Vector3D; left: Vector3D } {
-    const config = this._viewerConfig as
-      | PointCloudViewerConfigType
-      | Image3DViewerConfigType
-    const forward = new Vector3D().fromState(config.target).normalize()
-    const up = new Vector3D().fromState(config.verticalAxis).normalize()
+    const mainSensor = getMainSensor(this._state)
+    const forward = new Vector3D().fromThree(mainSensor.forward).normalize()
+    const up = new Vector3D().fromThree(mainSensor.up).normalize()
     const left = up.clone().cross(forward).normalize()
     return {
       up,
@@ -372,16 +371,21 @@ export class Label3DHandler {
       let center = new THREE.Vector3(0, 1.5, 10)
       let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
       if (isPointCloud) {
+        const rawGeometry = Session.pointClouds[item.index][sensorIdx]
+        const geometry = transformPointCloud(rawGeometry, sensorIdx, state)
         const pointCloud = Array.from(
-          new THREE.Points(
-            Session.pointClouds[item.index][sensorIdx]
-          ).geometry.getAttribute("position").array
+          new THREE.Points(geometry).geometry.getAttribute("position").array
         )
         const estimatedPlane = estimateGroundPlane(pointCloud)
         const target = new Vector3D().fromState(config.target)
-        const baseNormal = new THREE.Vector3(0, 0, 1)
-        center = calculatePlaneCenter(estimatedPlane, target.toThree())
-        rotation = calculatePlaneRotation(baseNormal, estimatedPlane.normal)
+        const { up, left } = this.getAxes()
+        const down = up.toThree().clone().multiplyScalar(-1)
+        center = calculatePlaneCenter(estimatedPlane, target.toThree(), down)
+        rotation = calculatePlaneRotation(
+          up.toThree(),
+          left.toThree(),
+          estimatedPlane.normal
+        )
       }
       const label = createPlaneLabel(
         Session.label3dList,
