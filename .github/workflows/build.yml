@@ -75,9 +75,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install apt packages
-        run: |
-          sudo apt-get install -y libopenmpi-dev
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
