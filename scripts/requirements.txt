@@ -15,7 +15,7 @@ nanoid==2.0.0
 numba==0.55.1
 numpy==1.21.0
 opencv-python==4.5.5.64
-pandas==1.4.1
+pandas
 Pillow==9.1.0
 plyfile==0.7.4
 protobuf==3.20.0
@@ -36,7 +36,7 @@ redis==4.2.2
 requests==2.27.1
 scikit-image==0.19.2
 scikit-learn==1.0.2
-scipy==1.8.0
+scipy
 seaborn==0.11.2
 tabulate==0.8.9
 tenacity==8.0.1
