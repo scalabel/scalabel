@@ -16,6 +16,7 @@ import { categoryStyle } from "../styles/label"
 import { BaseAction } from "../types/action"
 import { Component } from "./component"
 import { Category } from "../types/state"
+import { LabelTypeName } from "../const/common"
 
 /**
  * This is the handleChange function of MultipleSelect
@@ -32,9 +33,16 @@ function handleChange(
   if (categoryIndex !== null) {
     const actions: BaseAction[] = []
     actions.push(changeSelect({ category: categoryIndex }))
-    // Update categories if any labels are selected
-    if (Object.keys(state.user.select.labels).length > 0) {
-      actions.push(changeSelectedLabelsCategories(state, [categoryIndex]))
+    // Update categories if any non-plane labels are selected
+    const hasSelectedLabels = Object.keys(state.user.select.labels).length > 0
+    if (hasSelectedLabels) {
+      const labelIds = Object.values(state.user.select.labels)
+      const groundPlaneSelected =
+        state.task.items[state.user.select.item].labels[labelIds[0][0]].type ===
+        LabelTypeName.PLANE_3D
+      if (!groundPlaneSelected) {
+        actions.push(changeSelectedLabelsCategories(state, [categoryIndex]))
+      }
     }
     dispatch(makeSequential(actions))
   }
@@ -57,9 +65,19 @@ function handleTreeSelect(
   const state = getState()
   const actions: BaseAction[] = []
   actions.push(changeSelect({ category: Number(categoryIndex) }))
-  // Update categories if any labels are selected
-  if (Object.keys(state.user.select.labels).length > 0) {
-    actions.push(changeSelectedLabelsCategories(state, [Number(categoryIndex)]))
+
+  // Update categories if any non-plane labels are selected
+  const hasSelectedLabels = Object.keys(state.user.select.labels).length > 0
+  if (hasSelectedLabels) {
+    const labelIds = Object.values(state.user.select.labels)
+    const groundPlaneSelected =
+      state.task.items[state.user.select.item].labels[labelIds[0][0]].type ===
+      LabelTypeName.PLANE_3D
+    if (!groundPlaneSelected) {
+      actions.push(
+        changeSelectedLabelsCategories(state, [Number(categoryIndex)])
+      )
+    }
   }
   dispatch(makeSequential(actions))
 }
