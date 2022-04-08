@@ -349,20 +349,28 @@ export class Label3DHandler {
   }
 
   /**
-   * Toggle showing ground plane. If no ground plane, create one.
+   * Toggle selecting ground plane.
    */
   private toggleGroundPlane(): void {
     const groundPlane = Session.label3dList.getItemGroundPlane(
       this._selectedItemIndex
     )
     if (groundPlane !== null) {
-      if (groundPlane.visible) {
-        groundPlane.visible = false
+      groundPlane.visible = true
+      const selectedLabel = Session.label3dList.selectedLabel
+      const groundPlaneSelected = selectedLabel?.labelId === groundPlane.labelId
+      if (groundPlaneSelected) {
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
       } else {
-        groundPlane.visible = true
+        Session.dispatch(
+          selectLabel(
+            Session.label3dList.selectedLabelIds,
+            this._selectedItemIndex,
+            groundPlane.labelId
+          )
+        )
       }
     } else {
       const center = new Vector3D(0, 1.5, 10)
