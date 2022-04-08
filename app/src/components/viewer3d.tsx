@@ -7,6 +7,7 @@ import SyncIcon from "@material-ui/icons/Sync"
 import ThreeDRotationSharpIcon from "@material-ui/icons/ThreeDRotationSharp"
 import ThreeSixtyIcon from "@material-ui/icons/ThreeSixty"
 import TripOriginIcon from "@material-ui/icons/TripOrigin"
+import ColorLensIcon from "@material-ui/icons/ColorLens"
 import { withStyles } from "@material-ui/styles"
 import React from "react"
 import * as THREE from "three"
@@ -25,7 +26,11 @@ import Session from "../common/session"
 import * as types from "../const/common"
 import { Vector3D } from "../math/vector3d"
 import { viewerStyles } from "../styles/viewer"
-import { PointCloudViewerConfigType } from "../types/state"
+import {
+  ColorSchemeType,
+  PointCloudViewerConfigType,
+  State
+} from "../types/state"
 import {
   DrawableViewer,
   ViewerClassTypes,
@@ -35,6 +40,8 @@ import Label3dCanvas from "./label3d_canvas"
 import PointCloudCanvas from "./point_cloud_canvas"
 import Tag3dCanvas from "./tag_3d_canvas"
 import { isCurrentItemLoaded } from "../functional/state_util"
+import { getMainSensor } from "../common/util"
+import { Sensor } from "../common/sensor"
 
 interface ClassType extends ViewerClassTypes {
   /** camera z lock */
@@ -76,17 +83,31 @@ function underlineElement(
  * Calculate forward vector
  *
  * @param viewerConfig
+ * @param state
  */
 function calculateForward(
-  viewerConfig: PointCloudViewerConfigType
+  viewerConfig: PointCloudViewerConfigType,
+  state: State
 ): THREE.Vector3 {
-  // Get vector pointing from camera to target projected to horizontal plane
-  let forwardX = viewerConfig.target.x - viewerConfig.position.x
-  let forwardY = viewerConfig.target.y - viewerConfig.position.y
-  const forwardDist = Math.sqrt(forwardX * forwardX + forwardY * forwardY)
-  forwardX *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
-  forwardY *= CameraMovementParameters.MOVE_AMOUNT / forwardDist
-  return new THREE.Vector3(forwardX, forwardY, 0)
+  const mainSensor = getMainSensor(state)
+  const up = mainSensor.up
+  const origin = new THREE.Vector3(0, 0, 0)
+  const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(up, origin)
+  const target = new THREE.Vector3(
+    viewerConfig.target.x,
+    viewerConfig.target.y,
+    viewerConfig.target.z
+  )
+  const camPosition = new THREE.Vector3(
+    viewerConfig.position.x,
+    viewerConfig.position.y,
+    viewerConfig.position.z
+  )
+  const camDirection = target.clone().sub(camPosition)
+  const forward = new THREE.Vector3()
+  plane.projectPoint(camDirection, forward)
+  forward.normalize().multiplyScalar(CameraMovementParameters.MOVE_AMOUNT)
+  return forward
 }
 
 /**
@@ -94,17 +115,12 @@ function calculateForward(
  *
  * @param viewerConfig
  * @param forward
+ * @param state
  */
-function calculateLeft(
-  viewerConfig: PointCloudViewerConfigType,
-  forward: THREE.Vector3
-): THREE.Vector3 {
+function calculateLeft(forward: THREE.Vector3, state: State): THREE.Vector3 {
   // Get vector pointing up
-  const vertical = new THREE.Vector3(
-    viewerConfig.verticalAxis.x,
-    viewerConfig.verticalAxis.y,
-    viewerConfig.verticalAxis.z
-  )
+  const mainSensor = getMainSensor(state)
+  const vertical = mainSensor.up
 
   // Handle movement in three dimensions
   const left = new THREE.Vector3()
@@ -130,6 +146,8 @@ class Viewer3D extends DrawableViewer<Props> {
   private _scrollTimer: ReturnType<typeof setTimeout> | null
   /** Whether the camera is being moved */
   private _movingCamera: boolean
+  /** Whether the camera has been transformed */
+  private cameraTransformed: boolean
 
   /**
    * Constructor
@@ -145,6 +163,7 @@ class Viewer3D extends DrawableViewer<Props> {
     this._pointCloud = null
     this._scrollTimer = null
     this._movingCamera = false
+    this.cameraTransformed = false
   }
 
   /** Called when component updates */
@@ -220,7 +239,8 @@ class Viewer3D extends DrawableViewer<Props> {
         this.getSynchronizationButton(config),
         this.getSelectionLockButton(config),
         this.getOriginButton(config),
-        this.getViewerConfigButton(config)
+        this.getViewerConfigButton(config),
+        this.getColorSchemeButton(config)
       ]
     }
 
@@ -534,6 +554,48 @@ class Viewer3D extends DrawableViewer<Props> {
   }
 
   /**
+   * color scheme button
+   *
+   * @param config
+   */
+  protected getColorSchemeButton(
+    config: PointCloudViewerConfigType
+  ): JSX.Element {
+    return (
+      <Tooltip
+        key={`colorSchemeButton${this.props.id}`}
+        title="Color scheme"
+        enterDelay={500}
+        TransitionComponent={Fade}
+        TransitionProps={{ timeout: 600 }}
+        arrow
+      >
+        <IconButton
+          className={this.props.classes.viewer_button}
+          onClick={() => {
+            const colorSchemes = Object.values(ColorSchemeType)
+            const itemType = this.state.task.config.itemType
+            if (itemType !== types.ItemTypeName.IMAGE) {
+              const imageIndex = colorSchemes.indexOf(ColorSchemeType.IMAGE)
+              colorSchemes.splice(imageIndex, 1)
+            }
+            const currentIndex = colorSchemes.indexOf(config.colorScheme)
+            const nextIndex = (currentIndex + 1) % colorSchemes.length
+            const newConfig = {
+              ...config,
+              colorScheme: colorSchemes[nextIndex]
+            }
+            Session.dispatch(changeViewerConfig(this.props.id, newConfig))
+          }}
+          edge={"start"}
+        >
+          <ColorLensIcon />
+        </IconButton>
+      </Tooltip>
+    )
+  }
+
+  /**
    * Mouse enter
    *
    * @param e
@@ -740,6 +802,8 @@ class Viewer3D extends DrawableViewer<Props> {
     }
 
     this._target.set(config.target.x, config.target.y, config.target.z)
+    const mainSensor = getMainSensor(this.state)
+    this.cameraTransformed = config.cameraTransformed
 
     if (
       lockedToSelection(config) &&
@@ -786,12 +850,19 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.up = up
       this._camera.lookAt(target)
     } else {
-      this._camera.up.x = config.verticalAxis.x
-      this._camera.up.y = config.verticalAxis.y
-      this._camera.up.z = config.verticalAxis.z
+      this._camera.up.copy(mainSensor.up)
       this._camera.position.x = config.position.x
       this._camera.position.y = config.position.y
       this._camera.position.z = config.position.z
+
+      if (
+        this.state.task.config.itemType === types.ItemTypeName.IMAGE &&
+        !this.cameraTransformed
+      ) {
+        const sensorId = this.state.user.viewerConfigs[this.props.id].sensor
+        this.transformCamera(sensorId)
+        this.commitCamera()
+      }
       this._camera.lookAt(this._target)
     }
 
@@ -804,6 +875,28 @@ class Viewer3D extends DrawableViewer<Props> {
         this.forceUpdate()
       }
     }
+  }
+
+  /**
+   * Transform points with sensor extrinsics
+   *
+   * @param sensorId
+   */
+  private transformCamera(sensorId: number): void {
+    const sensorType = this.state.task.sensors[sensorId]
+    const sensor = Sensor.fromSensorType(sensorType)
+    const mainSensor = getMainSensor(this.state)
+
+    this._target.copy(
+      mainSensor.inverseTransform(sensor.transform(this._target))
+    )
+    this._camera.position.copy(
+      mainSensor.inverseTransform(sensor.transform(this._camera.position))
+    )
+    this._camera.up.copy(
+      mainSensor.inverseTransform(sensor.transform(this._camera.up))
+    )
+    this.cameraTransformed = true
   }
 
   /**
@@ -883,11 +976,13 @@ class Viewer3D extends DrawableViewer<Props> {
       this._camera.position.z
     )
 
-    offset.sub(target)
+    const sensor = getMainSensor(this.state)
+    const up = sensor.up
 
+    offset.sub(target)
     // Rotate so that positive y-axis is vertical
     const rotVertQuat = new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, 1),
+      up,
       new THREE.Vector3(0, 1, 0)
     )
     offset.applyQuaternion(rotVertQuat)
@@ -920,6 +1015,7 @@ class Viewer3D extends DrawableViewer<Props> {
 
     this._camera.position.copy(offset)
     this._camera.lookAt(this._target)
+    this._camera.up.copy(up)
   }
 
   /**
@@ -999,9 +1095,9 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveForward(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
+        this._viewerConfig as PointCloudViewerConfigType,
+        this.state
       )
-      forward.z = 0
       this._camera.position.add(forward)
       this._target.add(forward)
       Session.label3dList.onDrawableUpdate()
@@ -1012,9 +1108,9 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveBackward(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
+        this._viewerConfig as PointCloudViewerConfigType,
+        this.state
       )
-      forward.z = 0
       this._camera.position.sub(forward)
       this._target.sub(forward)
       Session.label3dList.onDrawableUpdate()
@@ -1025,12 +1121,10 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveLeft(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
-      )
-      const left = calculateLeft(
         this._viewerConfig as PointCloudViewerConfigType,
-        forward
+        this.state
       )
+      const left = calculateLeft(forward, this.state)
       this._camera.position.add(left)
       this._target.add(left)
       Session.label3dList.onDrawableUpdate()
@@ -1041,12 +1135,10 @@ class Viewer3D extends DrawableViewer<Props> {
   private moveRight(): void {
     if (this._viewerConfig !== undefined) {
       const forward = calculateForward(
-        this._viewerConfig as PointCloudViewerConfigType
-      )
-      const left = calculateLeft(
         this._viewerConfig as PointCloudViewerConfigType,
-        forward
+        this.state
       )
+      const left = calculateLeft(forward, this.state)
       this._camera.position.sub(left)
       this._target.sub(left)
       Session.label3dList.onDrawableUpdate()
@@ -1058,7 +1150,8 @@ class Viewer3D extends DrawableViewer<Props> {
     const newConfig = {
       ...(this._viewerConfig as PointCloudViewerConfigType),
       position: new Vector3D().fromThree(this._camera.position).toState(),
-      target: new Vector3D().fromThree(this._target).toState()
+      target: new Vector3D().fromThree(this._target).toState(),
+      cameraTransformed: this.cameraTransformed
     }
     Session.dispatch(changeViewerConfig(this._viewerId, newConfig))
   }

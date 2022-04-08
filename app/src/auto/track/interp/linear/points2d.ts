@@ -53,7 +53,6 @@ function linearInterpPoints(
       shape[j].y = diffs[j].y * dist + first[j].y
     }
     newShapes[i] = shape
-    // Console.log(shape, diffs, first)
   }
   return newShapes
 }

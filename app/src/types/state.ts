@@ -179,6 +179,12 @@ export interface IndexedShapeType {
   shape: ShapeType
 }
 
+export enum ColorSchemeType {
+  IMAGE = "image",
+  DEPTH = "depth",
+  HEIGHT = "height"
+}
+
 export interface ViewerConfigType {
   /** string indicating type */
   type: string
@@ -223,11 +229,17 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   lockStatus: number
   /** Camera rotation direction */
   cameraRotateDir?: boolean
+  /** Color scheme for the point cloud */
+  colorScheme: ColorSchemeType
+  /** Has the camera been transformed */
+  cameraTransformed: boolean
 }
 
 export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+  /** whether to overlay point cloud */
+  pointCloudOverlay: boolean
   /** Viewing direction */
   target: Vector3Type
   /** Up direction of the camera */
