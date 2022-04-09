@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ROOT=0
+ROOT=1
 DIR=$(cd "$(dirname "${BASH_SOURCE:-$0}")"; pwd)
 PARENT_DIR=$(dirname ${DIR})
 LINE=$(printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' |tr ' ' '-')
@@ -17,24 +17,24 @@ function Help()
 {
     # Display Help
     title "SYNOPSIS"
-    echo "    ${SCRIPT_NAME} [-h] args ..."
+    echo "    ${SCRIPT_NAME} [-u] args ..."
     echo ""
     title "DESCRIPTION"
     echo "    Scalabel setup script for Ubuntu"
     echo ""
     title "OPTIONS"
     echo "    -h, --help                    Print this help"
-    echo "    -r, --root                    Run as root"
+    echo "    -u, --user                    Run as user"
     echo ""
 }
 
-while getopts ":h" option; do
+while getopts "hu" option; do
     case $option in
         h) # display Help
             Help
             exit;;
-        r) # run as root
-            ROOT=1;;
+        u) # run as user
+            ROOT=0;;
     esac
 done
 
