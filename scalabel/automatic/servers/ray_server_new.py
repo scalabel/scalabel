@@ -9,6 +9,7 @@ import json
 import time
 import torch
 import torch.multiprocessing as mp
+from codetiming import Timer
 
 import ray
 from ray import serve
@@ -23,24 +24,35 @@ import scalabel.automatic.consts.redis_consts as RedisConsts
 import scalabel.automatic.consts.query_consts as QueryConsts
 from scalabel.automatic.consts import ModelStatus
 
-from scalabel.automatic.model_repo import add_general_config, add_polyrnnpp_config, add_dd3d_config
+from scalabel.automatic.model_repo import (
+    add_general_config,
+    add_polyrnnpp_config,
+    add_dd3d_config,
+)
 
-ray.init()
-serve.start(http_options={"port": 8001})
+ray.init(num_cpus=4, num_gpus=1)
+serve.start(http_options={"port": 8001}, detached=True)
 
 
 class RayModelServerScheduler(object):
     def __init__(self, server_config, model_registry_config, logger):
         self.logger = logger
+        self.timer = Timer(name="RayModelServerScheduler")
 
         self.server_config = server_config
         self.model_registry_config = model_registry_config
 
-        self.redis = redis.Redis(host=server_config["redis_host"], port=server_config["redis_port"])
+        self.redis = redis.Redis(
+            host=server_config["redis_host"], port=server_config["redis_port"]
+        )
 
-        self.model_register_channel = RedisConsts.REDIS_CHANNELS["modelRegister"]
+        self.model_register_channel = RedisConsts.REDIS_CHANNELS[
+            "modelRegister"
+        ]
         self.model_request_channel = RedisConsts.REDIS_CHANNELS["modelRequest"]
-        self.model_response_channel = RedisConsts.REDIS_CHANNELS["modelResponse"]
+        self.model_response_channel = RedisConsts.REDIS_CHANNELS[
+            "modelResponse"
+        ]
         self.model_status_channel = RedisConsts.REDIS_CHANNELS["modelStatus"]
         self.model_notify_channel = RedisConsts.REDIS_CHANNELS["modelNotify"]
 
@@ -62,7 +74,9 @@ class RayModelServerScheduler(object):
     # get task names in redis
     @property
     def redis_task_names(self):
-        return list(map(lambda x: x.decode(), self.redis.smembers("ModelServerTasks")))
+        return list(
+            map(lambda x: x.decode(), self.redis.smembers("ModelServerTasks"))
+        )
 
     def get_task_config(self, task_name):
         if task_name in self.task_configs:
@@ -74,7 +88,8 @@ class RayModelServerScheduler(object):
     def restore(self):
         for task_name in self.redis_task_names:
             if (
-                task_name in ["a-poly-31_000000", "test-bot_0", "test-bot-dd3d_0"]
+                task_name
+                in ["a-poly-31_000000", "test-bot_0", "test-bot-dd3d_0"]
                 or task_name.startswith("bot3d-")
                 or task_name.startswith("bot3d-bdd_")
             ):
@@ -95,8 +110,12 @@ class RayModelServerScheduler(object):
             self.task_configs[task_name] = task_config
 
             model_request_channel = self.model_request_channel % task_name
-            self.logger.info(f"Setting up handler for channel {model_request_channel}")
-            self.setup_handler_for_channel(model_request_channel, self.request_handler)
+            self.logger.info(
+                f"Setting up handler for channel {model_request_channel}"
+            )
+            self.setup_handler_for_channel(
+                model_request_channel, self.request_handler
+            )
 
             # send notification message to let them know the model is ready
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
@@ -153,8 +172,12 @@ class RayModelServerScheduler(object):
         torch.save(task_images, task_config["image_dir"])
 
     def listen(self):
-        self.setup_handler_for_channel(self.model_register_channel, self.register_handler)
-        self.setup_handler_for_channel(self.model_status_channel, self.status_handler)
+        self.setup_handler_for_channel(
+            self.model_register_channel, self.register_handler
+        )
+        self.setup_handler_for_channel(
+            self.model_status_channel, self.status_handler
+        )
 
     def register_handler(self, register_message):
         # decode message (do we need to put all the decode process to another file to keep here cleaner?)
@@ -168,7 +191,9 @@ class RayModelServerScheduler(object):
 
         self.register_task(task_type, project_name, task_id, item_list)
 
-        self.logger.info(f"Set up model inference for {project_name}: {task_id}.")
+        self.logger.info(
+            f"Set up model inference for {project_name}: {task_id}."
+        )
 
     def status_handler(self, status_message):
         # decode message
@@ -197,7 +222,9 @@ class RayModelServerScheduler(object):
                 self.logger.info(f"{task_name} reset to active.")
             else:
                 model.idle.remote()
-                self.logger.info(f"{task_name} recevied no action for a period. Set to idle.")
+                self.logger.info(
+                    f"{task_name} recevied no action for a period. Set to idle."
+                )
 
         if active:
             self.redis.publish(model_notify_channel, ModelStatus.READY.value)
@@ -230,6 +257,11 @@ class RayModelServerScheduler(object):
             task_config = self.task_configs[task_name]
             task_images = self.task_images[task_name]
             inputs = [task_images[item["url"]] for item in items][0]
+            self.logger.debug(f"Task ID: {task_name}")
+            self.logger.debug(f"Task Name: {task_name}")
+            self.logger.debug(f"Task Config: {task_config}")
+            self.logger.debug(f"Task Images: {task_images}")
+            self.logger.debug(f"Inputs: {inputs}")
 
             # for polygon annotation
             if task_config["task_type"] == "polygon2d":
@@ -237,7 +269,9 @@ class RayModelServerScheduler(object):
                 inputs["bbox"] = None
                 if items[0]["labels"][0]["box2d"] is not None:
                     box = items[0]["labels"][0]["box2d"]
-                    inputs.update({"bbox": [box["x1"], box["y1"], box["x2"], box["y2"]]})
+                    inputs.update(
+                        {"bbox": [box["x1"], box["y1"], box["x2"], box["y2"]]}
+                    )
 
             # for box3d annotation
             if task_config["task_type"] == "box3d":
@@ -245,15 +279,26 @@ class RayModelServerScheduler(object):
                     intrinsics = items[0]["intrinsics"]
                     intrinsics_tensor = torch.tensor(
                         [
-                            [intrinsics["focal"][0], 0.0, intrinsics["center"][0]],
-                            [0.0, intrinsics["focal"][1], intrinsics["center"][1]],
+                            [
+                                intrinsics["focal"][0],
+                                0.0,
+                                intrinsics["center"][0],
+                            ],
+                            [
+                                0.0,
+                                intrinsics["focal"][1],
+                                intrinsics["center"][1],
+                            ],
                             [0.0, 0.0, 1.0],
                         ]
                     )
                     inputs.update({"intrinsics": intrinsics_tensor})
 
+            self.timer.start()
             model = self.task_models[task_name]
             model.remote(inputs, request_data, request_type)
+            self.timer.stop()
+            self.logger.info(f"Time: {self.timer.last}")
 
     def register_task(self, task_type, project_name, task_id, item_list):
         # register task
@@ -289,20 +334,28 @@ class RayModelServerScheduler(object):
 
             model_registry_config = self.model_registry_config[task_type]
 
-            model_name = model_registry_config["models"][model_registry_config["defaults"]["model"]]
+            model_name = model_registry_config["models"][
+                model_registry_config["defaults"]["model"]
+            ]
             deploy_config = model_registry_config["defaults"]["deploy_config"]
 
-            self.initialize(task_type, task_name, model_name, deploy_config, item_list)
+            self.initialize(
+                task_type, task_name, model_name, deploy_config, item_list
+            )
 
             self.save(task_name)
             self.redis.sadd("ModelServerTasks", task_name)
 
         model_request_channel = self.model_request_channel % task_name
-        self.setup_handler_for_channel(model_request_channel, self.request_handler)
+        self.setup_handler_for_channel(
+            model_request_channel, self.request_handler
+        )
 
         self.redis.publish(model_notify_channel, ModelStatus.READY.value)
 
-    def initialize(self, task_type, task_name, model_name, deploy_config, item_list):
+    def initialize(
+        self, task_type, task_name, model_name, deploy_config, item_list
+    ):
         cfg = get_cfg()
         add_general_config(cfg)
         if task_type == "box2d":
@@ -341,7 +394,9 @@ class RayModelServerScheduler(object):
         self.task_models[task_name] = deploy_model
 
         # TODO: change this to multi-processing
-        self.task_images[task_name] = ray.get(deploy_model.load_inputs.remote(item_list))
+        self.task_images[task_name] = ray.get(
+            deploy_model.load_inputs.remote(item_list)
+        )
 
     def close(self, tash_name):
         self.threads[tash_name].stop()
@@ -359,7 +414,10 @@ def launch() -> None:
     # logger.addHandler(fh)
 
     # scheduler config
-    server_config = {"redis_host": RedisConsts.REDIS_HOST, "redis_port": RedisConsts.REDIS_PORT}
+    server_config = {
+        "redis_host": RedisConsts.REDIS_HOST,
+        "redis_port": RedisConsts.REDIS_PORT,
+    }
     model_registry_config = {
         "tasks": ["box2d", "polygon2d", "Mask"],
         "box2d": {
@@ -379,17 +437,29 @@ def launch() -> None:
             },
         },
         "polygon2d": {
-            "models": {"POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"},
-            "defaults": {"model": "POLYRNN-PP", "deploy_config": {"num_replicas": 1}},
+            "models": {
+                "POLYRNN-PP": "scalabel/automatic/model_repo/configs/polyrnn_pp/polyrnn_pp.yaml"
+            },
+            "defaults": {
+                "model": "POLYRNN-PP",
+                "deploy_config": {"num_replicas": 1},
+            },
         },
         "box3d": {
-            "models": {"DD3D": "scalabel/automatic/model_repo/configs/dd3d/dd3d.yaml"},
-            "defaults": {"model": "DD3D", "deploy_config": {"num_replicas": 1}},
+            "models": {
+                "DD3D": "scalabel/automatic/model_repo/configs/dd3d/dd3d.yaml"
+            },
+            "defaults": {
+                "model": "DD3D",
+                "deploy_config": {"num_replicas": 1},
+            },
         },
     }
 
     # create scheduler
-    scheduler = RayModelServerScheduler(server_config, model_registry_config, logger)
+    scheduler = RayModelServerScheduler(
+        server_config, model_registry_config, logger
+    )
     scheduler.listen()
 
 
