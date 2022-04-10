@@ -58,15 +58,10 @@ COLORMAP = OrderedDict(
 )
 
 
-def createFiles(num):
-    files = []
-    for i in range(num):
-        files.append(
-            "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/000000000{}.png".format(
-                i
-            )
-        )
-    return files
+def get_url(id):
+    return "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/000000000{}.png".format(
+        id
+    )
 
 
 @serve.deployment(
@@ -75,7 +70,7 @@ def createFiles(num):
     #     "max_replicas": 5,
     #     "target_num_ongoing_requests_per_replica": 10,
     # },
-    ray_actor_options={"num_cpus": 4, "num_gpus": 1},
+    ray_actor_options={"num_cpus": 16, "num_gpus": 2},
     version="v2",
 )
 class RayModel(object):
@@ -232,7 +227,7 @@ class RayModel(object):
         # print("filtered", filtered)
         # print("Output", result)
 
-    def load_inputs(self):
+    def load_inputs(self, id):
         intrinsics = (
             torch.tensor(
                 [
@@ -245,41 +240,40 @@ class RayModel(object):
             .numpy()
         )
 
-        single_input = []
-        batched_inputs = []
-        num = 10
-        files = createFiles(num)
-        for image_url in files:
-            # "/Users/elrich/code/eth/scalabel/local-data/items/kitti/tracking/training/image_02/0001/000000.png"
-            # image_path = "/home/cwlroda/projects/scalabel/local-data/items/kitti/image_02/0000000001.png"
-            # image_path = os.path.join(dir_path, "../../../0000000019.png")
-            urllib.request.urlretrieve(image_url, "img.png")
-            image = Image.open("img.png")
-            image_tensor = TF.to_tensor(image)
+        inputs = []
+        image_url = get_url(id)
+        # "/Users/elrich/code/eth/scalabel/local-data/items/kitti/tracking/training/image_02/0001/000000.png"
+        # image_path = "/home/cwlroda/projects/scalabel/local-data/items/kitti/image_02/0000000001.png"
+        # image_path = os.path.join(dir_path, "../../../0000000019.png")
+        urllib.request.urlretrieve(image_url, "img.png")
+        image = Image.open("img.png")
+        image_tensor = TF.to_tensor(image)
 
-            if single_input == []:
-                single_input.append(
-                    {
-                        "image": image_tensor,
-                        "intrinsics": torch.tensor(intrinsics.tolist()),
-                    }
-                )
+        inputs.append(
+            {
+                "image": image_tensor,
+                "intrinsics": torch.tensor(intrinsics.tolist()),
+            }
+        )
 
-            batched_inputs.append(
-                {
-                    "image": image_tensor,
-                    "intrinsics": torch.tensor(intrinsics.tolist()),
-                }
-            )
+        return inputs
 
-        return batched_inputs
+
+def predict(models):
+    for id, model in models:
+        inputs = ray.get(model.load_inputs.remote(id))
+        model.remote(inputs)
 
 
 def launch():
-    RayModel.options(name="test").deploy()
-    deploy_model = serve.get_deployment("test").get_handle()
-    inputs = ray.get(deploy_model.load_inputs.remote())
-    deploy_model.remote(inputs)
+    nodes = 4
+    models = []
+
+    for node in range(nodes):
+        RayModel.options(name=str(node)).deploy()
+        models.append((str(node), serve.get_deployment(str(node)).get_handle()))
+
+    predict(models)
 
 
 if __name__ == "__main__":
