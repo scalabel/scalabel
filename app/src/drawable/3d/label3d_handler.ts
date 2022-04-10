@@ -466,6 +466,9 @@ export class Label3DHandler {
         }
       }
       case Key.ESCAPE:
+        Session.dispatch(
+          selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
+        )
         if (state.session.info3D.isBoxSpan) {
           Session.dispatch(resetSpan())
         }
