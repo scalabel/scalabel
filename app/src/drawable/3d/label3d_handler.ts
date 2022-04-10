@@ -134,6 +134,9 @@ export class Label3DHandler {
       selectLabel !== null &&
       selectedLabel?.label.type === LabelTypeName.PLANE_3D
     ) {
+      // Add to hist shapes for undo
+      const shape = Session.label3dList.getCurrentShape()
+      Session.label3dList.addShapeToHistShapes(shape)
       const planeLabel = selectedLabel as Plane3D
       // Get interception with plane
       const plane = new THREE.Plane()
