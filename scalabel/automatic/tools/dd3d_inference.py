@@ -10,7 +10,7 @@ import json
 from scalabel.profiling.profile import profile
 
 from codetiming import Timer
-
+from multiprocessing import Pool
 
 from detectron2.modeling import META_ARCH_REGISTRY
 from detectron2.config import get_cfg, CfgNode
@@ -57,47 +57,31 @@ COLORMAP = OrderedDict(
     }
 )
 
+def get_file_path(id):
+    return "./local-data/items/synscapes/img/rgb/{}.png".format(id)
 
 def get_url(id):
-    return "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/image_02/000000000{}.png".format(
+    return "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/synscapes/img/rgb/{}.png".format(
         id
     )
 
 
 @serve.deployment(
-    # _autoscaling_config={
-    #     "min_replicas": 1,
-    #     "max_replicas": 5,
-    #     "target_num_ongoing_requests_per_replica": 10,
-    # },
-    ray_actor_options={"num_cpus": 16, "num_gpus": 2},
+    _autoscaling_config={
+        "min_replicas": 1,
+        "max_replicas": 8,
+        "target_num_ongoing_requests_per_replica": 5,
+    },
+    # num_replicas=4,
+    ray_actor_options={"num_cpus": 4, "num_gpus": 0.125},
     version="v2",
 )
 class RayModel(object):
     def __init__(self):
         self.timer = Timer(name="dd3d_inference")
-        cfg = get_cfg()
-        add_general_config(cfg)
-        add_dd3d_config(cfg)
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        file_path = os.path.join(
-            dir_path, "../model_repo/configs/dd3d/dd3d.yaml"
-        )
-        # print("file_path:", file_path)
-        cfg.merge_from_file(file_path)
-
-        cfg.TASK_TYPE = "box3d"
-        cfg.MODEL.WEIGHTS = os.path.join(
-            dir_path, "../../..", cfg.MODEL.WEIGHTS
-        )
-        cfg.MODEL.CKPT = os.path.join(dir_path, "../../..", cfg.MODEL.CKPT)
-        # print("weights", cfg.MODEL)
-
         self.timer.start()
-        self.model = build_model(cfg)
-        checkpointer = DetectionCheckpointer(self.model, save_to_disk=True)
-        checkpointer.load(cfg.MODEL.WEIGHTS)
-        self.model.cuda().eval()
+        self.load_config()
+        self.load_model()
         print(f"Model init:")
         self.timer.stop()
 
@@ -227,6 +211,33 @@ class RayModel(object):
         # print("filtered", filtered)
         # print("Output", result)
 
+    def load_config(self):
+        self.cfg = get_cfg()
+        add_general_config(self.cfg)
+        add_dd3d_config(self.cfg)
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(
+            dir_path, "../model_repo/configs/dd3d/dd3d.yaml"
+        )
+        # print("file_path:", file_path)
+        self.cfg.merge_from_file(file_path)
+
+        self.cfg.TASK_TYPE = "box3d"
+        self.cfg.MODEL.WEIGHTS = os.path.join(
+            dir_path, "../../..", self.cfg.MODEL.WEIGHTS
+        )
+        self.cfg.MODEL.CKPT = os.path.join(
+            dir_path, "../../..", self.cfg.MODEL.CKPT
+        )
+        # print("weights", cfg.MODEL)
+
+    def load_model(self):
+        # print(torch.cuda.is_available())
+        self.model = build_model(self.cfg)
+        checkpointer = DetectionCheckpointer(self.model, save_to_disk=True)
+        checkpointer.load(self.cfg.MODEL.WEIGHTS)
+        self.model.cuda().eval()
+
     def load_inputs(self, id):
         intrinsics = (
             torch.tensor(
@@ -241,20 +252,21 @@ class RayModel(object):
         )
 
         inputs = []
-        image_url = get_url(id)
-        # "/Users/elrich/code/eth/scalabel/local-data/items/kitti/tracking/training/image_02/0001/000000.png"
-        # image_path = "/home/cwlroda/projects/scalabel/local-data/items/kitti/image_02/0000000001.png"
-        # image_path = os.path.join(dir_path, "../../../0000000019.png")
-        urllib.request.urlretrieve(image_url, "img.png")
-        image = Image.open("img.png")
-        image_tensor = TF.to_tensor(image)
 
-        inputs.append(
-            {
-                "image": image_tensor,
-                "intrinsics": torch.tensor(intrinsics.tolist()),
-            }
-        )
+        for i in range(1, int(id)):
+            image_path = get_file_path(i)
+            image = Image.open(image_path)
+            # image_url = get_url(i)
+            # urllib.request.urlretrieve(image_url, "img.png")
+            # image = Image.open("img.png")
+            image_tensor = TF.to_tensor(image)
+
+            inputs.append(
+                {
+                    "image": image_tensor,
+                    "intrinsics": torch.tensor(intrinsics.tolist()),
+                }
+            )
 
         return inputs
 
@@ -265,13 +277,16 @@ def predict(models):
         model.remote(inputs)
 
 
+# TODO: try to change the number of replicas
 def launch():
-    nodes = 4
+    nodes = 30
     models = []
 
-    for node in range(nodes):
-        RayModel.options(name=str(node)).deploy()
-        models.append((str(node), serve.get_deployment(str(node)).get_handle()))
+    for node in range(1):
+        RayModel.options(name=str(nodes)).deploy()
+        models.append(
+            (str(nodes), serve.get_deployment(str(nodes)).get_handle())
+        )
 
     predict(models)
 
@@ -291,7 +306,7 @@ if __name__ == "__main__":
     #     ),
     # ) as p:
 
-    ray.init(num_cpus=64, num_gpus=8)
+    ray.init()
     serve.start(http_options={"port": 8001}, detached=False)
     # print("Running with CPU")
     # run("cpu")

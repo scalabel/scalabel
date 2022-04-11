@@ -30,7 +30,7 @@ from scalabel.automatic.model_repo import (
     add_dd3d_config,
 )
 
-ray.init(num_cpus=4, num_gpus=1)
+ray.init(num_cpus=8, num_gpus=2)
 serve.start(http_options={"port": 8001}, detached=True)
 
 

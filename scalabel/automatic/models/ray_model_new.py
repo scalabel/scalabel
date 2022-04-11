@@ -86,7 +86,7 @@ class RayModel(object):
         self.cfg = cfg.clone()
         self.model = build_model(cfg)
 
-        checkpointer = DetectionCheckpointer(self.model, save_to_disk=True)
+        checkpointer = DetectionCheckpointer(self.model, save_to_disk=True, save_dir="./ckpt")
         checkpointer.load(cfg.MODEL.WEIGHTS)
         self.model.cuda().eval()
 
