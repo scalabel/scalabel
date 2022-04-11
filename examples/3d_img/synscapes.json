@@ -1,0 +1,76 @@
+{
+  "frames": [
+    {
+      "name": "img_001",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/1.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_002",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/2.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_003",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/3.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_004",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/4.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_005",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/5.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_006",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/6.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_007",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/7.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_008",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/8.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    },
+    {
+      "name": "img_009",
+      "url": "s3://scalabel-public/demo/synscapes/img/rgb/9.png",
+      "intrinsics": {
+        "focal": [1590.83437, 1592.79032],
+        "center": [771.31406, 360.79945]
+      }
+    }
+  ]
+}
