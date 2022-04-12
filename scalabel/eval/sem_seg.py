@@ -69,8 +69,9 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return np.bincount(
-        size * groundtruth[k].astype(int) + prediction[k], minlength=size**2
+    return np.bincount(  # type: ignore
+        size * groundtruth[k].astype(int) + prediction[k],
+        minlength=size**2,
     ).reshape(size, size)
 
 
@@ -115,7 +116,8 @@ def frame_to_mask(
     """Convert list of labels to a mask."""
     if image_size is not None:
         out_mask: NDArrayU8 = (
-            np.ones((image_size.height, image_size.width)) * ignore_label
+            np.ones((image_size.height, image_size.width))
+            * ignore_label  # type: ignore
         ).astype(np.uint8)
     else:
         out_mask = np.zeros((0), dtype=np.uint8)
