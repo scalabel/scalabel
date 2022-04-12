@@ -20,6 +20,7 @@ import PointCloudOverlayCanvas from "./point_cloud_overlay_canvas"
 import { changeViewerConfig } from "../action/common"
 import { Sensor } from "../common/sensor"
 import { getMainSensor } from "../common/util"
+import Tag3dCanvas from "./tag_3d_canvas"
 
 /**
  * Viewer for 3d labels on images
@@ -126,6 +127,15 @@ class Image3DViewer extends Viewer2D {
       views.push(
         <Label3dCanvas
           key={`label3dCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+          camera={this._camera}
+        />
+      )
+
+      views.push(
+        <Tag3dCanvas
+          key={`tag3dCanvas${this.props.id}`}
           display={this._container}
           id={this.props.id}
           camera={this._camera}

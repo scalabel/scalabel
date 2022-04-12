@@ -266,4 +266,18 @@ export class Plane3D extends Label3D {
   public set visible(v: boolean) {
     this._shape.lines.visible = v
   }
+
+  /**
+   * copy the label
+   *
+   * @param shape
+   */
+  public setShape(shape: ShapeType): void {
+    if (shape.id !== this._shape.shapeId) {
+      this.labelList.clearHistShapes()
+      return
+    }
+    super.setShape(shape)
+    this._shape.updateState(shape, this._shape.shapeId)
+  }
 }

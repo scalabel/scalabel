@@ -42,6 +42,7 @@ import {
   estimateGroundPlane
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
+import { projectionFromNDC } from "../../view_config/point_cloud"
 
 /**
  * Handles user interactions with labels
@@ -120,13 +121,44 @@ export class Label3DHandler {
   }
 
   /**
-   * Handle double click, select label for editing
+   * Handle double click, select label for editing. Move ground plane if highlighted.
    *
+   * @param x
+   * @param y
    * @returns true if consumed, false otherwise
    */
-  public onDoubleClick(): boolean {
-    this.selectHighlighted()
-    return this._highlightedLabel !== null
+  public onDoubleClick(x: number, y: number): boolean {
+    const selectedLabel = Session.label3dList.selectedLabel
+    if (
+      this._highlightedLabel === null &&
+      selectLabel !== null &&
+      selectedLabel?.label.type === LabelTypeName.PLANE_3D
+    ) {
+      // Add to hist shapes for undo
+      const shape = Session.label3dList.getCurrentShape()
+      Session.label3dList.addShapeToHistShapes(shape)
+      const planeLabel = selectedLabel as Plane3D
+      // Get interception with plane
+      const plane = new THREE.Plane()
+      const normal = new THREE.Vector3(0, 0, 1)
+      normal.applyQuaternion(planeLabel.orientation)
+      plane.setFromNormalAndCoplanarPoint(normal, planeLabel.center)
+
+      const projection = projectionFromNDC(x, y, this._camera)
+      const point3d = new THREE.Vector3()
+      projection.intersectPlane(plane, point3d)
+      // Move plane center
+      planeLabel.move(point3d)
+
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+      return true
+    } else {
+      this.selectHighlighted()
+      return this._highlightedLabel !== null
+    }
   }
 
   /**
@@ -320,20 +352,28 @@ export class Label3DHandler {
   }
 
   /**
-   * Toggle showing ground plane. If no ground plane, create one.
+   * Toggle selecting ground plane.
    */
   private toggleGroundPlane(): void {
     const groundPlane = Session.label3dList.getItemGroundPlane(
       this._selectedItemIndex
     )
     if (groundPlane !== null) {
-      if (groundPlane.visible) {
-        groundPlane.visible = false
+      groundPlane.visible = true
+      const selectedLabel = Session.label3dList.selectedLabel
+      const groundPlaneSelected = selectedLabel?.labelId === groundPlane.labelId
+      if (groundPlaneSelected) {
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
       } else {
-        groundPlane.visible = true
+        Session.dispatch(
+          selectLabel(
+            Session.label3dList.selectedLabelIds,
+            this._selectedItemIndex,
+            groundPlane.labelId
+          )
+        )
       }
     } else {
       const center = new Vector3D(0, 1.5, 10)
@@ -426,6 +466,9 @@ export class Label3DHandler {
         }
       }
       case Key.ESCAPE:
+        Session.dispatch(
+          selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
+        )
         if (state.session.info3D.isBoxSpan) {
           Session.dispatch(resetSpan())
         }

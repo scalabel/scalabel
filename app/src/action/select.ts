@@ -165,9 +165,9 @@ export function changeSelectedLabelsCategories(
 ): actionTypes.ChangeLabelsAction {
   const select = state.user.select
   const labelIds = Object.values(select.labels)
+  const selectedItem = state.task.items[select.item]
   let duplicatedCategories = []
   // Tracking: changes the category for the entire lifespan
-  const selectedItem = state.task.items[select.item]
   if (selectedItem.labels[labelIds[0][0]].track !== "") {
     const labelsInTracks: { [key: number]: string[] } = {}
     for (const labelId of labelIds[0]) {
