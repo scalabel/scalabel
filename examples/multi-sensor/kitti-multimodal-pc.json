@@ -1,0 +1,486 @@
+{
+    "frames": [
+        {
+            "name": "image_2/000000",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/image_02/0001/000000.png",
+            "timestamp": 6446,
+            "frameIndex": 12
+        },
+        {
+            "name": "image_3/000000",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/image_03/0001/000000.png",
+            "timestamp": 6446,
+            "frameIndex": 12
+        },
+        {
+            "name": "velodyne/000000",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/velodyne/0001/000000.ply",
+            "labels": [
+                {
+                    "id": "0",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0121546080084074,
+                        "orientation": [
+                            0.0,
+                            -1.581246476885404,
+                            0.0
+                        ],
+                        "location": [
+                            6.62968315803448,
+                            -2.9145132180390307,
+                            -0.792596139020572
+                        ],
+                        "dimension": [
+                            1.50992,
+                            1.85,
+                            4.930564
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "1",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0719856942953916,
+                        "orientation": [
+                            0.0,
+                            -1.5812464768854033,
+                            0.0
+                        ],
+                        "location": [
+                            13.451310193258053,
+                            -2.9858584205681824,
+                            -0.7966661260205227
+                        ],
+                        "dimension": [
+                            1.404795,
+                            1.612032,
+                            3.772344
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "2",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0914375078453213,
+                        "orientation": [
+                            0.0,
+                            -1.5812391258348413,
+                            0.0
+                        ],
+                        "location": [
+                            19.58069506801584,
+                            -2.898267422600131,
+                            -0.7780043835124977
+                        ],
+                        "dimension": [
+                            1.413269,
+                            1.567278,
+                            3.158158
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "3",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.06040021219992786,
+                        "orientation": [
+                            0.0,
+                            1.560348218332545,
+                            0.0
+                        ],
+                        "location": [
+                            23.998072500502502,
+                            6.053848681676927,
+                            -1.1997522520870036
+                        ],
+                        "dimension": [
+                            1.527328,
+                            1.555003,
+                            3.57675
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "4",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.03836837411230243,
+                        "orientation": [
+                            0.0,
+                            1.5603450221206758,
+                            0.0
+                        ],
+                        "location": [
+                            46.774255803505994,
+                            6.332788150694729,
+                            -1.3061394836394653
+                        ],
+                        "dimension": [
+                            1.417371,
+                            1.540476,
+                            3.504344
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "5",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.115473367883996,
+                        "orientation": [
+                            0.0,
+                            -1.5812466501947513,
+                            0.0
+                        ],
+                        "location": [
+                            50.28708040819399,
+                            -2.8055073719065082,
+                            -0.7880108583051622
+                        ],
+                        "dimension": [
+                            1.512623,
+                            1.746309,
+                            3.775171
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "6",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.03411019534259596,
+                        "orientation": [
+                            0.0,
+                            1.5603477647231263,
+                            0.0
+                        ],
+                        "location": [
+                            52.35382600282144,
+                            6.308441791377657,
+                            -1.2390082688807733
+                        ],
+                        "dimension": [
+                            1.360295,
+                            1.513462,
+                            4.017021
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                }
+            ]
+        }
+    ],
+    "frameGroups": [
+        {
+            "name": "000",
+            "url": null,
+            "videoName": null,
+            "intrinsics": null,
+            "extrinsics": {
+                "location": [
+                    -0.7956064878711493,
+                    0.06994663796442704,
+                    0.07554082295382114
+                ],
+                "rotation": [
+                    0.06168062793771913,
+                    0.01200528651139976,
+                    -0.26920656196175347
+                ]
+            },
+            "attributes": {
+                "town": "05",
+                "sun_altitude_angle": "60",
+                "weather_preset": "clear",
+                "cloudiness": "5.0",
+                "precipitation": "0.0",
+                "precipitation_deposits": "0.0",
+                "wind_intensity": "10.0",
+                "sun_azimuth_angle": "0.0",
+                "fog_density": "1.0",
+                "fog_distance": "0.75",
+                "wetness": "0.0",
+                "fog_falloff": "0.1"
+            },
+            "timestamp": 6446,
+            "frameIndex": 12,
+            "size": null,
+            "labels": [
+                {
+                    "id": "0",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0121546080084074,
+                        "orientation": [
+                            0.0,
+                            -1.581246476885404,
+                            0.0
+                        ],
+                        "location": [
+                            6.62968315803448,
+                            -2.9145132180390307,
+                            -0.792596139020572
+                        ],
+                        "dimension": [
+                            1.50992,
+                            1.85,
+                            4.930564
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "1",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0719856942953916,
+                        "orientation": [
+                            0.0,
+                            -1.5812464768854033,
+                            0.0
+                        ],
+                        "location": [
+                            13.451310193258053,
+                            -2.9858584205681824,
+                            -0.7966661260205227
+                        ],
+                        "dimension": [
+                            1.404795,
+                            1.612032,
+                            3.772344
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "2",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.0914375078453213,
+                        "orientation": [
+                            0.0,
+                            -1.5812391258348413,
+                            0.0
+                        ],
+                        "location": [
+                            19.58069506801584,
+                            -2.898267422600131,
+                            -0.7780043835124977
+                        ],
+                        "dimension": [
+                            1.413269,
+                            1.567278,
+                            3.158158
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "3",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.06040021219992786,
+                        "orientation": [
+                            0.0,
+                            1.560348218332545,
+                            0.0
+                        ],
+                        "location": [
+                            23.998072500502502,
+                            6.053848681676927,
+                            -1.1997522520870036
+                        ],
+                        "dimension": [
+                            1.527328,
+                            1.555003,
+                            3.57675
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "4",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.03836837411230243,
+                        "orientation": [
+                            0.0,
+                            1.5603450221206758,
+                            0.0
+                        ],
+                        "location": [
+                            46.774255803505994,
+                            6.332788150694729,
+                            -1.3061394836394653
+                        ],
+                        "dimension": [
+                            1.417371,
+                            1.540476,
+                            3.504344
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "5",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 3.115473367883996,
+                        "orientation": [
+                            0.0,
+                            -1.5812466501947513,
+                            0.0
+                        ],
+                        "location": [
+                            50.28708040819399,
+                            -2.8055073719065082,
+                            -0.7880108583051622
+                        ],
+                        "dimension": [
+                            1.512623,
+                            1.746309,
+                            3.775171
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                },
+                {
+                    "id": "6",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": [],
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -0.03411019534259596,
+                        "orientation": [
+                            0.0,
+                            1.5603477647231263,
+                            0.0
+                        ],
+                        "location": [
+                            52.35382600282144,
+                            6.308441791377657,
+                            -1.2390082688807733
+                        ],
+                        "dimension": [
+                            1.360295,
+                            1.513462,
+                            4.017021
+                        ]
+                    },
+                    "poly2d": null,
+                    "graph": null
+                }
+            ],
+            "frames": [
+                "velodyne/000000",
+                "image_2/000000",
+                "image_3/000000"
+            ]
+        }
+    ]
+}

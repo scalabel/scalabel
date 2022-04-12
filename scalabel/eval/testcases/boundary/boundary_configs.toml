@@ -3,47 +3,43 @@ height = 720
 width = 1280
 
 [[categories]]
-name = "weather"
+name = "direction"
     [[categories.subcategories]]
-    name = "rainy"
+    name = "parallel"
 
     [[categories.subcategories]]
-    name = "snowy"
-
-    [[categories.subcategories]]
-    name = "clear"
-
-    [[categories.subcategories]]
-    name = "overcast"
-
-    [[categories.subcategories]]
-    name = "undefined"
-
-    [[categories.subcategories]]
-    name = "partly cloudy"
-
-    [[categories.subcategories]]
-    name = "foggy"
+    name = "vertical"
 
 [[categories]]
-name = "scene"
+name = "style"
     [[categories.subcategories]]
-    name = "tunnel"
+    name = "solid"
 
     [[categories.subcategories]]
-    name = "residential"
+    name = "dashed"
+
+[[categories]]
+name = "category"
+    [[categories.subcategories]]
+    name = "crosswalk"
 
     [[categories.subcategories]]
-    name = "parking lot"
+    name = "double other"
 
     [[categories.subcategories]]
-    name = "undefined"
+    name = "double white"
 
     [[categories.subcategories]]
-    name = "city street"
+    name = "double yellow"
 
     [[categories.subcategories]]
-    name = "gas stations"
+    name = "road curb"
 
     [[categories.subcategories]]
-    name = "highway"
+    name = "single other"
+
+    [[categories.subcategories]]
+    name = "single white"
+
+    [[categories.subcategories]]
+    name = "single yellow"

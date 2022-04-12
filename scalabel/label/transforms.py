@@ -11,7 +11,7 @@ from pycocotools import mask as mask_utils  # type: ignore
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType, RLEType
-from .typing import RLE, Box2D, Config, Edge, ImageSize, Node, Poly2D
+from .typing import RLE, Box2D, Config, Edge, Graph, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
 
 __all__ = [
@@ -29,6 +29,7 @@ __all__ = [
     "rle_to_box2d",
     "rle_to_mask",
     "coco_rle_to_rle",
+    "graph_to_keypoints",
 ]
 
 
@@ -278,3 +279,21 @@ def nodes_to_edges(
                 )
             )
     return edges
+
+
+def graph_to_keypoints(graph: Graph) -> List[float]:
+    """Converting Graph to COCO keypoints."""
+    keypoints = []
+    for node in graph.nodes:
+        c3 = 0.0
+        if node.score is not None:
+            c3 = node.score
+        else:
+            if graph.type is not None:
+                if graph.type.startswith("Pose2D"):
+                    if node.visibility == "V":
+                        c3 = 2.0
+                    elif node.visibility == "N":
+                        c3 = 1.0
+        keypoints.extend([node.location[0], node.location[1], c3])
+    return keypoints

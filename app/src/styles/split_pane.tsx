@@ -2,7 +2,7 @@ import { StyleRules } from "@material-ui/core"
 import createStyles from "@material-ui/core/styles/createStyles"
 
 export const paneBarStyles = (): StyleRules<
-  "icon" | "viewer_container_bar" | "select" | "icon90",
+  "icon" | "viewer_container_bar" | "select" | "icon90" | "button",
   {}
 > =>
   createStyles({
@@ -28,6 +28,20 @@ export const paneBarStyles = (): StyleRules<
       color: "#ced4da",
       transform: "rotate(90deg)",
       "z-index": 1001
+    },
+    button: {
+      backgroundColor: "rgba(34, 34, 34, 1)",
+      border: "1px solid #ced4da",
+      color: "#ced4da",
+      borderRadius: 4,
+      height: "100%",
+      "z-index": 1001,
+      margin: "0px 0px 0px 20px",
+      textTransform: "none",
+      fontSize: "16px",
+      fontWeight: "normal",
+      paddingLeft: "10px",
+      paddingRight: "10px"
     }
   })
 

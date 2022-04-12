@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { ViewerConfigTypeName } from "../const/common"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { isCurrentFrameLoaded } from "../functional/state_util"
 import { makeTaskConfig } from "../functional/states"
 import { ConfigType, Image3DViewerConfigType, State } from "../types/state"
@@ -15,6 +15,7 @@ import {
   DrawableProps,
   mapStateToDrawableProps
 } from "./viewer"
+import { Plane3D } from "../drawable/3d/plane3d"
 
 const styles = (): StyleRules<"tag3d_canvas", {}> =>
   createStyles({
@@ -164,6 +165,22 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           }
         }
 
+        if (
+          label.type === LabelTypeName.PLANE_3D &&
+          (label as Plane3D).visible
+        ) {
+          // Get height under camera
+          const planeLabel = label as Plane3D
+          const normal = new THREE.Vector3(0, 0, 1)
+          normal.applyQuaternion(planeLabel.orientation)
+          const plane = new THREE.Plane()
+          plane.setFromNormalAndCoplanarPoint(normal, planeLabel.center)
+          const point3d = new THREE.Vector3()
+          plane.projectPoint(normal, point3d)
+          const heightUnderCamera = point3d.length()
+          tag = "Height under camera:" + heightUnderCamera.toFixed(2)
+        }
+
         const location = new THREE.Vector3().copy(label.center)
         location.project(this.camera)
         if (location.z > 0 && location.z < 1) {
@@ -171,6 +188,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           const y = ((-location.y + 1) * this.canvas.height) / 2
           this._context.font = "12px Verdana"
           this._context.fillStyle = "#FFFFFF"
+          this._context.textAlign = "center"
           this._context.fillText(tag, x, y)
         }
       }
