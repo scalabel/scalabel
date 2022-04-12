@@ -97,8 +97,8 @@ def predict(finetuned=False, samples=range(1, 100)):
         # cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/2cqf6zkg-20220406_141344/model_0001299.pth"
         # cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/2cqf6zkg-20220406_141344/model_0001299.pth"
         # Trained on new 10_2 dataset and cls tower unfrozen
-        cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0000499.pth"
-        cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0000499.pth"
+        cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
+        cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
         # Trained only on 674
         # cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/uuvjf98k-20220405_192229/model_0001499.pth"
         # cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/uuvjf98k-20220405_192229/model_0001499.pth"
@@ -109,12 +109,14 @@ def predict(finetuned=False, samples=range(1, 100)):
     print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
     cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH = 0.5
     cfg.DD3D.FCOS2D.INFERENCE.DO_NMS = True
+    cfg.DD3D.FCOS2D.INFERENCE.PRE_NMS_THRESH = 0.2
     # cfg.DD3D.FCOS3D.CLASS_AGNOSTIC_BOX3D = True
     print(
         "nms",
         cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH,
         cfg.DD3D.FCOS2D.INFERENCE.DO_NMS,
         cfg.DD3D.FCOS3D.CLASS_AGNOSTIC_BOX3D,
+        cfg.DD3D.FCOS2D.INFERENCE.PRE_NMS_THRESH,
     )
 
     cfg.TASK_TYPE = "box3d"
@@ -246,7 +248,8 @@ def predict(finetuned=False, samples=range(1, 100)):
 
 if __name__ == "__main__":
     # finetune_10_2 samples
-    samples = (63, 596, 736, 627, 630, 674, 869, 529, 901, 766)
+    samples = [63, 596, 736, 627, 630, 674, 869, 529, 901, 766]
+    samples.extend(list(range(1080, 1100)))
     # Add one to the samples -> this is what the datamapper did
     print("samples", samples)
     # samples = range(1, 100)
