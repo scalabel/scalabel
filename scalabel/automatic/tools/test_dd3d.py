@@ -32,6 +32,9 @@ from scalabel.automatic.models.ray_model_new import RayModel
 import os
 from PIL import Image
 import torchvision.transforms.functional as TF
+from scalabel.automatic.tools.synscapes_to_dd3d import synscapes_to_dd3d
+
+from scalabel.automatic.tools.visualize_annotations import plot_bev
 
 VALID_CLASS_NAMES = ("Car", "Pedestrian", "Cyclist", "Van", "Truck")
 
@@ -97,8 +100,11 @@ def predict(finetuned=False, samples=range(1, 100)):
         # cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/2cqf6zkg-20220406_141344/model_0001299.pth"
         # cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/2cqf6zkg-20220406_141344/model_0001299.pth"
         # Trained on new 10_2 dataset and cls tower unfrozen
-        cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
-        cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
+        # cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
+        # cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/1k18ssgc-20220407_135606/model_0001199.pth"
+        # Trained on new 100_1 dataset and cls tower unfrozen
+        cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/30is8u20-20220413_140151/model_0002999.pth"
+        cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/30is8u20-20220413_140151/model_0002999.pth"
         # Trained only on 674
         # cfg.MODEL.CKPT = "/scratch/egroenewald/code/dd3d/outputs/uuvjf98k-20220405_192229/model_0001499.pth"
         # cfg.MODEL.WEIGHTS = "/scratch/egroenewald/code/dd3d/outputs/uuvjf98k-20220405_192229/model_0001499.pth"
@@ -109,7 +115,7 @@ def predict(finetuned=False, samples=range(1, 100)):
     print("nms", cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH)
     cfg.DD3D.FCOS2D.INFERENCE.NMS_THRESH = 0.5
     cfg.DD3D.FCOS2D.INFERENCE.DO_NMS = True
-    cfg.DD3D.FCOS2D.INFERENCE.PRE_NMS_THRESH = 0.2
+    # cfg.DD3D.FCOS2D.INFERENCE.PRE_NMS_THRESH = 0.3
     # cfg.DD3D.FCOS3D.CLASS_AGNOSTIC_BOX3D = True
     print(
         "nms",
@@ -136,6 +142,7 @@ def predict(finetuned=False, samples=range(1, 100)):
     image_format = cfg.INPUT.FORMAT
     dataset_mapper = DefaultDatasetMapper(is_train, task_manager, augs, image_format)
 
+    print("Samples", samples)
     for sample_id in samples:
         print("sample_id:", sample_id)
         synscapes_path = "/scratch-second/egroenewald/synscapes/Synscapes"
@@ -225,13 +232,15 @@ def predict(finetuned=False, samples=range(1, 100)):
         extrinsics = {"tvec": [0, 0, 0], "wxyz": Quaternion().elements}
 
         vis_image = draw_boxes3d_cam(image_cv2, boxes3d.vectorize(), classes, metadata, intrinsics)
-        bev_vis, bev = draw_boxes3d_bev(boxes3d, extrinsics, classes, bev_width)
+        # bev_vis, bev = draw_boxes3d_bev(boxes3d, extrinsics, classes, bev_width)
 
         out_img_dir = "base_imgs"
+        out_bev_dir = "base_bev_imgs"
         out_label_dir = "base_labels"
         if finetuned:
             out_img_dir = "finetune_imgs"
             out_label_dir = "finetune_labels"
+            out_bev_dir = "finetune_bev_imgs"
 
         cv2.imwrite(f"{out_img_dir}/vis_image_synscapes_{sample_id}.png", vis_image)
         # cv2.imwrite(f"{out_img_dir}_bev/vis_image_synscapes_{sample_id}.png", bev_vis)
@@ -245,13 +254,19 @@ def predict(finetuned=False, samples=range(1, 100)):
         with open(f"groundtruth_labels/synscapes_gt_{sample_id}.json", "w") as file:
             json.dump(get_labels, file)
 
+        # Save BEV image
+        bev_outpath = os.path.join(out_bev_dir, f"{sample_id}.png")
+        pred_boxes = [convert_3d_box_to_kitti(box) for box in boxes3d]
+        gt_boxes = [convert_3d_box_to_kitti(box["box3d"]) for box in synscapes_to_dd3d(sample_meta)]
+        plot_bev(pred_boxes, gt_boxes, bev_outpath)
+
 
 if __name__ == "__main__":
     # finetune_10_2 samples
-    samples = [63, 596, 736, 627, 630, 674, 869, 529, 901, 766]
+    # samples = [63, 596, 736, 627, 630, 674, 869, 529, 901, 766]
+    samples = []
     samples.extend(list(range(1080, 1100)))
     # Add one to the samples -> this is what the datamapper did
-    print("samples", samples)
     # samples = range(1, 100)
     # samples = [1, 2]
     # samples = range(1080, 1100)

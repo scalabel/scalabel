@@ -3,6 +3,7 @@ import numpy as np
 from pyquaternion import Quaternion
 import os
 import shutil
+import cv2
 
 from sklearn.metrics import coverage_error
 
@@ -13,8 +14,10 @@ from scalabel.automatic.model_repo.dd3d.utils.convert import convert_3d_box_to_k
 from detectron2.data import DatasetCatalog, MetadataCatalog
 
 from scalabel.automatic.model_repo.dd3d.utils.convert import convert_3d_box_to_kitti
+from scalabel.automatic.model_repo.dd3d.utils.kitti_metadata import metadata as kitti_metadata
 from scalabel.automatic.model_repo.dd3d.utils.box3d_visualizer import draw_boxes3d_cam
 from scalabel.automatic.model_repo.dd3d.utils.visualization import float_to_uint8_color
+
 
 """
 Synscapes labels:
@@ -100,8 +103,8 @@ def synscapes_to_dd3d(metadata):
         resy = 720
         box3d = metadata["instance"]["bbox3d"][key]
         box2d = metadata["instance"]["bbox2d"][key]
+        raw_class = metadata["instance"]["class"][key]
         class_label = synscapes_to_kitti_class(metadata["instance"]["class"][key])
-        print(metadata["instance"]["class"][key])
 
         xmin = box2d["xmin"] * resx
         xmax = box2d["xmax"] * resx
@@ -135,7 +138,9 @@ def synscapes_to_dd3d(metadata):
         )
 
         box3d_dd3d = GenericBoxes3D(box_pose.quat.elements, box_pose.tvec, [width, length, height])
-        boxes.append({"box3d": box3d_dd3d, "box2d": [xmin, xmax, ymin, ymax], "class": class_label})
+        boxes.append(
+            {"box3d": box3d_dd3d, "box2d": [xmin, xmax, ymin, ymax], "class": class_label, "raw_class": raw_class}
+        )
 
     return boxes
 
@@ -174,20 +179,31 @@ if __name__ == "__main__":
         )
 
         boxes = synscapes_to_dd3d(metadata)
+        vectorized = np.array([box["box3d"].vectorize().cpu().numpy() for box in boxes]).squeeze()
+        print("vectorized", vectorized)
+        classes = [0 for box in boxes]
+        intrinsics = np.array(
+            [[1590.83437, 0.0000, 771.31406], [0.0000, 1592.79032, 360.79945], [0.0000, 0.0000, 1.0000]]
+        )
+        image_cv2 = cv2.imread(img_path)
+        vis_image = draw_boxes3d_cam(image_cv2, vectorized, classes, kitti_metadata, intrinsics)
 
-        with open(meta_outpath, "w") as f:
-            for line in meta_lines:
-                f.write(line + "\n")
+        outpath = "test.png"
+        cv2.imwrite(outpath, vis_image)
 
-        with open(labels_outpath, "w") as f:
-            for box in boxes:
-                w, l, h, x, y, z, rot_y, alpha = convert_3d_box_to_kitti(box["box3d"])
-                xmin, xmax, ymin, ymax = box["box2d"]
-                class_label = box["class"]
+        # with open(meta_outpath, "w") as f:
+        #     for line in meta_lines:
+        #         f.write(line + "\n")
 
-                line = f"{class_label} 0.00 0 {alpha} {xmin} {ymin} {xmax} {ymax} {h} {w} {l} {x} {y} {z} {rot_y}"
+        # with open(labels_outpath, "w") as f:
+        #     for box in boxes:
+        #         w, l, h, x, y, z, rot_y, alpha = convert_3d_box_to_kitti(box["box3d"])
+        #         xmin, xmax, ymin, ymax = box["box2d"]
+        #         class_label = box["class"]
 
-                print("box", line)
-                f.write(line + "\n")
+        #         line = f"{class_label} 0.00 0 {alpha} {xmin} {ymin} {xmax} {ymax} {h} {w} {l} {x} {y} {z} {rot_y}"
 
-        shutil.copyfile(img_path, img_outpath)
+        #         print("box", line)
+        #         f.write(line + "\n")
+
+        # shutil.copyfile(img_path, img_outpath)

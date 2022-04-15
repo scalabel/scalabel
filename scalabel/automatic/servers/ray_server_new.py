@@ -77,6 +77,8 @@ class RayModelServerScheduler(object):
                 task_name in ["a-poly-31_000000", "test-bot_0", "test-bot-dd3d_0"]
                 or task_name.startswith("bot3d-")
                 or task_name.startswith("bot3d-bdd_")
+                or task_name.startswith("synscapes-1080-ai")
+                or task_name.startswith("synscapes-1080-auto")
             ):
                 continue
             task_config = self.get_task_config(task_name)
@@ -305,6 +307,7 @@ class RayModelServerScheduler(object):
     def initialize(self, task_type, task_name, model_name, deploy_config, item_list):
         cfg = get_cfg()
         add_general_config(cfg)
+        self.logger.info(f"Adding config {task_type}")
         if task_type == "box2d":
             cfg.merge_from_file(model_zoo.get_config_file(model_name))
             cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
@@ -314,6 +317,7 @@ class RayModelServerScheduler(object):
             add_polyrnnpp_config(cfg)
             cfg.merge_from_file(model_name)
         elif task_type == "box3d":
+            self.logger.info(f"Adding dd3d config {model_name}")
             cfg.TASK_TYPE = "box3d"
             add_dd3d_config(cfg)
             cfg.merge_from_file(model_name)
