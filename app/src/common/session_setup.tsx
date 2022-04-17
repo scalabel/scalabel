@@ -40,7 +40,7 @@ import { Track } from "./track"
 import * as types from "../const/common"
 import { alert } from "./alert"
 import { Severity } from "../types/common"
-import { getViewerType } from "./util"
+import { getMainSensor, getViewerType, transformPointCloud } from "./util"
 
 /**
  * Initialize state, then set up the rest of the session
@@ -204,8 +204,18 @@ function loadPointClouds(
       ) {
         const url = item.urls[sensorId]
         attemptsMap[sensorId] = 0
+        const mainSensor = getMainSensor(state)
+        const isMainSensor = mainSensor.id === sensorId
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
+          if (!isMainSensor) {
+            const transformedGeometry = transformPointCloud(
+              geometry.clone(),
+              sensorId,
+              state
+            )
+            Session.pointClouds[item.index][mainSensor.id] = transformedGeometry
+          }
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent

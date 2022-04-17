@@ -39,7 +39,8 @@ import {
   calculatePlaneRotation,
   getMainSensor,
   transformPointCloud,
-  estimateGroundPlane
+  estimateGroundPlane,
+  getClosestPoint
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 import { projectionFromNDC } from "../../view_config/point_cloud"
@@ -143,10 +144,27 @@ export class Label3DHandler {
       const normal = new THREE.Vector3(0, 0, 1)
       normal.applyQuaternion(planeLabel.orientation)
       plane.setFromNormalAndCoplanarPoint(normal, planeLabel.center)
-
       const projection = projectionFromNDC(x, y, this._camera)
       const point3d = new THREE.Vector3()
       projection.intersectPlane(plane, point3d)
+
+      // If point cloud, move to closest point
+      const state = this._state
+      const config = this._viewerConfig as PointCloudViewerConfigType
+      const sensorIdx = config.sensor
+      const sensor = this._state.task.sensors[sensorIdx]
+      const isPointCloud = sensor.type === DataType.POINT_CLOUD
+      const mainSensor = getMainSensor(state)
+      if (isPointCloud) {
+        const itemIndex = state.user.select.item
+        const pointCloud = new THREE.Points(
+          Session.pointClouds[itemIndex][mainSensor.id]
+        )
+        const closestPoint = getClosestPoint(pointCloud, projection)
+        if (closestPoint !== null) {
+          point3d.copy(closestPoint)
+        }
+      }
       // Move plane center
       planeLabel.move(point3d)
 

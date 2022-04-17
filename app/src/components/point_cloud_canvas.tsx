@@ -6,7 +6,7 @@ import * as THREE from "three"
 import { Sensor } from "../common/sensor"
 
 import Session from "../common/session"
-import { getMainSensor, transformPointCloud } from "../common/util"
+import { getMainSensor } from "../common/util"
 import { DataType, ItemTypeName } from "../const/common"
 import {
   getMinSensorIds,
@@ -280,8 +280,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       Session.pointClouds[item][sensor] !== undefined &&
       !this._pointsUpdated
     ) {
-      const rawGeometry = Session.pointClouds[item][sensor].clone()
-      const geometry = transformPointCloud(rawGeometry, sensor, this.state)
+      const mainSensor = getMainSensor(this.state)
+      const geometry = Session.pointClouds[item][mainSensor.id]
       this.pointCloud.geometry.copy(geometry)
       this.pointCloud.layers.enableAll()
       this._pointsUpdated = true

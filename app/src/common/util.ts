@@ -296,3 +296,39 @@ export function calculatePlaneCenter(
   ray.intersectPlane(plane, center)
   return center
 }
+
+/**
+ * Get the closest point to the ray interception with the pointCloud
+ *
+ * @param pointCloud
+ * @param ray
+ */
+export function getClosestPoint(
+  pointCloud: THREE.Points,
+  ray: THREE.Ray
+): THREE.Vector3 | null {
+  const raycaster = new THREE.Raycaster()
+  raycaster.set(ray.origin, ray.direction)
+  pointCloud.geometry.boundingBox = null
+  const intersection = raycaster.intersectObject(pointCloud)
+  intersection.sort((a, b) => (a.distanceToRay ?? 0) - (b.distanceToRay ?? 0))
+
+  if (intersection.length > 0) {
+    const intersectionPoint = intersection[0].point
+    const points = Array.from(
+      pointCloud.geometry.getAttribute("position").array
+    )
+    const closestPoint = new THREE.Vector3()
+    let minDist = closestPoint.distanceTo(intersectionPoint)
+    for (let i = 0; i < points.length; i += 3) {
+      const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+      const pointDist = point.distanceTo(intersectionPoint)
+      if (pointDist < minDist) {
+        minDist = pointDist
+        closestPoint.copy(point)
+      }
+    }
+    return closestPoint
+  }
+  return null
+}
