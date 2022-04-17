@@ -359,7 +359,6 @@ export class Label3DHandler {
       this._selectedItemIndex
     )
     if (groundPlane !== null) {
-      groundPlane.visible = true
       const selectedLabel = Session.label3dList.selectedLabel
       const groundPlaneSelected = selectedLabel?.labelId === groundPlane.labelId
       if (groundPlaneSelected) {

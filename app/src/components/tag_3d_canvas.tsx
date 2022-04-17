@@ -165,10 +165,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           }
         }
 
-        if (
-          label.type === LabelTypeName.PLANE_3D &&
-          (label as Plane3D).visible
-        ) {
+        if (label.type === LabelTypeName.PLANE_3D) {
           // Get height under camera
           const planeLabel = label as Plane3D
           const normal = new THREE.Vector3(0, 0, 1)
