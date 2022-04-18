@@ -150,12 +150,13 @@ export class Label3DHandler {
 
       // If point cloud, move to closest point
       const state = this._state
-      const config = this._viewerConfig as PointCloudViewerConfigType
-      const sensorIdx = config.sensor
-      const sensor = this._state.task.sensors[sensorIdx]
-      const isPointCloud = sensor.type === DataType.POINT_CLOUD
-      const mainSensor = getMainSensor(state)
-      if (isPointCloud) {
+      const sensors = Object.values(state.task.sensors)
+      const hasPointCloud = sensors.reduce(
+        (prev: boolean, curr) => prev || curr.type === DataType.POINT_CLOUD,
+        false
+      )
+      if (hasPointCloud) {
+        const mainSensor = getMainSensor(state)
         const itemIndex = state.user.select.item
         const pointCloud = new THREE.Points(
           Session.pointClouds[itemIndex][mainSensor.id]
