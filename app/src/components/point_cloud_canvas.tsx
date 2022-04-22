@@ -139,6 +139,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private readonly _drawableUpdateCallback: () => void
   /** have points been set or transformed */
   private _pointsUpdated: boolean
+  /** current item */
+  private _currentItem: number
   /** context of image canvas */
   private _hiddenContext: CanvasRenderingContext2D | null
   /** canvas for drawing image & getting colors */
@@ -160,6 +162,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.camera = props.camera
     this.target = new THREE.AxesHelper(0.5)
     this.scene.add(this.target)
+    this._currentItem = 0
     this._pointsUpdated = false
     this._hiddenContext = null
     this._hiddenCanvas = document.createElement("canvas")
@@ -270,6 +273,10 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     const select = state.user.select
     const item = select.item
     const sensor = this.state.user.viewerConfigs[this.props.id].sensor
+    if (item !== this._currentItem) {
+      this._currentItem = item
+      this._pointsUpdated = false
+    }
 
     const config = state.user.viewerConfigs[
       this.props.id
@@ -306,6 +313,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
           ).data
         }
       }
+      this.updatePointCloudColors()
     }
     if (this._pointsUpdated && this._colorScheme !== config.colorScheme) {
       this._colorScheme = config.colorScheme
