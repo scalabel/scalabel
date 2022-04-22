@@ -15,7 +15,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 [**Discussion**](https://groups.google.com/g/scalabel) |
 [**Contributors**](https://github.com/scalabel/scalabel/graphs/contributors)
 
-<!-- ![scalabel interface](https://doc.scalabel.ai/_images/box2d_tracking_result.gif) -->
+![scalabel interface](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/banner-app.png)
 
 ---
 
@@ -37,7 +37,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 - Convenient data uploading using integrated or multiple configuration files for items, categories, and attributes
 - Divide a project into multiple tasks using variable task sizes
 
-![Create project](https://doc.scalabel.ai/_images/project-creation-after-enter.png)
+![Create project](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/project-creation.png)
 
 Creating a project consists of filling in the fields that specify the task, data type, and other parameters such as the task size. Item lists, categories, and attributes must be in the Scalabel format (see [docs](https://doc.scalabel.ai/)) when uploaded.
 
