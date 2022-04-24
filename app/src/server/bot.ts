@@ -200,7 +200,7 @@ export class Bot {
     this.ackedPackets.add(actionPacket.id)
 
     const modelRequests = this.packetToRequests(actionPacket)
-    console.log("model requests:", modelRequests)
+    // console.log("model requests:", modelRequests)
     // Send the requests for execution on the model server
     this.executeRequests(modelRequests, actionPacket.id)
   }
@@ -424,10 +424,10 @@ export class Bot {
     } else if (this.labelType === LabelTypeName.BOX_3D) {
       for (const box of shapes) {
         if (box[0] === 0 || box[1] === 0 || box[2] === 0) {
-          Logger.info(`Ignoring box with 0 dimension: ${String(box)}`)
+          // Logger.info(`Ignoring box with 0 dimension: ${String(box)}`)
           continue
         } else {
-          Logger.info(`Creating box: ${String(box)}`)
+          // Logger.info(`Creating box: ${String(box)}`)
           const action = this.modelInterface.makeBox3dAction(
             box,
             itemIndices[0]

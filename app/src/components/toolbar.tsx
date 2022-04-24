@@ -229,6 +229,13 @@ export class ToolBar extends Component<Props> {
           )}
           {this.state.task.config.bots && (
             <div>
+              {makeButton("Batch Predict", () => {
+                this.startBatchPrediction(this.state)
+              })}
+            </div>
+          )}
+          {this.state.task.config.bots && (
+            <div>
               {makeButton("Predict", () => {
                 this.startPrediction(this.state)
               })}
@@ -447,6 +454,19 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Send a prediction request
+   *
+   * @param state
+   */
+  private startBatchPrediction(state: State): void {
+    // console.log("start batch prediction")
+    // console.log(state.task.items)
+    for (const item of state.task.items) {
+      Session.dispatch(sendPredictionRequest(item.index))
+    }
   }
 
   /**
