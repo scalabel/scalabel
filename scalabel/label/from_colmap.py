@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 import os
+from pyquaternion import Quaternion
 
 
 def from_colmap(in_file):
@@ -34,15 +35,41 @@ def get_points(file_path):
             if line.startswith("#"):
                 continue
             point_id, x, y, z, r, g, b, *_ = line.split(" ")
-            points.append([x, y, z])
+            points.append([x, y, z, 1])
 
-    return np.array(points, dtype=np.float64)
+    return np.array(points, dtype=np.float64).T
+
+
+def get_dense_points(file_path, filter=10):
+    pcd = o3d.io.read_point_cloud(file_path)
+    points = np.asarray(pcd.points)
+    points = points[::filter]
+    points = np.append(points, np.ones((points.shape[0], 1)), axis=1).T
+    return points
 
 
 def transform_points(cam, points):
-    # print("points shape", points.shape, points.dtype, points[:10])
-    # print("cam translation", cam["translation"])
-    return points - np.array(cam["translation"], dtype=np.float64)
+    """
+    Transform points using camera pose.
+    Pose translation and rotation define the projection from world to
+    camera coordinates.
+    """
+    q = Quaternion(np.array(cam["rotation"], dtype=np.float64))
+    proj_mat = np.identity(4)
+    proj_mat[:3, :3] = q.rotation_matrix
+    position = np.array(cam["translation"], dtype=np.float64)
+    proj_mat[:3, 3] = position
+    projected = proj_mat.dot(points).T
+    # Reorder axis
+    projected = projected[:, [2, 0, 1, 3]]
+    projected[:, 1:3] *= -1
+    return projected[:, :3]
+
+
+def filter_points(points, max_dist=20):
+    norms = np.apply_along_axis(np.linalg.norm, 1, points)
+    keep_idx = np.where(norms < max_dist)
+    return points[keep_idx]
 
 
 def save_points(out_path, cam, points):
@@ -55,36 +82,47 @@ def save_points(out_path, cam, points):
 
 
 if __name__ == "__main__":
-    # in_file = "local-data/items/bdd100k/sfm/output/fused_0.ply"
-    # from_colmap(in_file)
-
-    # poses_path = "local-data/items/nuscenes-sfm/sparse/output/images.txt"
-    # get_cam_poses(poses_path)
-
-    """
-    Todo:
-    - read points
-    - read camera positions
-    - for each cam, transform points and save to output file.
-    """
     # points_path = "local-data/items/nuscenes-sfm/sparse/output/points3D.txt"
     # poses_path = "local-data/items/nuscenes-sfm/sparse/output/images.txt"
     # out_path = "local-data/items/nuscenes-sfm/sparse/point-clouds"
     points_path = "local-data/items/bdd100k/sfm/output/sparse_0/output/points3D.txt"
     poses_path = "local-data/items/bdd100k/sfm/output/sparse_0/output/images.txt"
     out_path = "local-data/items/bdd100k/sfm/output/sparse_0/output/point-clouds"
+    dense_out_path = "local-data/items/bdd100k/sfm/output/dense-point-clouds"
+    dense_points_path = "local-data/items/bdd100k/sfm/output/fused_0.ply"
 
-    points = get_points(points_path)
-    # min_dist = 100
-    # for point in points:
-    #     norm = np.linalg.norm(point)
-    #     if norm < min_dist:
-    #         min_dist = norm
+    dense_points = get_dense_points(dense_points_path)
+    # dense_points = dense_points[::10]
+    # print(dense_points.shape)
+    # dense_points = filter_points(dense_points)
+    # print(dense_points.shape)
 
-    # print("min_dst", min_dist)
     cams = get_cam_poses(poses_path)
 
+    cams.sort(key=lambda c: c["image_name"])
+    imgs = [
+        "2ef923e9-5d8874dd-0000481.jpg",
+        "2ef923e9-5d8874dd-0000487.jpg",
+        "2ef923e9-5d8874dd-0000493.jpg",
+        "2ef923e9-5d8874dd-0000499.jpg",
+        "2ef923e9-5d8874dd-0000505.jpg",
+    ]
     for cam in cams:
-        cam_points = transform_points(cam, points)
-        print("points", cam_points[:3])
-        save_points(out_path, cam, cam_points)
+        if cam["image_name"].strip() not in imgs:
+            continue
+        print(cam["image_name"])
+        print(dense_points.shape)
+        cam_points = transform_points(cam, dense_points)
+        print(cam_points.shape)
+        cam_points = filter_points(cam_points)
+        print(cam_points.shape)
+        save_points(dense_out_path, cam, cam_points)
+
+    # points = get_points(points_path)
+    # print("len cams", len(cams))
+
+    # cams.sort(key=lambda c: c["image_name"])
+    # for cam in cams:
+    #     print(cam["image_name"])
+    #     cam_points = transform_points(cam, points)
+    #     save_points(out_path, cam, cam_points)
