@@ -84,9 +84,9 @@ class GenericBoxes3D:
             tvecs.append(tvec)
             sizes.append(size)
 
-        quats = torch.as_tensor(quats, dtype=torch.float32, device=device)
-        tvecs = torch.as_tensor(tvecs, dtype=torch.float32, device=device)
-        sizes = torch.as_tensor(sizes, device=device)
+        quats = torch.as_tensor(np.array(quats), dtype=torch.float32, device=device)
+        tvecs = torch.as_tensor(np.array(tvecs), dtype=torch.float32, device=device)
+        sizes = torch.as_tensor(np.array(sizes), device=device)
 
         return cls(quats, tvecs, sizes)
 

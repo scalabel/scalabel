@@ -28,6 +28,7 @@ from fsdet.evaluation import (
     DatasetEvaluators,
     LVISEvaluator,
     PascalVOCDetectionEvaluator,
+    ScalabelEvaluator,
     verify_results,
 )
 
@@ -60,6 +61,8 @@ class Trainer(DefaultTrainer):
             return PascalVOCDetectionEvaluator(dataset_name)
         if evaluator_type == "lvis":
             return LVISEvaluator(dataset_name, cfg, True, output_folder)
+        if evaluator_type == "scalabel":
+            return ScalabelEvaluator(dataset_name) # TODO: check if other inputs are needed
         if len(evaluator_list) == 0:
             raise NotImplementedError(
                 "no Evaluator for the dataset {} with the type {}".format(

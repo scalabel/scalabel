@@ -146,50 +146,44 @@ def synscapes_to_dd3d(metadata):
 
 
 if __name__ == "__main__":
-    # sample_ids = (2, 3, 20, 41, 97)
-    sample_ids = [3]
-    for sample_id in sample_ids:
-        # sample_id = 6
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        img_path = os.path.join(dir_path, "../../..", f"local-data/items/synscapes-sample/img/rgb/{sample_id}.png")
-        labels_path = os.path.join(dir_path, "../../..", f"local-data/items/synscapes-sample/meta/{sample_id}.json")
+    for id in range(1, 25001):
+        img_path = f"/scratch/wcheng/synscapes/Synscapes/img/rgb/{id}.png"
+        labels_path = f"/scratch/wcheng/synscapes/Synscapes/meta/{id}.json"
 
         # [[1590.83437, 0.0000, 771.31406, 0.0], [0.0000, 1592.79032, 360.79945, 0.0], [0.0000, 0.0000, 1.0000, 0.0]]
         # 1590.83437 0.0000 771.31406 0.0 0.0000 1592.79032 360.79945 0.0 0.000 0.0000 1.0000 0.0
-        meta_lines = [
-            "P0: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 0.000000000000e+00 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 0.000000000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 0.000000000000e+00",
-            "P1: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 -3.875744000000e+02 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 0.000000000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 0.000000000000e+00",
-            "P2: 1590.83437 0.0000 771.31406 0.0 0.0000 1592.79032 360.79945 0.0 0.000 0.0000 1.0000 0.0",
-            "P3: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 -3.395242000000e+02 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 2.199936000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 2.729905000000e-03",
-            "R0_rect: 9.999239000000e-01 9.837760000000e-03 -7.445048000000e-03 -9.869795000000e-03 9.999421000000e-01 -4.278459000000e-03 7.402527000000e-03 4.351614000000e-03 9.999631000000e-01",
-            "Tr_velo_to_cam: 7.533745000000e-03 -9.999714000000e-01 -6.166020000000e-04 -4.069766000000e-03 1.480249000000e-02 7.280733000000e-04 -9.998902000000e-01 -7.631618000000e-02 9.998621000000e-01 7.523790000000e-03 1.480755000000e-02 -2.717806000000e-01",
-            "Tr_imu_to_velo: 9.999976000000e-01 7.553071000000e-04 -2.035826000000e-03 -8.086759000000e-01 -7.854027000000e-04 9.998898000000e-01 -1.482298000000e-02 3.195559000000e-01 2.024406000000e-03 1.482454000000e-02 9.998881000000e-01 -7.997231000000e-01",
-        ]
+        # meta_lines = [
+        #     "P0: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 0.000000000000e+00 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 0.000000000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 0.000000000000e+00",
+        #     "P1: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 -3.875744000000e+02 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 0.000000000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 0.000000000000e+00",
+        #     "P2: 1590.83437 0.0000 771.31406 0.0 0.0000 1592.79032 360.79945 0.0 0.000 0.0000 1.0000 0.0",
+        #     "P3: 7.215377000000e+02 0.000000000000e+00 6.095593000000e+02 -3.395242000000e+02 0.000000000000e+00 7.215377000000e+02 1.728540000000e+02 2.199936000000e+00 0.000000000000e+00 0.000000000000e+00 1.000000000000e+00 2.729905000000e-03",
+        #     "R0_rect: 9.999239000000e-01 9.837760000000e-03 -7.445048000000e-03 -9.869795000000e-03 9.999421000000e-01 -4.278459000000e-03 7.402527000000e-03 4.351614000000e-03 9.999631000000e-01",
+        #     "Tr_velo_to_cam: 7.533745000000e-03 -9.999714000000e-01 -6.166020000000e-04 -4.069766000000e-03 1.480249000000e-02 7.280733000000e-04 -9.998902000000e-01 -7.631618000000e-02 9.998621000000e-01 7.523790000000e-03 1.480755000000e-02 -2.717806000000e-01",
+        #     "Tr_imu_to_velo: 9.999976000000e-01 7.553071000000e-04 -2.035826000000e-03 -8.086759000000e-01 -7.854027000000e-04 9.998898000000e-01 -1.482298000000e-02 3.195559000000e-01 2.024406000000e-03 1.482454000000e-02 9.998881000000e-01 -7.997231000000e-01",
+        # ]
         with open(labels_path) as f:
             metadata = json.load(f)
 
-        meta_outpath = os.path.join(
-            "/Users/elrich/code/eth/simple_kitti_visualization", "examples/kitti/calib", f"{sample_id}.txt"
-        )
-        labels_outpath = os.path.join(
-            "/Users/elrich/code/eth/simple_kitti_visualization", "examples/kitti/label_2", f"{sample_id}.txt"
-        )
-        img_outpath = os.path.join(
-            "/Users/elrich/code/eth/simple_kitti_visualization", "examples/kitti/image_2", f"{sample_id}.png"
-        )
+        # meta_outpath = os.path.join(
+        #     "/Users/elrich/code/eth/simple_kitti_visualization", "examples/kitti/calib", f"{id}.txt"
+        # )
+        # labels_outpath = os.path.join(
+        #     "/Users/elrich/code/eth/simple_kitti_visualization", "examples/kitti/label_2", f"{id}.txt"
+        # )
+        img_outpath = f"/scratch/wcheng/synscapes/Synscapes/bbox_3d/{id}.png"
 
         boxes = synscapes_to_dd3d(metadata)
         vectorized = np.array([box["box3d"].vectorize().cpu().numpy() for box in boxes]).squeeze()
-        print("vectorized", vectorized)
-        classes = [0 for box in boxes]
+        # print("vectorized", vectorized)
+        classes = [0 for _ in boxes]
         intrinsics = np.array(
             [[1590.83437, 0.0000, 771.31406], [0.0000, 1592.79032, 360.79945], [0.0000, 0.0000, 1.0000]]
         )
         image_cv2 = cv2.imread(img_path)
         vis_image = draw_boxes3d_cam(image_cv2, vectorized, classes, kitti_metadata, intrinsics)
 
-        outpath = "test.png"
-        cv2.imwrite(outpath, vis_image)
+        cv2.imwrite(img_outpath, vis_image)
+        print(f"Processed: {img_outpath}")
 
         # with open(meta_outpath, "w") as f:
         #     for line in meta_lines:

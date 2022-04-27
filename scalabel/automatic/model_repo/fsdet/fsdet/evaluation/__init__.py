@@ -7,6 +7,7 @@ from .evaluator import (
 )
 from .lvis_evaluation import LVISEvaluator
 from .pascal_voc_evaluation import PascalVOCDetectionEvaluator
+from .scalabel_evaluation import ScalabelEvaluator
 from .testing import print_csv_format, verify_results
 
 __all__ = [k for k in globals().keys() if not k.startswith("_")]

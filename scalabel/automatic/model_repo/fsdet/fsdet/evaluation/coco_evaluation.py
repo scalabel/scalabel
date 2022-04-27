@@ -68,6 +68,9 @@ class COCOEvaluator(DatasetEvaluator):
             81, 82, 84, 85, 86, 87, 88, 89, 90,
         ]
         # fmt: on
+        self._novel_classes = [
+            1, 2, 3, 4, 5, 6, 7, 9, 16, 17, 18, 19, 20, 21, 44, 62, 63, 64, 67, 72
+        ]
 
         json_file = PathManager.get_local_path(self._metadata.json_file)
         with contextlib.redirect_stdout(io.StringIO()):
