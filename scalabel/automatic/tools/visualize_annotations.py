@@ -106,9 +106,11 @@ if __name__ == "__main__":
     for sample in samples:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         gt_path = os.path.join(dir_path, "../../../local-data/items/synscapes-sample/meta/", f"{sample}.json")
-        filename = "synscapes-1080_export_2022-04-12_15-36-09.json"
+        project = "synscape-ann-multi-2_export_2022-04-27_20-19-00"
+        # filename = "synscapes-1080_export_2022-04-12_15-36-09.json"
+        filename = f"{project}.json"
         file_path = os.path.join(dir_path, "../../..", f"local-data/annotations/{filename}")
-        save_path = os.path.join(dir_path, "../../..", f"local-data/annotations/bev_imgs/{sample}.png")
+        save_path = os.path.join(dir_path, "../../..", f"local-data/annotations/bev_imgs/{project}/{sample}.png")
         with open(file_path) as f:
             file_data = json.load(f)
 
