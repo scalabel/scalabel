@@ -50,7 +50,8 @@ def save_points(out_path, sample_idx, points):
 
 
 if __name__ == "__main__":
-    for sample_idx in range(1, 10):
+    for sample_idx in range(1080, 1090):
+        print("sample_idx", sample_idx)
         file_path = f"/scratch-second/egroenewald/synscapes/Synscapes/img/depth/{sample_idx}.exr"
         outpath = "local-data/items/synscapes-sample/point-cloud"
         depth = get_depth_map(file_path)

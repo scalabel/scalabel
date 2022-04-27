@@ -66,11 +66,11 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         )[0] ?? null
 
       if (plane !== null) {
-        // Set camera 50m above ground plane
+        // Set camera 30m above ground plane
         const grid = plane.internalShapes()[0] as Grid3D
         const normal = new THREE.Vector3(0, 0, 1)
         normal.applyQuaternion(grid.quaternion)
-        normal.setLength(50)
+        normal.setLength(30)
         const position = grid.position.clone()
         position.add(normal)
 
