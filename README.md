@@ -19,7 +19,11 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ---
 
-## Main features
+<br>
+
+## User Instructions
+
+### Main features
 
 - Image tagging
 - 2D bounding box detection and tracking annotation
@@ -31,7 +35,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 <br>
 
-### Creating a new annotation project
+### [Creating a new annotation project](https://doc.scalabel.ai/quick-start.html)
 
 - Supports importing popular data formats such as 2D images and 3D point clouds
 - Convenient data uploading using integrated or multiple configuration files for items, categories, and attributes
@@ -45,16 +49,13 @@ Creating a project consists of filling in the fields that specify the task, data
 
 ### Image tagging
 
-- Freely add multiple tags to images
-- Customisable categories such as weather, scene, and time of day
+Whole images can be tagged with attributes for classification. Categories include weather, scene, and time of day as defaults, but can be freely customised by the user.
 
 ![Image tagging](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/tagging.png)
 
-Whole images can be tagged with customisable attributes for classification.
-
 <br>
 
-### 2D bounding box detection and tracking annotation
+### [2D bounding box detection and tracking annotation](https://doc.scalabel.ai/2d-bb.html)
 
 - Simple click-and-drag area selection
 - Group boxes into a wide range of categories
@@ -71,7 +72,7 @@ Bounding boxes are interpolated between keyframes if the position, orientation, 
 
 <br>
 
-### 2D polygon/polyline and tracking annotation
+### [2D polygon/polyline and tracking annotation](https://doc.scalabel.ai/instance-segmentation.html)
 
 - Click to add new vertices
 - Choose between closed paths for image segmentation or open paths for lane marking
@@ -92,7 +93,7 @@ Polygons are interpolated between keyframes if the position, orientation, or sca
 
 <br>
 
-### 3D bounding box detection and tracking annotation on point clouds
+### [3D bounding box detection and tracking annotation on point clouds](https://doc.scalabel.ai/3d-bb.html)
 
 - Contains multi-sensor view for side-by-side comparison with corresponding 2D images
 - Simple four-point click to generate 3D bounding boxes
@@ -111,30 +112,22 @@ Bounding boxes are interpolated between keyframes if the position, orientation, 
 
 ### Real-time session synchronization for seamless collaboration
 
-- Annotation labels are updated across multiple sessions in real-time
-- Works for tracking as well
+Multiple sessions can be initialised by opening new windows or tabs. Each session synchronises its changes in labels and tags with the other sessions in real-time. Tracking changes are also updated in real-time as well.
 
 ![Session synchronisation](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/sync.gif)
 
-Multiple sessions can be initialised by opening new windows or tabs. Each session synchronises its changes with the other sessions in real-time.
+<br>
+
+### [Semi-automatic annotation with label pre-loading](https://doc.scalabel.ai/auto-label.html)
+
+Deep learning models can be used to assist annotation for large batches of data. New models can be trained on a subset of the data, and the remaining data can be uploaded for Scalabel to label automatically. The labels can be preloaded in the backend and can also be manually adjusted in the interface.
 
 <br>
 
-### Semi-automatic annotation with label pre-loading
+### [Python API for label handling and visualization](https://doc.scalabel.ai/tools.html)
 
-- Integrate deep learning models for assisted annotation
-- Supports popular frameworks such as TensorFlow and PyTorch
-
-![Semi-automatic annotation](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/semi-auto.gif)
-
-Deep learning models can be pre-loaded and used to assist annotation for large batches of data. New models can be trained on a subset of the data, and the remaining data can be uploaded for Scalabel to label automatically. Labels can still be manually adjusted in the interface.
-
-<br>
-
-### Python API for label handling and visualization
-
-- Provides convenience scripts for converting from and to other popular formats, such as COCO, KITTI, Waymo
-- Supports evaluation of various tasks with the Scalabel format
+- Provides convenience [scripts](https://doc.scalabel.ai/label.html) for converting from and to other popular formats, such as COCO, KITTI, Waymo
+- Supports [evaluation](https://doc.scalabel.ai/eval.html) of various tasks with the Scalabel format
   - Image tagging
   - Detection
   - Pose estimation
@@ -144,6 +137,6 @@ Deep learning models can be pre-loaded and used to assist annotation for large b
   - Boundary detection
   - Bounding box tracking
   - Segmentation tracking
-- Contains a visualizer to easily visualize annotations as well as model predictions in Scalabel format
+- Contains a [visualizer](https://doc.scalabel.ai/visual.html) to easily visualize annotations as well as model predictions in Scalabel format
 
 Python backend provides a convenient API for label handling and visualization. For compatibility with Scalabel's interface, datasets can be converted to the appropriate formats via scripts. Algorithms can be evaluated for each task by uploading the predictions and corresponding ground truth annotations in the Scalabel format. The labels can be easily visualised using the Python interface.
