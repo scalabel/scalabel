@@ -43,7 +43,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ![Create project](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/project-creation.png)
 
-Creating a project consists of filling in the fields that specify the task, data type, and other parameters such as the task size. Item lists, categories, and attributes must be in the Scalabel format (see [docs](https://doc.scalabel.ai/)) when uploaded.
+Creating a project consists of filling in the fields that specify the task, data type, and other parameters such as the task size. Item lists, categories, and attributes must be in the [Scalabel format](https://doc.scalabel.ai/) when uploaded.
 
 <br>
 
