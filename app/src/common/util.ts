@@ -309,26 +309,17 @@ export function getClosestPoint(
 ): THREE.Vector3 | null {
   const raycaster = new THREE.Raycaster()
   raycaster.set(ray.origin, ray.direction)
-  pointCloud.geometry.boundingBox = null
-  const intersection = raycaster.intersectObject(pointCloud)
-  intersection.sort((a, b) => (a.distanceToRay ?? 0) - (b.distanceToRay ?? 0))
 
-  if (intersection.length > 0) {
-    const intersectionPoint = intersection[0].point
-    const points = Array.from(
-      pointCloud.geometry.getAttribute("position").array
-    )
-    const closestPoint = new THREE.Vector3()
-    let minDist = closestPoint.distanceTo(intersectionPoint)
-    for (let i = 0; i < points.length; i += 3) {
-      const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
-      const pointDist = point.distanceTo(intersectionPoint)
-      if (pointDist < minDist) {
-        minDist = pointDist
-        closestPoint.copy(point)
-      }
+  const points = Array.from(pointCloud.geometry.getAttribute("position").array)
+  let minDist = Infinity
+  let closestPoint = null
+  for (let i = 0; i < points.length; i += 3) {
+    const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+    const dist = ray.distanceToPoint(point)
+    if (dist < minDist) {
+      minDist = dist
+      closestPoint = point
     }
-    return closestPoint
   }
-  return null
+  return closestPoint
 }
