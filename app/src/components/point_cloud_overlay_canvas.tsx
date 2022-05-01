@@ -17,7 +17,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { ViewerConfigTypeName } from "../const/common"
-import { transformPointCloud } from "../common/util"
+import { getMainSensor } from "../common/util"
 
 const styles = (): StyleRules<"point_cloud_canvas", {}> =>
   createStyles({
@@ -144,7 +144,9 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
   /** Current point cloud for rendering */
   private readonly pointCloud: THREE.Points
   /** have points been cloned */
-  private pointsCloned: boolean
+  private _pointsUpdated: boolean
+  /** current item */
+  private _currentItem: number
 
   /**
    * Constructor, ons subscription to store
@@ -156,7 +158,8 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = props.camera
-    this.pointsCloned = false
+    this._pointsUpdated = false
+    this._currentItem = 0
 
     this.canvas = null
     this.display = null
@@ -245,14 +248,20 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
       this.forceUpdate()
     }
     const item = state.user.select.item
-    const sensor = this.props.sensor
+    const mainSensor = getMainSensor(this.state)
+    if (item !== this._currentItem) {
+      this._currentItem = item
+      this._pointsUpdated = false
+    }
 
-    if (Session.pointClouds[item][sensor] !== undefined && !this.pointsCloned) {
-      const rawGeometry = Session.pointClouds[item][sensor].clone()
-      const geometry = transformPointCloud(rawGeometry, sensor, state)
+    if (
+      Session.pointClouds[item][mainSensor.id] !== undefined &&
+      !this._pointsUpdated
+    ) {
+      const geometry = Session.pointClouds[item][mainSensor.id]
       this.pointCloud.geometry.copy(geometry)
       this.pointCloud.layers.enableAll()
-      this.pointsCloned = true
+      this._pointsUpdated = true
     }
   }
 
