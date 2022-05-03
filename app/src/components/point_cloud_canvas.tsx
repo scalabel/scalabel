@@ -55,7 +55,7 @@ const vertexShader = `
     varying vec3 pointColor;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
+      gl_PointSize = 3.0;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
       pointColor = color;
@@ -355,7 +355,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       const depth = point.length()
       depths.push(depth)
     }
-    const maxDepth = Math.max.apply(Math, depths)
+    const maxDepth = Math.min(Math.max.apply(Math, depths), 60)
     const minDepth = Math.min.apply(Math, depths)
     const colors: number[] = []
     for (let i = 0; i < depths.length; i += 1) {

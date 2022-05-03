@@ -41,6 +41,24 @@ def get_point_cloud(depth, intrinsics, interval=4):
     return points
 
 
+def simulate_lidar(depth, intrinsics, n_beams=32, max_height=0.75, interval=5):
+    fx, fy, cx, cy = intrinsics
+    h, w = depth.shape
+    points = []
+    for b in range(n_beams):
+        for i in range(w):
+            if i % interval != 0:
+                continue
+            j = round(h - 1 - (0.75 * h / n_beams) * b)
+            z = depth[j, i]
+            x = (i - cx) * z / fx
+            y = (j - cy) * z / fy
+            # Swap axes from camera to lidar frame
+            points.append([z, -x, -y])
+    points = np.array(points)
+    return points
+
+
 def save_points(out_path, sample_idx, points):
     file_name = f"{sample_idx}.ply"
     file_path = os.path.join(out_path, file_name)
@@ -59,5 +77,5 @@ if __name__ == "__main__":
         fy = 1592.79032
         cx = 771.31406
         cy = 360.79945
-        points = get_point_cloud(depth, (fx, fy, cx, cy))
+        points = simulate_lidar(depth, (fx, fy, cx, cy))
         save_points(outpath, sample_idx, points)
