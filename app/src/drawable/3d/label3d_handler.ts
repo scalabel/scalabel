@@ -2,9 +2,9 @@ import * as THREE from "three"
 
 import { selectLabel, selectLabel3dType } from "../../action/select"
 import {
+  activateSpan,
   deactivateSpan,
   pauseSpan,
-  resetSpan,
   resumeSpan,
   undoSpan
 } from "../../action/span3d"
@@ -478,6 +478,9 @@ export class Label3DHandler {
           !state.session.info3D.boxSpan.complete
         ) {
           break
+        } else if (!state.session.info3D.isBoxSpan) {
+          Session.dispatch(activateSpan())
+          return true
         } else {
           this.createLabel()
           return true
@@ -488,17 +491,13 @@ export class Label3DHandler {
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
         if (state.session.info3D.isBoxSpan) {
-          Session.dispatch(resetSpan())
+          Session.dispatch(deactivateSpan())
         }
         return true
       case Key.ENTER:
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
-        return true
-      case Key.P_UP:
-      case Key.P_LOW:
-        Session.dispatch(selectLabel3dType(LabelTypeName.PLANE_3D))
         return true
       case Key.B_UP:
       case Key.B_LOW:
