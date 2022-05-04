@@ -190,11 +190,14 @@ export class Label3DHandler {
     const groundPlane = Session.label3dList.getItemGroundPlane(
       this._selectedItemIndex
     )
-    if (groundPlane !== null) {
+    const state = this._state
+    const mainSensor = getMainSensor(state)
+    const itemIndex = state.user.select.item
+    if (
+      groundPlane !== null &&
+      Session.pointClouds[itemIndex][mainSensor.id] !== undefined
+    ) {
       const center = groundPlane.center
-      const state = this._state
-      const mainSensor = getMainSensor(state)
-      const itemIndex = state.user.select.item
       const pointCloud = new THREE.Points(
         Session.pointClouds[itemIndex][mainSensor.id]
       )
