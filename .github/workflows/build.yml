@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Install apt packages
+        run: |
+          sudo apt-get install -y libopenmpi-dev
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -33,7 +36,7 @@ jobs:
         run: |
           python3 -m pylint scalabel
           python3 -m pydocstyle --convention=google scalabel
-          python3 -m mypy --strict --allow-untyped-calls --show-error-codes scalabel
+          python3 -m mypy --strict --allow-untyped-calls --show-error-codes --warn-unused-ignores scalabel
           python3 -m black --check scalabel
           python3 -m isort -c scalabel/**/*.py
 
@@ -46,6 +49,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Install apt packages
+        run: |
+          sudo apt-get install -y libopenmpi-dev
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
@@ -69,6 +75,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Install brew packages
+        run: |
+          brew install openmpi
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:

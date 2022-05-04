@@ -215,7 +215,7 @@ export async function parseSingleFile(
       sensors:
         dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
-      attributes: dataset.config.attributes as Attribute[],
+      attributes: (dataset.config.attributes as Attribute[]) ?? [],
       categories: dataset.config.categories
     }
   })

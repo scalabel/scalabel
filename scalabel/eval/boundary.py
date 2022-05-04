@@ -162,14 +162,18 @@ def eval_bdry_per_frame(
                 if cat.name in gt_masks
                 else blank_mask
             )
+            gt_mask = gt_mask > 0
             pd_mask = (
                 rle_to_mask(pd_masks[cat.name])
                 if cat.name in pd_masks
                 else blank_mask
             )
+            pd_mask = pd_mask > 0
             cat_scores = [
                 eval_bdry_per_thr(
-                    gt_mask > 0, pd_mask > 0, bound_pixel  # type: ignore
+                    gt_mask,
+                    pd_mask,
+                    bound_pixel,
                 )
                 for bound_pixel in BOUND_PIXELS
             ]

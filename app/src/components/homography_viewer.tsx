@@ -66,13 +66,22 @@ class HomographyViewer extends DrawableViewer<ViewerProps> {
         )[0] ?? null
 
       if (plane !== null) {
+        // Set camera 50m above ground plane
         const grid = plane.internalShapes()[0] as Grid3D
         const normal = new THREE.Vector3(0, 0, 1)
         normal.applyQuaternion(grid.quaternion)
         normal.setLength(50)
         const position = grid.position.clone()
         position.add(normal)
-        this._camera.up = new THREE.Vector3(0, 0, 1)
+
+        // Rotate camera based on plane
+        const zRotation = new THREE.Euler().setFromQuaternion(grid.quaternion).z
+        const cameraUp = new THREE.Vector3(0, 0, 1).applyAxisAngle(
+          new THREE.Vector3(0, 1, 0),
+          -zRotation
+        )
+
+        this._camera.up = cameraUp
         this._camera.position.copy(position)
         this._camera.lookAt(grid.position)
       }
