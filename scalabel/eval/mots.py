@@ -2,6 +2,7 @@
 import argparse
 import json
 import time
+import copy
 from functools import partial
 from multiprocessing import Pool
 from typing import Callable, List, Optional
@@ -155,6 +156,43 @@ def evaluate_seg_track(
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
+    # check the missing video sequences
+    if len(results) < len(gts):
+        # build gt_index and gt_videoName mapping
+        gt_videoName_index_mapping = {}
+        for i, gt in enumerate(gts):
+            gt_videoName_index_mapping[gt[0].videoName] = i
+
+        gt_videoNames = set(gt_videoName_index_mapping.keys())
+        res_videoNames = set([res[0].videoName for res in results])
+        missing_videoNames = gt_videoNames - res_videoNames
+        outlier_results = res_videoNames - gt_videoNames
+
+        if outlier_results:
+            logger.critical(
+                f"You have videos not in the test set: {str(outlier_results)} !"
+            )
+            raise ValueError
+
+        if missing_videoNames:
+            logger.critical(f"The results are missing for following video sequences: {str(missing_videoNames)} !")
+
+            # add empty list for those missing results
+            for vname in missing_videoNames:
+                gt_idx = gt_videoName_index_mapping[vname]
+                gt = gts[gt_idx]
+                gt_without_labels = []
+
+                for f in gt:
+                    f_copy = copy.deepcopy(f)
+                    f_copy.labels = []
+                    gt_without_labels.append(f_copy)
+                results.append(gt_without_labels)
+
+            results = sorted(
+                results, key=lambda frames: str(frames[0].videoName)
+            )
+
     assert len(gts) == len(results)
     # check overlap of masks
     logger.info("checking for overlap of masks...")
