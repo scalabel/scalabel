@@ -71,43 +71,27 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
 
     steps:
       - uses: actions/checkout@v2
       - name: Install brew packages
         run: |
-          brew install openmpi tcl-tk
+          brew install openmpi
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-        env:
-          PYTHON_CONFIGURE_OPTS: --with-tcltk-includes='-I/usr/local/opt/tcl-tk/include' --with-tcltk-libs='-L/usr/local/opt/tcl-tk/lib -ltcl8.6 -ltk8.6'
-          LDFLAGS: -L/usr/local/opt/tcl-tk/lib
-          CPPFLAGS: -I/usr/local/opt/tcl-tk/include
-          PKG_CONFIG_PATH: /usr/local/opt/tcl-tk/lib/pkgconfig
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
           pip install --ignore-installed -r scripts/optional.txt
-        env:
-          LDFLAGS: -L/usr/local/opt/tcl-tk/lib
-          CPPFLAGS: -I/usr/local/opt/tcl-tk/include
-          PKG_CONFIG_PATH: /usr/local/opt/tcl-tk/lib/pkgconfig
       - name: Build
         run: python3 setup.py sdist bdist_wheel
-        env:
-          LDFLAGS: -L/usr/local/opt/tcl-tk/lib
-          CPPFLAGS: -I/usr/local/opt/tcl-tk/include
-          PKG_CONFIG_PATH: /usr/local/opt/tcl-tk/lib/pkgconfig
       - name: Test
         env:
           MPLBACKEND: TkAgg
-          LDFLAGS: -L/usr/local/opt/tcl-tk/lib
-          CPPFLAGS: -I/usr/local/opt/tcl-tk/include
-          PKG_CONFIG_PATH: /usr/local/opt/tcl-tk/lib/pkgconfig
         run: python3 -m pytest --pyargs scalabel
 
   nodejs:
