@@ -109,7 +109,7 @@ def check_overlap(
 def handle_inconsistent_length(
     gts: List[List[Frame]],
     results: List[List[Frame]],
-):
+) -> List[List[Frame]]:
     """Check the video results and give feedbacks about inconsistency.
 
     Args:
@@ -168,7 +168,7 @@ def handle_inconsistent_length(
             results = sorted(
                 results, key=lambda frames: str(frames[0].videoName)
             )
-    else:
+    elif len(results) > len(gts):
         raise ValueError("You have videos not in the test set.")
 
     return results
