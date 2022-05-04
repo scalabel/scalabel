@@ -197,15 +197,9 @@ export function getMainSensor(state: State): Sensor {
 
 /** Ground plane estimation using RANSAC
  *
- * @param vertices
+ * @param points
  */
-export function estimateGroundPlane(vertices: number[]): THREE.Plane {
-  const points: THREE.Vector3[] = []
-  for (let i = 0; i < vertices.length; i += 3) {
-    points.push(
-      new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
-    )
-  }
+export function estimateGroundPlane(points: THREE.Vector3[]): THREE.Plane {
   let bestPlane = new THREE.Plane()
   let maxNumPoints = 0
   const itMax = Math.ceil(points.length / 40)
@@ -237,6 +231,21 @@ export function estimateGroundPlane(vertices: number[]): THREE.Plane {
     }
   }
   return bestPlane
+}
+
+/**
+ * Get points from raw vertices
+ *
+ * @param vertices
+ */
+export function getPointsFromVertices(vertices: number[]): THREE.Vector3[] {
+  const points: THREE.Vector3[] = []
+  for (let i = 0; i < vertices.length; i += 3) {
+    points.push(
+      new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
+    )
+  }
+  return points
 }
 
 /** Random integer generator

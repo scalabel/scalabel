@@ -5,6 +5,7 @@ import {
   activateSpan,
   deactivateSpan,
   pauseSpan,
+  resetSpan,
   resumeSpan,
   undoSpan
 } from "../../action/span3d"
@@ -40,7 +41,8 @@ import {
   getMainSensor,
   transformPointCloud,
   estimateGroundPlane,
-  getClosestPoint
+  getClosestPoint,
+  getPointsFromVertices
 } from "../../common/util"
 import { createBox3dLabel, createPlaneLabel } from "./label3d_list"
 import { projectionFromNDC } from "../../view_config/point_cloud"
@@ -177,6 +179,45 @@ export class Label3DHandler {
     } else {
       this.selectHighlighted()
       return this._highlightedLabel !== null
+    }
+  }
+
+  /**
+   * Fit ground plane to nearby points
+   */
+  private fitGroundPlane(): void {
+    const range = 2 // look at points within 2m of center
+    const groundPlane = Session.label3dList.getItemGroundPlane(
+      this._selectedItemIndex
+    )
+    if (groundPlane !== null) {
+      const center = groundPlane.center
+      const state = this._state
+      const mainSensor = getMainSensor(state)
+      const itemIndex = state.user.select.item
+      const pointCloud = new THREE.Points(
+        Session.pointClouds[itemIndex][mainSensor.id]
+      )
+      const vertices = Array.from(
+        pointCloud.geometry.getAttribute("position").array
+      )
+      const points = getPointsFromVertices(vertices)
+      const filteredPoints = points.filter((p) => p.distanceTo(center) < range)
+      const estimatedPlane = estimateGroundPlane(filteredPoints)
+      const newCenter = new THREE.Vector3()
+      estimatedPlane.projectPoint(center, newCenter)
+      const { up, left } = this.getAxes()
+      const rotation = calculatePlaneRotation(
+        up.toThree(),
+        left.toThree(),
+        estimatedPlane.normal
+      )
+      groundPlane.rotation.copy(new THREE.Euler().setFromVector3(rotation))
+      groundPlane.move(newCenter)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
     }
   }
 
@@ -434,7 +475,8 @@ export class Label3DHandler {
         const pointCloud = Array.from(
           new THREE.Points(geometry).geometry.getAttribute("position").array
         )
-        const estimatedPlane = estimateGroundPlane(pointCloud)
+        const points = getPointsFromVertices(pointCloud)
+        const estimatedPlane = estimateGroundPlane(points)
         const target = new Vector3D().fromState(config.target)
         const { up, left } = this.getAxes()
         const down = up.toThree().clone().multiplyScalar(-1)
@@ -472,6 +514,11 @@ export class Label3DHandler {
         this.toggleGroundPlane()
         return true
       }
+      case Key.P_UP:
+      case Key.P_LOW: {
+        this.fitGroundPlane()
+        return true
+      }
       case Key.SPACE: {
         if (
           state.session.info3D.boxSpan !== null &&
@@ -486,12 +533,17 @@ export class Label3DHandler {
           return true
         }
       }
+      case Key.BACKSPACE:
+        if (state.session.info3D.isBoxSpan) {
+          Session.dispatch(deactivateSpan())
+        }
+        return true
       case Key.ESCAPE:
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
         if (state.session.info3D.isBoxSpan) {
-          Session.dispatch(deactivateSpan())
+          Session.dispatch(resetSpan())
         }
         return true
       case Key.ENTER:
