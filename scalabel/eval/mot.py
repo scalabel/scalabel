@@ -354,7 +354,6 @@ def evaluate_track(
     Raises:
         ValueError: if test results have videos that not present in gts.
     """
-
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
     # check the missing video sequences
