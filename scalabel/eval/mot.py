@@ -355,15 +355,15 @@ def evaluate_track(
     t = time.time()
     # check the missing video sequences
     if len(results) < len(gts):
-        gt_videoName_index_mapping = {}
-
+        # build gt_index and gt_videoName mapping
+        gt_video_name_index_mapping = {}
         for i, gt in enumerate(gts):
-            gt_videoName_index_mapping[gt[0].videoName] = i
+            gt_video_name_index_mapping[gt[0].videoName] = i
 
-        gt_videoNames = set(gt_videoName_index_mapping.keys())
-        res_videoNames = set([res[0].videoName for res in results])
-        missing_videoNames = gt_videoNames - res_videoNames
-        outlier_results = res_videoNames - gt_videoNames
+        gt_video_names = set(gt_video_name_index_mapping.keys())
+        res_video_names = set([res[0].videoName for res in results])
+        missing_video_names = gt_video_names - res_video_names
+        outlier_results = res_video_names - gt_video_names
 
         if outlier_results:
             logger.critical(
@@ -371,13 +371,13 @@ def evaluate_track(
             )
             raise ValueError
 
-        if missing_videoNames:
-            logger.critical(f"The results are missing "
-                            f"for following video sequences: {str(missing_videoNames)} !")
+        if missing_video_names:
+            logger.critical(f"The results are missing for "
+                            f"following video sequences: {str(missing_video_names)} !")
 
             # add empty list for those missing results
-            for vname in missing_videoNames:
-                gt_idx = gt_videoName_index_mapping[vname]
+            for name in missing_video_names:
+                gt_idx = gt_video_name_index_mapping[name]
                 gt = gts[gt_idx]
                 gt_without_labels = []
 
@@ -391,6 +391,11 @@ def evaluate_track(
             results = sorted(
                 results, key=lambda frames: str(frames[0].videoName)
             )
+    else:
+        logger.critical(
+            f"You have video names that are not in the test set!"
+        )
+
     assert len(gts) == len(results)
 
     classes = get_leaf_categories(config.categories)
