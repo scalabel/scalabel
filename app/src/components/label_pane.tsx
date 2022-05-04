@@ -112,6 +112,8 @@ interface ClassType {
   icon90: string
   /** class name for resizer */
   resizer: string
+  /** button */
+  button: string
 }
 
 interface Props {
@@ -156,48 +158,50 @@ class LabelPane extends Component<Props> {
             }
           }}
         >
-          <MenuItem
-            key={`imageTypeMenuItem${pane.id}`}
-            value={types.ViewerConfigTypeName.IMAGE}
-            disabled={
-              !getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE)
-            }
-          >
-            Image
-          </MenuItem>
-          <MenuItem
-            key={`pcTypeMenuItem${pane.id}`}
-            value={types.ViewerConfigTypeName.POINT_CLOUD}
-            disabled={
-              !getSensorTypes(this.state).has(
-                types.ViewerConfigTypeName.POINT_CLOUD
-              )
-            }
-          >
-            Point Cloud
-          </MenuItem>
-          <MenuItem
-            key={`image3dTypeMenuItem${pane.id}`}
-            value={types.ViewerConfigTypeName.IMAGE_3D}
-            disabled={
-              !getSensorTypes(this.state).has(
-                types.ViewerConfigTypeName.IMAGE_3D
-              )
-            }
-          >
-            Image 3D
-          </MenuItem>
-          <MenuItem
-            key={`homographyTypeMenuItem${pane.id}`}
-            value={types.ViewerConfigTypeName.HOMOGRAPHY}
-            disabled={
-              !getSensorTypes(this.state).has(
-                types.ViewerConfigTypeName.HOMOGRAPHY
-              )
-            }
-          >
-            Homography
-          </MenuItem>
+          {getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+          !this.state.task.config.labelTypes.includes(
+            types.LabelTypeName.BOX_3D
+          ) ? (
+            <MenuItem
+              key={`imageTypeMenuItem${pane.id}`}
+              value={types.ViewerConfigTypeName.IMAGE}
+            >
+              Image
+            </MenuItem>
+          ) : undefined}
+          {getSensorTypes(this.state).has(
+            types.ViewerConfigTypeName.POINT_CLOUD
+          ) ? (
+            <MenuItem
+              key={`pcTypeMenuItem${pane.id}`}
+              value={types.ViewerConfigTypeName.POINT_CLOUD}
+            >
+              Point Cloud
+            </MenuItem>
+          ) : undefined}
+
+          {getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+          this.state.task.config.labelTypes.includes(
+            types.LabelTypeName.BOX_3D
+          ) ? (
+            <MenuItem
+              key={`image3dTypeMenuItem${pane.id}`}
+              value={types.ViewerConfigTypeName.IMAGE_3D}
+            >
+              Image 3D
+            </MenuItem>
+          ) : undefined}
+          {getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+          this.state.task.config.labelTypes.includes(
+            types.LabelTypeName.BOX_3D
+          ) ? (
+            <MenuItem
+              key={`homographyTypeMenuItem${pane.id}`}
+              value={types.ViewerConfigTypeName.HOMOGRAPHY}
+            >
+              Homography
+            </MenuItem>
+          ) : undefined}
         </Select>
       )
 
@@ -323,12 +327,11 @@ class LabelPane extends Component<Props> {
       )
 
       const numSensors = Object.keys(this.state.task.sensors).length
-      const imageOnly =
-        this.state.task.config.itemType === types.ItemTypeName.IMAGE
+      const is3dProject = this.state.task.config.labelTypes.includes(
+        types.LabelTypeName.BOX_3D
+      )
       let paneControl: JSX.Element
-      if (imageOnly) {
-        paneControl = <></>
-      } else {
+      if (is3dProject) {
         paneControl = (
           <List>
             <ListItem dense disableGutters>
@@ -345,6 +348,8 @@ class LabelPane extends Component<Props> {
             </ListItem>
           </List>
         )
+      } else {
+        paneControl = <></>
       }
 
       const configBar = (
@@ -361,16 +366,19 @@ class LabelPane extends Component<Props> {
         </Grid>
       )
 
+      const isImage3d =
+        getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
+        this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
       const paneBar = (
         <Grid
           key={`paneMenu${pane.id}`}
           justifyContent={"flex-start"}
-          alignItems={"flex-end"}
+          alignItems={"stretch"}
           container
           direction="row"
         >
           <div hidden={pane.hide}>
-            {numSensors > 1 ? viewerTypeMenu : null}
+            {numSensors > 1 || isImage3d ? viewerTypeMenu : null}
             {numSensors > 1 ? viewerIdMenu : null}
           </div>
         </Grid>

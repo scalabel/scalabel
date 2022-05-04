@@ -1,0 +1,263 @@
+{
+    "frames": [
+        {
+            "name": "image_2/000000",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/image_02/0001/000000.png",
+            "timestamp": 6446,
+            "frameIndex": 12,
+            "labels": [
+                {
+                    "id": "0",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -1.983535,
+                        "orientation": [
+                            0.0,
+                            -1.570796,
+                            0.0
+                        ],
+                        "location": [
+                            2.921483,
+                            0.755883,
+                            6.348542
+                        ],
+                        "dimension": [
+                            1.50992,
+                            1.85,
+                            4.930564
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "1",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -1.788589,
+                        "orientation": [
+                            0.0,
+                            -1.570796,
+                            0.0
+                        ],
+                        "location": [
+                            2.994469,
+                            0.8304805,
+                            13.169745
+                        ],
+                        "dimension": [
+                            1.404795,
+                            1.612032,
+                            3.772344
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "2",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -1.658339,
+                        "orientation": [
+                            0.0,
+                            -1.511817,
+                            0.0
+                        ],
+                        "location": [
+                            2.908125,
+                            0.8767944999999999,
+                            19.299001
+                        ],
+                        "dimension": [
+                            1.413269,
+                            1.567278,
+                            3.158158
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "3",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 1.834548,
+                        "orientation": [
+                            0.0,
+                            1.587202,
+                            0.0
+                        ],
+                        "location": [
+                            -6.037999,
+                            1.4392370000000003,
+                            23.712843
+                        ],
+                        "dimension": [
+                            1.527328,
+                            1.555003,
+                            3.57675
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "4",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 1.696224,
+                        "orientation": [
+                            0.0,
+                            1.561516,
+                            0.0
+                        ],
+                        "location": [
+                            -6.310451,
+                            1.7865565,
+                            46.486705
+                        ],
+                        "dimension": [
+                            1.417371,
+                            1.540476,
+                            3.504344
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "5",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": -1.627754,
+                        "orientation": [
+                            0.0,
+                            -1.572189,
+                            0.0
+                        ],
+                        "location": [
+                            2.822686,
+                            1.2086425,
+                            50.003616
+                        ],
+                        "dimension": [
+                            1.512623,
+                            1.746309,
+                            3.775171
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                },
+                {
+                    "id": "6",
+                    "index": null,
+                    "manualShape": null,
+                    "manualAttributes": null,
+                    "score": null,
+                    "attributes": null,
+                    "category": "car",
+                    "box2d": null,
+                    "box3d": {
+                        "alpha": 1.703595,
+                        "orientation": [
+                            0.0,
+                            1.583558,
+                            0.0
+                        ],
+                        "location": [
+                            -6.285505,
+                            1.7774785,
+                            52.066669
+                        ],
+                        "dimension": [
+                            1.360295,
+                            1.513462,
+                            4.017021
+                        ]
+                    },
+                    "poly2d": null,
+                    "rle": null,
+                    "graph": null
+                }
+            ]
+        },
+        {
+            "name": "velodyne/000000",
+            "url": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/kitti/tracking/training/velodyne/0001/000000.ply"
+        }
+    ],
+    "frameGroups": [
+        {
+            "name": "000",
+            "url": null,
+            "videoName": null,
+            "intrinsics": null,
+            "extrinsics": null,
+            "attributes": {
+                "town": "05",
+                "sun_altitude_angle": "60",
+                "weather_preset": "clear",
+                "cloudiness": "5.0",
+                "precipitation": "0.0",
+                "precipitation_deposits": "0.0",
+                "wind_intensity": "10.0",
+                "sun_azimuth_angle": "0.0",
+                "fog_density": "1.0",
+                "fog_distance": "0.75",
+                "wetness": "0.0",
+                "fog_falloff": "0.1"
+            },
+            "timestamp": 6446,
+            "frameIndex": 12,
+            "size": null,
+            "frames": [
+                "image_2/000000",
+                "velodyne/000000"
+            ]
+        }
+    ]
+}
