@@ -8,7 +8,7 @@
 Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
 ![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
 
-[Scalabel](https://www.scalabel.ai) (pronounced "scalable") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
+[Scalabel](https://www.scalabel.ai) (pronounced "sca&#8901;label") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
 
 [**Documentation**](https://doc.scalabel.ai/) |
 [**Overview Video**](https://go.yf.io/scalabel-video-demo) |
@@ -139,3 +139,9 @@ Deep learning models can be used to assist annotation for large batches of data.
 - Contains a [visualizer](https://doc.scalabel.ai/visual.html) to easily visualize annotations as well as model predictions in Scalabel format
 
 Python backend provides a convenient API for label handling and visualization. For compatibility with Scalabel's interface, datasets can be converted to the appropriate formats via scripts. Algorithms can be evaluated for each task by uploading the predictions and corresponding ground truth annotations in the Scalabel format. The labels can be easily visualised using the Python interface.
+
+<br>
+
+### Contributors
+
+Scalabel is currently supported by [ETH VIS Group](https://www.vis.xyz/). [Many contributors](https://github.com/scalabel/scalabel/graphs/contributors) have contributed to the project.
