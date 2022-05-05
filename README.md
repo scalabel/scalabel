@@ -37,7 +37,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ### [Creating a new annotation project](https://doc.scalabel.ai/quick-start.html)
 
-- Supports importing popular data formats such as 2D images and 3D point clouds
+- Supporting importing popular data formats such as 2D images and 3D point clouds
 - Convenient data uploading using integrated or multiple configuration files for items, categories, and attributes
 - Divide a project into multiple tasks using variable task sizes
 
@@ -49,7 +49,7 @@ Creating a project consists of filling in the fields that specify the task, data
 
 ### Image tagging
 
-Whole images can be tagged with attributes for classification. Categories include weather, scene, and time of day as defaults, but can be freely customised by the user.
+Images can be tagged with multiple attributes. Categories include weather, scene, and time of day as defaults, but can be freely customised.
 
 ![Image tagging](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/tagging.png)
 
@@ -74,9 +74,8 @@ Bounding boxes are interpolated between keyframes if the position, orientation, 
 
 ### [2D polygon/polyline and tracking annotation](https://doc.scalabel.ai/instance-segmentation.html)
 
-- Click to add new vertices
-- Choose between closed paths for image segmentation or open paths for lane marking
-- Supports bezier curves for precise annotation for round objects
+- Choosing between closed paths for image segmentation or open paths for lane marking
+- Supporting bezier curves for precise annotation for round objects
 - Tracking interpolation between keyframes
 
 ![2D polygon](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/2d_seg.gif)
@@ -95,9 +94,9 @@ Polygons are interpolated between keyframes if the position, orientation, or sca
 
 ### [3D bounding box detection and tracking annotation on point clouds](https://doc.scalabel.ai/3d-bb.html)
 
-- Contains multi-sensor view for side-by-side comparison with corresponding 2D images
+- Multi-sensor view for side-by-side comparison with corresponding 2D images
 - Simple four-point click to generate 3D bounding boxes
-- Supports undo and panning functions during annotation for added precision
+- Supporting undo and panning functions during annotation for added precision
 - Tracking interpolation between keyframes
 
 ![3D bounding box](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/3d_bbox.gif)
@@ -126,8 +125,8 @@ Deep learning models can be used to assist annotation for large batches of data.
 
 ### [Python API for label handling and visualization](https://doc.scalabel.ai/tools.html)
 
-- Provides convenience [scripts](https://doc.scalabel.ai/label.html) for converting from and to other popular formats, such as COCO, KITTI, Waymo
-- Supports [evaluation](https://doc.scalabel.ai/eval.html) of various tasks with the Scalabel format
+- Providing convenience [scripts](https://doc.scalabel.ai/label.html) for converting from and to other popular formats, such as COCO, KITTI, Waymo
+- Supporting [evaluation](https://doc.scalabel.ai/eval.html) of various tasks with the Scalabel format
   - Image tagging
   - Detection
   - Pose estimation
