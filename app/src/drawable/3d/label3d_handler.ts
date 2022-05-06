@@ -23,6 +23,7 @@ import {
 import { makePointCloudViewerConfig, makeSensor } from "../../functional/states"
 import { Vector3D } from "../../math/vector3d"
 import {
+  CubeType,
   INVALID_ID,
   PointCloudViewerConfigType,
   SensorType,
@@ -221,6 +222,40 @@ export class Label3DHandler {
         [...Session.label3dList.updatedLabels.values()],
         this._tracking
       )
+    }
+  }
+
+  /**
+   * Duplicate box
+   */
+  private duplicateBox(): void {
+    const selectedLabel = Session.label3dList.selectedLabel
+    if (
+      selectedLabel !== null &&
+      selectedLabel.label.type === LabelTypeName.BOX_3D
+    ) {
+      const shape = selectedLabel.internalShapes()[0].toState() as CubeType
+      const center = new Vector3D(
+        shape.center.x,
+        shape.center.y,
+        shape.center.z - 1
+      )
+      const dimension = new Vector3D(shape.size.x, shape.size.y, shape.size.z)
+      const orientation = new Vector3D(
+        shape.orientation.x,
+        shape.orientation.y,
+        shape.orientation.z
+      )
+      const label = createBox3dLabel(
+        Session.label3dList,
+        this._selectedItemIndex,
+        this._sensorIds,
+        Session.label3dList.currentCategory,
+        center,
+        dimension,
+        orientation
+      )
+      commitLabels([label], this._tracking)
     }
   }
 
@@ -517,6 +552,11 @@ export class Label3DHandler {
         this.toggleGroundPlane()
         return true
       }
+      case Key.C_UP:
+      case Key.C_LOW: {
+        this.duplicateBox()
+        return true
+      }
       case Key.P_UP:
       case Key.P_LOW: {
         this.fitGroundPlane()
@@ -541,14 +581,20 @@ export class Label3DHandler {
           Session.dispatch(deactivateSpan())
         }
         return true
-      case Key.ESCAPE:
+      case Key.ESCAPE: {
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
-        if (state.session.info3D.isBoxSpan) {
-          Session.dispatch(resetSpan())
+        const boxSpan = state.session.info3D.boxSpan
+        if (state.session.info3D.isBoxSpan && boxSpan !== null) {
+          if (boxSpan.numPoints > 0) {
+            Session.dispatch(resetSpan())
+          } else {
+            Session.dispatch(deactivateSpan())
+          }
         }
         return true
+      }
       case Key.ENTER:
         Session.dispatch(
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
