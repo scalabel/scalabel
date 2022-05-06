@@ -230,6 +230,7 @@ export class Label3DHandler {
    */
   private duplicateBox(): void {
     const selectedLabel = Session.label3dList.selectedLabel
+    const { forward } = this.getAxes()
     if (
       selectedLabel !== null &&
       selectedLabel.label.type === LabelTypeName.BOX_3D
@@ -238,8 +239,8 @@ export class Label3DHandler {
       const center = new Vector3D(
         shape.center.x,
         shape.center.y,
-        shape.center.z - 1
-      )
+        shape.center.z
+      ).subtract(forward)
       const dimension = new Vector3D(shape.size.x, shape.size.y, shape.size.z)
       const orientation = new Vector3D(
         shape.orientation.x,
