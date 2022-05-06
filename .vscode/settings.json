@@ -70,5 +70,9 @@
   "eslint.options": {
     "configFile": "./.eslintrc.json"
   },
-  "eslint.validate": ["typescript", "typescriptreact"]
+"eslint.validate": [
+    "typescript",
+    "typescriptreact"
+],
+"esbonio.sphinx.confDir": "${workspaceFolder}/doc/src"
 }

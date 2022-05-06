@@ -44,7 +44,8 @@
     ],
     "testURL": "http://localhost:8687",
     "transform": {
-      "^.+\\.tsx?$": "ts-jest"
+      "^.+\\.tsx?$": "ts-jest",
+      "\\.js?$": "babel-jest"
     },
     "testEnvironment": "jest-environment-jsdom-fourteen",
     "moduleNameMapper": {
@@ -62,10 +63,10 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
-    "@babel/core": "^7.14.0",
+    "@babel/core": "^7.17.10",
     "@babel/eslint-parser": "^7.13.14",
     "@babel/node": "^7.13.13",
-    "@babel/preset-env": "^7.14.0",
+    "@babel/preset-env": "^7.17.10",
     "@babel/preset-react": "^7.13.13",
     "@emotion/react": "^11.5.0",
     "@emotion/styled": "^11.3.0",
@@ -108,7 +109,7 @@
     "aws-sdk": "^2.897.0",
     "axios": "^0.21.2",
     "babel-jest": "^26.6.3",
-    "babel-loader": "^8.2.2",
+    "babel-loader": "^8.2.5",
     "body-parser": "^1.19.0",
     "canvas": "^2.7.0",
     "circular-dependency-plugin": "^5.2.2",
@@ -152,9 +153,10 @@
     "prettier-eslint": "^12.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-lifecycles-compat": "^3.0.4",
     "react-page-visibility": "^6.4.0",
     "react-redux": "^7.2.4",
-    "react-split-pane": "^0.1.92",
+    "react-style-proptype": "^3.2.2",
     "react-test-renderer": "^17.0.2",
     "react-toastify": "^8.0.2",
     "redis": "^3.1.2",
