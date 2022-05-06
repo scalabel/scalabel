@@ -4,7 +4,7 @@ export type Size = string | number
 
 export type Split = "vertical" | "horizontal"
 
-export type SplitPaneProps = {
+export interface SplitPaneProps {
   allowResize?: boolean
   className?: string
   primary?: "first" | "second"
@@ -27,11 +27,14 @@ export type SplitPaneProps = {
   step?: number
 }
 
-export type SplitPaneState = {
+export interface SplitPaneState {
   active: boolean
   resized: boolean
 }
 
+/**
+ * SplitPane.
+ */
 declare class SplitPane extends React.Component<
   SplitPaneProps,
   SplitPaneState
@@ -58,7 +61,7 @@ declare class SplitPane extends React.Component<
 
 export default SplitPane
 
-export type PaneProps = {
+export interface PaneProps {
   className?: string
   size?: Size
   split?: Split
@@ -66,6 +69,9 @@ export type PaneProps = {
   eleRef?: (el: HTMLDivElement) => void
 }
 
+/**
+ * A pane in a SplitPane.
+ */
 declare class Pane extends React.PureComponent<PaneProps> {}
 
 export { Pane }
