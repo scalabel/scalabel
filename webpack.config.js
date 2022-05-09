@@ -76,6 +76,7 @@ let config = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env']
+            // exclude: [/(node_modules|bower_components)/, /app[\\\/]src[\\\/]dev/]
           }
         }
       },
