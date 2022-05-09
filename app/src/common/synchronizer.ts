@@ -106,7 +106,7 @@ export class Synchronizer {
     this.containerName = containerName
 
     this.actionQueue = []
-    this.actionsPendingSave = OrderedMap.from()
+    this.actionsPendingSave = OrderedMap.from({})
     this.actionLog = []
     this.userId = userId
     this.ackedPackets = new Set()
