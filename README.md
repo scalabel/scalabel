@@ -23,6 +23,21 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ## User Instructions
 
+### Quick Installation (Ubuntu)
+
+```bash
+git clone https://github.com/scalabel/scalabel
+cd scalabel
+
+chmod +x scripts/setup_ubuntu.sh
+. scripts/setup_ubuntu.sh
+python setup.py develop
+```
+
+For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
+
+<br>
+
 ### Main features
 
 - Image tagging
