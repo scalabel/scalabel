@@ -371,9 +371,9 @@ function mergeTracksInItems(
 
   tracks = [...tracks]
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const firstItem = Number(Object.keys(tracks[0].labels)[0])
   const firstLabelId = tracks[0].labels[firstItem]
@@ -438,9 +438,9 @@ function splitTrackInItems(
   const splitedTrack1 = makeTrack({ type: track.type, id: newTrackId }, false)
 
   const labelIds: IdType[][] = _.range(items.length).map(() => [])
-  const props: Array<Array<Partial<LabelType>>> = _.range(
-    items.length
-  ).map(() => [])
+  const props: Array<Array<Partial<LabelType>>> = _.range(items.length).map(
+    () => []
+  )
 
   const prop: Partial<LabelType> = {
     track: splitedTrack1.id
@@ -652,8 +652,12 @@ export function getRootLabelId(item: ItemType, labelId: IdType): string {
   let parent = item.labels[labelId].parent
 
   while (isValidId(parent)) {
-    labelId = parent
-    parent = item.labels[labelId].parent
+    if (item.labels[parent] !== undefined) {
+      labelId = parent
+      parent = item.labels[labelId].parent
+    } else {
+      break
+    }
   }
   return labelId
 }
@@ -699,8 +703,12 @@ function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
 export function getRootTrackId(item: ItemType, labelId: IdType): IdType {
   let parent = item.labels[labelId].parent
   while (isValidId(parent)) {
-    labelId = parent
-    parent = item.labels[labelId].parent
+    if (item.labels[parent] !== undefined) {
+      labelId = parent
+      parent = item.labels[labelId].parent
+    } else {
+      break
+    }
   }
   return item.labels[labelId].track
 }
@@ -1643,32 +1651,7 @@ export function removeAlert(
 }
 
 /**
- * Set ground plane
- *
- * @param state
- * @param action
- */
-export function setGroundPlane(
-  state: State,
-  action: actionTypes.SetGroundPlaneAction
-): State {
-  const oldInfo3D = state.session.info3D
-  const newInfo3D = updateObject(oldInfo3D, {
-    ...oldInfo3D,
-    groundPlane: action.groundPlanePoints
-  })
-  const oldSession = state.session
-  const newSession = updateObject(oldSession, {
-    ...oldSession,
-    info3D: newInfo3D
-  })
-  return updateObject(state, {
-    session: newSession
-  })
-}
-
-/**
- * Set ground plane
+ * Toggle ground plane
  *
  * @param state
  * @param action

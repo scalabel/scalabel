@@ -103,7 +103,7 @@ test("multiple saves multiple loads", async () => {
       expect(data).toBe(`fake content`)
     })
   )
-  return Promise.all(loadPromises)
+  return await Promise.all(loadPromises)
 })
 
 test("delete", async () => {

@@ -1,6 +1,7 @@
 /* global module __dirname process */
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CircularDependencyPlugin = require('circular-dependency-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 let config = {
   devtool: false,
@@ -8,7 +9,6 @@ let config = {
     create: __dirname + '/app/src/entries/create.tsx',
     worker: __dirname + '/app/src/entries/worker.tsx',
     admin: __dirname + '/app/src/entries/admin.tsx',
-    // speed_test: __dirname + '/app/src/dev/speed_test.js',
     dashboard: __dirname + '/app/src/entries/dashboard.tsx',
     vendor: __dirname + '/app/src/entries/vendor.tsx',
     label: __dirname + '/app/src/entries/label.index.ts',
@@ -47,7 +47,10 @@ let config = {
           from: __dirname + '/app/dev',
           to: __dirname + '/app/dist/dev',
         },
-    ]})
+    ]}),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
+    new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
     hints: false,
@@ -60,8 +63,20 @@ let config = {
       {
         test: /\.t(s|sx)$/,
         use: {
-          loader: 'awesome-typescript-loader',
+          loader: 'ts-loader',
+          // Temporary fix to avoid memory errors
+          options: { transpileOnly: true }
         },
+      },
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
         test: /\.css$/,
@@ -95,6 +110,9 @@ let serverConfig = {
       // set the current working directory for displaying module paths
       cwd: process.cwd(),
     }),
+    // used for type checking when `transpile: true` for ts-loader
+    // see https://github.com/TypeStrong/ts-loader#transpileonly
+    new ForkTsCheckerWebpackPlugin()
   ],
   performance: {
     hints: false,
@@ -107,6 +125,7 @@ let serverConfig = {
       test: /\.node|t(s|sx)$/,
       use: {
         loader: 'ts-loader',
+        options: { transpileOnly: true }
       },
     }],
   },

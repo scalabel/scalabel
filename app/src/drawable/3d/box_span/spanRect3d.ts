@@ -16,6 +16,8 @@ export class SpanRect3D {
   private readonly _p3: SpanPoint3D
   /** fourth point */
   private readonly _p4: SpanPoint3D
+  /** lines in the rect */
+  private _lines: SpanLine3D[] | null
 
   /**
    * Constructor
@@ -30,6 +32,18 @@ export class SpanRect3D {
     this._p3 = p3
     const v4 = this.completeParallelogram()
     this._p4 = new SpanPoint3D(v4)
+    this._lines = null
+  }
+
+  /**
+   * Remove rect from Three.js scene
+   *
+   * @param scene
+   */
+  public removeFromScene(scene: THREE.Scene): void {
+    if (this._lines !== null) {
+      this._lines.forEach((line) => line.removeFromScene(scene))
+    }
   }
 
   /**
@@ -45,6 +59,7 @@ export class SpanRect3D {
       const next = (i + 1) % points.length
       return new SpanLine3D(p, points[next])
     })
+    this._lines = lines
     lines.map((l) => l.render(scene))
   }
 

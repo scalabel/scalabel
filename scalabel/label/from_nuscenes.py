@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 
 from ..common.parallel import NPROC, pmap
-from ..common.typing import DictStrAny
+from ..common.typing import DictStrAny, NDArrayF64
+from ..label.transforms import xyxy_to_box2d
 from .io import save
 from .typing import (
-    Box2D,
     Box3D,
     Category,
     Config,
@@ -159,9 +159,13 @@ def transform_boxes(
 
     Note: mutates input boxes.
     """
-    translation_car = -np.array(ego_pose["translation"])
+    translation_car: NDArrayF64 = -np.array(
+        ego_pose["translation"], dtype=np.float64
+    )
     rotation_car = Quaternion(ego_pose["rotation"]).inverse
-    translation_sensor = -np.array(car_from_sensor["translation"])
+    translation_sensor: NDArrayF64 = -np.array(
+        car_from_sensor["translation"], dtype=np.float64
+    )
     rotation_sensor = Quaternion(car_from_sensor["rotation"]).inverse
     for box in boxes:
         box.translate(translation_car)
@@ -176,13 +180,16 @@ def parse_labels(
     ego_pose: DictStrAny,
     calib_sensor: DictStrAny,
     img_size: Optional[Tuple[int, int]] = None,
+    in_image_frame: bool = True,
 ) -> Optional[List[Label]]:
     """Parse NuScenes labels into sensor frame."""
     if len(boxes):
         labels = []
         # transform into the sensor coord system
         transform_boxes(boxes, ego_pose, calib_sensor)
-        intrinsic_matrix = np.array(calib_sensor["camera_intrinsic"])
+        intrinsic_matrix: NDArrayF64 = np.array(
+            calib_sensor["camera_intrinsic"], dtype=np.float64
+        )
         for box in boxes:
             box_class = category_to_detection_name(box.name)
             in_image = True
@@ -192,7 +199,7 @@ def parse_labels(
             if in_image and box_class is not None:
                 xyz = tuple(box.center.tolist())
                 w, l, h = box.wlh
-                roty = quaternion_to_yaw(box.orientation)
+                roty = quaternion_to_yaw(box.orientation, in_image_frame)
 
                 box2d = None
                 if img_size is not None:
@@ -203,9 +210,8 @@ def parse_labels(
                         .T[:, :2]
                         .tolist()
                     )
-                    # Keep only corners that fall within the image.
-                    x1, y1, x2, y2 = post_process_coords(corner_coords)
-                    box2d = Box2D(x1=x1, y1=y1, x2=x2, y2=y2)
+                    # Keep only corners that fall within the image, transform
+                    box2d = xyxy_to_box2d(*post_process_coords(corner_coords))
 
                 instance_data = data.get("sample_annotation", box.token)
                 # Attributes can be retrieved via instance_data and also the
@@ -249,7 +255,9 @@ def get_extrinsics(
 
 def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
     """Convert calibration ego pose to Intrinsics."""
-    matrix = np.array(calibration["camera_intrinsic"])
+    matrix: NDArrayF64 = np.array(
+        calibration["camera_intrinsic"], dtype=np.float64
+    )
     return get_intrinsics_from_matrix(matrix)
 
 
@@ -333,7 +341,11 @@ def parse_sequence(
             timestamp=timestamp,
             frames=frame_names,
             labels=parse_labels(
-                data, data.get_boxes(lidar_token), ego_pose, calibration_lidar
+                data,
+                data.get_boxes(lidar_token),
+                ego_pose,
+                calibration_lidar,
+                in_image_frame=False,
             ),
         )
         groups.append(group)

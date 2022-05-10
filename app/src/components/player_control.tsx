@@ -31,6 +31,8 @@ interface Props {
   classes: ClassType
   /** Number of frames */
   numFrames: number
+  /** Keyframe interval */
+  keyInterval: number
 }
 
 /**
@@ -54,9 +56,15 @@ class PlayerControl extends Component<Props> {
   private intervalId: number
   /** number of frames */
   private readonly numFrames: number
+  /** keyframe interval */
+  private readonly keyInterval: number
 
   /** key down listener */
   private readonly _keyDownListener: (e: KeyboardEvent) => void
+  /** key up listener */
+  private readonly _keyUpListener: (e: KeyboardEvent) => void
+  /** The hashed list of keys currently down */
+  protected _keyDownMap: { [key: string]: boolean }
 
   /**
    * Constructor
@@ -68,9 +76,12 @@ class PlayerControl extends Component<Props> {
     this.playing = false
     this.currentFrame = 1
     this.intervalId = -1
-    const { numFrames } = this.props
+    const { numFrames, keyInterval } = this.props
     this.numFrames = numFrames
+    this.keyInterval = keyInterval
     this._keyDownListener = this.onKeyDown.bind(this)
+    this._keyUpListener = this.onKeyUp.bind(this)
+    this._keyDownMap = {}
   }
 
   /**
@@ -79,6 +90,7 @@ class PlayerControl extends Component<Props> {
   public componentDidMount(): void {
     super.componentDidMount()
     document.addEventListener("keydown", this._keyDownListener)
+    document.addEventListener("keyup", this._keyUpListener)
   }
 
   /**
@@ -87,6 +99,7 @@ class PlayerControl extends Component<Props> {
   public componentWillUnmount(): void {
     super.componentWillUnmount()
     document.removeEventListener("keydown", this._keyDownListener)
+    document.removeEventListener("keyup", this._keyUpListener)
   }
 
   /**
@@ -235,21 +248,58 @@ class PlayerControl extends Component<Props> {
   }
 
   /**
+   * Whether a specific key is pressed down
+   *
+   * @param {string} key - the key to check
+   * @return {boolean}
+   */
+  protected isKeyDown(key: string): boolean {
+    return this._keyDownMap[key]
+  }
+
+  /**
    * Listen to key down
    *
    * @param e
    */
   private onKeyDown(e: KeyboardEvent): void {
+    this._keyDownMap[e.key] = true
+    let toChangeFrame = 0
     switch (e.key) {
       case Key.ARROW_LEFT:
-        this.currentFrame = Math.max(this.currentFrame - 1, 1)
+        if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
+          toChangeFrame =
+            Math.floor((this.currentFrame - 2) / this.keyInterval) *
+              this.keyInterval +
+            1
+        } else {
+          toChangeFrame = this.currentFrame - 1
+        }
+        this.currentFrame = Math.max(toChangeFrame, 1)
         goToItemWithIndex(this.currentFrame)
         break
       case Key.ARROW_RIGHT:
-        this.currentFrame = Math.min(this.currentFrame + 1, this.numFrames)
+        if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
+          toChangeFrame =
+            Math.ceil(this.currentFrame / this.keyInterval) * this.keyInterval +
+            1
+        } else {
+          toChangeFrame = this.currentFrame + 1
+        }
+        this.currentFrame = Math.min(toChangeFrame, this.numFrames)
         goToItemWithIndex(this.currentFrame)
         break
     }
+  }
+
+  /**
+   * Handle key down
+   *
+   * @param e
+   */
+  private onKeyUp(e: KeyboardEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete this._keyDownMap[e.key]
   }
 }
 

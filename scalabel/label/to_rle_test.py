@@ -1,4 +1,5 @@
 """Test cases for to_rle.py."""
+import copy
 import os
 import shutil
 import unittest
@@ -16,21 +17,29 @@ class TestToRLEs(unittest.TestCase):
         """General test function for different tasks."""
         cur_dir = os.path.dirname(os.path.abspath(__file__))
 
-        json_path = f"{cur_dir}/testcases/example_annotation.json"
+        json_path = f"{cur_dir}/testcases/rles/pred.json"
         frames = load(json_path).frames
+        assert frames[0].labels is not None
         scalabel_config = load_label_config(
             f"{cur_dir}/../eval/testcases/{task_name}/{task_name}_configs.toml"
         )
-        dt_rle = seg_to_rles(frames, scalabel_config, 1)
+        dt_rle = seg_to_rles(copy.deepcopy(frames), scalabel_config, 1)
         gt_rle = load(f"{cur_dir}/testcases/rles/{file_name}").frames
-        for gt, dt in zip(gt_rle, dt_rle):
+        frames[0].labels = [
+            label for label in frames[0].labels if label.poly2d is not None
+        ]
+        for gt, dt, og in zip(gt_rle, dt_rle, frames):
             self.assertEqual(gt.name, dt.name)
             self.assertEqual(gt.videoName, dt.videoName)
             self.assertEqual(gt.labels is None, dt.labels is None)
-            if gt.labels is None or dt.labels is None:
+            if gt.labels is None or dt.labels is None or og.labels is None:
                 continue
-            for gt_label, dt_label in zip(gt.labels, dt.labels):
+            for gt_label, dt_label, og_label in zip(
+                gt.labels, dt.labels, og.labels
+            ):
                 self.assertEqual(gt_label.rle is None, dt_label.rle is None)
+                self.assertTrue(dt_label.poly2d is None)
+                self.assertEqual(og_label.poly2d is None, dt_label.rle is None)
                 if gt_label.rle is None or dt_label.rle is None:
                     continue
                 self.assertEqual(gt_label.rle.counts, dt_label.rle.counts)

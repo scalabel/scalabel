@@ -98,11 +98,6 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return span3d.activateSpan(state)
     case actionConsts.DEACTIVATE_SPAN:
       return span3d.deactivateSpan(state)
-    case actionConsts.UPDATE_SPAN_POINT:
-      return span3d.updateSpanPoint(
-        state,
-        action as actionTypes.UpdateSpanPointAction
-      )
     case actionConsts.REGISTER_SPAN_POINT:
       return span3d.registerSpanPoint(state)
     case actionConsts.RESET_SPAN:
@@ -113,11 +108,6 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return span3d.resumeSpan(state)
     case actionConsts.UNDO_SPAN:
       return span3d.undoSpan(state)
-    case actionConsts.SET_GROUND_PLANE:
-      return common.setGroundPlane(
-        state,
-        action as actionTypes.SetGroundPlaneAction
-      )
     case actionConsts.TOGGLE_GROUND_PLANE:
       return common.toggleGroundPlane(state)
     case actionConsts.NULL:

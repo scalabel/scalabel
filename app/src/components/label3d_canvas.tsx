@@ -5,7 +5,7 @@ import { connect } from "react-redux"
 import * as THREE from "three"
 
 import Session from "../common/session"
-import { ViewerConfigTypeName } from "../const/common"
+import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { registerSpanPoint, updateSpanPoint } from "../action/span3d"
 import { Label3DHandler } from "../drawable/3d/label3d_handler"
 import { isCurrentFrameLoaded } from "../functional/state_util"
@@ -18,8 +18,8 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { Crosshair, Crosshair2D } from "./crosshair"
-import { Vector3D } from "../math/vector3d"
-import { GroundPlane3D } from "../drawable/3d/ground_plane3d"
+import { Plane3D } from "../drawable/3d/plane3d"
+import { Vector2D } from "../math/vector2d"
 
 const styles = (): StyleRules<"label3d_canvas", {}> =>
   createStyles({
@@ -86,8 +86,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
   private data2d: boolean
   /** The crosshair */
   private readonly crosshair: React.RefObject<Crosshair2D>
-  /** Ground plane */
-  private groundPlane: GroundPlane3D | null
 
   /** drawable label list */
   private readonly _labelHandler: Label3DHandler
@@ -124,7 +122,6 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       Line: { threshold: 0.02 }
     }
     this.crosshair = React.createRef()
-    this.groundPlane = null
 
     this._keyDownMap = {}
 
@@ -226,6 +223,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
     if (this.canvas !== null) {
       const sensor = this.state.user.viewerConfigs[this.props.id].sensor
       if (isCurrentFrameLoaded(this.state, sensor)) {
+        this.updateGroundPlane()
         this.updateRenderer()
         this.renderThree()
       } else if (this.renderer !== null && this.renderer !== undefined) {
@@ -233,6 +231,22 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       }
     }
     return true
+  }
+
+  /** Update ground plane if needed */
+  private updateGroundPlane(): void {
+    const selectedItem = this.state.user.select.item
+    const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
+    const viewerConfig = this.state.user.viewerConfigs[this.props.id]
+    if (groundPlane === null) {
+      if (
+        viewerConfig.type === ViewerConfigTypeName.POINT_CLOUD ||
+        viewerConfig.type === ViewerConfigTypeName.IMAGE_3D
+      ) {
+        // Estimate new ground plane
+        this._labelHandler.createGroundPlane(selectedItem)
+      }
+    }
   }
 
   /**
@@ -314,29 +328,30 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
 
     const state = Session.getState()
     if (state.session.info3D.isBoxSpan) {
-      this.setCursor("crosshair")
-      if (this.groundPlane === null) {
-        const groundPlanePoints = Session.getState().session.info3D.groundPlane
+      const plane = new THREE.Plane()
+      // Check if ground plane in current item
+      const selectedItem = state.user.select.item
+      const labels = Session.label3dList.labels()
+      const itemPlanes = labels.filter(
+        (l) =>
+          l.item === selectedItem && l.label.type === LabelTypeName.PLANE_3D
+      )
+      if (itemPlanes.length > 0) {
+        const itemPlane = itemPlanes[0] as Plane3D
+        const normal = new THREE.Vector3(0, 0, 1)
+        normal.applyQuaternion(itemPlane.orientation)
+        plane.setFromNormalAndCoplanarPoint(normal, itemPlane.center)
+      }
 
-        if (groundPlanePoints !== null) {
-          const points: THREE.Vector3[] = []
-          for (let i = 0; i < groundPlanePoints.length; i += 3) {
-            points.push(
-              new THREE.Vector3(
-                groundPlanePoints[i],
-                groundPlanePoints[i + 1],
-                groundPlanePoints[i + 2]
-              )
-            )
-          }
-          this.groundPlane = new GroundPlane3D(points)
-        }
-      } else {
-        const intersects = new THREE.Vector3()
-        this._raycaster.ray.intersectPlane(this.groundPlane.plane, intersects)
-        Session.dispatch(
-          updateSpanPoint(new Vector3D().fromThree(intersects), y)
+      const intersects = new THREE.Vector3()
+      this._raycaster.ray.intersectPlane(plane, intersects)
+      if (state.session.info3D.boxSpan !== null) {
+        state.session.info3D.boxSpan.updatePointTmp(
+          new Vector2D(x, y),
+          plane,
+          this.camera
         )
+        Session.dispatch(updateSpanPoint())
       }
     } else {
       this.setCursor("default")
@@ -344,7 +359,7 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       const intersects = this._raycaster.intersectObjects(
         // Need to do this middle conversion because ThreeJS does not specify
         // as readonly, but this should be readonly for all other purposes
-        (shapes as unknown) as THREE.Object3D[],
+        shapes as unknown as THREE.Object3D[],
         false
       )
 
@@ -437,13 +452,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       isCurrentFrameLoaded(state, sensor)
     ) {
       const boxSpan = Session.getState().session.info3D.boxSpan
-      if (boxSpan !== null) {
+      if (boxSpan?.render !== undefined) {
         boxSpan.render(Session.label3dList.scene)
-        const showGroundPlane = Session.getState().session.info3D
-          .showGroundPlane
-        if (showGroundPlane && this.groundPlane !== null) {
-          this.groundPlane.render(Session.label3dList.scene)
-        }
       }
       this.renderer.render(Session.label3dList.scene, this.camera)
     } else if (this.renderer !== null && this.renderer !== undefined) {
@@ -458,7 +468,18 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * @param e
    */
   private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
-    if (this._labelHandler.onDoubleClick()) {
+    if (this.canvas === null || this.checkFreeze()) {
+      return
+    }
+    const normalized = normalizeCoordinatesToCanvas(
+      e.clientX,
+      e.clientY,
+      this.canvas
+    )
+    const NDC = convertMouseToNDC(normalized[0], normalized[1], this.canvas)
+    const x = NDC[0]
+    const y = NDC[1]
+    if (this._labelHandler.onDoubleClick(x, y)) {
       e.stopPropagation()
     }
   }
@@ -500,7 +521,8 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
       if (
         this.canvas !== null &&
         this.display !== null &&
-        this.data2d !== null
+        this.data2d !== null &&
+        viewerConfig.type === ViewerConfigTypeName.IMAGE_3D
       ) {
         const img3dConfig = viewerConfig as Image3DViewerConfigType
         if (

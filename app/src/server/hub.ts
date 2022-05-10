@@ -73,7 +73,7 @@ export class Hub {
       try {
         await this.register(data, socket)
       } catch (error) {
-        Logger.error(error)
+        Logger.error(error as Error)
       }
     })
 
@@ -81,7 +81,7 @@ export class Hub {
       try {
         await this.actionUpdate(data, socket)
       } catch (error) {
-        Logger.error(error)
+        Logger.error(error as Error)
       }
     })
 

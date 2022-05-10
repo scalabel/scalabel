@@ -32,7 +32,9 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
     if frame.url is not None and len(frame.url) > 0:
         with urllib.request.urlopen(frame.url, timeout=300) as req:
             image_data = req.read()
-        im = np.asarray(Image.open(io.BytesIO(image_data)), dtype=np.uint8)
+        im: NDArrayU8 = np.asarray(
+            Image.open(io.BytesIO(image_data)), dtype=np.uint8
+        )
     else:
         if frame.videoName is not None:
             image_path = os.path.join(image_dir, frame.videoName, frame.name)
@@ -46,9 +48,7 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
 
 
 def gen_2d_rect(
-    label: Label,
-    color: List[float],
-    linewidth: int,
+    label: Label, color: List[float], linewidth: int
 ) -> List[mpatches.Rectangle]:
     """Generate individual bounding box from 2d label."""
     assert label.box2d is not None
@@ -157,29 +157,19 @@ def poly2patch(
 
 
 def gen_graph_point(
-    node: Node,
-    color: List[float],
-    radius: int,
+    node: Node, color: List[float], radius: int, alpha: float
 ) -> List[mpatches.Circle]:
     """Generate graph point from node."""
     assert node is not None
 
     # Draw and add graph node to the figure
     return [
-        mpatches.Circle(
-            node.location,
-            radius=radius,
-            color=color,
-            alpha=0.5,
-        )
+        mpatches.Circle(node.location, radius=radius, color=color, alpha=alpha)
     ]
 
 
 def gen_graph_edge(
-    edge: Edge,
-    label: Label,
-    color: List[float],
-    linewidth: int,
+    edge: Edge, label: Label, color: List[float], linewidth: int, alpha: float
 ) -> List[mpatches.ConnectionPatch]:
     """Generate graph edges from graph label."""
     assert edge is not None
@@ -194,6 +184,6 @@ def gen_graph_edge(
             "data",
             color=color,
             linewidth=linewidth,
-            alpha=0.5,
+            alpha=alpha,
         )
     ]

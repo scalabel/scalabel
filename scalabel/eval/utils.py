@@ -1,4 +1,5 @@
 """Utility functions for eval."""
+import copy
 from functools import partial
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
@@ -51,7 +52,7 @@ def check_overlap_frame(
     """Check overlap of segmentation masks for a single frame."""
     if frame.labels is None:
         return False
-    overlap_mask = np.zeros((0), dtype=np.uint8)
+    overlap_mask: NDArrayU8 = np.zeros((0), dtype=np.uint8)
     for label in frame.labels:
         if label.category not in categories:
             continue
@@ -103,6 +104,74 @@ def check_overlap(
             # remove predictions with overlap
             frame.labels = None
     return any(overlaps)
+
+
+def handle_inconsistent_length(
+    gts: List[List[Frame]],
+    results: List[List[Frame]],
+) -> List[List[Frame]]:
+    """Check the video results and give feedbacks about inconsistency.
+
+    Args:
+        gts: the ground truth annotations in Scalabel format
+        results: the prediction results in Scalabel format.
+
+    Returns:
+      results: the processed results in Scalabel format.
+
+    Raises:
+        ValueError: if test results have videos that not present in gts.
+    """
+    # check the missing video sequences
+    if len(results) < len(gts):
+        # build gt_index and gt_videoName mapping
+        gt_video_name_index_mapping = {}
+        for i, gt in enumerate(gts):
+            gt_video_name_index_mapping[gt[0].videoName] = i
+
+        gt_video_names = set(gt_video_name_index_mapping.keys())
+        res_video_names = {res[0].videoName for res in results}
+        missing_video_names = gt_video_names - res_video_names
+        outlier_results = res_video_names - gt_video_names
+
+        if outlier_results:
+            logger.critical(
+                "You have videos not in the test set: " "%s",
+                str(outlier_results),
+            )
+            raise ValueError(
+                f"You have videos not in the test set: "
+                f"{str(outlier_results)}"
+            )
+
+        if missing_video_names:
+            logger.critical(
+                "The results are missing for "
+                "following video sequences: "
+                "%s",
+                str(missing_video_names),
+            )
+
+            # add empty list for those missing results
+            for name in missing_video_names:
+                gt_idx = gt_video_name_index_mapping[name]
+                gt = gts[gt_idx]
+                gt_without_labels = []
+
+                for f in gt:
+                    f_copy = copy.deepcopy(f)
+                    f_copy.labels = []
+                    gt_without_labels.append(f_copy)
+
+                results.append(gt_without_labels)
+
+            results = sorted(
+                results, key=lambda frames: str(frames[0].videoName)
+            )
+    elif len(results) > len(gts):
+        raise ValueError("You have videos not in the test set.")
+
+    return results
 
 
 def combine_stuff_masks(
@@ -174,25 +243,59 @@ def parse_seg_objects(
         rles, labels, ids = combine_stuff_masks(rles, labels, ids, classes)
     rles_dict = [rle.dict() for rle in rles]
     ignore_rles_dict = [rle.dict() for rle in ignore_rles]
-    labels_arr = np.array(labels, dtype=np.int32)
-    ids_arr = np.array(ids, dtype=np.int32)
+    labels_arr: NDArrayI32 = np.array(labels, dtype=np.int32)
+    ids_arr: NDArrayI32 = np.array(ids, dtype=np.int32)
     return (rles_dict, labels_arr, ids_arr, ignore_rles_dict)
 
 
 def reorder_preds(
     ann_frames: List[Frame], pred_frames: List[Frame]
 ) -> List[Frame]:
-    """Sort predictions and add empty frames for missing predictions."""
-    pred_map: Dict[str, Frame] = {
-        pred_frame.name: pred_frame for pred_frame in pred_frames
-    }
-    sorted_results: List[Frame] = []
+    """Reorder predictions and add empty frames for missing predictions."""
+    pred_names = [f.name for f in pred_frames]
+    use_video = False
+    if len(pred_names) != len(set(pred_names)):
+        # handling non-unique prediction frames names with videoName
+        use_video = all(f.videoName for f in pred_frames) and all(
+            f.videoName for f in ann_frames
+        )
+        if not use_video:
+            logger.critical(
+                "Prediction frames names are not unique, but videoName is not "
+                "specified for all frames."
+            )
+    pred_map: Dict[str, Frame] = {}
+    for pred_frame in pred_frames:
+        name = pred_frame.name
+        if use_video:
+            name = f"{pred_frame.videoName}/{name}"
+        pred_map[name] = pred_frame
+    order_results: List[Frame] = []
     miss_num = 0
     for gt_frame in ann_frames:
-        if gt_frame.name in pred_map:
-            sorted_results.append(pred_map[gt_frame.name])
+        gt_name = gt_frame.name
+        if use_video:
+            gt_name = f"{gt_frame.videoName}/{gt_name}"
+        if gt_name in pred_map:
+            order_results.append(pred_map[gt_name])
         else:
-            sorted_results.append(Frame(name=gt_frame.name))
+            # add empty frame
+            gt_frame_copy = copy.deepcopy(gt_frame)
+            gt_frame_copy.labels = None
+            order_results.append(gt_frame_copy)
             miss_num += 1
-    logger.info("%s images are missed in the prediction.", miss_num)
-    return sorted_results
+    if miss_num > 0:
+        logger.critical("%s images are missed in the prediction!", miss_num)
+    return order_results
+
+
+def filter_labels(frames: List[Frame], cats: List[Category]) -> List[Frame]:
+    """Filter frame labels by categories."""
+    cats = get_leaf_categories(cats)
+    cat_names = [c.name for c in cats]
+    filt_frames = []
+    for f in frames:
+        if f.labels is not None:
+            f.labels = [l for l in f.labels if l.category in cat_names]
+        filt_frames.append(f)
+    return filt_frames

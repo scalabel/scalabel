@@ -284,6 +284,15 @@ export class Label2DHandler {
           commit2DLabels([...this._labelList.popUpdatedLabels()])
         }
         break
+      case Key.SPACE:
+        if (this.hasSelectedLabels()) {
+          for (const label of this._labelList.selectedLabels) {
+            if (!label.temporary) {
+              label.changeChecked()
+              commit2DLabels([...this._labelList.popUpdatedLabels()])
+            }
+          }
+        }
     }
   }
 
@@ -356,9 +365,8 @@ export class Label2DHandler {
       const labelIds = this._highlightedLabel.isValid()
         ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
         : [this._highlightedLabel.labelId]
-      const highlightedAlreadySelected = this._labelList.selectedLabels.includes(
-        this._highlightedLabel
-      )
+      const highlightedAlreadySelected =
+        this._labelList.selectedLabels.includes(this._highlightedLabel)
       if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
         if (highlightedAlreadySelected) {
           Session.dispatch(

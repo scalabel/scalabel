@@ -1,0 +1,49 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "weather"
+    [[categories.subcategories]]
+    name = "rainy"
+
+    [[categories.subcategories]]
+    name = "snowy"
+
+    [[categories.subcategories]]
+    name = "clear"
+
+    [[categories.subcategories]]
+    name = "overcast"
+
+    [[categories.subcategories]]
+    name = "undefined"
+
+    [[categories.subcategories]]
+    name = "partly cloudy"
+
+    [[categories.subcategories]]
+    name = "foggy"
+
+[[categories]]
+name = "scene"
+    [[categories.subcategories]]
+    name = "tunnel"
+
+    [[categories.subcategories]]
+    name = "residential"
+
+    [[categories.subcategories]]
+    name = "parking lot"
+
+    [[categories.subcategories]]
+    name = "undefined"
+
+    [[categories.subcategories]]
+    name = "city street"
+
+    [[categories.subcategories]]
+    name = "gas stations"
+
+    [[categories.subcategories]]
+    name = "highway"

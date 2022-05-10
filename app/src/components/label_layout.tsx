@@ -2,7 +2,7 @@ import CssBaseline from "@material-ui/core/CssBaseline"
 import { withStyles } from "@material-ui/core/styles"
 import { Stack } from "@mui/material"
 import * as React from "react"
-import SplitPane from "react-split-pane"
+import SplitPane from "../common/split_pane/SplitPane"
 import Session from "../common/session"
 import { LayoutStyles } from "../styles/label"
 import LabelPane from "./label_pane"
@@ -86,11 +86,9 @@ class LabelLayout extends React.Component<Props, LayoutState> {
    * called on redux store update
    */
   public onStateUpdated(): void {
-    this.setState(
-      (state: LayoutState): LayoutState => {
-        return state
-      }
-    )
+    this.setState((state: LayoutState): LayoutState => {
+      return state
+    })
   }
 
   /**
@@ -100,19 +98,17 @@ class LabelLayout extends React.Component<Props, LayoutState> {
    * @param {string} position
    */
   public handleOnChange(size: number, position: string): void {
-    this.setState(
-      (state: LayoutState): LayoutState => {
-        const newState = { ...state }
-        if (position === "left" && state.left_size !== size) {
-          newState.left_size = size
-        } else if (position === "center" && state.center_size !== size) {
-          newState.center_size = size
-        } else if (position === "right" && state.right_size !== size) {
-          newState.right_size = size
-        }
-        return newState
+    this.setState((state: LayoutState): LayoutState => {
+      const newState = { ...state }
+      if (position === "left" && state.left_size !== size) {
+        newState.left_size = size
+      } else if (position === "center" && state.center_size !== size) {
+        newState.center_size = size
+      } else if (position === "right" && state.right_size !== size) {
+        newState.right_size = size
       }
-    )
+      return newState
+    })
   }
 
   /**
@@ -222,6 +218,7 @@ class LabelLayout extends React.Component<Props, LayoutState> {
       <PlayerControl
         key="player-control"
         numFrames={Session.getState().task.items.length}
+        keyInterval={Session.getState().task.config.keyInterval}
       />
     )
 

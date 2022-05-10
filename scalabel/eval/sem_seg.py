@@ -23,7 +23,7 @@ from scalabel.label.typing import Config, Frame, ImageSize
 from scalabel.label.utils import get_leaf_categories
 
 from .result import AVERAGE, Result, Scores, ScoresList
-from .utils import reorder_preds
+from .utils import filter_labels, reorder_preds
 
 
 class SegResult(Result):
@@ -57,9 +57,7 @@ class SegResult(Result):
 
 
 def fast_hist(
-    groundtruth: NDArrayU8,
-    prediction: NDArrayU8,
-    size: int,
+    groundtruth: NDArrayU8, prediction: NDArrayU8, size: int
 ) -> NDArrayI32:
     """Compute the histogram."""
     prediction = prediction.copy()
@@ -72,11 +70,12 @@ def fast_hist(
         np.less(groundtruth, size - 1),
     )
     return np.bincount(  # type: ignore
-        size * groundtruth[k].astype(int) + prediction[k], minlength=size ** 2
+        size * groundtruth[k].astype(int) + prediction[k],
+        minlength=size**2,
     ).reshape(size, size)
 
 
-def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
+def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class iou."""
     ious: NDArrayF64 = np.diag(hist) / (
         hist.sum(1) + hist.sum(0) - np.diag(hist)
@@ -86,7 +85,7 @@ def per_class_iou(hist: NDArrayU8) -> NDArrayF64:
     return ious[:-1]  # type: ignore
 
 
-def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
+def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class accuracy."""
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
@@ -94,13 +93,13 @@ def per_class_acc(hist: NDArrayU8) -> NDArrayF64:
     return accs[:-1]  # type: ignore
 
 
-def whole_acc(hist: NDArrayU8) -> float:
+def whole_acc(hist: NDArrayI32) -> float:
     """Calculate whole accuray."""
     hist = hist[:-1]
     return cast(float, np.diag(hist).sum() / hist.sum())
 
 
-def freq_iou(hist: NDArrayU8) -> float:
+def freq_iou(hist: NDArrayI32) -> float:
     """Calculate frequency iou."""
     ious = per_class_iou(hist)
     hist = hist[:-1]
@@ -116,8 +115,9 @@ def frame_to_mask(
 ) -> NDArrayU8:
     """Convert list of labels to a mask."""
     if image_size is not None:
-        out_mask: NDArrayU8 = (  # type: ignore
-            np.ones((image_size.height, image_size.width)) * ignore_label
+        out_mask: NDArrayU8 = (
+            np.ones((image_size.height, image_size.width))
+            * ignore_label  # type: ignore
         ).astype(np.uint8)
     else:
         out_mask = np.zeros((0), dtype=np.uint8)
@@ -189,12 +189,12 @@ def evaluate_sem_seg(
     Returns:
         SegResult: evaluation results.
     """
-    categories = {
-        cat.name: id
-        for id, cat in enumerate(get_leaf_categories(config.categories))
-    }
+    categories = get_leaf_categories(config.categories)
+    cat_map = {cat.name: id for id, cat in enumerate(categories)}
     ignore_label = 255
     pred_frames = reorder_preds(ann_frames, pred_frames)
+    ann_frames = filter_labels(ann_frames, categories)
+    pred_frames = filter_labels(pred_frames, categories)
 
     logger.info("evaluating...")
     if nproc > 1:
@@ -202,7 +202,7 @@ def evaluate_sem_seg(
             hist_and_gt_id_sets = pool.starmap(
                 partial(
                     per_image_hist,
-                    categories=categories,
+                    categories=cat_map,
                     image_size=config.imageSize,
                     ignore_label=ignore_label,
                 ),
@@ -213,7 +213,7 @@ def evaluate_sem_seg(
             per_image_hist(
                 ann_frame,
                 pred_frame,
-                categories=categories,
+                categories=cat_map,
                 image_size=config.imageSize,
                 ignore_label=ignore_label,
             )
@@ -223,8 +223,8 @@ def evaluate_sem_seg(
         ]
 
     logger.info("accumulating...")
-    num_classes = len(categories) + 1
-    hist = np.zeros((num_classes, num_classes))
+    num_classes = len(cat_map) + 1
+    hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
     for (hist_, gt_id_set_) in hist_and_gt_id_sets:
         hist += hist_
@@ -232,17 +232,17 @@ def evaluate_sem_seg(
 
     ious = per_class_iou(hist)
     accs = per_class_acc(hist)
-    IoUs = [  # pylint: disable=invalid-name
-        {cat_name: 100 * score for cat_name, score in zip(categories, ious)},
+    iou_scores = [
+        {cat_name: 100 * score for cat_name, score in zip(cat_map, ious)},
         {AVERAGE: np.multiply(np.mean(ious[list(gt_id_set)]), 100)},
     ]
-    Accs = [  # pylint: disable=invalid-name
-        {cat_name: 100 * score for cat_name, score in zip(categories, accs)},
+    acc_scores = [
+        {cat_name: 100 * score for cat_name, score in zip(cat_map, accs)},
         {AVERAGE: np.multiply(np.mean(accs[list(gt_id_set)]), 100)},
     ]
     res_dict: Dict[str, Union[float, ScoresList]] = dict(
-        IoU=IoUs,
-        Acc=Accs,
+        IoU=iou_scores,
+        Acc=acc_scores,
         fIoU=np.multiply(freq_iou(hist), 100),  # pylint: disable=invalid-name
         pAcc=np.multiply(whole_acc(hist), 100),  # pylint: disable=invalid-name
     )
@@ -266,7 +266,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes and resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",

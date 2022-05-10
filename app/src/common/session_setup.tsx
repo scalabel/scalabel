@@ -15,11 +15,7 @@ import {
   updatePane,
   updateState
 } from "../action/common"
-import {
-  alignToAxis,
-  toggleSelectionLock,
-  setGroundPlane
-} from "../action/point_cloud"
+import { alignToAxis, toggleSelectionLock } from "../action/point_cloud"
 import Window from "../components/window"
 import {
   DataType,
@@ -210,10 +206,6 @@ function loadPointClouds(
         attemptsMap[sensorId] = 0
         const onLoad = (geometry: THREE.BufferGeometry): void => {
           Session.pointClouds[item.index][sensorId] = geometry
-          const groundPlanePoints = Array.from(
-            geometry.getAttribute("groundPlane").array
-          )
-          dispatch(setGroundPlane(groundPlanePoints))
           dispatch(loadItem(item.index, sensorId))
         }
         // TODO(fyu): need to make a unified data loader with consistent
@@ -282,7 +274,7 @@ function initViewerConfigs(
         )
       )
       let primarySize = "33%"
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "25%"
       }
       dispatch(
@@ -312,7 +304,7 @@ function initViewerConfigs(
         )
       )
       primarySize = "50%"
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "33%"
       }
       dispatch(
@@ -334,7 +326,7 @@ function initViewerConfigs(
           2
         )
       )
-      if (minSensorIds[types.ViewerConfigTypeName.IMAGE_3D] >= 0) {
+      if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         dispatch(
           splitPane(
             state.user.layout.maxPaneId,
