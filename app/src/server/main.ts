@@ -28,6 +28,9 @@ import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
 
 declare global {
+  // formidable expects a type extension for this.
+  // Better to have a more elegant solution.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       fields?: formidable.Fields
@@ -118,6 +121,8 @@ function startHTTPServer(
     (req, _, next) => {
       const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
       form.parse(req, (err, fields, files) => {
+        // err is defined as any in formidable types
+        // eslint-disable-next-line  @typescript-eslint/strict-boolean-expressions
         if (err) {
           return next(err)
         }
