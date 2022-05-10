@@ -50,6 +50,7 @@ setuptools.setup(
         "PyYAML",
         "requests",
         "scikit-learn",
+        "scikit-image",
         "tabulate",
         "tqdm",
         "toml",
