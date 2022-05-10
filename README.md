@@ -2,24 +2,19 @@
 
 ---
 
-<center>
-
-![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
-![Mac OS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)
-
 ![Build & Test](https://github.com/scalabel/scalabel/workflows/Build%20&%20Test/badge.svg?branch=master)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade:
 Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
 ![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
+![System Support](https://img.shields.io/badge/os-linux%20%7C%20macos-green)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/scalabel/scalabel)
 [![PyPI version](https://badge.fury.io/py/scalabel.svg)](https://badge.fury.io/py/scalabel)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/scalabel)
 ![npm](https://img.shields.io/npm/v/scalabel)
 ![node-lts](https://img.shields.io/node/v-lts/scalabel)
 ![Redis Version](https://img.shields.io/badge/redis-%3E%3D5-blue)
 ![npm type definitions](https://img.shields.io/npm/types/scalabel)
-
-</center>
 
 [Scalabel](https://www.scalabel.ai) (pronounced "sca&#8901;label") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
 
