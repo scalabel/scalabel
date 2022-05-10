@@ -4,10 +4,10 @@ import unittest
 
 import numpy as np
 
-from ..common.typing import NDArrayF64
-from ..label.io import load, load_label_config
-from ..unittest.util import get_test_file
-from .boundary import evaluate_boundary
+from scalabel.common.typing import NDArrayF64
+from scalabel.eval.boundary import evaluate_boundary
+from scalabel.label.io import load, load_label_config
+from scalabel.unittest.util import get_test_file
 
 
 class TestScalabelBoundaryEval(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestScalabelBoundaryEval(unittest.TestCase):
     def test_frame(self) -> None:
         """Test case for the function frame()."""
         data_frame = self.result.pd_frame()
+        print(data_frame)
         categories = set(
             [
                 "double other",

@@ -228,6 +228,7 @@ def filter_labels(frames: List[Frame], cats: List[Category]) -> List[Frame]:
     filt_frames = []
     for f in frames:
         if f.labels is not None:
+            f = copy.deepcopy(f)
             f.labels = [l for l in f.labels if l.category in cat_names]
         filt_frames.append(f)
     return filt_frames

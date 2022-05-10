@@ -65,6 +65,8 @@ def parse_arguments() -> argparse.Namespace:
 def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
     """Parse annotation file into List of Scalabel Label type per frame."""
     outputs = defaultdict(list)
+    if not os.path.exists(ann_filepath):
+        return outputs
     for line in load_file_as_list(ann_filepath):
         gt = line.strip().split(",")
         class_id = gt[7]

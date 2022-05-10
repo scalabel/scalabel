@@ -56,6 +56,13 @@ class SegResult(Result):
         return summary_dict
 
 
+def safe_divide(arr_a: NDArrayI32, arr_b: NDArrayI32) -> NDArrayF64:
+    """Safe divide of NumPy arrays to handle NaNs."""
+    return np.divide(
+        arr_a, arr_b, out=np.zeros(arr_a.shape, dtype=float), where=arr_b != 0
+    )
+
+
 def fast_hist(
     groundtruth: NDArrayU8, prediction: NDArrayU8, size: int
 ) -> NDArrayI32:
@@ -64,31 +71,27 @@ def fast_hist(
     # Out-of-range values as `ignored`
     prediction[prediction >= size] = size - 1
 
+    # `ignored` is not considered
     k = np.logical_and(
-        # `ignored` is not considered
-        np.greater_equal(groundtruth, 0),
-        np.less(groundtruth, size - 1),
+        np.greater_equal(groundtruth, 0), np.less(groundtruth, size - 1)
     )
-    return np.bincount(  # type: ignore
-        size * groundtruth[k].astype(int) + prediction[k],
-        minlength=size**2,
+    return np.bincount(
+        size * groundtruth[k].astype(int) + prediction[k], minlength=size ** 2
     ).reshape(size, size)
 
 
 def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class iou."""
-    ious: NDArrayF64 = np.diag(hist) / (
-        hist.sum(1) + hist.sum(0) - np.diag(hist)
+    ious = safe_divide(
+        np.diag(hist), hist.sum(1) + hist.sum(0) - np.diag(hist)
     )
-    ious[np.isnan(ious)] = 0
     # Last class as `ignored`
     return ious[:-1]  # type: ignore
 
 
 def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class accuracy."""
-    accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
-    accs[np.isnan(accs)] = 0
+    accs = safe_divide(np.diag(hist), hist.sum(axis=0))
     # Last class as `ignored`
     return accs[:-1]  # type: ignore
 

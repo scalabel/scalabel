@@ -74,6 +74,9 @@ class BoundaryResult(Result):
     F1_pix1: List[Dict[str, float]]
     F1_pix2: List[Dict[str, float]]
     F1_pix5: List[Dict[str, float]]
+    IoU_pix1: List[Dict[str, float]]
+    IoU_pix2: List[Dict[str, float]]
+    IoU_pix5: List[Dict[str, float]]
 
     # pylint: disable=useless-super-delegation
     def __eq__(self, other: "BoundaryResult") -> bool:  # type: ignore
@@ -96,7 +99,7 @@ class BoundaryResult(Result):
         return summary_dict
 
 
-def eval_bdry_per_thr(
+def eval_f1_per_thr(
     gt_mask: NDArrayU8, pd_mask: NDArrayU8, bound_pix: int
 ) -> float:
     """Compute mean, recall, and decay from per-threshold evaluation."""
@@ -119,8 +122,7 @@ def eval_bdry_per_thr(
         precision = 0
         recall = 1
     elif n_pd == 0 and n_gt == 0:
-        precision = 1
-        recall = 1
+        return np.nan
     else:
         precision = np.sum(pd_match) / float(n_pd)
         recall = np.sum(gt_match) / float(n_gt)
@@ -132,6 +134,21 @@ def eval_bdry_per_thr(
         f_score = 2.0 * precision * recall / (precision + recall)
 
     return f_score
+
+
+def eval_iou_per_thr(
+    gt_mask: NDArrayU8, pd_mask: NDArrayU8, bound_pix: int
+) -> float:
+    """Compute IoU from per-threshold evaluation."""
+    pd_dil = binary_dilation(pd_mask, disk(bound_pix))
+
+    gt_match = np.sum(gt_mask * pd_dil)
+    n_gt = np.sum(gt_mask)
+    n_pd = np.sum(pd_mask)
+
+    if n_gt == 0 and n_pd == 0:
+        return np.nan
+    return float(gt_match) / (n_gt + n_pd - gt_match)
 
 
 def eval_bdry_per_frame(
@@ -154,6 +171,8 @@ def eval_bdry_per_frame(
     pd_masks = {
         l.category: l.rle for l in pred_frame.labels if l.rle is not None
     }
+    labels = [l.category for l in gt_frame.labels if l.rle is not None]
+    assert len(labels) == len(set(labels))
     for task_name, cats in categories.items():
         task_scores: List[List[float]] = []
         for cat in cats:
@@ -170,13 +189,15 @@ def eval_bdry_per_frame(
             )
             pd_mask = pd_mask > 0
             cat_scores = [
-                eval_bdry_per_thr(
-                    gt_mask,
-                    pd_mask,
-                    bound_pixel,
-                )
+                eval_f1_per_thr(gt_mask, pd_mask, bound_pixel)
                 for bound_pixel in BOUND_PIXELS
             ]
+            cat_scores.extend(
+                [
+                    eval_iou_per_thr(gt_mask, pd_mask, bound_pixel)
+                    for bound_pixel in BOUND_PIXELS
+                ]
+            )
             task_scores.append(cat_scores)
         task2arr[task_name] = np.array(task_scores)
 
@@ -187,21 +208,24 @@ def merge_results(
     task2arr_list: List[Dict[str, NDArrayF64]],
     categories: Dict[str, List[Category]],
 ) -> Dict[str, NDArrayF64]:
-    """Merge F-score results from all images."""
+    """Merge results from all images."""
     task2arr: Dict[str, NDArrayF64] = {
-        task_name: np.stack(
-            [task2arr_img[task_name] for task2arr_img in task2arr_list]
-        ).mean(axis=0)
+        task_name: np.nanmean(
+            np.stack(
+                [task2arr_img[task_name] for task2arr_img in task2arr_list]
+            ),
+            axis=0,
+        )
         for task_name in categories
     }
 
     for task_name, arr2d in task2arr.items():
         arr2d *= 100
-        arr_mean = arr2d.mean(axis=0, keepdims=True)
+        arr_mean = np.nanmean(arr2d, axis=0, keepdims=True)
         task2arr[task_name] = np.concatenate([arr2d, arr_mean], axis=0)
 
     avg_arr: NDArrayF64 = np.stack([arr2d[-1] for arr2d in task2arr.values()])
-    task2arr[AVERAGE] = avg_arr.mean(axis=0)
+    task2arr[AVERAGE] = np.nanmean(avg_arr, axis=0)
 
     return task2arr
 
@@ -211,7 +235,8 @@ def generate_results(
 ) -> BoundaryResult:
     """Render the evaluation results."""
     res_dict: Dict[str, ScoresList] = {
-        f"F1_pix{bound_pixel}": [{} for _ in range(5)]
+        f"{metric}_pix{bound_pixel}": [{} for _ in range(5)]
+        for metric in ["F1", "IoU"]
         for bound_pixel in BOUND_PIXELS
     }
 
@@ -220,8 +245,10 @@ def generate_results(
         if task_name == AVERAGE:
             continue
         for cat, arr1d in zip(categories[task_name], arr2d):
-            for bound_pixel, f_score in zip(BOUND_PIXELS, arr1d):
+            for bound_pixel, f_score in zip(BOUND_PIXELS, arr1d[:3]):
                 res_dict[f"F1_pix{bound_pixel}"][cur_ind][cat.name] = f_score
+            for bound_pixel, iou in zip(BOUND_PIXELS, arr1d[3:]):
+                res_dict[f"IoU_pix{bound_pixel}"][cur_ind][cat.name] = iou
         cur_ind += 1
 
     for task_name, arr2d in task2arr.items():
@@ -229,11 +256,15 @@ def generate_results(
         if task_name == AVERAGE:
             continue
         arr1d = arr2d[-1]
-        for bound_pixel, f_score in zip(BOUND_PIXELS, arr1d):
+        for bound_pixel, f_score in zip(BOUND_PIXELS, arr1d[:3]):
             res_dict[f"F1_pix{bound_pixel}"][-2][task_name] = f_score
+        for bound_pixel, iou in zip(BOUND_PIXELS, arr1d[3:]):
+            res_dict[f"IoU_pix{bound_pixel}"][-2][task_name] = iou
 
-    for bound_pixel, f_score in zip(BOUND_PIXELS, task2arr[AVERAGE]):
+    for bound_pixel, f_score in zip(BOUND_PIXELS, task2arr[AVERAGE][:3]):
         res_dict[f"F1_pix{bound_pixel}"][-1][AVERAGE] = f_score
+    for bound_pixel, iou in zip(BOUND_PIXELS, task2arr[AVERAGE][3:]):
+        res_dict[f"IoU_pix{bound_pixel}"][-1][AVERAGE] = iou
 
     return BoundaryResult(**res_dict)
 
