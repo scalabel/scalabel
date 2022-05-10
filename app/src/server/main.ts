@@ -2,7 +2,7 @@ import "source-map-support/register"
 
 import * as child from "child_process"
 import express, { Application, NextFunction, Request, Response } from "express"
-import * as formidable from "express-formidable"
+import formidable from "formidable"
 import { createServer } from "http"
 import { Server } from "socket.io"
 
@@ -26,6 +26,15 @@ import { RedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
+
+declare global {
+  namespace Express {
+    interface Request {
+      fields?: formidable.Fields
+      files?: formidable.Files
+    }
+  }
+}
 
 /**
  * Sets up http handlers
@@ -106,7 +115,20 @@ function startHTTPServer(
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    formidable({ maxFileSize: maxFileSize }),
+    (req, _, next) => {
+      const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          return next(err)
+        }
+
+        Object.assign(req, {
+          fields,
+          files
+        })
+        return next()
+      })
+    },
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(
