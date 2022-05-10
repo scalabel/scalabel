@@ -9,7 +9,6 @@ let config = {
     create: __dirname + '/app/src/entries/create.tsx',
     worker: __dirname + '/app/src/entries/worker.tsx',
     admin: __dirname + '/app/src/entries/admin.tsx',
-    // speed_test: __dirname + '/app/src/dev/speed_test.js',
     dashboard: __dirname + '/app/src/entries/dashboard.tsx',
     vendor: __dirname + '/app/src/entries/vendor.tsx',
     label: __dirname + '/app/src/entries/label.index.ts',
