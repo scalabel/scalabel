@@ -2,6 +2,8 @@
 
 ---
 
+<br>
+
 ![Build & Test](https://github.com/scalabel/scalabel/workflows/Build%20&%20Test/badge.svg?branch=master)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade:
@@ -16,6 +18,26 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 [**Contributors**](https://github.com/scalabel/scalabel/graphs/contributors)
 
 ![scalabel interface](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/banner-app.png)
+
+<br>
+
+---
+
+<br>
+
+## Supported Builds
+
+| OS         | Python 3.7                                                                                                                                             | Python 3.8                                                                                                                                             | Python 3.9                                                                                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Ubuntu** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.7)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.8)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.9)?style=plastic>) |
+| **MacOS**  | NA                                                                                                                                                     | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(MacOS,%20Python%203.8)?style=plastic>)  | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(MacOS,%20Python%203.9)?style=plastic>)  |
+
+| Node         | 12.x                                                                                                                                        | 13.x                                                                                                                                        | 14.x                                                                                                                                        | 16.x                                                                                                                                        | 18.x                                                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Redis v5** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2012.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2013.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2014.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2016.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2018.x)?style=plastic>) |
+| **Redis v6** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2012.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2013.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2014.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2016.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2018.x)?style=plastic>) |
+
+<br>
 
 ---
 
