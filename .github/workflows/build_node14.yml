@@ -1,0 +1,51 @@
+name: Build & Test (Node 14.x)
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  nodejs:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        redis-version: [6, 5]
+
+    services:
+      redis:
+        # Docker Hub image
+        image: redis:${{ matrix.redis-version }}
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps port 6379 on service container to the host
+          - 6378:6379
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install node packages
+        run: |
+          # add library dependencies for canvas package in case we need to compile from source
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+          npm ci
+      - name: Lint
+        run: npx eslint -c .eslintrc.json --ext .ts,.tsx app/src app/test
+      - name: Test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: npm test
+      - name: Build
+        run: npx webpack --config webpack.config.js --mode=production

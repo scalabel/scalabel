@@ -1,0 +1,39 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Build & Test (MacOS, Python 3.7)
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  python-mac:
+    name: test py${{ matrix.python-version }} on mac
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install brew packages
+        run: |
+          brew install openmpi
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install --ignore-installed -r scripts/requirements.txt
+          pip install --ignore-installed -r scripts/optional.txt
+      - name: Build
+        run: python3 setup.py sdist bdist_wheel
+      - name: Test
+        env:
+          MPLBACKEND: TkAgg
+        run: python3 -m pytest --pyargs scalabel
