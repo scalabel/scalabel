@@ -172,7 +172,7 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing node packages
 echo [$(date +"%F %T")] ================================
 
-npm install --save-dev --max_old_space_size=8000
+npm ci --max_old_space_size=8000
 
 echo ""
 echo [$(date +"%F %T")] ================================
