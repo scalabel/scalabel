@@ -119,6 +119,9 @@ function startHTTPServer(
     Endpoint.POST_PROJECT,
     authMiddleWare,
     (req, _, next) => {
+      /**
+       * If we need to use formidable at more places, we had better make this a middleware.
+       */
       const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
       form.parse(req, (err, fields, files) => {
         // err is defined as any in formidable types
