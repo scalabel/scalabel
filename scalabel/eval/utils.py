@@ -106,6 +106,74 @@ def check_overlap(
     return any(overlaps)
 
 
+def handle_inconsistent_length(
+    gts: List[List[Frame]],
+    results: List[List[Frame]],
+) -> List[List[Frame]]:
+    """Check the video results and give feedbacks about inconsistency.
+
+    Args:
+        gts: the ground truth annotations in Scalabel format
+        results: the prediction results in Scalabel format.
+
+    Returns:
+      results: the processed results in Scalabel format.
+
+    Raises:
+        ValueError: if test results have videos that not present in gts.
+    """
+    # check the missing video sequences
+    if len(results) < len(gts):
+        # build gt_index and gt_videoName mapping
+        gt_video_name_index_mapping = {}
+        for i, gt in enumerate(gts):
+            gt_video_name_index_mapping[gt[0].videoName] = i
+
+        gt_video_names = set(gt_video_name_index_mapping.keys())
+        res_video_names = {res[0].videoName for res in results}
+        missing_video_names = gt_video_names - res_video_names
+        outlier_results = res_video_names - gt_video_names
+
+        if outlier_results:
+            logger.critical(
+                "You have videos not in the test set: " "%s",
+                str(outlier_results),
+            )
+            raise ValueError(
+                f"You have videos not in the test set: "
+                f"{str(outlier_results)}"
+            )
+
+        if missing_video_names:
+            logger.critical(
+                "The results are missing for "
+                "following video sequences: "
+                "%s",
+                str(missing_video_names),
+            )
+
+            # add empty list for those missing results
+            for name in missing_video_names:
+                gt_idx = gt_video_name_index_mapping[name]
+                gt = gts[gt_idx]
+                gt_without_labels = []
+
+                for f in gt:
+                    f_copy = copy.deepcopy(f)
+                    f_copy.labels = []
+                    gt_without_labels.append(f_copy)
+
+                results.append(gt_without_labels)
+
+            results = sorted(
+                results, key=lambda frames: str(frames[0].videoName)
+            )
+    elif len(results) > len(gts):
+        raise ValueError("You have videos not in the test set.")
+
+    return results
+
+
 def combine_stuff_masks(
     rles: List[RLE],
     class_ids: List[int],
@@ -219,3 +287,15 @@ def reorder_preds(
     if miss_num > 0:
         logger.critical("%s images are missed in the prediction!", miss_num)
     return order_results
+
+
+def filter_labels(frames: List[Frame], cats: List[Category]) -> List[Frame]:
+    """Filter frame labels by categories."""
+    cats = get_leaf_categories(cats)
+    cat_names = [c.name for c in cats]
+    filt_frames = []
+    for f in frames:
+        if f.labels is not None:
+            f.labels = [l for l in f.labels if l.category in cat_names]
+        filt_frames.append(f)
+    return filt_frames

@@ -48,6 +48,8 @@ export interface LabelType {
   manual: boolean
   /** Has shape changed? e.g. vertex is added/deleted. */
   changed: boolean
+  /** whether the label has been annotated as checked. */
+  checked: boolean
 }
 
 export interface TrackType {
@@ -177,6 +179,12 @@ export interface IndexedShapeType {
   shape: ShapeType
 }
 
+export enum ColorSchemeType {
+  IMAGE = "image",
+  DEPTH = "depth",
+  HEIGHT = "height"
+}
+
 export interface ViewerConfigType {
   /** string indicating type */
   type: string
@@ -221,11 +229,21 @@ export interface PointCloudViewerConfigType extends ViewerConfigType {
   lockStatus: number
   /** Camera rotation direction */
   cameraRotateDir?: boolean
+  /** Color scheme for the point cloud */
+  colorScheme: ColorSchemeType
+  /** Has the camera been transformed */
+  cameraTransformed: boolean
 }
 
 export interface Image3DViewerConfigType extends ImageViewerConfigType {
   /** If set, sensor id of point cloud to use as reference */
   pointCloudSensor: number
+  /** whether to overlay point cloud */
+  pointCloudOverlay: boolean
+  /** Viewing direction */
+  target: Vector3Type
+  /** Up direction of the camera */
+  verticalAxis: Vector3Type
 }
 
 export interface HomographyViewerConfigType extends Image3DViewerConfigType {
@@ -351,6 +369,8 @@ export interface ConfigType {
   policyTypes: string[]
   /** Task size */
   taskSize: number
+  /** Keyframe interval */
+  keyInterval: number
   /** Whether to track */
   tracking: boolean
   /** Handler URL */
@@ -532,8 +552,6 @@ export interface Info3DType {
   boxSpan: Span3D | null
   /** Ground plane toggled */
   showGroundPlane: boolean
-  /** Ground plane */
-  groundPlane: number[] | null
 }
 
 /**

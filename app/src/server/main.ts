@@ -2,7 +2,7 @@ import "source-map-support/register"
 
 import * as child from "child_process"
 import express, { Application, NextFunction, Request, Response } from "express"
-import * as formidable from "express-formidable"
+import formidable from "formidable"
 import { createServer } from "http"
 import { Server } from "socket.io"
 
@@ -26,6 +26,18 @@ import { RedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
+
+declare global {
+  // formidable expects a type extension for this.
+  // Better to have a more elegant solution.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      fields?: formidable.Fields
+      files?: formidable.Files
+    }
+  }
+}
 
 /**
  * Sets up http handlers
@@ -106,7 +118,25 @@ function startHTTPServer(
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    formidable({ maxFileSize: maxFileSize }),
+    (req, _, next) => {
+      /**
+       * If we need to use formidable at more places, we had better make this a middleware.
+       */
+      const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
+      form.parse(req, (err, fields, files) => {
+        // err is defined as any in formidable types
+        // eslint-disable-next-line  @typescript-eslint/strict-boolean-expressions
+        if (err) {
+          return next(err)
+        }
+
+        Object.assign(req, {
+          fields,
+          files
+        })
+        return next()
+      })
+    },
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(

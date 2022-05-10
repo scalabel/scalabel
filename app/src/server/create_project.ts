@@ -88,6 +88,19 @@ export async function parseForm(
     }
   }
 
+  // In tracking case, set the interval between keyframes
+  let keyInterval = 1
+  if (
+    fields[FormField.ITEM_TYPE] === ItemTypeName.VIDEO ||
+    fields[FormField.ITEM_TYPE] === ItemTypeName.POINT_CLOUD_TRACKING
+  ) {
+    if (fields[FormField.KEY_INTERVAL] === "") {
+      throw Error("Please specify a task size")
+    } else {
+      keyInterval = parseInt(fields[FormField.KEY_INTERVAL], 10)
+    }
+  }
+
   // Derived fields
   const pageTitle = getPageTitle(labelType, itemType)
   const instructionUrl = getInstructionUrl(labelType)
@@ -104,6 +117,7 @@ export async function parseForm(
     labelType,
     pageTitle,
     taskSize,
+    keyInterval,
     instructionUrl,
     demoMode
   )
@@ -201,7 +215,7 @@ export async function parseSingleFile(
       sensors:
         dataset.config.sensors !== undefined ? dataset.config.sensors : [],
       templates: [],
-      attributes: dataset.config.attributes as Attribute[],
+      attributes: (dataset.config.attributes as Attribute[]) ?? [],
       categories: dataset.config.categories
     }
   })
@@ -227,7 +241,7 @@ export async function readConfig<T>(
 
   const file = await storage.load(filePath)
   try {
-    const fileData = (yaml.load(file, { json: true }) as unknown) as T
+    const fileData = yaml.load(file, { json: true }) as T
     return fileData
   } catch {
     throw new Error(`Improper formatting for file: ${filePath}`)
@@ -346,6 +360,7 @@ export async function createProject(
     labelTypes: [form.labelType],
     label2DTemplates: templates,
     taskSize: form.taskSize,
+    keyInterval: form.keyInterval,
     handlerUrl,
     pageTitle: form.pageTitle,
     instructionPage: form.instructionUrl,
@@ -384,7 +399,7 @@ export async function createProject(
     itemGroups: formFileData.itemGroups,
     sensors
   }
-  return Promise.resolve(project)
+  return await Promise.resolve(project)
 }
 
 /**
@@ -455,9 +470,9 @@ function getCategoryMap(configCategories: string[]): { [key: string]: number } {
  *
  * @param items
  */
-function getItemNameMap(
-  items: Array<Partial<ItemExport>>
-): { [key: string]: number } {
+function getItemNameMap(items: Array<Partial<ItemExport>>): {
+  [key: string]: number
+} {
   const itemNameMap: { [key: string]: number } = {}
   for (let itemInd = 0; itemInd < items.length; itemInd++) {
     const item = items[itemInd]
@@ -813,5 +828,5 @@ export async function createTasks(
       tasks.push(task)
     }
   }
-  return Promise.resolve(tasks)
+  return await Promise.resolve(tasks)
 }

@@ -553,17 +553,3 @@ export function toggleRotation(
 
   return changeViewerConfig(viewerId, config)
 }
-
-/**
- * Set ground plane
- *
- * @param groundPlanePoints
- */
-export function setGroundPlane(
-  groundPlanePoints: number[]
-): actionTypes.SetGroundPlaneAction {
-  return {
-    ...makeBaseAction(actionConsts.SET_GROUND_PLANE),
-    groundPlanePoints
-  }
-}

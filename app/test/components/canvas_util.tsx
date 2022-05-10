@@ -20,10 +20,10 @@ function mouseDownEvent(
   x: number,
   y: number
 ): React.MouseEvent<HTMLCanvasElement> {
-  return (new MouseEvent("mousedown", {
+  return new MouseEvent("mousedown", {
     clientX: x,
     clientY: y
-  }) as unknown) as React.MouseEvent<HTMLCanvasElement>
+  }) as unknown as React.MouseEvent<HTMLCanvasElement>
 }
 
 /**
@@ -36,10 +36,10 @@ function mouseUpEvent(
   x: number,
   y: number
 ): React.MouseEvent<HTMLCanvasElement> {
-  return (new MouseEvent("mouseup", {
+  return new MouseEvent("mouseup", {
     clientX: x,
     clientY: y
-  }) as unknown) as React.MouseEvent<HTMLCanvasElement>
+  }) as unknown as React.MouseEvent<HTMLCanvasElement>
 }
 
 /**
@@ -52,10 +52,10 @@ function mouseMoveEvent(
   x: number,
   y: number
 ): React.MouseEvent<HTMLCanvasElement> {
-  return (new MouseEvent("mousemove", {
+  return new MouseEvent("mousemove", {
     clientX: x,
     clientY: y
-  }) as unknown) as React.MouseEvent<HTMLCanvasElement>
+  }) as unknown as React.MouseEvent<HTMLCanvasElement>
 }
 
 /**

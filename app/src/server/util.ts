@@ -38,7 +38,7 @@ export async function makeStorage(
         await s3Store.makeBucket()
         storage = s3Store
       } catch (error) {
-        Logger.error(error)
+        Logger.error(error as Error)
         Logger.info("s3 failed, using file storage by default")
         storage = new FileStorage(dir)
       }
@@ -77,6 +77,7 @@ export async function makeStorage(
  * @param labelType
  * @param pageTitle
  * @param taskSize
+ * @param keyInterval
  * @param instructionUrl
  * @param demoMode
  */
@@ -86,6 +87,7 @@ export function makeCreationForm(
   labelType = "",
   pageTitle = "",
   taskSize = 0,
+  keyInterval = 1,
   instructionUrl = "",
   demoMode = false
 ): CreationForm {
@@ -96,6 +98,7 @@ export function makeCreationForm(
     pageTitle,
     instructionUrl,
     taskSize,
+    keyInterval,
     demoMode
   }
   return form
@@ -125,7 +128,8 @@ export function getHandlerUrl(itemType: string, labelType: string): string {
       if (
         labelType === LabelTypeName.BOX_2D ||
         labelType === LabelTypeName.POLYGON_2D ||
-        labelType === LabelTypeName.CUSTOM_2D
+        labelType === LabelTypeName.CUSTOM_2D ||
+        labelType === LabelTypeName.BOX_3D
       ) {
         return HandlerUrl.LABEL
       }
@@ -186,6 +190,11 @@ export function getPolicy(
           case LabelTypeName.CUSTOM_2D:
             labelTypes[0] = Object.keys(templates2d)[0]
             return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.BOX_3D:
+            return [
+              [TrackPolicyType.LINEAR_INTERPOLATION],
+              [LabelTypeName.BOX_3D, LabelTypeName.PLANE_3D]
+            ]
         }
       }
       return [policyTypes, labelTypes]
@@ -216,7 +225,7 @@ export function safeParseJSON(data: string): unknown {
     return parsed
   } catch (e) {
     Logger.error(Error("JSON parsed failed"))
-    Logger.error(e)
+    Logger.error(e as Error)
   }
 }
 

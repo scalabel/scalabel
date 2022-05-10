@@ -5,6 +5,8 @@ import { SpanLine3D } from "./spanLine3d"
 import { SpanRect3D } from "./spanRect3d"
 import { SpanCuboid3D } from "./spanCuboid3d"
 import { Vector3D } from "../../../math/vector3d"
+import { projectionFromNDC } from "../../../view_config/point_cloud"
+import { Vector2D } from "../../../math/vector2d"
 
 /**
  * ThreeJS class for rendering 3D span object
@@ -16,6 +18,8 @@ export class Span3D {
   private _pTmp: SpanPoint3D
   /** Line between first and second point */
   private _line: SpanLine3D | null
+  /** Rectangle formed by first three points */
+  private _rect: SpanRect3D | null
   /** Cuboid formed by the four points */
   private _cuboid: SpanCuboid3D | null
   /** Whether span box is complete */
@@ -26,6 +30,7 @@ export class Span3D {
     this._points = []
     this._pTmp = new SpanPoint3D(new Vector3D(0, 0, 0))
     this._line = null
+    this._rect = null
     this._cuboid = null
     this._complete = false
   }
@@ -47,6 +52,7 @@ export class Span3D {
         break
       case 1: {
         // render line between first point and temp point
+        this._line?.removeFromScene(scene)
         const line = new SpanLine3D(this._points[0], this._pTmp)
         this._line = line
         line.render(scene)
@@ -54,16 +60,19 @@ export class Span3D {
       }
       case 2: {
         // render plane formed by first, second point and temp point
-        const plane = new SpanRect3D(
+        this._rect?.removeFromScene(scene)
+        const rect = new SpanRect3D(
           this._points[0],
           this._points[1],
           this._pTmp
         )
-        plane.render(scene)
+        this._rect = rect
+        rect.render(scene)
         break
       }
       case 3: {
         // render cuboid formed by first, second, third point and temp point
+        this._cuboid?.removeFromScene(scene)
         const cuboid = new SpanCuboid3D(
           this._points[0],
           this._points[1],
@@ -84,32 +93,48 @@ export class Span3D {
   /**
    * Register new temporary point given current mouse position
    *
-   * @param point
-   * @param mouseY
+   * @param coords
+   * @param plane
+   * @param camera
    */
-  public updatePointTmp(point: Vector3D, mouseY: number): this {
+  public updatePointTmp(
+    coords: Vector2D,
+    plane: THREE.Plane,
+    camera: THREE.Camera
+  ): this {
+    if (this._pTmp === null) {
+      this._pTmp = new SpanPoint3D(new Vector3D())
+    }
+    const projection = projectionFromNDC(coords.x, coords.y, camera)
+    const point3d = new THREE.Vector3()
+    projection.intersectPlane(plane, point3d)
+    const point = new Vector3D(point3d.x, point3d.y, point3d.z)
     switch (this._points.length) {
       case 2:
         // make second point orthogonal to line
         if (this._line !== null) {
-          const newCoords = this._line.alignPointToNormal(point)
-          this._pTmp = new SpanPoint3D(newCoords)
+          const newCoords = this._line.alignPointToNormal(point, plane)
+          this._pTmp.update(newCoords)
         }
         break
       case 3: {
         // make third point orthogonal to plane
-        const scaleFactor = 5
-        this._pTmp = new SpanPoint3D(
-          new Vector3D(
-            this._points[2].x,
-            this._points[2].y,
-            mouseY * scaleFactor
-          )
-        )
+        const newPlane = new THREE.Plane()
+        const p3 = this._points[2].toVector3D().toThree()
+        const newNormal = p3.clone().normalize()
+        newPlane.setFromNormalAndCoplanarPoint(newNormal, p3)
+
+        projection.intersectPlane(newPlane, point3d)
+
+        const distance = plane.distanceToPoint(point3d)
+        const normal = plane.normal.clone()
+        normal.setLength(distance)
+        const newPoint = normal.add(this._points[2].toVector3D().toThree())
+        this._pTmp.update(new Vector3D(newPoint.x, newPoint.y, newPoint.z))
         break
       }
       default:
-        this._pTmp = new SpanPoint3D(point)
+        this._pTmp.update(point)
     }
     return this
   }
@@ -135,6 +160,7 @@ export class Span3D {
         }
     }
     this._points.push(this._pTmp)
+    this._pTmp = new SpanPoint3D(new Vector3D())
     return this
   }
 
@@ -161,21 +187,35 @@ export class Span3D {
     throw new Error("Span3D: cannot get cuboid center")
   }
 
-  /** Return cuboid dimensions */
-  public get dimensions(): THREE.Vector3 {
+  /**
+   * Return cuboid dimensions
+   *
+   * @param up
+   * @param forward
+   * @param left
+   * */
+  public dimensions(
+    up: Vector3D,
+    forward: Vector3D,
+    left: Vector3D
+  ): THREE.Vector3 {
     if (this._cuboid !== null) {
-      return this._cuboid.dimensions
+      return this._cuboid.dimensions(up, forward, left)
     }
 
     throw new Error("Span3D: cannot get cuboid dimensions")
   }
 
-  /** Return cuboid rotation */
-  public get rotation(): THREE.Quaternion {
-    if (this._cuboid !== null) {
-      return this._cuboid.rotation
+  /**
+   * Get side line
+   */
+  public get sideEdge(): THREE.Vector3 {
+    if (this._points.length < 3) {
+      throw new Error("Point 3 has not been set yet")
     }
-
-    throw new Error("Span3D: cannot get cuboid rotation")
+    return this._points[2]
+      .toVector3D()
+      .toThree()
+      .sub(this._points[1].toVector3D().toThree())
   }
 }

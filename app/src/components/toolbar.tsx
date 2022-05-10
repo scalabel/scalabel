@@ -3,7 +3,7 @@ import List from "@material-ui/core/List/List"
 // import ListItem from "@material-ui/core/ListItem"
 import _ from "lodash"
 import React from "react"
-import { ToastContainer, toast, Slide } from "react-toastify"
+import { Slide, toast, ToastContainer } from "react-toastify"
 
 import {
   changeModeToAnnotating,
@@ -24,7 +24,7 @@ import {
 import { addLabelTag } from "../action/tag"
 import { renderTemplate } from "../common/label"
 import Session from "../common/session"
-import { ItemTypeName, Key, LabelTypeName } from "../const/common"
+import { Key, LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import { getSelectedTracks } from "../functional/state_util"
 import { isValidId, makeTrack } from "../functional/states"
 import { tracksOverlapping } from "../functional/track"
@@ -186,9 +186,10 @@ export class ToolBar extends Component<Props> {
               this.deletePressed()
             })}
           </div>
-          {(this.state.task.config.itemType === ItemTypeName.POINT_CLOUD ||
-            this.state.task.config.itemType ===
-              ItemTypeName.POINT_CLOUD_TRACKING) && (
+          {(this.state.user.viewerConfigs[0].type ===
+            ViewerConfigTypeName.POINT_CLOUD ||
+            this.state.user.viewerConfigs[0].type ===
+              ViewerConfigTypeName.IMAGE_3D) && (
             <div>
               {this.state.session.info3D.isBoxSpan ||
               this.state.session.info3D.boxSpan !== null
@@ -404,6 +405,7 @@ export class ToolBar extends Component<Props> {
 
     if (!tracksOverlapping(tracks)) {
       Session.dispatch(mergeTracks(tracks.map((t) => t.id)))
+      alert(Severity.SUCCESS, "Selected tracks have been successfuly linked.")
     } else {
       alert(Severity.WARNING, "Selected tracks have overlapping frames.")
     }
@@ -437,6 +439,10 @@ export class ToolBar extends Component<Props> {
    * Activate box spanning mode
    */
   private activateSpan(): void {
+    if (!this.itemHasGroundPlane()) {
+      alert(Severity.WARNING, 'First insert ground plane with "g".')
+      return
+    }
     Session.dispatch(activateSpan())
   }
 
@@ -447,5 +453,14 @@ export class ToolBar extends Component<Props> {
    */
   private deactivateSpan(): void {
     Session.dispatch(deactivateSpan())
+  }
+
+  /**
+   * Check if current selected item has a ground plane.
+   */
+  private itemHasGroundPlane(): boolean {
+    const selectedItem = this.state.user.select.item
+    const groundPlane = Session.label3dList.getItemGroundPlane(selectedItem)
+    return groundPlane !== null
   }
 }

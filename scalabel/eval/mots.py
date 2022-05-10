@@ -25,7 +25,12 @@ from .mot import (
     evaluate_single_class,
     generate_results,
 )
-from .utils import check_overlap, label_ids_to_int, parse_seg_objects
+from .utils import (
+    check_overlap,
+    handle_inconsistent_length,
+    label_ids_to_int,
+    parse_seg_objects,
+)
 
 VidFunc = Callable[
     [
@@ -155,6 +160,7 @@ def evaluate_seg_track(
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
+    results = handle_inconsistent_length(gts, results)
     assert len(gts) == len(results)
     # check overlap of masks
     logger.info("checking for overlap of masks...")
@@ -237,7 +243,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="Path to config toml file. Contains definition of categories, "
         "and optionally attributes as well as resolution. For an example "
-        "see scalabel/label/configs.toml",
+        "see scalabel/label/testcases/configs.toml",
     )
     parser.add_argument(
         "--out-file",

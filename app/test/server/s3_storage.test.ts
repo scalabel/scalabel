@@ -158,7 +158,7 @@ describe.skip("test s3 storage", () => {
             expect(data).toBe(`fake content`)
           })
         )
-        return Promise.all(loadPromises)
+        return await Promise.all(loadPromises)
       })
     })
   })
