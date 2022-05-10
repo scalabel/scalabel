@@ -2,13 +2,24 @@
 
 ---
 
-<br>
+<center>
+
+![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![Mac OS](https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0)
 
 ![Build & Test](https://github.com/scalabel/scalabel/workflows/Build%20&%20Test/badge.svg?branch=master)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:javascript)
 [![Language grade:
 Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/scalabel/scalabel/context:python)
 ![Docker Pulls](https://img.shields.io/docker/pulls/scalabel/www)
+[![PyPI version](https://badge.fury.io/py/scalabel.svg)](https://badge.fury.io/py/scalabel)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/scalabel)
+![npm](https://img.shields.io/npm/v/scalabel)
+![node-lts](https://img.shields.io/node/v-lts/scalabel)
+![Redis Version](https://img.shields.io/badge/redis-%3E%3D5-blue)
+![npm type definitions](https://img.shields.io/npm/types/scalabel)
+
+</center>
 
 [Scalabel](https://www.scalabel.ai) (pronounced "sca&#8901;label") is a versatile and scalable annotation platform, supporting both 2D and 3D data labeling. [BDD100K](https://www.bdd100k.com/) is labeled with this tool.
 
@@ -19,29 +30,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ![scalabel interface](https://raw.githubusercontent.com/scalabel/scalabel-doc-media/main/readme/banner-app.png)
 
-<br>
-
 ---
-
-<br>
-
-## Supported Builds
-
-| OS         | Python 3.7                                                                                                                                             | Python 3.8                                                                                                                                             | Python 3.9                                                                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Ubuntu** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.7)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.8)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Ubuntu,%20Python%203.9)?style=plastic>) |
-| **MacOS**  | NA                                                                                                                                                     | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(MacOS,%20Python%203.8)?style=plastic>)  | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(MacOS,%20Python%203.9)?style=plastic>)  |
-
-| Node         | 12.x                                                                                                                                        | 13.x                                                                                                                                        | 14.x                                                                                                                                        | 16.x                                                                                                                                        | 18.x                                                                                                                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Redis v5** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2012.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2013.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2014.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2016.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2018.x)?style=plastic>) |
-| **Redis v6** | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2012.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2013.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2014.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2016.x)?style=plastic>) | ![GitHub Workflow Status](<https://img.shields.io/github/workflow/status/scalabel/scalabel/Build%20&%20Test%20(Node%2018.x)?style=plastic>) |
-
-<br>
-
----
-
-<br>
 
 ## User Instructions
 
@@ -62,13 +51,18 @@ For other operating systems or if you wish to use the Docker image, please refer
 
 ### Main features
 
-- Image tagging
-- 2D bounding box detection and tracking annotation
-- 2D polygon/polyline and tracking annotation
-- 3D bounding box detection and tracking annotation on point clouds
-- Real-time session synchronization for seamless collaboration
-- Semi-automatic annotation with label pre-loading
-- Python API for label handling and visualization
+- [User Instructions](#user-instructions)
+  - [Quick Installation (Ubuntu)](#quick-installation-ubuntu)
+  - [Main features](#main-features)
+  - [Creating a new annotation project](#creating-a-new-annotation-project)
+  - [Image tagging](#image-tagging)
+  - [2D bounding box detection and tracking annotation](#2d-bounding-box-detection-and-tracking-annotation)
+  - [2D polygon/polyline and tracking annotation](#2d-polygonpolyline-and-tracking-annotation)
+  - [3D bounding box detection and tracking annotation on point clouds](#3d-bounding-box-detection-and-tracking-annotation-on-point-clouds)
+  - [Real-time session synchronization for seamless collaboration](#real-time-session-synchronization-for-seamless-collaboration)
+  - [Semi-automatic annotation with label pre-loading](#semi-automatic-annotation-with-label-pre-loading)
+  - [Python API for label handling and visualization](#python-api-for-label-handling-and-visualization)
+  - [Contributors](#contributors)
 
 <br>
 
