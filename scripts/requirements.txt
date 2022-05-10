@@ -31,7 +31,6 @@ python-dateutil
 pytorch3d
 PyWavelets
 PyYAML
-ray[serve]
 redis
 requests
 scikit-image
