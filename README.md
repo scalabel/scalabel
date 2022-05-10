@@ -32,37 +32,37 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ---
 
-## User Instructions
+### Main features
 
-### Quick Installation (Ubuntu)
+- [Creating a new annotation project](#creating-a-new-annotation-project)
+- [Image tagging](#image-tagging)
+- [2D bounding box detection and tracking annotation](#2d-bounding-box-detection-and-tracking-annotation)
+- [2D polygon/polyline and tracking annotation](#2d-polygonpolyline-and-tracking-annotation)
+- [3D bounding box detection and tracking annotation on point clouds](#3d-bounding-box-detection-and-tracking-annotation-on-point-clouds)
+- [Real-time session synchronization for seamless collaboration](#real-time-session-synchronization-for-seamless-collaboration)
+- [Semi-automatic annotation with label pre-loading](#semi-automatic-annotation-with-label-pre-loading)
+- [Python API for label handling and visualization](#python-api-for-label-handling-and-visualization)
+
+<br>
+
+### Quick Start
+
+Try Scalabel on your local machine
 
 ```bash
 git clone https://github.com/scalabel/scalabel
 cd scalabel
 
-chmod +x scripts/setup_ubuntu.sh
+chmod +x scripts/setup_ubuntu.sh scripts/setup_osx.sh scripts/setup_local_dir.sh
+# Or run scripts/setup_osx.sh for MacOS
 . scripts/setup_ubuntu.sh
-python setup.py develop
+. scripts/setup_local_dir.sh
+npm run serve
 ```
 
+Open your browser and go to [http://localhost:8686](http://localhost:8686) to use Scalabel. You can check our project [configuration examples](./examples/) to create some sample projects.
+
 For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
-
-<br>
-
-### Main features
-
-- [User Instructions](#user-instructions)
-  - [Quick Installation (Ubuntu)](#quick-installation-ubuntu)
-  - [Main features](#main-features)
-  - [Creating a new annotation project](#creating-a-new-annotation-project)
-  - [Image tagging](#image-tagging)
-  - [2D bounding box detection and tracking annotation](#2d-bounding-box-detection-and-tracking-annotation)
-  - [2D polygon/polyline and tracking annotation](#2d-polygonpolyline-and-tracking-annotation)
-  - [3D bounding box detection and tracking annotation on point clouds](#3d-bounding-box-detection-and-tracking-annotation-on-point-clouds)
-  - [Real-time session synchronization for seamless collaboration](#real-time-session-synchronization-for-seamless-collaboration)
-  - [Semi-automatic annotation with label pre-loading](#semi-automatic-annotation-with-label-pre-loading)
-  - [Python API for label handling and visualization](#python-api-for-label-handling-and-visualization)
-  - [Contributors](#contributors)
 
 <br>
 
