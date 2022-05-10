@@ -25,7 +25,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 <br>
 
-## Supported Builds
+### Supported Builds
 
 | OS         | Python 3.7                                                                                                                                             | Python 3.8                                                                                                                                             | Python 3.9                                                                                                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -43,23 +43,6 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 <br>
 
-## User Instructions
-
-### Quick Installation (Ubuntu)
-
-```bash
-git clone https://github.com/scalabel/scalabel
-cd scalabel
-
-chmod +x scripts/setup_ubuntu.sh
-. scripts/setup_ubuntu.sh
-python setup.py develop
-```
-
-For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
-
-<br>
-
 ### Main features
 
 - Image tagging
@@ -69,6 +52,27 @@ For other operating systems or if you wish to use the Docker image, please refer
 - Real-time session synchronization for seamless collaboration
 - Semi-automatic annotation with label pre-loading
 - Python API for label handling and visualization
+
+<br>
+
+### Quick Start
+
+Try Scalabel on your local machine
+
+```bash
+git clone https://github.com/scalabel/scalabel
+cd scalabel
+
+chmod +x scripts/setup_ubuntu.sh scripts/setup_osx.sh scripts/setup_local_dir.sh
+# Or run scripts/setup_osx.sh for MacOS
+. scripts/setup_ubuntu.sh
+. scripts/setup_local_dir.sh
+npm run serve
+```
+
+Open your browser and go to [http://localhost:8686](http://localhost:8686) to use Scalabel. You can check our project [configuration examples](./examples/) to create some sample projects.
+
+For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
 
 <br>
 
