@@ -57,6 +57,28 @@ npm run serve
 
 Open your browser and go to [http://localhost:8686](http://localhost:8686) to use Scalabel. You can check our project [configuration examples](./examples/) to create some sample projects.
 
+We also provide docker image to avoid installing the libraries. To pull the image:
+
+```bash
+docker pull scalabel/www
+```
+
+Launch the server through docker
+
+```bash
+docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p \
+    8686:8686 -p 6379:6379 scalabel/www \
+    node app/dist/main.js \
+    --config /opt/scalabel/local-data/scalabel/config.yml \
+    --max-old-space-size=8192
+```
+
+The Python API can be installed through `pip`:
+
+```bash
+python3 -m pip install scalabel
+```
+
 For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
 
 <br>
