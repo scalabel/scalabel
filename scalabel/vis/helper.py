@@ -72,6 +72,19 @@ def gen_2d_rect(
     ]
 
 
+def check_edge_visibility(
+    edge: List[List[float]], img_center: Tuple[float, float]
+) -> bool:
+    """Check whether both ends of the edges is inside the picture."""
+    return (
+        (0 >= edge[0][0] or edge[0][0] >= img_center[0] * 2 - 1)
+        or (0 >= edge[0][1] or edge[0][1] >= img_center[1] * 2 - 1)
+    ) and (
+        (0 >= edge[1][0] or edge[1][0] >= img_center[0] * 2 - 1)
+        or (0 >= edge[1][1] or edge[1][1] >= img_center[1] * 2 - 1)
+    )
+
+
 def gen_3d_cube(
     label: Label,
     color: List[float],
@@ -98,6 +111,8 @@ def gen_3d_cube(
 
     lines = []
     for edge in edges["dashed"]:
+        if check_edge_visibility(edge, intrinsics.center):
+            continue
         lines.append(
             mpatches.Polygon(
                 edge,
@@ -110,6 +125,8 @@ def gen_3d_cube(
             )
         )
     for edge in edges["solid"]:
+        if check_edge_visibility(edge, intrinsics.center):
+            continue
         lines.append(
             mpatches.Polygon(
                 edge,

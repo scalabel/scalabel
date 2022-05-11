@@ -356,7 +356,7 @@ def from_kitti_det(
             FrameGroup(
                 name=velodyne_name,
                 url=url,
-                extrinsics=lidar2cam_mat,
+                extrinsics=lidar2cam,
                 frames=frame_names,
                 labels=parse_lidar_labels(labels, lidar2cam),
             )

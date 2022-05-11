@@ -234,7 +234,7 @@ def to_nuscenes(
 
                 tracking_id = label.id
                 if prev_loc.get(tracking_id) is not None:
-                    velocity = translation - prev_loc[tracking_id]
+                    velocity = (translation - prev_loc[tracking_id]) * 2  # 2Hz
                 else:
                     velocity = [0.0, 0.0, 0.0]
                 prev_loc[tracking_id] = translation
