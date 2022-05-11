@@ -91,7 +91,7 @@ def gen_3d_cube(
     linewidth: int,
     intrinsics: Intrinsics,
     alpha: float,
-) -> List[mpatches.Polygon]:
+) -> Tuple[Label3d, List[mpatches.Polygon]]:
     """Generate individual bounding box from 3d label.
 
     Assumes the following format:
@@ -138,7 +138,7 @@ def gen_3d_cube(
             )
         )
 
-    return lines
+    return label3d, lines
 
 
 def poly2patch(

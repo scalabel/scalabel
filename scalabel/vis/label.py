@@ -37,7 +37,7 @@ from .controller import (
     DisplayData,
     ViewController,
 )
-from .geometry import Label3d, vector_3d_to_2d
+from .geometry import vector_3d_to_2d
 from .helper import (
     gen_2d_rect,
     gen_3d_cube,
@@ -339,29 +339,27 @@ class LabelViewer:
         labels: List[Label],
         intrinsics: Intrinsics,
         with_tags: bool = True,
-        camera_near_clip: float = 0.15,
     ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
-                if label.box3d.location[2] <= camera_near_clip:
-                    continue
                 color = self._get_label_color(label).tolist()
                 occluded = check_occluded(label)
                 alpha = 0.5 if occluded else 0.8
-                for result in gen_3d_cube(
+                label3d, lines = gen_3d_cube(
                     label, color, int(2 * self.ui_cfg.scale), intrinsics, alpha
-                ):
-                    self.ax.add_patch(result)
+                )
+                if not label3d.behind_camera:
+                    for line in lines:
+                        self.ax.add_patch(line)
 
-                if with_tags:
-                    label3d = Label3d.from_box3d(label.box3d)
-                    point_1 = vector_3d_to_2d(
-                        label3d.vertices[-1],
-                        get_matrix_from_intrinsics(intrinsics),
-                    )
-                    x1, y1 = point_1[0], point_1[1]
-                    self._draw_label_attributes(label, x1, y1 - 4)
+                    if with_tags:
+                        point_1, _ = vector_3d_to_2d(
+                            label3d.vertices[-1],
+                            get_matrix_from_intrinsics(intrinsics),
+                        )
+                        x1, y1 = point_1[0], point_1[1]
+                        self._draw_label_attributes(label, x1, y1 - 4)
 
     def draw_poly2ds(
         self,

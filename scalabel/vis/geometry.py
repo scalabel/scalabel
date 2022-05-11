@@ -37,14 +37,16 @@ def vector_3d_to_2d(
     vector: NDArrayF64,
     calibration: NDArrayF64,
     camera_near_clip: float = 0.15,
-) -> List[float]:
+    behind_camera: bool = False,
+) -> Tuple[List[float], bool]:
     """Project 3d vector to the 2d camera view."""
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
     if vec_3d[2] < camera_near_clip:
         vec_3d[2] = camera_near_clip
+        behind_camera = True
     vec_2d = np.dot(calibration, vec_3d / vec_3d[2])
-    return [vec_2d[0], vec_2d[1]]
+    return [vec_2d[0], vec_2d[1]], behind_camera
 
 
 def check_side_of_line(
@@ -80,7 +82,7 @@ class Vertex:
     def __init__(self, vector: NDArrayF64, calibration: NDArrayF64) -> None:
         """Init the vector."""
         self.v3d = vector.tolist()
-        self.v2d = vector_3d_to_2d(vector, calibration)
+        self.v2d, self.behind_camera = vector_3d_to_2d(vector, calibration)
 
 
 class Label3d:
@@ -89,6 +91,7 @@ class Label3d:
     def __init__(self, vertices: List[NDArrayF64]) -> None:
         """Init the vector."""
         self.vertices = vertices
+        self.behind_camera = False
 
     @classmethod
     def from_box3d(cls, box3d: Box3D) -> Label3d:
@@ -126,6 +129,8 @@ class Label3d:
         """Get edges with visibility."""
         vertices = [Vertex(v, calibration) for v in self.vertices]
         v000, v001, v010, v011, v100, v101, v110, v111 = vertices
+
+        self.behind_camera = np.any([v.behind_camera for v in vertices])
 
         edges = {
             "FU": [v000, v100],
