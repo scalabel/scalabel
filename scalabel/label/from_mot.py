@@ -129,9 +129,12 @@ def from_mot(
             continue
         video_frames = []
         img_names = sorted(os.listdir(os.path.join(data_path, video, "img1")))
-        annotations = parse_annotations(
-            os.path.join(data_path, video, "gt/gt.txt"),
-        )
+        if os.path.exists(os.path.join(data_path, video, "gt/gt.txt")):
+            annotations = parse_annotations(
+                os.path.join(data_path, video, "gt/gt.txt"),
+            )
+        else:
+            annotations = {}
 
         for i, img_name in enumerate(img_names):
             assert i + 1 == int(img_name.replace(".jpg", ""))
