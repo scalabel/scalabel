@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --ignore-installed -r scripts/requirements.txt
-          python3 -m pip install --ignore-installed -r scripts/optional.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-opt.txt
       - name: Build mypy cache
         continue-on-error: true
         run: python3 -m mypy scalabel
@@ -60,7 +60,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
-          pip install --ignore-installed -r scripts/optional.txt
+          pip install --ignore-installed -r scripts/requirements-opt.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
@@ -86,7 +86,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --ignore-installed -r scripts/requirements.txt
-          pip install --ignore-installed -r scripts/optional.txt
+          pip install --ignore-installed -r scripts/requirements-opt.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
