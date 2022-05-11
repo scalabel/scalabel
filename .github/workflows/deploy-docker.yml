@@ -1,5 +1,4 @@
-# This workflow will deploy the current version of the documentation to the scalabel website
-
+# This workflow will deploy the current docker image to docker hub
 name: deploy docker
 on:
   push:
