@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
     curl \
     git \
+    libopenmpi-dev \
     python3.8 \
     python3.8-dev \
     python3-pip \
@@ -34,7 +35,9 @@ COPY . .
 RUN python3.8 -m pip install --upgrade pip && \
     python3.8 -m pip install -r scripts/requirements.txt
 
-RUN npm install -g npm@latest && npm install --max_old_space_size=8000
+RUN python3.8 setup.py install
+
+RUN npm install -g npm@latest && npm ci --max_old_space_size=8000
 
 
 RUN ./node_modules/.bin/webpack --config webpack.config.js --mode=production; \
