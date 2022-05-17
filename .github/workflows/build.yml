@@ -26,7 +26,8 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install --ignore-installed -r scripts/requirements.txt
-          python3 -m pip install --ignore-installed -r scripts/optional.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-opt.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-dev.txt
       - name: Build mypy cache
         continue-on-error: true
         run: python3 -m mypy scalabel
@@ -59,8 +60,9 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install --ignore-installed -r scripts/requirements.txt
-          pip install --ignore-installed -r scripts/optional.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-opt.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-dev.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
@@ -85,8 +87,9 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install --ignore-installed -r scripts/requirements.txt
-          pip install --ignore-installed -r scripts/optional.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-opt.txt
+          python3 -m pip install --ignore-installed -r scripts/requirements-dev.txt
       - name: Build
         run: python3 setup.py sdist bdist_wheel
       - name: Test
@@ -136,3 +139,17 @@ jobs:
         run: npm test
       - name: Build
         run: npx webpack --config webpack.config.js --mode=production
+
+  deploy-docker:
+    name: build docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          load: true
+          tags: scalabel/www:test

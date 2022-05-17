@@ -1,0 +1,5 @@
+hydra-core
+pytorch3d
+ray[serve]
+redis
+mpi4py
