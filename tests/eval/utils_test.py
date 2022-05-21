@@ -2,15 +2,14 @@
 import os
 import unittest
 
-from scalabel.label.io import load, load_label_config
-
-from .utils import (
+from scalabel.eval.utils import (
     check_overlap,
     check_overlap_frame,
     combine_stuff_masks,
     label_ids_to_int,
     reorder_preds,
 )
+from scalabel.label.io import load, load_label_config
 
 
 class TestEvalUtils(unittest.TestCase):

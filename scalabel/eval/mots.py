@@ -1,4 +1,4 @@
-"""BDD100K segmentation tracking evaluation with CLEAR MOT metrics."""
+"""Segmentation tracking evaluation with CLEAR MOT metrics."""
 import argparse
 import json
 import time
