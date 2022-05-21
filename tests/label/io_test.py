@@ -1,9 +1,9 @@
 """Test cases for io.py."""
 import json
 
-from ..unittest.util import get_test_file
-from .io import dump, group_and_sort, load, parse
-from .typing import Frame
+from scalabel.unittest.util import get_test_file
+from scalabel.label.io import dump, group_and_sort, load, parse
+from scalabel.label.typing import Frame
 
 
 def test_parse() -> None:

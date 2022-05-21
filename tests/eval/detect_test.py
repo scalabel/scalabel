@@ -4,10 +4,10 @@ import unittest
 
 import numpy as np
 
-from ..common.typing import NDArrayF64
-from ..label.io import load, load_label_config
-from ..unittest.util import get_test_file
-from .detect import evaluate_det
+from scalabel.common.typing import NDArrayF64
+from scalabel.label.io import load, load_label_config
+from scalabel.unittest.util import get_test_file
+from scalabel.eval.detect import evaluate_det
 
 
 class TestScalabelDetectEval(unittest.TestCase):

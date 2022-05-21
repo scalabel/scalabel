@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from .result import Result
+from scalabel.eval.result import Result
 
 
 class TestModel(Result):

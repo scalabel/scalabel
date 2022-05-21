@@ -1,8 +1,8 @@
 """Test cases for from_coco.py."""
 import unittest
 
-from .coco_typing import GtType
-from .from_coco import coco_to_scalabel
+from scalabel.label.coco_typing import GtType
+from scalabel.label.from_coco import coco_to_scalabel
 
 
 class TestCOCOToScalabel(unittest.TestCase):

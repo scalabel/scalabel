@@ -4,11 +4,11 @@ import unittest
 
 import numpy as np
 
-from ..common.io import open_read_text
-from ..common.typing import NDArrayU8
-from ..unittest.util import get_test_file
-from .io import load
-from .transforms import (
+from scalabel.common.io import open_read_text
+from scalabel.common.typing import NDArrayU8
+from scalabel.unittest.util import get_test_file
+from scalabel.label.io import load
+from scalabel.label.transforms import (
     bbox_to_box2d,
     box2d_to_bbox,
     coco_rle_to_rle,
@@ -22,7 +22,7 @@ from .transforms import (
     polygon_to_poly2ds,
     rle_to_box2d,
 )
-from .typing import Box2D, ImageSize, Poly2D
+from scalabel.label.typing import Box2D, ImageSize, Poly2D
 
 SHAPE = ImageSize(height=720, width=1280)
 

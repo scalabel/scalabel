@@ -1,7 +1,7 @@
 """Test io."""
 
-from ..unittest.util import get_test_file
-from . import io
+from scalabel.unittest.util import get_test_file
+from scalabel.common import io
 
 
 def test_load_yaml_config() -> None:

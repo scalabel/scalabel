@@ -4,8 +4,8 @@ import os
 import shutil
 import unittest
 
-from .io import load, load_label_config
-from .to_rle import seg_to_rles
+from scalabel.label.io import load, load_label_config
+from scalabel.label.to_rle import seg_to_rles
 
 
 class TestToRLEs(unittest.TestCase):
