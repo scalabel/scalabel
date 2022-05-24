@@ -55,7 +55,7 @@ const vertexShader = `
     varying vec3 pointColor;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = 2.5;
+      gl_PointSize = 3.0;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
       pointColor = color;
