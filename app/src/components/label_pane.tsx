@@ -10,7 +10,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility"
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff"
 import { withStyles } from "@material-ui/styles"
 import * as React from "react"
-import SplitPane from "react-split-pane"
+import SplitPane from "../common/split_pane/SplitPane"
 
 import {
   changeViewerConfig,

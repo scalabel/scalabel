@@ -34,13 +34,17 @@ def rotate_vector(
 
 
 def vector_3d_to_2d(
-    vector: NDArrayF64, calibration: NDArrayF64
+    vector: NDArrayF64,
+    calibration: NDArrayF64,
+    camera_near_clip: float = 0.15,
 ) -> List[float]:
     """Project 3d vector to the 2d camera view."""
     vec_3d = np.ones(3)
     vec_3d[:3] = vector
-    vec_2d = np.dot(calibration, vec_3d)
-    return [vec_2d[0] / vec_2d[2], vec_2d[1] / vec_2d[2]]
+    if vec_3d[2] < camera_near_clip:
+        vec_3d[2] = camera_near_clip
+    vec_2d = np.dot(calibration, vec_3d / vec_3d[2])
+    return [vec_2d[0], vec_2d[1]]
 
 
 def check_side_of_line(

@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="scalabel",  # Replace with your own username
-    version="0.3.0-rc.2",
+    version="0.3.0",
     author="Fisher Yu",
     author_email="i@yf.io",
     description="Scalabel Python Package",
@@ -22,15 +22,16 @@ setuptools.setup(
     package_data={"scalabel": ["py.typed", "label/configs.toml"]},
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
     install_requires=[
         "boto3",
-        "Flask-Cors",
-        "Flask",
         "joblib",
         "matplotlib",
         "motmetrics",
@@ -47,6 +48,7 @@ setuptools.setup(
         "PyYAML",
         "requests",
         "scikit-learn",
+        "scikit-image",
         "tabulate",
         "tqdm",
         "toml",

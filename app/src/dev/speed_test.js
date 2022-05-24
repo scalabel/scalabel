@@ -163,10 +163,10 @@ function requestGateInfo() {
  * @param {string} port - the websocket port
  */
 function generateSessions(addr: string, port: string) {
-  let numSessionsInput = (document.getElementById("numSessions"): any)
+  let numSessionsInput = document.getElementById("numSessions")
   window.numSessions = parseInt((numSessionsInput: HTMLInputElement).value)
 
-  let numMessagesInput = (document.getElementById("numMessages"): any)
+  let numMessagesInput = document.getElementById("numMessages")
   window.numMessages = parseInt((numMessagesInput: HTMLInputElement).value)
 
   window.websockets = []

@@ -139,7 +139,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
   private readonly _drawableUpdateCallback: () => void
   /** have points been set or transformed */
   private _pointsUpdated: boolean
-  /** current item */
+  /** currently selected item */
   private _currentItem: number
   /** context of image canvas */
   private _hiddenContext: CanvasRenderingContext2D | null
@@ -164,6 +164,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.scene.add(this.target)
     this._currentItem = 0
     this._pointsUpdated = false
+    this._currentItem = 0
     this._hiddenContext = null
     this._hiddenCanvas = document.createElement("canvas")
     this._colorScheme = null

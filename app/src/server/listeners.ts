@@ -282,8 +282,7 @@ export class Listeners {
     for (const key of Object.keys(formFiles)) {
       const file = formFiles[key]
       if (file !== undefined && file.size !== 0) {
-        // @ts-expect-error
-        files[key] = file.path
+        files[key] = file.filepath
       }
     }
 

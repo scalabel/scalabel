@@ -141,7 +141,7 @@ else
     sudo apt-get update
     sudo apt-get install -y --no-install-recommends ca-certificates \
         build-essential software-properties-common curl \
-        autoconf libtool pkg-config gnupg-agent git ffmpeg
+        autoconf libtool pkg-config gnupg-agent git ffmpeg libopenmpi-dev
     sudo add-apt-repository -y ppa:chris-lea/redis-server
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
@@ -172,7 +172,7 @@ echo [$(date +"%F %T")] ================================
 echo [$(date +"%F %T")] Installing node packages
 echo [$(date +"%F %T")] ================================
 
-npm install --max_old_space_size=8000
+npm ci --max_old_space_size=8000
 
 echo ""
 echo [$(date +"%F %T")] ================================
