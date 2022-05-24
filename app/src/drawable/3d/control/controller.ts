@@ -100,6 +100,10 @@ export abstract class Controller extends THREE.Object3D {
    */
   public onMouseDown(camera: THREE.Camera): boolean {
     if (this._highlightedUnit !== null) {
+      // Set labels in editing mode, so that state doesn't get overwritten
+      for (const label of this._labels) {
+        label.editing = true
+      }
       const normal = new THREE.Vector3()
       camera.getWorldDirection(normal)
       this._dragPlane.setFromNormalAndCoplanarPoint(
@@ -137,6 +141,10 @@ export abstract class Controller extends THREE.Object3D {
 
   /** mouse up */
   public onMouseUp(): boolean {
+    // Turn off editing mode for labels
+    for (const label of this._labels) {
+      label.editing = false
+    }
     return false
   }
 
