@@ -22,6 +22,7 @@ class Box3D(BaseModel):
     orientation: Tuple[float, float, float]
     location: Tuple[float, float, float]
     dimension: Tuple[float, float, float]
+    velocity: Tuple[float, float, float]
 
 
 class Poly2D(BaseModel):

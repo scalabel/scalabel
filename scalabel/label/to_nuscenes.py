@@ -2,7 +2,7 @@
 import argparse
 import json
 import operator
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
@@ -21,117 +21,17 @@ try:
 except ImportError:
     NuScenes = None
 
-cls_attr_dist = {
-    "barrier": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 0,
-        "vehicle.parked": 0,
-        "vehicle.stopped": 0,
-    },
-    "bicycle": {
-        "cycle.with_rider": 2791,
-        "cycle.without_rider": 8946,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 0,
-        "vehicle.parked": 0,
-        "vehicle.stopped": 0,
-    },
-    "bus": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 9092,
-        "vehicle.parked": 3294,
-        "vehicle.stopped": 3881,
-    },
-    "car": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 114304,
-        "vehicle.parked": 330133,
-        "vehicle.stopped": 46898,
-    },
-    "construction_vehicle": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 882,
-        "vehicle.parked": 11549,
-        "vehicle.stopped": 2102,
-    },
-    "ignore": {
-        "cycle.with_rider": 307,
-        "cycle.without_rider": 73,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 165,
-        "vehicle.parked": 400,
-        "vehicle.stopped": 102,
-    },
-    "motorcycle": {
-        "cycle.with_rider": 4233,
-        "cycle.without_rider": 8326,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 0,
-        "vehicle.parked": 0,
-        "vehicle.stopped": 0,
-    },
-    "pedestrian": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 157444,
-        "pedestrian.sitting_lying_down": 13939,
-        "pedestrian.standing": 46530,
-        "vehicle.moving": 0,
-        "vehicle.parked": 0,
-        "vehicle.stopped": 0,
-    },
-    "traffic_cone": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 0,
-        "vehicle.parked": 0,
-        "vehicle.stopped": 0,
-    },
-    "trailer": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 3421,
-        "vehicle.parked": 19224,
-        "vehicle.stopped": 1895,
-    },
-    "truck": {
-        "cycle.with_rider": 0,
-        "cycle.without_rider": 0,
-        "pedestrian.moving": 0,
-        "pedestrian.sitting_lying_down": 0,
-        "pedestrian.standing": 0,
-        "vehicle.moving": 21339,
-        "vehicle.parked": 55626,
-        "vehicle.stopped": 11097,
-    },
+DefaultAttribute = {
+    "car": "vehicle.parked",
+    "pedestrian": "pedestrian.moving",
+    "trailer": "vehicle.parked",
+    "truck": "vehicle.parked",
+    "bus": "vehicle.moving",
+    "motorcycle": "cycle.without_rider",
+    "construction_vehicle": "vehicle.parked",
+    "bicycle": "cycle.without_rider",
+    "barrier": "",
+    "traffic_cone": "",
 }
 
 tracking_cats = [
@@ -183,6 +83,31 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def get_attributes(name: str, velocity: List[float]) -> str:
+    """Get nuScenes attributes."""
+    if np.sqrt(velocity[0] ** 2 + velocity[1] ** 2) > 0.2:
+        if name in [
+            "car",
+            "construction_vehicle",
+            "bus",
+            "truck",
+            "trailer",
+        ]:
+            attr = "vehicle.moving"
+        elif name in ["bicycle", "motorcycle"]:
+            attr = "cycle.with_rider"
+        else:
+            attr = DefaultAttribute[name]
+    else:
+        if name in ["pedestrian"]:
+            attr = "pedestrian.standing"
+        elif name in ["bus"]:
+            attr = "vehicle.stopped"
+        else:
+            attr = DefaultAttribute[name]
+    return attr
+
+
 def to_nuscenes(
     dataset: Dataset, mode: str, metadata: Dict[str, bool]
 ) -> DictStrAny:
@@ -232,13 +157,11 @@ def to_nuscenes(
                 if mode == "detection":
                     dimension = [d if d >= 0 else 0.1 for d in dimension]
 
-                tracking_id = label.id
-                if prev_loc.get(tracking_id) is not None:
-                    velocity = (translation - prev_loc[tracking_id]) * 2  # 2Hz
-                else:
-                    velocity = [0.0, 0.0, 0.0]
-                prev_loc[tracking_id] = translation
+                velocity = np.dot(
+                    sensor2global, np.array(label.box3d.velocity)
+                ).tolist()
 
+                tracking_id = label.id
                 if mode == "detection":
                     nusc_anno = {
                         "sample_token": token,
@@ -248,10 +171,9 @@ def to_nuscenes(
                         "velocity": [velocity[0], velocity[1]],
                         "detection_name": label.category,
                         "detection_score": label.score,
-                        "attribute_name": max(
-                            cls_attr_dist[label.category].items(),
-                            key=operator.itemgetter(1),
-                        )[0],
+                        "attribute_name": get_attributes(
+                            label.category, velocity
+                        ),
                     }
                 else:
                     nusc_anno = {
