@@ -199,7 +199,12 @@ def parse_labels(
             if in_image and box_class is not None:
                 xyz = tuple(box.center.tolist())
                 w, l, h = box.wlh
-                roty = quaternion_to_yaw(box.orientation, in_image_frame)
+                yaw = quaternion_to_yaw(box.orientation, in_image_frame)
+                alpha = rotation_y_to_alpha(yaw, xyz)
+                if in_image_frame:
+                    orientation = (0, yaw, 0)
+                else:
+                    orientation = (0, 0, yaw)
 
                 box2d = None
                 if img_size is not None:
@@ -225,8 +230,8 @@ def parse_labels(
                     box3d=Box3D(
                         location=xyz,
                         dimension=(h, w, l),
-                        orientation=(0, roty, 0),
-                        alpha=rotation_y_to_alpha(roty, xyz),  # type: ignore
+                        orientation=orientation,
+                        alpha=alpha,
                         velocity=tuple(box.velocity.tolist()),
                     ),
                 )
