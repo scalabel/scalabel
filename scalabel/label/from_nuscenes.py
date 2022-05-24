@@ -100,7 +100,7 @@ def parse_arguments() -> argparse.Namespace:
 
 def load_data(filepath: str, version: str) -> Tuple[NuScenes, pd.DataFrame]:
     """Load nuscenes data and extract meta-information into dataframe."""
-    data = NuScenes(version=version, dataroot=filepath, verbose=True)
+    data = NuScenes(version=version, dataroot=filepath, verbose=False)
     records = [
         (data.get("sample", record["first_sample_token"])["timestamp"], record)
         for record in data.scene
@@ -227,6 +227,7 @@ def parse_labels(
                         dimension=(h, w, l),
                         orientation=(0, roty, 0),
                         alpha=rotation_y_to_alpha(roty, xyz),  # type: ignore
+                        velocity=tuple(box.velocity.tolist()),
                     ),
                 )
                 labels.append(label)
