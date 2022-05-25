@@ -675,7 +675,7 @@ test("Rotate axis aligned 3d bbox around all axes", () => {
       state = Session.getState()
       cube = getShape(state, 0, labelIds[0], 0) as CubeType
       expectVector3TypesClose(cube.center, { x: 0, y: 0, z: 0 })
-      expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 }, 1)
+      expectVector3TypesClose(cube.orientation, { x: 0, y: 0, z: 0 }, 0)
     }
   }
 })
