@@ -110,22 +110,13 @@ export class RotationRing extends THREE.Mesh implements ControlUnit {
     delta.copy(newIntersection)
     delta.sub(oldIntersection)
 
+    const centerToIntersection = new THREE.Vector3()
+    this.getWorldPosition(centerToIntersection)
+    centerToIntersection.sub(oldIntersection)
+
     const dragDirection = new THREE.Vector3()
-    dragDirection.crossVectors(dragPlane.normal, normal)
+    dragDirection.crossVectors(centerToIntersection, normal)
     dragDirection.normalize()
-
-    const centerToCamera = new THREE.Vector3()
-    this.getWorldPosition(centerToCamera)
-    centerToCamera.sub(newProjection.origin)
-
-    const intersectionToCamera = new THREE.Vector3()
-    intersectionToCamera.copy(this._highlightIntersection)
-    intersectionToCamera.sub(newProjection.origin)
-
-    // If the intersection is further away than the center, reverse direction
-    if (intersectionToCamera.length() - centerToCamera.length() > 1e-3) {
-      dragDirection.negate()
-    }
 
     const dragAmount = delta.dot(dragDirection)
     const rotation = new THREE.Quaternion()
