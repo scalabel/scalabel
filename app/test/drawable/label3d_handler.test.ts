@@ -119,9 +119,9 @@ test("Add 3d bbox", () => {
   const [label3dHandler, viewerId] = initializeTestingObjects(
     new THREE.PerspectiveCamera(45, 1, 0.1, 1000)
   )
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
 
-  label3dHandler.onKeyDown(spaceEvent)
+  label3dHandler.onKeyDown(nEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
   labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
@@ -151,7 +151,7 @@ test("Add 3d bbox", () => {
       moveCameraAndTarget(position, target, viewerId, viewerConfig)
     )
 
-    label3dHandler.onKeyDown(spaceEvent)
+    label3dHandler.onKeyDown(nEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 1)
     labelIds.push(findNewLabelsFromState(state, 0, labelIds)[0])
@@ -197,8 +197,8 @@ test("Move axis aligned 3d bbox along z axis", () => {
   ) as PointCloudViewerConfigType
   updateThreeCameraAndRenderer(viewerConfig, camera)
 
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
-  label3dHandler.onKeyDown(spaceEvent)
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
+  label3dHandler.onKeyDown(nEvent)
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
 
@@ -297,10 +297,10 @@ test("Move axis aligned 3d bbox along all axes", () => {
     moveCameraAndTarget(new Vector3D(), new Vector3D(), viewerId, viewerConfig)
   )
 
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
-  label3dHandler.onKeyDown(spaceEvent)
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
+  label3dHandler.onKeyDown(nEvent)
   Session.label3dList.onDrawableUpdate()
-  label3dHandler.onKeyUp(spaceEvent)
+  label3dHandler.onKeyUp(nEvent)
   Session.label3dList.onDrawableUpdate()
 
   state = Session.getState()
@@ -426,10 +426,10 @@ test("Scale axis aligned 3d bbox along all axes", () => {
     moveCameraAndTarget(new Vector3D(), new Vector3D(), viewerId, viewerConfig)
   )
 
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
-  label3dHandler.onKeyDown(spaceEvent)
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
+  label3dHandler.onKeyDown(nEvent)
   Session.label3dList.onDrawableUpdate()
-  label3dHandler.onKeyUp(spaceEvent)
+  label3dHandler.onKeyUp(nEvent)
   Session.label3dList.onDrawableUpdate()
 
   state = Session.getState()
@@ -571,10 +571,10 @@ test("Rotate axis aligned 3d bbox around all axes", () => {
         )
       )
 
-      const spaceEvent = new KeyboardEvent("keydown", { key: " " })
-      label3dHandler.onKeyDown(spaceEvent)
+      const nEvent = new KeyboardEvent("keydown", { key: "n" })
+      label3dHandler.onKeyDown(nEvent)
       Session.label3dList.onDrawableUpdate()
-      label3dHandler.onKeyUp(spaceEvent)
+      label3dHandler.onKeyUp(nEvent)
       Session.label3dList.onDrawableUpdate()
 
       state = Session.getState()

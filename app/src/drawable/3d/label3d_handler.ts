@@ -601,6 +601,10 @@ export class Label3DHandler {
           selectLabel(Session.label3dList.selectedLabelIds, -1, INVALID_ID)
         )
         return true
+      case Key.N_UP:
+      case Key.N_LOW:
+        this.createLabel()
+        return true
       case Key.B_UP:
       case Key.B_LOW:
         Session.dispatch(selectLabel3dType(LabelTypeName.BOX_3D))
