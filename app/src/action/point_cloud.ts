@@ -8,7 +8,7 @@ import { changeViewerConfig, makeBaseAction } from "./common"
 
 export enum CameraMovementParameters {
   MOUSE_CORRECTION_FACTOR = 60.0,
-  MOVE_AMOUNT = 0.15,
+  MOVE_AMOUNT = 0.4,
   ZOOM_SPEED = 1.05
 }
 

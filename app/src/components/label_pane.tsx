@@ -199,7 +199,7 @@ class LabelPane extends Component<Props> {
               key={`homographyTypeMenuItem${pane.id}`}
               value={types.ViewerConfigTypeName.HOMOGRAPHY}
             >
-              Homography
+              BEV
             </MenuItem>
           ) : undefined}
         </Select>

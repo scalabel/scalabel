@@ -6,7 +6,7 @@ import * as THREE from "three"
 import { Sensor } from "../common/sensor"
 
 import Session from "../common/session"
-import { getMainSensor, transformPointCloud } from "../common/util"
+import { getMainSensor } from "../common/util"
 import { DataType, ItemTypeName } from "../const/common"
 import {
   getMinSensorIds,
@@ -55,7 +55,7 @@ const vertexShader = `
     varying vec3 pointColor;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = 0.1 * ( 300.0 / -mvPosition.z );
+      gl_PointSize = 3.0;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
       pointColor = color;
@@ -162,6 +162,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
     this.camera = props.camera
     this.target = new THREE.AxesHelper(0.5)
     this.scene.add(this.target)
+    this._currentItem = 0
     this._pointsUpdated = false
     this._currentItem = 0
     this._hiddenContext = null
@@ -287,8 +288,8 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       Session.pointClouds[item][sensor] !== undefined &&
       !this._pointsUpdated
     ) {
-      const rawGeometry = Session.pointClouds[item][sensor].clone()
-      const geometry = transformPointCloud(rawGeometry, sensor, this.state)
+      const mainSensor = getMainSensor(this.state)
+      const geometry = Session.pointClouds[item][mainSensor.id]
       this.pointCloud.geometry.copy(geometry)
       this.pointCloud.layers.enableAll()
       this._pointsUpdated = true
@@ -355,7 +356,7 @@ class PointCloudCanvas extends DrawableCanvas<Props> {
       const depth = point.length()
       depths.push(depth)
     }
-    const maxDepth = Math.max.apply(Math, depths)
+    const maxDepth = Math.min(Math.max.apply(Math, depths), 60)
     const minDepth = Math.min.apply(Math, depths)
     const colors: number[] = []
     for (let i = 0; i < depths.length; i += 1) {

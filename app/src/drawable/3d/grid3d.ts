@@ -176,4 +176,19 @@ export class Grid3D extends Shape3D {
     // Also update the _planeShape
     this._planeShape = newShape
   }
+
+  /**
+   * Set visibility for viewer
+   *
+   * @param viewerId
+   * @param v
+   */
+  public setVisible(viewerId: number, v: boolean = true): void {
+    super.setVisible(viewerId, v)
+    if (v) {
+      this._lines.layers.enable(viewerId)
+    } else {
+      this._lines.layers.disable(viewerId)
+    }
+  }
 }
