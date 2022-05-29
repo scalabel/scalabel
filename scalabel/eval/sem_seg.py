@@ -47,7 +47,7 @@ class SegResult(Result):
         """Convert the seg result into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude  # type: ignore
+            include=include, exclude=exclude
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
@@ -69,10 +69,14 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return np.bincount(
-        size * groundtruth[k].astype(int) + prediction[k],
-        minlength=size**2,
-    ).reshape(size, size)
+    return (
+        np.bincount(
+            size * groundtruth[k] + prediction[k],
+            minlength=size**2,
+        )
+        .reshape(size, size)
+        .astype(np.int32)
+    )
 
 
 def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
@@ -82,7 +86,7 @@ def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     )
     ious[np.isnan(ious)] = 0
     # Last class as `ignored`
-    return ious[:-1]  # type: ignore
+    return NDArrayF64(ious[:-1])
 
 
 def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
@@ -90,7 +94,7 @@ def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
     # Last class as `ignored`
-    return accs[:-1]  # type: ignore
+    return NDArrayF64(accs[:-1])
 
 
 def whole_acc(hist: NDArrayI32) -> float:

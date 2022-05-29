@@ -142,7 +142,7 @@ def quaternion_to_yaw(quat: Quaternion, in_image_frame: bool = True) -> float:
         v = np.dot(quat.rotation_matrix, np.array([1, 0, 0]))
         yaw = np.arctan2(v[1], v[0])
 
-    return yaw  # type: ignore
+    return yaw
 
 
 def yaw_to_quaternion(yaw: float) -> Quaternion:

@@ -531,7 +531,7 @@ class LabelViewer:
                 mask, color.astype(np.uint8), combined_mask
             )
 
-        img: NDArrayU8 = image * 255
+        img: NDArrayU8 = (image * 255).astype(np.uint8)
         self.ax.imshow(
             np.where(
                 combined_mask > 0,
