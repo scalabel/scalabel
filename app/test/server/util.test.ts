@@ -49,39 +49,52 @@ describe("test general utility methods", () => {
   })
 
   test("handler url selection", () => {
-    // Img item => label2d handler
-    let handler = util.getHandlerUrl(ItemTypeName.IMAGE, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL)
+    const testcases = new Map<[ItemTypeName, LabelTypeName], HandlerUrl>([
+      // Image
+      [[ItemTypeName.IMAGE, LabelTypeName.EMPTY], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.TAG], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.PLANE_3D], HandlerUrl.LABEL],
 
-    // Video item + box2d label => 2d handler
-    handler = util.getHandlerUrl(ItemTypeName.VIDEO, LabelTypeName.BOX_2D)
-    expect(handler).toBe(HandlerUrl.LABEL)
+      // Video
+      [[ItemTypeName.IMAGE, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.IMAGE, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
 
-    // Video item + other label => 3d handler
-    handler = util.getHandlerUrl(ItemTypeName.VIDEO, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL)
+      // Point cloud
+      [[ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
 
-    // Point cloud item + box3d label => 3d handler
-    handler = util.getHandlerUrl(ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D)
-    expect(handler).toBe(HandlerUrl.LABEL)
-    handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD_TRACKING,
-      LabelTypeName.BOX_3D
-    )
-    expect(handler).toBe(HandlerUrl.LABEL)
+      // Point cloud tracking
+      [
+        [ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.BOX_3D],
+        HandlerUrl.LABEL
+      ],
 
-    // Point cloud item + other label => invalid handler
-    handler = util.getHandlerUrl(ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_2D)
-    expect(handler).toBe(HandlerUrl.INVALID)
-    handler = util.getHandlerUrl(
-      ItemTypeName.POINT_CLOUD_TRACKING,
-      LabelTypeName.TAG
-    )
-    expect(handler).toBe(HandlerUrl.INVALID)
+      // Fusion
+      [[ItemTypeName.FUSION, LabelTypeName.BOX_3D], HandlerUrl.LABEL]
+    ])
+
+    testcases.forEach((want, [item, label]) => {
+      const handler = util.getHandlerUrl(item, label)
+      expect(handler).toBe(want)
+    })
 
     // Any other combinations are invalid
-    handler = util.getHandlerUrl("invalid item", LabelTypeName.BOX_2D)
-    expect(handler).toBe(HandlerUrl.INVALID)
+    for (const item in ItemTypeName) {
+      for (const label in LabelTypeName) {
+        if (testcases.has([item as ItemTypeName, label as LabelTypeName])) {
+          continue
+        }
+        const handler = util.getHandlerUrl(item, label)
+        expect(handler).toBe(HandlerUrl.INVALID)
+      }
+    }
   })
 
   test("bundle file selection", () => {
