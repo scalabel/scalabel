@@ -88,7 +88,8 @@ class BoundaryResult(Result):
         """Convert data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=(include if include is not None else set()),
+            exclude=(exclude if exclude is not None else set()),
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -159,7 +160,7 @@ def eval_bdry_per_frame(
         for cat in cats:
             gt_mask: NDArrayU8 = (
                 rle_to_mask(gt_masks[cat.name])
-                if cat.name in pd_masks
+                if cat.name in gt_masks
                 else blank_mask
             )
             pd_mask: NDArrayU8 = (

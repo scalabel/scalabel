@@ -47,7 +47,8 @@ class SegResult(Result):
         """Convert the seg result into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=(include if include is not None else set()),
+            exclude=(exclude if exclude is not None else set()),
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list

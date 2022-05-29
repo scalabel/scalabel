@@ -99,7 +99,8 @@ class Result(BaseModel):
         """
         frame_dict: Dict[str, Scores] = defaultdict(dict)
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=(include if include is not None else set()),
+            exclude=(exclude if exclude is not None else set()),
         ).items():
             if not isinstance(scores_list, list):
                 continue
@@ -131,7 +132,7 @@ class Result(BaseModel):
             strs.insert(row_ind, split_line)
         summary = "".join([f"{s}\n" for s in strs])
         summary = "\n" + summary
-        return summary
+        return str(summary)
 
     def __str__(self) -> str:
         """Convert the data into a printable string."""
@@ -157,7 +158,8 @@ class Result(BaseModel):
         """
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=(include if include is not None else set()),
+            exclude=(exclude if exclude is not None else set()),
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
