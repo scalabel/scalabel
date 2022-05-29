@@ -232,7 +232,8 @@ def frame_to_rles(
 
 def rle_to_mask(rle: RLE) -> NDArrayU8:
     """Converting RLE to mask."""
-    return mask_utils.decode(dict(rle))  # type: ignore
+    mask = mask_utils.decode(dict(rle))
+    return NDArrayU8(mask > 0)
 
 
 def rle_to_box2d(rle: RLE) -> Box2D:
