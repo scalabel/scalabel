@@ -1,7 +1,7 @@
 import express from "express"
 import request from "supertest"
-import { parseMultipartFormData } from "../../src/server/middleware/multipart"
 import { File } from "formidable"
+import { parseMultipartFormData } from "../../src/server/middleware/multipart"
 
 describe("test middleware", () => {
   test("parsing multipart/form-data", (done) => {
