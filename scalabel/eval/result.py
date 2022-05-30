@@ -99,8 +99,7 @@ class Result(BaseModel):
         """
         frame_dict: Dict[str, Scores] = defaultdict(dict)
         for metric, scores_list in self.dict(
-            include=(include if include is not None else set()),
-            exclude=(exclude if exclude is not None else set()),
+            include=include, exclude=exclude # type: ignore
         ).items():
             if not isinstance(scores_list, list):
                 continue
@@ -158,8 +157,7 @@ class Result(BaseModel):
         """
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=(include if include is not None else set()),
-            exclude=(exclude if exclude is not None else set()),
+            include=include, exclude=exclude # type: ignore
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list

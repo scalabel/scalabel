@@ -77,8 +77,7 @@ class PanSegResult(Result):
         """Convert the pan_seg data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=(include if include is not None else set()),
-            exclude=(exclude if exclude is not None else set()),
+            include=include, exclude=exclude # type: ignore
         ).items():
             summary_dict[f"{metric}/{STUFF}"] = scores_list[1][STUFF]
             summary_dict[f"{metric}/{THING}"] = scores_list[1][THING]

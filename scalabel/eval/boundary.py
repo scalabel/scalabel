@@ -88,8 +88,7 @@ class BoundaryResult(Result):
         """Convert data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=(include if include is not None else set()),
-            exclude=(exclude if exclude is not None else set()),
+            include=include, exclude=exclude  # type: ignore
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -143,7 +142,7 @@ def eval_bdry_per_frame(
 ) -> Dict[str, NDArrayF64]:
     """Compute mean, recall, and decay from per-frame evaluation."""
     w, h = image_size.width, image_size.height
-    blank_mask = NDArrayU8(np.zeros((h, w)))
+    blank_mask: NDArrayU8 = np.zeros((h, w)).astype(np.uint8)
     task2arr: Dict[str, NDArrayF64] = {}  # str -> 2d array
     if gt_frame.labels is None:
         gt_frame.labels = []

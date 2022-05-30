@@ -127,7 +127,8 @@ def project_points_to_image(
     """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
     hom_cam_coords = points / points[:, 2:3]
     pts_2d = np.dot(hom_cam_coords, np.transpose(intrinsics))
-    return NDArrayF64(pts_2d[:, :2])
+    res: NDArrayF64 = pts_2d[:, :2].astype(np.float64)
+    return res
 
 
 def rotation_y_to_alpha(
