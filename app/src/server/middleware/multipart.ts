@@ -4,7 +4,19 @@ import formidable, { Fields, Files } from "formidable"
 
 const maxFileSize = 1000 * 1024 * 1024 // 1G
 
-const multipart = (req: Request, _: Response, next: NextFunction): void => {
+/**
+ * A middleware to parse multipart/form-data request, after which two
+ * properties, `fields` and `files`, will be added to the request.
+ *
+ * @param req -
+ * @param _
+ * @param next
+ */
+export function multipartFormData(
+  req: Request,
+  _: Response,
+  next: NextFunction
+): void {
   parseMultipartFormData(req)
     .then(({ fields, files }) => {
       Object.assign(req, { fields, files })
@@ -34,5 +46,3 @@ export async function parseMultipartFormData(
     })
   })
 }
-
-export default multipart

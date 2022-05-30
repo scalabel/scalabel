@@ -17,7 +17,7 @@ import { Hub } from "./hub"
 import { Listeners } from "./listeners"
 import Logger from "./logger"
 import auth from "./middleware/cognitoAuth"
-import multipartMiddleware from "./middleware/multipart"
+import { multipartFormData as formDataMiddleware } from "./middleware/multipart"
 import errorHandler from "./middleware/errorHandler"
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
 import { ProjectStore } from "./project_store"
@@ -118,7 +118,7 @@ function startHTTPServer(
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    multipartMiddleware,
+    formDataMiddleware,
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(
