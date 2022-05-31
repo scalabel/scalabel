@@ -109,7 +109,10 @@ def get_attributes(name: str, velocity: List[float]) -> str:
 
 
 def to_nuscenes(
-    dataset: Dataset, mode: str, metadata: Dict[str, bool]
+    dataset: Dataset,
+    mode: str,
+    metadata: Dict[str, bool],
+    attr_by_velocity: bool = True,
 ) -> DictStrAny:
     """Conver Scalabel format prediction into nuScenes JSON file."""
     results: DictStrAny = {}
@@ -161,6 +164,11 @@ def to_nuscenes(
                     sensor2global, np.array(label.box3d.velocity)
                 ).tolist()
 
+                if attr_by_velocity:
+                    attribute_name = get_attributes(label.category, velocity)
+                else:
+                    attribute_name = DefaultAttribute[label.category]
+
                 tracking_id = label.id
                 if mode == "detection":
                     nusc_anno = {
@@ -171,9 +179,7 @@ def to_nuscenes(
                         "velocity": [velocity[0], velocity[1]],
                         "detection_name": label.category,
                         "detection_score": label.score,
-                        "attribute_name": get_attributes(
-                            label.category, velocity
-                        ),
+                        "attribute_name": attribute_name,
                     }
                 else:
                     nusc_anno = {
