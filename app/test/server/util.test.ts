@@ -61,11 +61,11 @@ describe("test general utility methods", () => {
       [[ItemTypeName.IMAGE, LabelTypeName.PLANE_3D], HandlerUrl.LABEL],
 
       // Video
-      [[ItemTypeName.IMAGE, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
+      [[ItemTypeName.VIDEO, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.VIDEO, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.VIDEO, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.VIDEO, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
+      [[ItemTypeName.VIDEO, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
 
       // Point cloud
       [[ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
