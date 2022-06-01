@@ -49,52 +49,69 @@ describe("test general utility methods", () => {
   })
 
   test("handler url selection", () => {
-    const testcases = new Map<[ItemTypeName, LabelTypeName], HandlerUrl>([
+    const handlers = new Map([
       // Image
-      [[ItemTypeName.IMAGE, LabelTypeName.EMPTY], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.TAG], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
-      [[ItemTypeName.IMAGE, LabelTypeName.PLANE_3D], HandlerUrl.LABEL],
+      [
+        ItemTypeName.IMAGE,
+        new Map([
+          [LabelTypeName.EMPTY, HandlerUrl.LABEL],
+          [LabelTypeName.TAG, HandlerUrl.LABEL],
+          [LabelTypeName.BOX_2D, HandlerUrl.LABEL],
+          [LabelTypeName.POLYGON_2D, HandlerUrl.LABEL],
+          [LabelTypeName.POLYLINE_2D, HandlerUrl.LABEL],
+          [LabelTypeName.CUSTOM_2D, HandlerUrl.LABEL],
+          [LabelTypeName.BOX_3D, HandlerUrl.LABEL],
+          [LabelTypeName.PLANE_3D, HandlerUrl.LABEL]
+        ])
+      ],
 
       // Video
-      [[ItemTypeName.VIDEO, LabelTypeName.BOX_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.VIDEO, LabelTypeName.POLYGON_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.VIDEO, LabelTypeName.POLYLINE_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.VIDEO, LabelTypeName.CUSTOM_2D], HandlerUrl.LABEL],
-      [[ItemTypeName.VIDEO, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
+      [
+        ItemTypeName.VIDEO,
+        new Map([
+          [LabelTypeName.BOX_2D, HandlerUrl.LABEL],
+          [LabelTypeName.POLYGON_2D, HandlerUrl.LABEL],
+          [LabelTypeName.POLYLINE_2D, HandlerUrl.LABEL],
+          [LabelTypeName.CUSTOM_2D, HandlerUrl.LABEL],
+          [LabelTypeName.BOX_3D, HandlerUrl.LABEL]
+        ])
+      ],
 
       // Point cloud
-      [[ItemTypeName.POINT_CLOUD, LabelTypeName.BOX_3D], HandlerUrl.LABEL],
+      [
+        ItemTypeName.POINT_CLOUD,
+        new Map([[LabelTypeName.BOX_3D, HandlerUrl.LABEL]])
+      ],
 
       // Point cloud tracking
       [
-        [ItemTypeName.POINT_CLOUD_TRACKING, LabelTypeName.BOX_3D],
-        HandlerUrl.LABEL
+        ItemTypeName.POINT_CLOUD_TRACKING,
+        new Map([[LabelTypeName.BOX_3D, HandlerUrl.LABEL]])
       ],
 
       // Fusion
-      [[ItemTypeName.FUSION, LabelTypeName.BOX_3D], HandlerUrl.LABEL]
+      [ItemTypeName.FUSION, new Map([[LabelTypeName.BOX_3D, HandlerUrl.LABEL]])]
     ])
 
-    testcases.forEach((want, [item, label]) => {
-      const handler = util.getHandlerUrl(item, label)
-      expect(handler).toBe(want)
+    handlers.forEach((labels, item) => {
+      labels.forEach((want, label) => {
+        const handler = util.getHandlerUrl(item, label)
+        expect(handler, `expect ${item} + ${label} => ${want}`).toBe(want)
+      })
     })
 
     // Any other combinations are invalid
-    for (const item in ItemTypeName) {
-      for (const label in LabelTypeName) {
-        if (testcases.has([item as ItemTypeName, label as LabelTypeName])) {
-          continue
+    Object.values(ItemTypeName).forEach((item) => {
+      Object.values(LabelTypeName).forEach((label) => {
+        if (handlers.get(item)?.has(label) ?? false) {
+          return
         }
         const handler = util.getHandlerUrl(item, label)
-        expect(handler).toBe(HandlerUrl.INVALID)
-      }
-    }
+        expect(handler, `expect ${item} + ${label} => invalid`).toBe(
+          HandlerUrl.INVALID
+        )
+      })
+    })
   })
 
   test("bundle file selection", () => {
