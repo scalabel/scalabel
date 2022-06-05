@@ -157,7 +157,7 @@ def parse_lidar_labels(
                 ],
                 dtype=np.float64,
             )
-            center_lidar = tuple(
+            center_lidar: Tuple[float, float, float] = tuple(  # type: ignore
                 np.dot(car2lidar, cart2hom(center).T)[:3, 0].tolist()
             )
             heading = heading_transform(laser_box3d, car2lidar)
@@ -166,7 +166,7 @@ def parse_lidar_labels(
                 orientation=(0.0, heading, 0.0),
                 location=center_lidar,
                 dimension=dim,
-                alpha=rotation_y_to_alpha(heading, center_lidar),  # type: ignore # pylint: disable=line-too-long
+                alpha=rotation_y_to_alpha(heading, center_lidar),
             )
             labels.append(
                 Label(
@@ -261,7 +261,10 @@ def parse_frame_attributes(
     use_lidar_labels: bool = False,
 ) -> Dict[str, Union[str, float]]:
     """Parse the camera-based attributes."""
-    check_attribute = lambda x: x if x else "undefined"
+
+    def check_attribute(attr):  # type: ignore
+        return attr if attr else "undefined"
+
     s = frame.context.stats
 
     attributes = {
@@ -440,17 +443,11 @@ def from_waymo(
         os.mkdir(output_dir)
 
     func = partial(parse_record, output_dir, save_images, use_lidar_labels)
-    if nproc > 1:
-        partial_results = pmap(
-            func,
-            (filename for filename in glob.glob(data_path + "/*.tfrecord")),
-            nprocs=nproc,
-        )
-    else:
-        partial_results = map(  # type: ignore
-            func,
-            (filename for filename in glob.glob(data_path + "/*.tfrecord")),
-        )
+    partial_results = pmap(
+        func,
+        (filename for filename in glob.glob(data_path + "/*.tfrecord")),
+        nprocs=nproc,
+    )
     frames, groups = [], []
     for f, g in partial_results:
         frames.extend(f)

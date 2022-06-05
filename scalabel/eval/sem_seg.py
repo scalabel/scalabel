@@ -34,7 +34,6 @@ class SegResult(Result):
     fIoU: float
     pAcc: float
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "SegResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
@@ -69,10 +68,14 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return np.bincount(  # type: ignore
-        size * groundtruth[k].astype(int) + prediction[k],
-        minlength=size**2,
-    ).reshape(size, size)
+    return (
+        np.bincount(
+            size * groundtruth[k].astype(int, copy=False) + prediction[k],
+            minlength=size**2,
+        )
+        .reshape(size, size)
+        .astype(np.int32)
+    )
 
 
 def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
@@ -82,7 +85,8 @@ def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     )
     ious[np.isnan(ious)] = 0
     # Last class as `ignored`
-    return ious[:-1]  # type: ignore
+    res: NDArrayF64 = ious[:-1].astype(np.float64, copy=False)
+    return res
 
 
 def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
@@ -90,7 +94,8 @@ def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
     # Last class as `ignored`
-    return accs[:-1]  # type: ignore
+    res: NDArrayF64 = accs[:-1].astype(np.float64, copy=False)
+    return res
 
 
 def whole_acc(hist: NDArrayI32) -> float:
@@ -116,9 +121,8 @@ def frame_to_mask(
     """Convert list of labels to a mask."""
     if image_size is not None:
         out_mask: NDArrayU8 = (
-            np.ones((image_size.height, image_size.width))
-            * ignore_label  # type: ignore
-        ).astype(np.uint8)
+            np.ones((image_size.height, image_size.width)) * ignore_label
+        ).astype(np.uint8, copy=False)
     else:
         out_mask = np.zeros((0), dtype=np.uint8)
     if frame.labels is None:
@@ -243,8 +247,8 @@ def evaluate_sem_seg(
     res_dict: Dict[str, Union[float, ScoresList]] = dict(
         IoU=iou_scores,
         Acc=acc_scores,
-        fIoU=np.multiply(freq_iou(hist), 100),  # pylint: disable=invalid-name
-        pAcc=np.multiply(whole_acc(hist), 100),  # pylint: disable=invalid-name
+        fIoU=np.multiply(freq_iou(hist), 100),
+        pAcc=np.multiply(whole_acc(hist), 100),
     )
 
     logger.info("GT id set [%s]", ",".join(str(s) for s in gt_id_set))

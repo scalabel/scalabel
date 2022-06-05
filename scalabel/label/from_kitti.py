@@ -113,7 +113,7 @@ def parse_lidar_labels(
             box3d = label.box3d
 
             center: NDArrayF64 = np.array([box3d.location], dtype=np.float64)
-            center_lidar = tuple(
+            center_lidar: Tuple[float, float, float] = tuple(  # type: ignore
                 np.dot(cam2lidar_mat, cart2hom(center).T)[:3, 0].tolist()
             )
             heading = heading_transform(box3d, cam2lidar_mat)
@@ -122,7 +122,7 @@ def parse_lidar_labels(
                 orientation=(0.0, heading, 0.0),
                 location=center_lidar,
                 dimension=box3d.dimension,
-                alpha=rotation_y_to_alpha(heading, center_lidar),  # type: ignore # pylint: disable=line-too-long
+                alpha=rotation_y_to_alpha(heading, center_lidar),
             )
         new_labels.append(
             Label(
