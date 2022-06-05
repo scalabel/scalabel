@@ -76,7 +76,7 @@ docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p \
 The Python API can be installed through `pip`:
 
 ```bash
-python3 -m pip install scalabel
+python3 -m pip install -U scalabel
 ```
 
 For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
