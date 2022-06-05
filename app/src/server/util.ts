@@ -128,6 +128,7 @@ export function getHandlerUrl(itemType: string, labelType: string): string {
       if (
         labelType === LabelTypeName.BOX_2D ||
         labelType === LabelTypeName.POLYGON_2D ||
+        labelType === LabelTypeName.POLYLINE_2D ||
         labelType === LabelTypeName.CUSTOM_2D ||
         labelType === LabelTypeName.BOX_3D
       ) {
@@ -186,6 +187,8 @@ export function getPolicy(
           case LabelTypeName.BOX_2D:
             return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
           case LabelTypeName.POLYGON_2D:
+            return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
+          case LabelTypeName.POLYLINE_2D:
             return [[TrackPolicyType.LINEAR_INTERPOLATION], labelTypes]
           case LabelTypeName.CUSTOM_2D:
             labelTypes[0] = Object.keys(templates2d)[0]

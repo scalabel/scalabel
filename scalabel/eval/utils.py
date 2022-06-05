@@ -136,7 +136,7 @@ def handle_inconsistent_length(
 
         if outlier_results:
             logger.critical(
-                "You have videos not in the test set: " "%s",
+                "You have videos not in the test set: %s",
                 str(outlier_results),
             )
             raise ValueError(
