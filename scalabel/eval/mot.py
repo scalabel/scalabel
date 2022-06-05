@@ -158,9 +158,7 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0]).astype(
-                    bool, copy=True
-                )
+                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0], dtype=bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):

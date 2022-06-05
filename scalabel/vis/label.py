@@ -526,15 +526,15 @@ class LabelViewer:
 
             # Non-zero values correspond to colors for each label
             combined_mask = np.where(
-                mask, color.astype(np.uint8, copy=True), combined_mask
+                mask, color.astype(np.uint8, copy=False), combined_mask
             )
 
-        img: NDArrayU8 = (image * 255).astype(np.uint8, copy=True)
+        img: NDArrayU8 = (image * 255).astype(np.uint8, copy=False)
         self.ax.imshow(
             np.where(
                 combined_mask > 0,
-                combined_mask.astype(np.uint8, copy=True),
-                img.astype(np.uint8, copy=True),
+                combined_mask.astype(np.uint8, copy=False),
+                img.astype(np.uint8, copy=False),
             ),
             alpha=alpha,
         )

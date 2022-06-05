@@ -70,7 +70,7 @@ def fast_hist(
     )
     return (
         np.bincount(
-            size * groundtruth[k].astype(int, copy=True) + prediction[k],
+            size * groundtruth[k].astype(int, copy=False) + prediction[k],
             minlength=size**2,
         )
         .reshape(size, size)
@@ -85,7 +85,7 @@ def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     )
     ious[np.isnan(ious)] = 0
     # Last class as `ignored`
-    res: NDArrayF64 = ious[:-1].astype(np.float64, copy=True)
+    res: NDArrayF64 = ious[:-1].astype(np.float64, copy=False)
     return res
 
 
@@ -94,7 +94,7 @@ def per_class_acc(hist: NDArrayI32) -> NDArrayF64:
     accs: NDArrayF64 = np.diag(hist) / hist.sum(axis=0)
     accs[np.isnan(accs)] = 0
     # Last class as `ignored`
-    res: NDArrayF64 = accs[:-1].astype(np.float64, copy=True)
+    res: NDArrayF64 = accs[:-1].astype(np.float64, copy=False)
     return res
 
 
@@ -122,7 +122,7 @@ def frame_to_mask(
     if image_size is not None:
         out_mask: NDArrayU8 = (
             np.ones((image_size.height, image_size.width)) * ignore_label
-        ).astype(np.uint8, copy=True)
+        ).astype(np.uint8, copy=False)
     else:
         out_mask = np.zeros((0), dtype=np.uint8)
     if frame.labels is None:
