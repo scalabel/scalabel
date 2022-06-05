@@ -21,7 +21,7 @@ def test_parse() -> None:
     labels = frame.labels
     assert isinstance(labels, list)
     assert len(labels) == 1
-    label = labels[0]  # pylint: disable=unsubscriptable-object
+    label = labels[0]
     assert label.id == "1"
     assert label.attributes is not None
     assert label.attributes["trafficLightColor"] == "G"

@@ -25,7 +25,6 @@ class TaggingResult(Result):
     f1_score: List[Dict[str, float]]
     accuracy: List[Dict[str, float]]
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "TaggingResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)

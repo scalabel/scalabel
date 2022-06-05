@@ -79,9 +79,7 @@ class DisplayData:
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
 if TYPE_CHECKING:
-    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
-        DisplayData
-    ]
+    DisplayDataQueue = Queue[DisplayData]
 else:
     DisplayDataQueue = Queue
 

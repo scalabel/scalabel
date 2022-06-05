@@ -75,7 +75,6 @@ class BoundaryResult(Result):
     F1_pix2: List[Dict[str, float]]
     F1_pix5: List[Dict[str, float]]
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "BoundaryResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)

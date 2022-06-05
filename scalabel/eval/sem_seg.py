@@ -34,7 +34,6 @@ class SegResult(Result):
     fIoU: float
     pAcc: float
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "SegResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
@@ -248,8 +247,8 @@ def evaluate_sem_seg(
     res_dict: Dict[str, Union[float, ScoresList]] = dict(
         IoU=iou_scores,
         Acc=acc_scores,
-        fIoU=np.multiply(freq_iou(hist), 100),  # pylint: disable=invalid-name
-        pAcc=np.multiply(whole_acc(hist), 100),  # pylint: disable=invalid-name
+        fIoU=np.multiply(freq_iou(hist), 100),
+        pAcc=np.multiply(whole_acc(hist), 100),
     )
 
     logger.info("GT id set [%s]", ",".join(str(s) for s in gt_id_set))

@@ -398,17 +398,11 @@ def from_nuscenes(
             first_sample_tokens.append(token)
 
     func = partial(parse_sequence, data, add_nonkey_frames)
-    if nproc > 1:
-        partial_results = pmap(
-            func,
-            zip(first_sample_tokens, scene_names_per_split[split]),
-            nprocs=nproc,
-        )
-    else:
-        partial_results = map(  # type: ignore
-            func,
-            zip(first_sample_tokens, scene_names_per_split[split]),
-        )
+    partial_results = pmap(
+        func,
+        zip(first_sample_tokens, scene_names_per_split[split]),
+        nprocs=nproc,
+    )
     frames, groups = [], []
     for f, g in partial_results:
         frames.extend(f)

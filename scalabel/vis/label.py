@@ -50,9 +50,7 @@ from .helper import (
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
 if TYPE_CHECKING:
-    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
-        DisplayData
-    ]
+    DisplayDataQueue = Queue[DisplayData]
 else:
     DisplayDataQueue = Queue
 
@@ -193,7 +191,7 @@ class LabelViewer:
         """Show the visualization."""
         plt.show()
 
-    def save(self, out_path: str) -> None:  # pylint: disable=no-self-use
+    def save(self, out_path: str) -> None:
         """Save the visualization."""
         plt.savefig(out_path, dpi=self.ui_cfg.dpi)
 
