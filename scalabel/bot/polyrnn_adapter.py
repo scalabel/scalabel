@@ -4,7 +4,7 @@ import warnings
 from typing import Dict, List
 
 import numpy as np
-from Tool.tool import Tool  # pylint: disable=import-error
+from Tool.tool import Tool
 
 from ..common.typing import NDArrayF64, NDArrayU8
 from .seg_base import SegBase
