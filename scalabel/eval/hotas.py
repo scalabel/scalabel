@@ -125,19 +125,17 @@ class BDD100K(TrackEvalKittiMOTS):  # type: ignore
             if labels is None:
                 continue
             for i, ann in enumerate(labels):
-                # TODO: handle ignore classes after deadline
-                # if is_gt and (
-                #     ann.category in self.distractor_classes
-                #     or (
-                #         ann.attributes is not None
-                #         and "crowd" in ann.attributes
-                #         and ann.attributes["crowd"]
-                #     )
-                # ):
-                #     ig_ids.append(i)
-                # else:
-                #     keep_ids.append(i)
-                keep_ids.append(i)
+                if is_gt and (
+                    ann.category in self.distractor_classes
+                    or (
+                        ann.attributes is not None
+                        and "crowd" in ann.attributes
+                        and ann.attributes["crowd"]
+                    )
+                ):
+                    ig_ids.append(i)
+                else:
+                    keep_ids.append(i)
 
             if keep_ids:
                 raw_data["dets"][t] = [
@@ -182,30 +180,6 @@ class BDD100K(TrackEvalKittiMOTS):  # type: ignore
                 else:
                     raw_data["gt_ignore_region"][t] = mask_utils.merge(
                         [], intersect=False
-                    )
-
-            # check for overlapping masks
-            if all_masks:
-                masks_merged = all_masks[0]
-                for mask in all_masks[1:]:
-                    if (
-                        mask_utils.area(
-                            mask_utils.merge(
-                                [masks_merged, mask], intersect=True
-                            )
-                        )
-                        != 0.0
-                    ):
-                        raise TrackEvalException(
-                            "Tracker has overlapping masks. Tracker: "
-                            + tracker
-                            + " Seq: "
-                            + seq
-                            + " Timestep: "
-                            + str(t)
-                        )
-                    masks_merged = mask_utils.merge(
-                        [masks_merged, mask], intersect=False
                     )
 
         if is_gt:
