@@ -142,7 +142,7 @@ def eval_bdry_per_frame(
 ) -> Dict[str, NDArrayF64]:
     """Compute mean, recall, and decay from per-frame evaluation."""
     w, h = image_size.width, image_size.height
-    blank_mask: NDArrayU8 = np.zeros((h, w)).astype(np.uint8)
+    blank_mask: NDArrayU8 = np.zeros((h, w), dtype=np.uint8)
     task2arr: Dict[str, NDArrayF64] = {}  # str -> 2d array
     if gt_frame.labels is None:
         gt_frame.labels = []

@@ -95,12 +95,12 @@ def read_calib(
     projections[left_cam] = (
         np.asarray(fields[2][1:], dtype=np.float32)
         .reshape(3, 4)
-        .astype(np.float64)
+        .astype(np.float64, copy=True)
     )
     projections[right_cam] = (
         np.asarray(fields[3][1:], dtype=np.float32)
         .reshape(3, 4)
-        .astype(np.float64)
+        .astype(np.float64, copy=True)
     )
 
     left_to_right_offset = (
@@ -111,7 +111,7 @@ def read_calib(
     rect: NDArrayF64 = (
         np.asarray(fields[4][1:], dtype=np.float32)
         .reshape(3, 3)
-        .astype(np.float64)
+        .astype(np.float64, copy=True)
     )
     rect = np.hstack((rect, np.zeros((3, 1))))
     rect = np.vstack((rect, np.array([0.0, 0.0, 0.0, 1.0])))
@@ -119,7 +119,7 @@ def read_calib(
     velo2cam: NDArrayF64 = (
         np.asarray(fields[5][1:], dtype=np.float32)
         .reshape(3, 4)
-        .astype(np.float64)
+        .astype(np.float64, copy=True)
     )
     velo2cam = np.vstack((velo2cam, np.array([0.0, 0.0, 0.0, 1.0])))
 

@@ -198,7 +198,7 @@ def frame_to_masks(
 
     fig.canvas.draw()
     out: NDArrayU8 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    out = out.reshape((height, width, -1)).astype(np.int32)
+    out = out.reshape((height, width, -1)).astype(np.int32, copy=True)
     out = (out[..., 0] << 8) + out[..., 1]
     plt.close()
 
@@ -232,7 +232,9 @@ def frame_to_rles(
 
 def rle_to_mask(rle: RLE) -> NDArrayU8:
     """Converting RLE to mask."""
-    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(np.uint8)
+    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(
+        np.uint8, copy=True
+    )
     return mask
 
 
