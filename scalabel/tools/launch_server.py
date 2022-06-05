@@ -11,7 +11,7 @@ from ..common.io import open_read_text
 
 FORMAT = "[%(asctime)-15s %(filename)s:%(lineno)d %(funcName)s] %(message)s"
 logging.basicConfig(format=FORMAT)
-logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 

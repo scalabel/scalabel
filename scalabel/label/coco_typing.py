@@ -4,7 +4,7 @@ import sys
 from typing import List, Optional, Tuple, Union
 
 if sys.version_info >= (3, 8):
-    from typing import TypedDict  # pylint: disable=no-name-in-module
+    from typing import TypedDict
 else:
     from typing_extensions import TypedDict
 

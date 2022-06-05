@@ -29,6 +29,7 @@ from ..label.utils import (
     check_occluded,
     check_truncated,
     get_leaf_categories,
+    get_matrix_from_intrinsics,
 )
 from .controller import (
     ControllerConfig,
@@ -36,6 +37,7 @@ from .controller import (
     DisplayData,
     ViewController,
 )
+from .geometry import Label3d, vector_3d_to_2d
 from .helper import (
     gen_2d_rect,
     gen_3d_cube,
@@ -48,9 +50,7 @@ from .helper import (
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
 if TYPE_CHECKING:
-    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
-        DisplayData
-    ]
+    DisplayDataQueue = Queue[DisplayData]
 else:
     DisplayDataQueue = Queue
 
@@ -191,7 +191,7 @@ class LabelViewer:
         """Show the visualization."""
         plt.show()
 
-    def save(self, out_path: str) -> None:  # pylint: disable=no-self-use
+    def save(self, out_path: str) -> None:
         """Save the visualization."""
         plt.savefig(out_path, dpi=self.ui_cfg.dpi)
 
@@ -337,10 +337,13 @@ class LabelViewer:
         labels: List[Label],
         intrinsics: Intrinsics,
         with_tags: bool = True,
+        camera_near_clip: float = 0.15,
     ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
+                if label.box3d.location[2] <= camera_near_clip:
+                    continue
                 color = self._get_label_color(label).tolist()
                 occluded = check_occluded(label)
                 alpha = 0.5 if occluded else 0.8
@@ -349,10 +352,14 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if with_tags and label.box2d is not None:
-                    self._draw_label_attributes(
-                        label, label.box2d.x1, (label.box2d.y1 - 4)
+                if with_tags:
+                    label3d = Label3d.from_box3d(label.box3d)
+                    point_1 = vector_3d_to_2d(
+                        label3d.vertices[-1],
+                        get_matrix_from_intrinsics(intrinsics),
                     )
+                    x1, y1 = point_1[0], point_1[1]
+                    self._draw_label_attributes(label, x1, y1 - 4)
 
     def draw_poly2ds(
         self,
@@ -519,15 +526,15 @@ class LabelViewer:
 
             # Non-zero values correspond to colors for each label
             combined_mask = np.where(
-                mask, color.astype(np.uint8), combined_mask
+                mask, color.astype(np.uint8, copy=False), combined_mask
             )
 
-        img: NDArrayU8 = image * 255
+        img: NDArrayU8 = (image * 255).astype(np.uint8, copy=False)
         self.ax.imshow(
             np.where(
                 combined_mask > 0,
-                combined_mask.astype(np.uint8),
-                img.astype(np.uint8),
+                combined_mask.astype(np.uint8, copy=False),
+                img.astype(np.uint8, copy=False),
             ),
             alpha=alpha,
         )

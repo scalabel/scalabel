@@ -53,11 +53,9 @@ class TestScalabelToCOCODetection(unittest.TestCase):
     def test_num_anns(self) -> None:
         """Check the number of annotations is unchanged."""
         len_scalabel = sum(
-            [
-                len(item.labels)
-                for item in self.scalabel
-                if item.labels is not None
-            ]
+            len(item.labels)
+            for item in self.scalabel
+            if item.labels is not None
         )
         len_coco = len(self.coco["annotations"])
         self.assertEqual(len_scalabel, len_coco)
@@ -82,11 +80,9 @@ class TestScalabelToCOCOInsSeg(unittest.TestCase):
     def test_num_anns(self) -> None:
         """Check the number of annotations is unchanged."""
         len_scalabel = sum(
-            [
-                len(item.labels)
-                for item in self.scalabel
-                if item.labels is not None
-            ]
+            len(item.labels)
+            for item in self.scalabel
+            if item.labels is not None
         )
         len_coco = len(self.coco["annotations"])
         self.assertEqual(len_scalabel, len_coco)
@@ -113,11 +109,9 @@ class TestScalabelToCOCOPose(unittest.TestCase):
     def test_num_anns(self) -> None:
         """Check the number of annotations is unchanged."""
         len_scalabel = sum(
-            [
-                len(item.labels)
-                for item in self.scalabel.frames
-                if item.labels is not None
-            ]
+            len(item.labels)
+            for item in self.scalabel.frames
+            if item.labels is not None
         )
         len_coco = len(self.coco["annotations"])
         self.assertEqual(len_scalabel, len_coco)

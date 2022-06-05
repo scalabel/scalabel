@@ -75,8 +75,8 @@ def parse_annotations(ann_filepath: str) -> Dict[int, List[Label]]:
         class_name = NAME_MAPPING[class_id]
         if class_name in IGNORE:
             continue
-        frame_id, ins_id = map(int, gt[:2])
-        box2d = bbox_to_box2d(list(map(float, gt[2:6])))
+        frame_id, ins_id = (int(x) for x in gt[:2])
+        box2d = bbox_to_box2d([float(x) for x in gt[2:6]])
         attrs: Dict[str, Union[bool, float, str]] = dict(
             visibility=float(gt[8])
         )
@@ -99,7 +99,7 @@ def save_split_files(split_index: int, orig_ann_path: str) -> None:
     train_lines, val_lines = [], []
     for line in load_file_as_list(orig_ann_path):
         gt = line.strip().split(",")
-        frame_id, _ = map(int, gt[:2])
+        frame_id, _ = (int(x) for x in gt[:2])
         if frame_id <= split_index:
             train_lines.append(line)
         else:
@@ -131,9 +131,12 @@ def from_mot(
             continue
         video_frames = []
         img_names = sorted(os.listdir(os.path.join(data_path, video, "img1")))
-        annotations = parse_annotations(
-            os.path.join(data_path, video, "gt/gt.txt"),
-        )
+        if os.path.exists(os.path.join(data_path, video, "gt/gt.txt")):
+            annotations = parse_annotations(
+                os.path.join(data_path, video, "gt/gt.txt"),
+            )
+        else:
+            annotations = {}
 
         for i, img_name in enumerate(img_names):
             assert i + 1 == int(img_name.replace(".jpg", ""))

@@ -131,7 +131,7 @@ class Result(BaseModel):
             strs.insert(row_ind, split_line)
         summary = "".join([f"{s}\n" for s in strs])
         summary = "\n" + summary
-        return summary  # type: ignore
+        return str(summary)
 
     def __str__(self) -> str:
         """Convert the data into a printable string."""

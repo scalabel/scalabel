@@ -25,7 +25,12 @@ from .mot import (
     evaluate_single_class,
     generate_results,
 )
-from .utils import check_overlap, label_ids_to_int, parse_seg_objects
+from .utils import (
+    check_overlap,
+    handle_inconsistent_length,
+    label_ids_to_int,
+    parse_seg_objects,
+)
 
 VidFunc = Callable[
     [
@@ -106,7 +111,7 @@ def acc_single_video_mots(
                 )
             if len(gt_ignores) > 0 and len(pred_rles_c) > 0:
                 # 1. assign gt and preds
-                fps: NDArrayU8 = np.ones(len(pred_rles_c)).astype(bool)
+                fps: NDArrayU8 = np.ones(len(pred_rles_c), dtype=bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
@@ -155,6 +160,7 @@ def evaluate_seg_track(
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
+    results = handle_inconsistent_length(gts, results)
     assert len(gts) == len(results)
     # check overlap of masks
     logger.info("checking for overlap of masks...")

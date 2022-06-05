@@ -17,7 +17,7 @@ import {
   mapStateToDrawableProps
 } from "./viewer"
 import { ViewerConfigTypeName } from "../const/common"
-import { transformPointCloud } from "../common/util"
+import { getMainSensor } from "../common/util"
 
 const styles = (): StyleRules<"point_cloud_canvas", {}> =>
   createStyles({
@@ -48,11 +48,14 @@ interface Props extends DrawableProps {
 
 const vertexShader = `
     varying vec3 worldPosition;
+    attribute vec3 color;
+    varying vec3 pointColor;
     void main() {
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      gl_PointSize = 1.5;
+      gl_PointSize = 3.0;
       gl_Position = projectionMatrix * mvPosition;
       worldPosition = position;
+      pointColor = color;
     }
   `
 const fragmentShader = `
@@ -64,19 +67,7 @@ const fragmentShader = `
     uniform mat4 toSelectionFrame;
     uniform vec3 selectionSize;
 
-    vec3 hsv2rgb(vec3 c)
-    {
-        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-    }
-
-    vec3 getHeatMapColor(float distance, float max_val) {
-      float val = min(max_val, max(0.0, distance)) / max_val;
-      vec3 hsv_val = vec3(1.0 - val, 1.0, 1.0);
-      vec3 rgb_val = hsv2rgb(hsv_val);
-      return rgb_val;
-    }
+    varying vec3 pointColor;
 
     bool pointInSelection(vec3 point) {
       vec4 testPoint = abs(toSelectionFrame * vec4(point.xyz, 1.0));
@@ -102,11 +93,7 @@ const fragmentShader = `
 
     void main() {
       float alpha = 0.5;
-      float distance = sqrt(
-        pow(worldPosition.x, 2.0)+
-        pow(worldPosition.y, 2.0)+
-        pow(worldPosition.z, 2.0));
-      vec3 color = getHeatMapColor(distance, 23.0);
+      vec3 color = pointColor;
       if (
         selectionSize.x * selectionSize.y * selectionSize.z > 1e-4
       ) {
@@ -144,7 +131,9 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
   /** Current point cloud for rendering */
   private readonly pointCloud: THREE.Points
   /** have points been cloned */
-  private pointsCloned: boolean
+  private _pointsUpdated: boolean
+  /** current item */
+  private _currentItem: number
 
   /**
    * Constructor, ons subscription to store
@@ -156,7 +145,8 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
     super(props)
     this.scene = new THREE.Scene()
     this.camera = props.camera
-    this.pointsCloned = false
+    this._pointsUpdated = false
+    this._currentItem = 0
 
     this.canvas = null
     this.display = null
@@ -245,15 +235,50 @@ class PointCloudOverlayCanvas extends DrawableCanvas<Props> {
       this.forceUpdate()
     }
     const item = state.user.select.item
-    const sensor = this.props.sensor
-
-    if (Session.pointClouds[item][sensor] !== undefined && !this.pointsCloned) {
-      const rawGeometry = Session.pointClouds[item][sensor].clone()
-      const geometry = transformPointCloud(rawGeometry, sensor, state)
-      this.pointCloud.geometry.copy(geometry)
-      this.pointCloud.layers.enableAll()
-      this.pointsCloned = true
+    const mainSensor = getMainSensor(this.state)
+    if (item !== this._currentItem) {
+      this._currentItem = item
+      this._pointsUpdated = false
     }
+
+    if (
+      Session.pointClouds[item][mainSensor.id] !== undefined &&
+      !this._pointsUpdated
+    ) {
+      const geometry = Session.pointClouds[item][mainSensor.id]
+      this.pointCloud.geometry.copy(geometry)
+      const colors = this.getDepthColors()
+      this.pointCloud.geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(colors, 3)
+      )
+      this.pointCloud.layers.enableAll()
+      this._pointsUpdated = true
+    }
+  }
+
+  /**
+   * Set color for points based on depth
+   */
+  private getDepthColors(): number[] {
+    const geometry = this.pointCloud.geometry
+    const points = Array.from(geometry.getAttribute("position").array)
+    const depths: number[] = []
+    for (let i = 0; i < points.length; i += 3) {
+      const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+      const depth = point.length()
+      depths.push(depth)
+    }
+    const maxDepth = Math.min(Math.max.apply(Math, depths), 60)
+    const minDepth = Math.min.apply(Math, depths)
+    const colors: number[] = []
+    for (let i = 0; i < depths.length; i += 1) {
+      const depth = depths[i]
+      const hue = Math.max(0, 0.66 - (depth - minDepth) / (maxDepth - minDepth))
+      const color = new THREE.Color().setHSL(hue, 1.0, 0.5)
+      colors.push(color.r, color.g, color.b)
+    }
+    return colors
   }
 
   /**
