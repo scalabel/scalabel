@@ -7,7 +7,7 @@ from ..common.parallel import NPROC
 from ..unittest.util import get_test_file
 from .from_waymo import run
 from .io import load
-from .utils import compare_groups_results, compare_results
+from .test_utils import compare_groups_results, compare_results
 
 
 def test_run() -> None:
