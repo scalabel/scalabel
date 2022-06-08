@@ -340,7 +340,7 @@ def parse_frame(
             car2global,
             cam2global,
         ) = get_calibration(frame, camera_id)
-        url = os.path.join(sequence, camera, frame_name)
+        url = os.path.join("images_png", sequence, camera, frame_name)
         img_filepath = os.path.join(output_dir, sequence, camera, frame_name)
 
         img_name = (
@@ -430,14 +430,17 @@ def parse_record(
 
 def from_waymo(
     data_path: str,
-    output_dir: str,
+    split: str,
     save_images: bool = False,
     use_lidar_labels: bool = False,
     nproc: int = NPROC,
 ) -> Dataset:
     """Function converting Waymo data to Scalabel format."""
+    output_dir = os.path.join(data_path, "images_png")
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
+
+    data_path = os.path.join(data_path, split)
 
     func = partial(parse_record, output_dir, save_images, use_lidar_labels)
     if nproc > 1:

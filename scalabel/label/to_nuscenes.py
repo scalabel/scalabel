@@ -83,9 +83,11 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_attributes(name: str, velocity: List[float]) -> str:
+def get_attributes(
+    name: str, velocity: List[float], velocity_thres: float = 0.2
+) -> str:
     """Get nuScenes attributes."""
-    if np.sqrt(velocity[0] ** 2 + velocity[1] ** 2) > 0.2:
+    if np.sqrt(velocity[0] ** 2 + velocity[1] ** 2) > velocity_thres:
         if name in [
             "car",
             "construction_vehicle",
@@ -113,6 +115,7 @@ def to_nuscenes(
     mode: str,
     metadata: Dict[str, bool],
     attr_by_velocity: bool = True,
+    velocity_thres: float = 0.2,
 ) -> DictStrAny:
     """Conver Scalabel format prediction into nuScenes JSON file."""
     results: DictStrAny = {}
@@ -165,7 +168,9 @@ def to_nuscenes(
                 ).tolist()
 
                 if attr_by_velocity:
-                    attribute_name = get_attributes(label.category, velocity)
+                    attribute_name = get_attributes(
+                        label.category, velocity, velocity_thres
+                    )
                 else:
                     attribute_name = DefaultAttribute[label.category]
 
