@@ -11,7 +11,7 @@ from pycocotools import mask as mask_utils  # type: ignore
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType, RLEType
-from .typing import RLE, Box2D, Config, Edge, ImageSize, Node, Poly2D
+from .typing import RLE, Box2D, Config, Edge, Graph, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
 
 __all__ = [
@@ -29,6 +29,7 @@ __all__ = [
     "rle_to_box2d",
     "rle_to_mask",
     "coco_rle_to_rle",
+    "graph_to_keypoints",
 ]
 
 
@@ -197,7 +198,7 @@ def frame_to_masks(
 
     fig.canvas.draw()
     out: NDArrayU8 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    out = out.reshape((height, width, -1)).astype(np.int32)
+    out = out.reshape((height, width, -1)).astype(np.int32, copy=False)
     out = (out[..., 0] << 8) + out[..., 1]
     plt.close()
 
@@ -231,7 +232,10 @@ def frame_to_rles(
 
 def rle_to_mask(rle: RLE) -> NDArrayU8:
     """Converting RLE to mask."""
-    return mask_utils.decode(dict(rle))  # type: ignore
+    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(
+        np.uint8, copy=False
+    )
+    return mask
 
 
 def rle_to_box2d(rle: RLE) -> Box2D:
@@ -278,3 +282,21 @@ def nodes_to_edges(
                 )
             )
     return edges
+
+
+def graph_to_keypoints(graph: Graph) -> List[float]:
+    """Converting Graph to COCO keypoints."""
+    keypoints = []
+    for node in graph.nodes:
+        c3 = 0.0
+        if node.score is not None:
+            c3 = node.score
+        else:
+            if graph.type is not None:
+                if graph.type.startswith("Pose2D"):
+                    if node.visibility == "V":
+                        c3 = 2.0
+                    elif node.visibility == "N":
+                        c3 = 1.0
+        keypoints.extend([node.location[0], node.location[1], c3])
+    return keypoints

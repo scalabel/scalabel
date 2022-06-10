@@ -23,7 +23,7 @@ from ..label.utils import (
     get_parent_categories,
 )
 from .result import AVERAGE, OVERALL, Result, Scores, ScoresList
-from .utils import label_ids_to_int
+from .utils import handle_inconsistent_length, label_ids_to_int
 
 # Video = TypeVar("Video", List[Frame])
 VidFunc = Callable[
@@ -158,7 +158,7 @@ def acc_single_video_mot(
                 )
             if gt_ignores.shape[0] > 0:
                 # 1. assign gt and preds
-                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0]).astype(bool)
+                fps: NDArrayU8 = np.ones(pred_bboxes_c.shape[0], dtype=bool)
                 le, ri = mm.lap.linear_sum_assignment(distances)
                 for m, n in zip(le, ri):
                     if np.isfinite(distances[m, n]):
@@ -352,6 +352,7 @@ def evaluate_track(
     """
     logger.info("Tracking evaluation with CLEAR MOT metrics.")
     t = time.time()
+    results = handle_inconsistent_length(gts, results)
     assert len(gts) == len(results)
 
     classes = get_leaf_categories(config.categories)

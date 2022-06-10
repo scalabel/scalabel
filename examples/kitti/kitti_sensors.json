@@ -7,21 +7,21 @@
   {
     "id": 1,
     "name": "image0",
-    "type": "image_3d"
+    "type": "image"
   },
   {
     "id": 2,
     "name": "image1",
-    "type": "image_3d"
+    "type": "image"
   },
   {
     "id": 3,
     "name": "image2",
-    "type": "image_3d"
+    "type": "image"
   },
   {
     "id": 4,
     "name": "image3",
-    "type": "image_3d"
+    "type": "image"
   }
 ]

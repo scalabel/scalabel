@@ -218,4 +218,11 @@ export class Span3D {
       .toThree()
       .sub(this._points[1].toVector3D().toThree())
   }
+
+  /**
+   * Number of points set
+   */
+  public get numPoints(): number {
+    return this._points.length
+  }
 }

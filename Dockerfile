@@ -1,5 +1,7 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 EXPOSE 8686
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -12,8 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     software-properties-common \
     curl \
     git \
-    python3.8 \
-    python3.8-dev \
+    libopenmpi-dev \
+    python3.9 \
+    python3.9-dev \
     python3-pip \
     python3-setuptools
 
@@ -31,10 +34,12 @@ RUN chmod -R a+w /opt/scalabel
 
 COPY . .
 
-RUN python3.8 -m pip install --upgrade pip && \
-    python3.8 -m pip install -r scripts/requirements.txt
+RUN python3.9 -m pip install -U pip && \
+    python3.9 -m pip install -r scripts/requirements.txt
 
-RUN npm install -g npm@latest && npm install --max_old_space_size=8000
+RUN python3.9 setup.py install
+
+RUN npm install -g npm@latest && npm ci --max_old_space_size=8000
 
 
 RUN ./node_modules/.bin/webpack --config webpack.config.js --mode=production; \

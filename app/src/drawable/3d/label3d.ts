@@ -40,6 +40,8 @@ export abstract class Label3D {
   protected _selected: boolean
   /** whether the label is highlighted */
   protected _highlighted: boolean
+  /** whether the label is being edited */
+  protected _editing: boolean
   /** rgba color decided by labelId */
   protected _color: number[]
   /** parent label if any */
@@ -64,6 +66,7 @@ export abstract class Label3D {
     this._label = makeLabel()
     this._selected = false
     this._highlighted = false
+    this._editing = false
     this._color = getColorById(this.labelId, this.trackId)
     this._parent = null
     this._children = []
@@ -157,6 +160,16 @@ export abstract class Label3D {
   /** return whether label selected */
   public get selected(): boolean {
     return this._selected
+  }
+
+  /** set editing mode */
+  public set editing(e: boolean) {
+    this._editing = e
+  }
+
+  /** return whether label is being edited */
+  public get editing(): boolean {
+    return this._editing
   }
 
   /** Return whether this label is temporary (not committed to state) */

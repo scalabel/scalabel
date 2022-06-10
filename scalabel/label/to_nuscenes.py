@@ -219,9 +219,11 @@ def to_nuscenes(
                     sensor2global, label.box3d.location
                 ) + np.array(frame.extrinsics.location)
 
-                quat = Quaternion(
-                    axis=[0, 1, 0], radians=label.box3d.orientation[1]
-                )
+                # Using extrinsic rotation here to align with Pytorch3D
+                x, y, z, w = R.from_euler(
+                    "XYZ", label.box3d.orientation
+                ).as_quat()
+                quat = Quaternion([w, x, y, z])
                 x, y, z, w = R.from_matrix(sensor2global).as_quat()
                 rotation = Quaternion([w, x, y, z]) * quat
 
@@ -232,7 +234,7 @@ def to_nuscenes(
 
                 tracking_id = label.id
                 if prev_loc.get(tracking_id) is not None:
-                    velocity = translation - prev_loc[tracking_id]
+                    velocity = (translation - prev_loc[tracking_id]) * 2  # 2Hz
                 else:
                     velocity = [0.0, 0.0, 0.0]
                 prev_loc[tracking_id] = translation

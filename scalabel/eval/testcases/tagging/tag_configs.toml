@@ -3,22 +3,47 @@ height = 720
 width = 1280
 
 [[categories]]
-name = "rainy"
+name = "weather"
+    [[categories.subcategories]]
+    name = "rainy"
+
+    [[categories.subcategories]]
+    name = "snowy"
+
+    [[categories.subcategories]]
+    name = "clear"
+
+    [[categories.subcategories]]
+    name = "overcast"
+
+    [[categories.subcategories]]
+    name = "undefined"
+
+    [[categories.subcategories]]
+    name = "partly cloudy"
+
+    [[categories.subcategories]]
+    name = "foggy"
 
 [[categories]]
-name = "snowy"
+name = "scene"
+    [[categories.subcategories]]
+    name = "tunnel"
 
-[[categories]]
-name = "clear"
+    [[categories.subcategories]]
+    name = "residential"
 
-[[categories]]
-name = "overcast"
+    [[categories.subcategories]]
+    name = "parking lot"
 
-[[categories]]
-name = "undefined"
+    [[categories.subcategories]]
+    name = "undefined"
 
-[[categories]]
-name = "partly cloudy"
+    [[categories.subcategories]]
+    name = "city street"
 
-[[categories]]
-name = "foggy"
+    [[categories.subcategories]]
+    name = "gas stations"
+
+    [[categories.subcategories]]
+    name = "highway"

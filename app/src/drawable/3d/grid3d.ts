@@ -31,8 +31,8 @@ export class Grid3D extends Shape3D {
     )
     this._lines.rotation.x = -Math.PI / 2
     this.add(this._lines)
-    this.scale.x = 6
-    this.scale.y = 6
+    this.scale.x = 3
+    this.scale.y = 3
     this._planeShape = makePlane()
   }
 
@@ -175,5 +175,20 @@ export class Grid3D extends Shape3D {
     )
     // Also update the _planeShape
     this._planeShape = newShape
+  }
+
+  /**
+   * Set visibility for viewer
+   *
+   * @param viewerId
+   * @param v
+   */
+  public setVisible(viewerId: number, v: boolean = true): void {
+    super.setVisible(viewerId, v)
+    if (v) {
+      this._lines.layers.enable(viewerId)
+    } else {
+      this._lines.layers.disable(viewerId)
+    }
   }
 }

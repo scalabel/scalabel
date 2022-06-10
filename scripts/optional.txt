@@ -1,2 +1,0 @@
-git+git://github.com/gdlg/simple-waymo-open-dataset-reader.git
-utm

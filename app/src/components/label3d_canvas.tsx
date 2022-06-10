@@ -468,7 +468,18 @@ export class Label3dCanvas extends DrawableCanvas<Props> {
    * @param e
    */
   private onDoubleClick(e: React.MouseEvent<HTMLCanvasElement>): void {
-    if (this._labelHandler.onDoubleClick()) {
+    if (this.canvas === null || this.checkFreeze()) {
+      return
+    }
+    const normalized = normalizeCoordinatesToCanvas(
+      e.clientX,
+      e.clientY,
+      this.canvas
+    )
+    const NDC = convertMouseToNDC(normalized[0], normalized[1], this.canvas)
+    const x = NDC[0]
+    const y = NDC[1]
+    if (this._labelHandler.onDoubleClick(x, y)) {
       e.stopPropagation()
     }
   }

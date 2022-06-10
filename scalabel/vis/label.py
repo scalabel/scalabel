@@ -29,6 +29,7 @@ from ..label.utils import (
     check_occluded,
     check_truncated,
     get_leaf_categories,
+    get_matrix_from_intrinsics,
 )
 from .controller import (
     ControllerConfig,
@@ -36,6 +37,7 @@ from .controller import (
     DisplayData,
     ViewController,
 )
+from .geometry import Label3d, vector_3d_to_2d
 from .helper import (
     gen_2d_rect,
     gen_3d_cube,
@@ -48,9 +50,7 @@ from .helper import (
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
 if TYPE_CHECKING:
-    DisplayDataQueue = Queue[  # pylint: disable=unsubscriptable-object
-        DisplayData
-    ]
+    DisplayDataQueue = Queue[DisplayData]
 else:
     DisplayDataQueue = Queue
 
@@ -191,7 +191,7 @@ class LabelViewer:
         """Show the visualization."""
         plt.show()
 
-    def save(self, out_path: str) -> None:  # pylint: disable=no-self-use
+    def save(self, out_path: str) -> None:
         """Save the visualization."""
         plt.savefig(out_path, dpi=self.ui_cfg.dpi)
 
@@ -208,6 +208,7 @@ class LabelViewer:
         with_ctrl_points: bool = False,
         with_tags: bool = True,
         ctrl_point_size: float = 2.0,
+        alpha: float = 0.5,
     ) -> None:
         """Display the image and corresponding labels."""
         plt.cla()
@@ -234,11 +235,12 @@ class LabelViewer:
                 with_tags=with_tags,
                 with_ctrl_points=with_ctrl_points,
                 ctrl_point_size=ctrl_point_size,
+                alpha=alpha,
             )
         if with_graph:
-            self.draw_graph(labels)
+            self.draw_graph(labels, alpha=alpha)
         if with_rle and has_rle:
-            self.draw_rle(img, labels)
+            self.draw_rle(img, labels, alpha=alpha)
 
     def draw_image(self, img: NDArrayU8, title: Optional[str] = None) -> None:
         """Draw image."""
@@ -249,7 +251,11 @@ class LabelViewer:
     def _get_label_color(self, label: Label) -> NDArrayF64:
         """Get color by id (if not found, then create a random color)."""
         category = label.category
-        if self._category_colors and category:
+        if (
+            self._category_colors
+            and category
+            and category in self._category_colors
+        ):
             return self._category_colors[category]
 
         label_id = label.id
@@ -323,9 +329,7 @@ class LabelViewer:
 
                 if with_tags:
                     self._draw_label_attributes(
-                        label,
-                        label.box2d.x1,
-                        (label.box2d.y1 - 4),
+                        label, label.box2d.x1, (label.box2d.y1 - 4)
                     )
 
     def draw_box3ds(
@@ -333,10 +337,13 @@ class LabelViewer:
         labels: List[Label],
         intrinsics: Intrinsics,
         with_tags: bool = True,
+        camera_near_clip: float = 0.15,
     ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
+                if label.box3d.location[2] <= camera_near_clip:
+                    continue
                 color = self._get_label_color(label).tolist()
                 occluded = check_occluded(label)
                 alpha = 0.5 if occluded else 0.8
@@ -345,12 +352,14 @@ class LabelViewer:
                 ):
                     self.ax.add_patch(result)
 
-                if with_tags and label.box2d is not None:
-                    self._draw_label_attributes(
-                        label,
-                        label.box2d.x1,
-                        (label.box2d.y1 - 4),
+                if with_tags:
+                    label3d = Label3d.from_box3d(label.box3d)
+                    point_1 = vector_3d_to_2d(
+                        label3d.vertices[-1],
+                        get_matrix_from_intrinsics(intrinsics),
                     )
+                    x1, y1 = point_1[0], point_1[1]
+                    self._draw_label_attributes(label, x1, y1 - 4)
 
     def draw_poly2ds(
         self,
@@ -399,9 +408,7 @@ class LabelViewer:
             # Show attributes
             if with_tags:
                 self._draw_label_attributes(
-                    label,
-                    x1 + (x2 - x1) * 0.4,
-                    y1 - 3.5,
+                    label, x1 + (x2 - x1) * 0.4, y1 - 3.5
                 )
 
     def _draw_ctrl_points(
@@ -420,10 +427,7 @@ class LabelViewer:
             # Add the point first
             self.ax.add_patch(
                 mpatches.Circle(
-                    vert,
-                    ctrl_point_size,
-                    alpha=alpha,
-                    color=color,
+                    vert, ctrl_point_size, alpha=alpha, color=color
                 )
             )
             # Draw the dashed line to the previous vertex.
@@ -479,33 +483,30 @@ class LabelViewer:
                         )
                     )
 
-    def draw_graph(self, labels: List[Label]) -> None:
+    def draw_graph(
+        self,
+        labels: List[Label],
+        linewidth: int = 2,
+        pointsize: int = 2,
+        alpha: float = 0.5,
+    ) -> None:
         """Draw Graph on the axes."""
         for label in labels:
             if label.graph is not None:
                 for edge in label.graph.edges:
                     color = _get_edge_color(edge, label.graph.type)
-                    result = gen_graph_edge(
-                        edge,
-                        label,
-                        color,
-                        int(2 * self.ui_cfg.scale),
-                    )
+                    width = int(linewidth * self.ui_cfg.scale)
+                    result = gen_graph_edge(edge, label, color, width, alpha)
                     self.ax.add_patch(result[0])
                 for node in label.graph.nodes:
                     color = _get_node_color(node, label.graph.type)
                     result = gen_graph_point(
-                        node,
-                        color,
-                        int(2 * self.ui_cfg.scale),
+                        node, color, int(pointsize * self.ui_cfg.scale), alpha
                     )
                     self.ax.add_patch(result[0])
 
     def draw_rle(
-        self,
-        image: NDArrayU8,
-        labels: List[Label],
-        alpha: float = 0.5,
+        self, image: NDArrayU8, labels: List[Label], alpha: float = 0.5
     ) -> None:
         """Draw RLE."""
         combined_mask: NDArrayU8 = np.zeros(image.shape, dtype=np.uint8)
@@ -525,15 +526,15 @@ class LabelViewer:
 
             # Non-zero values correspond to colors for each label
             combined_mask = np.where(
-                mask, color.astype(np.uint8), combined_mask
+                mask, color.astype(np.uint8, copy=False), combined_mask
             )
 
-        img: NDArrayU8 = image * 255
+        img: NDArrayU8 = (image * 255).astype(np.uint8, copy=False)
         self.ax.imshow(
             np.where(
                 combined_mask > 0,
-                combined_mask.astype(np.uint8),
-                img.astype(np.uint8),
+                combined_mask.astype(np.uint8, copy=False),
+                img.astype(np.uint8, copy=False),
             ),
             alpha=alpha,
         )

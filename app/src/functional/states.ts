@@ -6,6 +6,7 @@ import * as types from "../const/common"
 import { ItemExport, LabelExport } from "../types/export"
 import {
   Attribute,
+  ColorSchemeType,
   ConfigType,
   ConnectionStatus,
   CubeType,
@@ -329,7 +330,9 @@ export function makePointCloudViewerConfig(
     pane,
     synchronized: false,
     hideLabels: false,
-    cameraRotateDir: false
+    cameraRotateDir: false,
+    colorScheme: ColorSchemeType.HEIGHT,
+    cameraTransformed: false
   }
 }
 
@@ -349,7 +352,8 @@ export function makeImage3DViewerConfig(
     target: { x: 0.0, y: 0.0, z: 1.0 },
     verticalAxis: { x: 0.0, y: -1.0, z: 0.0 },
     type: types.ViewerConfigTypeName.IMAGE_3D,
-    pointCloudSensor: -2
+    pointCloudSensor: -2,
+    pointCloudOverlay: false
   }
 }
 
@@ -372,7 +376,8 @@ export function makeHomographyViewerConfig(
     verticalAxis: { x: 0.0, y: -1.0, z: 0.0 },
     type: types.ViewerConfigTypeName.HOMOGRAPHY,
     pointCloudSensor: -2,
-    distance
+    distance,
+    pointCloudOverlay: false
   }
 }
 

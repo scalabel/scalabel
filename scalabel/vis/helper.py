@@ -48,9 +48,7 @@ def fetch_image(inputs: Tuple[Frame, str]) -> NDArrayU8:
 
 
 def gen_2d_rect(
-    label: Label,
-    color: List[float],
-    linewidth: int,
+    label: Label, color: List[float], linewidth: int
 ) -> List[mpatches.Rectangle]:
     """Generate individual bounding box from 2d label."""
     assert label.box2d is not None
@@ -72,6 +70,19 @@ def gen_2d_rect(
             fill=True,
         )
     ]
+
+
+def check_edge_visibility(
+    edge: List[List[float]], img_center: Tuple[float, float]
+) -> bool:
+    """Check whether both ends of the edges is inside the picture."""
+    return (
+        (0 >= edge[0][0] or edge[0][0] >= img_center[0] * 2 - 1)
+        or (0 >= edge[0][1] or edge[0][1] >= img_center[1] * 2 - 1)
+    ) and (
+        (0 >= edge[1][0] or edge[1][0] >= img_center[0] * 2 - 1)
+        or (0 >= edge[1][1] or edge[1][1] >= img_center[1] * 2 - 1)
+    )
 
 
 def gen_3d_cube(
@@ -100,6 +111,8 @@ def gen_3d_cube(
 
     lines = []
     for edge in edges["dashed"]:
+        if check_edge_visibility(edge, intrinsics.center):
+            continue
         lines.append(
             mpatches.Polygon(
                 edge,
@@ -112,6 +125,8 @@ def gen_3d_cube(
             )
         )
     for edge in edges["solid"]:
+        if check_edge_visibility(edge, intrinsics.center):
+            continue
         lines.append(
             mpatches.Polygon(
                 edge,
@@ -159,29 +174,19 @@ def poly2patch(
 
 
 def gen_graph_point(
-    node: Node,
-    color: List[float],
-    radius: int,
+    node: Node, color: List[float], radius: int, alpha: float
 ) -> List[mpatches.Circle]:
     """Generate graph point from node."""
     assert node is not None
 
     # Draw and add graph node to the figure
     return [
-        mpatches.Circle(
-            node.location,
-            radius=radius,
-            color=color,
-            alpha=0.5,
-        )
+        mpatches.Circle(node.location, radius=radius, color=color, alpha=alpha)
     ]
 
 
 def gen_graph_edge(
-    edge: Edge,
-    label: Label,
-    color: List[float],
-    linewidth: int,
+    edge: Edge, label: Label, color: List[float], linewidth: int, alpha: float
 ) -> List[mpatches.ConnectionPatch]:
     """Generate graph edges from graph label."""
     assert edge is not None
@@ -196,6 +201,6 @@ def gen_graph_edge(
             "data",
             color=color,
             linewidth=linewidth,
-            alpha=0.5,
+            alpha=alpha,
         )
     ]

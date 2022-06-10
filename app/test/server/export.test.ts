@@ -1,7 +1,11 @@
 import * as fs from "fs-extra"
 
-import { LabelTypeName } from "../../src/const/common"
+import { LabelTypeName, ShapeTypeName } from "../../src/const/common"
 import { makePathPoint2D } from "../../src/functional/states"
+import {
+  box3dToCube,
+  transformBox3D
+} from "../../src/server/bdd_type_transformers"
 import {
   convertItemToExport,
   convertPolygonToExport,
@@ -99,6 +103,26 @@ describe("test export functionality for 3d bounding box", () => {
     const state = readSampleState(sample3dBoxStateFile)
     const exportedState = convertStateToExport(state)
     expect(exportedState).toEqual(sampleStateExportImage3dBox)
+  })
+  test("item import and export", () => {
+    const labels = sampleStateExportImage3dBox[0].labels
+    const boxes = labels.map((l) => l.box3d)
+    for (const box of boxes) {
+      expect(box).not.toBeNull()
+      if (box !== null) {
+        const importedBox = box3dToCube(box)
+        const importedShape = {
+          id: "0",
+          label: [] as string[],
+          shapeType: ShapeTypeName.CUBE,
+          ...importedBox
+        }
+        const exportedBox = transformBox3D(importedShape)
+        expect(box.dimension).toEqual(exportedBox.dimension)
+        expect(box.orientation).toEqual(exportedBox.orientation)
+        expect(box.location).toEqual(exportedBox.location)
+      }
+    }
   })
 })
 
