@@ -15,7 +15,7 @@ from os.path import join
 from subprocess import DEVNULL, check_call
 from typing import List
 
-import boto3
+# import boto3
 import yaml
 from joblib import Parallel, delayed
 from tqdm import tqdm
@@ -248,8 +248,8 @@ def parse_input_list(args: argparse.Namespace) -> List[str]:
 def prepare_data(args: argparse.Namespace) -> None:
     """Break one or a list of videos into frames."""
     url_root = args.url_root
-    if args.s3:
-        url_root = s3_setup(args.s3)
+    # if args.s3:
+    #     url_root = s3_setup(args.s3)
 
     inputs = parse_input_list(args)
     logger.info("processing %d video(s) ...", len(inputs))
@@ -283,68 +283,68 @@ def prepare_data(args: argparse.Namespace) -> None:
                 quiet,
             )
 
-    # upload to s3 if needed
-    if args.s3:
-        upload_files_to_s3(args.s3, args.out_dir)
+    # # upload to s3 if needed
+    # if args.s3:
+    #     upload_files_to_s3(args.s3, args.out_dir)
 
     # create the yaml file
     if not args.no_list:
         create_image_list(args.out_dir, url_root)
 
 
-@dataclass
-class S3Param:
-    """S3 parameters."""
-
-    bucket: str
-    folder: str
-
-
-def parse_s3_path(s3_path: str) -> S3Param:
-    """Parse s3 input path into s3 param."""
-    return S3Param(
-        bucket=s3_path.split("/")[0],
-        folder="/".join(s3_path.split("/")[1:]),
-    )
-
-
-def upload_files_to_s3(s3_path: str, out_dir: str) -> None:
-    """Send the files to s3."""
-    s3 = boto3.resource("s3")
-    s3_param = parse_s3_path(s3_path)
-    file_list = glob.glob(join(out_dir, "**/*.jpg"), recursive=True)
-    logger.info(
-        "Uploading %d files to s3 %s:%s",
-        len(file_list),
-        s3_param.bucket,
-        s3_param.folder,
-    )
-    for f in tqdm(file_list):
-        try:
-            # pylint is added here because it thinks boto3.resource is a string
-            s3.Bucket(s3_param.bucket).upload_file(
-                f,
-                join(s3_param.folder, f[len(out_dir) + 1 :]),
-                ExtraArgs={"ACL": "public-read"},
-            )
-        except boto3.exceptions.S3UploadFailedError as e:
-            logger.error("s3 bucket is not properly configured %s", e)
-            break
+# @dataclass
+# class S3Param:
+#     """S3 parameters."""
+#
+#     bucket: str
+#     folder: str
+#
+#
+# def parse_s3_path(s3_path: str) -> S3Param:
+#     """Parse s3 input path into s3 param."""
+#     return S3Param(
+#         bucket=s3_path.split("/")[0],
+#         folder="/".join(s3_path.split("/")[1:]),
+#     )
 
 
-def s3_setup(s3_path: str) -> str:
-    """Store optionaly the data on s3."""
-    s3_param = parse_s3_path(s3_path)
-    s3 = boto3.resource("s3")
-    region = s3.meta.client.get_bucket_location(Bucket=s3_param.bucket)[
-        "LocationConstraint"
-    ]
-
-    return join(
-        f"https://s3-{region}.amazonaws.com",
-        s3_param.bucket,
-        s3_param.folder,
-    )
+# def upload_files_to_s3(s3_path: str, out_dir: str) -> None:
+#     """Send the files to s3."""
+#     s3 = boto3.resource("s3")
+#     s3_param = parse_s3_path(s3_path)
+#     file_list = glob.glob(join(out_dir, "**/*.jpg"), recursive=True)
+#     logger.info(
+#         "Uploading %d files to s3 %s:%s",
+#         len(file_list),
+#         s3_param.bucket,
+#         s3_param.folder,
+#     )
+#     for f in tqdm(file_list):
+#         try:
+#             # pylint is added here because it thinks boto3.resource is a string
+#             s3.Bucket(s3_param.bucket).upload_file(
+#                 f,
+#                 join(s3_param.folder, f[len(out_dir) + 1 :]),
+#                 ExtraArgs={"ACL": "public-read"},
+#             )
+#         except boto3.exceptions.S3UploadFailedError as e:
+#             logger.error("s3 bucket is not properly configured %s", e)
+#             break
+#
+#
+# def s3_setup(s3_path: str) -> str:
+#     """Store optionaly the data on s3."""
+#     s3_param = parse_s3_path(s3_path)
+#     s3 = boto3.resource("s3")
+#     region = s3.meta.client.get_bucket_location(Bucket=s3_param.bucket)[
+#         "LocationConstraint"
+#     ]
+#
+#     return join(
+#         f"https://s3-{region}.amazonaws.com",
+#         s3_param.bucket,
+#         s3_param.folder,
+#     )
 
 
 def main() -> None:

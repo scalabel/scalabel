@@ -31,13 +31,9 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        "boto3",
-        "joblib",
-        "matplotlib",
         "motmetrics",
         "nanoid",
         "numpy",
-        "pandas",
         "Pillow",
         "plyfile",
         "psutil",
@@ -47,11 +43,10 @@ setuptools.setup(
         "python-dateutil",
         "PyYAML",
         "requests",
-        "scikit-learn",
-        "scikit-image",
         "tabulate",
         "tqdm",
         "toml",
+        'joblib'
     ],
     include_package_data=True,
 )
