@@ -2,20 +2,32 @@
 import argparse
 import json
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..label.io import group_and_sort, load, load_label_config
 from ..label.transforms import box2d_to_bbox
-from ..label.typing import Config, Frame
+from ..label.typing import Config, Frame, Label
+from ..label.utils import get_leaf_categories
 from .hota import evaluate_track_hota
 from .mot import acc_single_video_mot, evaluate_track
 from .result import Result
 
-
 EXCLUDE_METRICS = ["Dets", "IDs", "FP", "FN", "MT", "PT", "ML", "FM"]
+IGNORE_MAPPING = {
+    "other person": "pedestrian",
+    "other vehicle": "car",
+    "trailer": "truck",
+}
+NAME_MAPPING = {
+    "bike": "bicycle",
+    "caravan": "car",
+    "motor": "motorcycle",
+    "person": "pedestrian",
+    "van": "car",
+}
 
 
 class BoxTrackResult(Result):
@@ -58,6 +70,44 @@ class BoxTrackResult(Result):
         return self.table(exclude=set(EXCLUDE_METRICS))
 
 
+def deal_bdd100k_category(
+    label: Label, cat_name2id: Dict[str, int]
+) -> Optional[Label]:
+    """Deal with BDD100K category."""
+    category_name = label.category
+    if category_name in NAME_MAPPING:
+        category_name = NAME_MAPPING[category_name]
+
+    if category_name not in cat_name2id:
+        assert category_name in IGNORE_MAPPING
+        category_name = IGNORE_MAPPING[category_name]
+        if label.attributes is None:
+            label.attributes = {}
+        label.attributes["ignored"] = True
+        label.category = category_name
+        result = label
+    else:
+        label.category = category_name
+        result = label
+    return result
+
+
+def bdd100k_to_scalabel(frames: List[Frame], config: Config) -> List[Frame]:
+    """Converting BDD100K to Scalabel format."""
+    categories = get_leaf_categories(config.categories)
+    cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
+    for image_anns in frames:
+        if image_anns.labels is not None:
+            for i in reversed(range(len(image_anns.labels))):
+                label = deal_bdd100k_category(
+                    image_anns.labels[i], cat_name2id
+                )
+                if label is None:
+                    image_anns.labels.pop(i)
+
+    return frames
+
+
 def evaluate_box_track(
     gts: List[List[Frame]],
     results: List[List[Frame]],
@@ -84,6 +134,8 @@ def evaluate_box_track(
     """
     logger.info("Tracking evaluation.")
     t = time.time()
+    gts = [bdd100k_to_scalabel(gt, config) for gt in gts]
+    results = [bdd100k_to_scalabel(result, config) for result in results]
     mot_result = evaluate_track(
         acc_single_video_mot,
         gts,
@@ -132,7 +184,8 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--ignore-unknown-cats",
-        action="store_true",
+        type=bool,
+        default=False,
         help="ignore unknown categories",
     )
     parser.add_argument(
