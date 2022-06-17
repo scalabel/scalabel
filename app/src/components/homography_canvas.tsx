@@ -255,8 +255,8 @@ class HomographyCanvas extends ImageCanvas {
         this.imageCanvas.height
       )
 
-      const width = 50
-      const height = 50
+      const width = 30
+      const height = 30
       for (let dstX = 0; dstX < this.imageCanvas.width; dstX++) {
         for (let dstY = 0; dstY < this.imageCanvas.height; dstY++) {
           // Get source coordinates

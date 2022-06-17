@@ -138,17 +138,17 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
       const labels = Session.label3dList.labels()
       this._context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       for (const label of labels) {
-        const category =
+        let category =
           label.category.length >= 1 &&
           label.category[0] < this._config.categories.length &&
           label.category[0] >= 0
             ? this._config.categories[label.category[0]]
             : ""
         const attributes = label.attributes
-        let words: string[] = []
-        if (category !== undefined) {
-          words = category.split(" ")
+        if (category === undefined) {
+          category = ""
         }
+        const words = category.split(" ")
         let tag = words[words.length - 1]
 
         if (attributes !== undefined) {
@@ -170,10 +170,7 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
           }
         }
 
-        if (
-          label.type === LabelTypeName.PLANE_3D &&
-          (label as Plane3D).visible
-        ) {
+        if (label.type === LabelTypeName.PLANE_3D) {
           // Get height under camera
           const planeLabel = label as Plane3D
           const normal = new THREE.Vector3(0, 0, 1)

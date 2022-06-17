@@ -224,12 +224,15 @@ export class Plane3D extends Label3D {
   ): void {
     super.updateState(state, itemIndex, labelId)
 
-    const label = state.task.items[itemIndex].labels[labelId]
-    this._shape.updateState(
-      state.task.items[itemIndex].shapes[label.shapes[0]],
-      label.shapes[0],
-      activeCamera
-    )
+    // If label is being edited, don't overwrite state
+    if (!this.editing) {
+      const label = state.task.items[itemIndex].labels[labelId]
+      this._shape.updateState(
+        state.task.items[itemIndex].shapes[label.shapes[0]],
+        label.shapes[0],
+        activeCamera
+      )
+    }
   }
 
   /**
@@ -255,16 +258,6 @@ export class Plane3D extends Label3D {
       shape.id = this._label.shapes[0]
     }
     return [shape]
-  }
-
-  /** Get visible */
-  public get visible(): boolean {
-    return this._shape.lines.visible
-  }
-
-  /** Set visible */
-  public set visible(v: boolean) {
-    this._shape.lines.visible = v
   }
 
   /**

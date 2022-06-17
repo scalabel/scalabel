@@ -64,7 +64,6 @@ class PanSegResult(Result):
     RQ: List[Dict[str, float]]
     NUM: List[Dict[str, int]]
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "PanSegResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)

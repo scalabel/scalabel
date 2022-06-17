@@ -197,15 +197,9 @@ export function getMainSensor(state: State): Sensor {
 
 /** Ground plane estimation using RANSAC
  *
- * @param vertices
+ * @param points
  */
-export function estimateGroundPlane(vertices: number[]): THREE.Plane {
-  const points: THREE.Vector3[] = []
-  for (let i = 0; i < vertices.length; i += 3) {
-    points.push(
-      new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
-    )
-  }
+export function estimateGroundPlane(points: THREE.Vector3[]): THREE.Plane {
   let bestPlane = new THREE.Plane()
   let maxNumPoints = 0
   const itMax = Math.ceil(points.length / 40)
@@ -237,6 +231,21 @@ export function estimateGroundPlane(vertices: number[]): THREE.Plane {
     }
   }
   return bestPlane
+}
+
+/**
+ * Get points from raw vertices
+ *
+ * @param vertices
+ */
+export function getPointsFromVertices(vertices: number[]): THREE.Vector3[] {
+  const points: THREE.Vector3[] = []
+  for (let i = 0; i < vertices.length; i += 3) {
+    points.push(
+      new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2])
+    )
+  }
+  return points
 }
 
 /** Random integer generator
@@ -295,4 +304,31 @@ export function calculatePlaneCenter(
   const center = new THREE.Vector3()
   ray.intersectPlane(plane, center)
   return center
+}
+
+/**
+ * Get the closest point to the ray interception with the pointCloud
+ *
+ * @param pointCloud
+ * @param ray
+ */
+export function getClosestPoint(
+  pointCloud: THREE.Points,
+  ray: THREE.Ray
+): THREE.Vector3 | null {
+  const raycaster = new THREE.Raycaster()
+  raycaster.set(ray.origin, ray.direction)
+
+  const points = Array.from(pointCloud.geometry.getAttribute("position").array)
+  let minDist = Infinity
+  let closestPoint = null
+  for (let i = 0; i < points.length; i += 3) {
+    const point = new THREE.Vector3(points[i], points[i + 1], points[i + 2])
+    const dist = ray.distanceToPoint(point)
+    if (dist < minDist) {
+      minDist = dist
+      closestPoint = point
+    }
+  }
+  return closestPoint
 }

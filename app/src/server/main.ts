@@ -2,7 +2,7 @@ import "source-map-support/register"
 
 import * as child from "child_process"
 import express, { Application, NextFunction, Request, Response } from "express"
-import * as formidable from "express-formidable"
+import formidable from "formidable"
 import { createServer } from "http"
 import { Server } from "socket.io"
 
@@ -17,6 +17,7 @@ import { Hub } from "./hub"
 import { Listeners } from "./listeners"
 import Logger from "./logger"
 import auth from "./middleware/cognitoAuth"
+import { multipartFormData as formDataMiddleware } from "./middleware/multipart"
 import errorHandler from "./middleware/errorHandler"
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
 import { ProjectStore } from "./project_store"
@@ -26,6 +27,18 @@ import { RedisPubSub, makeRedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
+
+declare global {
+  // formidable expects a type extension for this.
+  // Better to have a more elegant solution.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      fields?: formidable.Fields
+      files?: formidable.Files
+    }
+  }
+}
 
 /**
  * Sets up http handlers
@@ -102,11 +115,10 @@ function startHTTPServer(
     listeners.deleteProjectHandler.bind(listeners)
   )
 
-  const maxFileSize = 1000 * 1024 * 1024 // 1G
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    formidable({ maxFileSize: maxFileSize }),
+    formDataMiddleware,
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(

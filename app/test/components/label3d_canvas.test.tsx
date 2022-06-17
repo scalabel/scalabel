@@ -152,9 +152,9 @@ function mouseEvent(x: number, y: number): React.MouseEvent<HTMLCanvasElement> {
 test("Add 3d bbox", () => {
   const canvas = setUpLabel3dCanvas()
 
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
 
-  canvas.onKeyDown(spaceEvent)
+  canvas.onKeyDown(nEvent)
   let state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(2)
   let labelId = Object.keys(state.task.items[0].labels)[1]
@@ -186,7 +186,7 @@ test("Add 3d bbox", () => {
       moveCameraAndTarget(position, target, canvasId, canvasConfig)
     )
 
-    canvas.onKeyDown(spaceEvent)
+    canvas.onKeyDown(nEvent)
     state = Session.getState()
     expect(_.size(state.task.items[0].labels)).toEqual(i + 2)
     Object.keys(state.task.items[0].labels).forEach((id) => {
@@ -231,8 +231,8 @@ test("Move axis aligned 3d bbox along z axis", () => {
     canvasId
   ) as PointCloudViewerConfigType
 
-  const spaceEvent = new KeyboardEvent("keydown", { key: " " })
-  canvas.onKeyDown(spaceEvent)
+  const nEvent = new KeyboardEvent("keydown", { key: "n" })
+  canvas.onKeyDown(nEvent)
   state = Session.getState()
   expect(_.size(state.task.items[0].labels)).toEqual(2)
 

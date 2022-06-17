@@ -210,7 +210,7 @@ class COCOevalV2(COCOeval):  # type: ignore
                     self.compute_match, range(len(p.imgIds))
                 )
         else:
-            to_updates = list(map(self.compute_match, range(len(p.imgIds))))
+            to_updates = [self.compute_match(i) for i in range(len(p.imgIds))]
 
         eval_num = len(p.catIds) * len(p.areaRng) * len(p.imgIds)
         self.evalImgs: List[DictStrAny] = [{} for _ in range(eval_num)]

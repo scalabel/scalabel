@@ -33,27 +33,38 @@ def parse(raw_frame: DictStrAny, validate_frames: bool = True) -> Frame:
         # ignore the construct arguments in mypy, add type ignores
         frame = Frame.construct(**raw_frame)
         if frame.intrinsics is not None:
-            frame.intrinsics = Intrinsics.construct(**frame.intrinsics)  # type: ignore # pylint: disable=line-too-long
+            frame.intrinsics = Intrinsics.construct(
+                **frame.intrinsics  # type: ignore
+            )
         if frame.extrinsics is not None:
-            frame.extrinsics = Extrinsics.construct(**frame.extrinsics)  # type: ignore # pylint: disable=line-too-long
+            frame.extrinsics = Extrinsics.construct(
+                **frame.extrinsics  # type: ignore
+            )
         if frame.size is not None:
-            frame.size = ImageSize.construct(**frame.size)  # type: ignore # pylint: disable=line-too-long
+            frame.size = ImageSize.construct(**frame.size)  # type: ignore
         if frame.labels is not None:
             labels = []
             for l in frame.labels:
                 label = Label.construct(**l)  # type: ignore
                 if label.box2d is not None:
-                    label.box2d = Box2D.construct(**label.box2d)  # type: ignore # pylint: disable=line-too-long
+                    label.box2d = Box2D.construct(
+                        **label.box2d  # type: ignore
+                    )
                 if label.box3d is not None:
-                    label.box3d = Box3D.construct(**label.box3d)  # type: ignore # pylint: disable=line-too-long
+                    label.box3d = Box3D.construct(
+                        **label.box3d  # type: ignore
+                    )
                 if label.poly2d is not None:
                     label.poly2d = [
-                        Poly2D.construct(**p) for p in label.poly2d  # type: ignore # pylint: disable=line-too-long
+                        Poly2D.construct(**p)  # type: ignore
+                        for p in label.poly2d
                     ]
                 if label.rle is not None:
-                    label.rle = RLE.construct(**label.rle)  # type: ignore # pylint: disable=line-too-long
+                    label.rle = RLE.construct(**label.rle)  # type: ignore
                 if label.graph is not None:
-                    label.graph = Graph.construct(**label.graph)  # type: ignore # pylint: disable=line-too-long
+                    label.graph = Graph.construct(
+                        **label.graph  # type: ignore
+                    )
                 labels.append(label)
             frame.labels = labels
         return frame
@@ -110,10 +121,10 @@ def load(
         if len(raw_groups) > 0:
             groups = pmap(lambda x: FrameGroup(**x), raw_groups, nprocs)
     else:
-        frames = list(map(parse_, raw_frames))
+        frames = [parse(raw_frame) for raw_frame in raw_frames]
         groups = None
         if len(raw_groups) > 0:
-            groups = list(map(lambda x: FrameGroup(**x), raw_groups))
+            groups = [FrameGroup(**x) for x in raw_groups]
     return Dataset(frames=frames, groups=groups, config=config)
 
 

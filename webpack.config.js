@@ -9,7 +9,6 @@ let config = {
     create: __dirname + '/app/src/entries/create.tsx',
     worker: __dirname + '/app/src/entries/worker.tsx',
     admin: __dirname + '/app/src/entries/admin.tsx',
-    // speed_test: __dirname + '/app/src/dev/speed_test.js',
     dashboard: __dirname + '/app/src/entries/dashboard.tsx',
     vendor: __dirname + '/app/src/entries/vendor.tsx',
     label: __dirname + '/app/src/entries/label.index.ts',
@@ -68,6 +67,16 @@ let config = {
           // Temporary fix to avoid memory errors
           options: { transpileOnly: true }
         },
+      },
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
         test: /\.css$/,

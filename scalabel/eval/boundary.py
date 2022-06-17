@@ -75,7 +75,6 @@ class BoundaryResult(Result):
     F1_pix2: List[Dict[str, float]]
     F1_pix5: List[Dict[str, float]]
 
-    # pylint: disable=useless-super-delegation
     def __eq__(self, other: "BoundaryResult") -> bool:  # type: ignore
         """Check whether two instances are equal."""
         return super().__eq__(other)
@@ -142,7 +141,7 @@ def eval_bdry_per_frame(
 ) -> Dict[str, NDArrayF64]:
     """Compute mean, recall, and decay from per-frame evaluation."""
     w, h = image_size.width, image_size.height
-    blank_mask = np.zeros((h, w))
+    blank_mask: NDArrayU8 = np.zeros((h, w), dtype=np.uint8)
     task2arr: Dict[str, NDArrayF64] = {}  # str -> 2d array
     if gt_frame.labels is None:
         gt_frame.labels = []
@@ -157,18 +156,16 @@ def eval_bdry_per_frame(
     for task_name, cats in categories.items():
         task_scores: List[List[float]] = []
         for cat in cats:
-            gt_mask = (
+            gt_mask: NDArrayU8 = (
                 rle_to_mask(gt_masks[cat.name])
                 if cat.name in gt_masks
                 else blank_mask
             )
-            gt_mask = gt_mask > 0
-            pd_mask = (
+            pd_mask: NDArrayU8 = (
                 rle_to_mask(pd_masks[cat.name])
                 if cat.name in pd_masks
                 else blank_mask
             )
-            pd_mask = pd_mask > 0
             cat_scores = [
                 eval_bdry_per_thr(
                     gt_mask,

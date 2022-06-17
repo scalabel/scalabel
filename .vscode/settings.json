@@ -56,7 +56,9 @@
   "python.linting.mypyEnabled": true,
   "python.linting.pydocstyleEnabled": true,
   "python.linting.pydocstyleArgs": ["--convention=google"],
-  "env": { "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}" },
+  "env": {
+    "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
+  },
   "spellright.language": ["en"],
   "spellright.documentTypes": ["markdown", "latex", "plaintext", "typescript"],
   "files.exclude": {
@@ -66,10 +68,13 @@
   "files.watcherExclude": {
     "node_modules": true
   },
-  "restructuredtext.confPath": "${workspaceFolder}/doc/src",
+
   "eslint.options": {
     "configFile": "./.eslintrc.json"
   },
   "eslint.validate": ["typescript", "typescriptreact"],
-  "python.linting.enabled": false
+  "esbonio.sphinx.confDir": "${workspaceFolder}/doc/src",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }

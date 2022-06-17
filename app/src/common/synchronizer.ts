@@ -106,14 +106,20 @@ export class Synchronizer {
     this.containerName = containerName
 
     this.actionQueue = []
-    this.actionsPendingSave = OrderedMap.from()
+    this.actionsPendingSave = OrderedMap.from({})
     this.actionLog = []
     this.userId = userId
     this.ackedPackets = new Set()
     this.actionsPendingPrediction = new Set()
     this.registeredOnce = false
 
-    window.onbeforeunload = this.warningPopup.bind(this)
+    // window.onbeforeunload = this.warningPopup.bind(this)
+
+    // To avoid jest error: https://github.com/facebook/jest/issues/890
+    Object.defineProperty(window, "onbeforeunload", {
+      writable: true,
+      value: this.warningPopup.bind(this)
+    })
   }
 
   /**
