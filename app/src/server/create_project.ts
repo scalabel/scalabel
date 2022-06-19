@@ -111,6 +111,7 @@ export async function parseForm(
     throw Error("Project name already exists.")
   }
   const demoMode = fields[FormField.DEMO_MODE] === "true"
+  const useModel = fields[FormField.USE_MODEL] === "true"
   const form = util.makeCreationForm(
     projectName,
     itemType,
@@ -119,7 +120,8 @@ export async function parseForm(
     taskSize,
     keyInterval,
     instructionUrl,
-    demoMode
+    demoMode,
+    useModel
   )
   return form
 }
@@ -350,6 +352,10 @@ export async function createProject(
     templates[`template${i}`] = formFileData.templates[i]
   }
 
+  let labelTypes = [form.labelType]
+  if (form.labelType === LabelTypeName.POLYGON_2D && form.useModel) {
+    labelTypes = labelTypes.concat(LabelTypeName.BOX_2D)
+  }
   /* use arbitrary values for
    * taskId and policyTypes
    * assign these when tasks are created
@@ -357,7 +363,7 @@ export async function createProject(
   const config: ConfigType = {
     projectName: form.projectName,
     itemType,
-    labelTypes: [form.labelType],
+    labelTypes: labelTypes,
     label2DTemplates: templates,
     taskSize: form.taskSize,
     keyInterval: form.keyInterval,
@@ -373,7 +379,7 @@ export async function createProject(
     policyTypes: [],
     demoMode: form.demoMode,
     autosave: true,
-    bots: false
+    bots: form.useModel
   }
 
   // Ensure that all video names are set to default if empty

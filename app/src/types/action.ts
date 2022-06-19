@@ -8,6 +8,7 @@ import {
   DeepPartialState,
   IdType,
   LabelType,
+  ModelStatus,
   ModeStatus,
   PaneType,
   Select,
@@ -73,6 +74,11 @@ export interface UpdateStateAction extends BaseAction {
 export interface UpdateSessionStatusAction extends BaseAction {
   /** New status of the session */
   newStatus: ConnectionStatus
+}
+
+export interface UpdateModelStatusAction extends BaseAction {
+  /** New status of the session */
+  newStatus: ModelStatus
 }
 
 export interface ChangeSessionModeAction extends BaseAction {
@@ -201,6 +207,11 @@ export interface RegisterSessionAction extends BaseAction {
 export interface ReceiveBroadcastAction extends BaseAction {
   /** The message containing the broadcasted action/actions */
   message: SyncActionMessageType
+}
+
+export interface PredictionAction extends BaseAction {
+  /** Indices of the items to be predicted */
+  itemIndices: number[]
 }
 
 export type ConnectAction = BaseAction

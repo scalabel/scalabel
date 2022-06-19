@@ -17,6 +17,7 @@ import * as actions from "./common"
  * @param sensor
  * @param category
  * @param box
+ * @param manual
  * @returns {AddLabelAction}
  */
 export function addBox2dLabel(
@@ -24,14 +25,16 @@ export function addBox2dLabel(
   sensor: number,
   category: number[],
   attributes: { [key: number]: number[] },
-  box: SimpleRect
+  box: SimpleRect,
+  manual = true
 ): AddLabelsAction {
   // Create the rect object
   const label = makeLabel({
     type: LabelTypeName.BOX_2D,
     category,
     attributes,
-    sensors: [sensor]
+    sensors: [sensor],
+    manual
   })
   const rect = makeRect({ ...box, label: [label.id] })
   label.shapes = [rect.id]

@@ -1,0 +1,2 @@
+MODEL:
+  WEIGHT: "local-data/models/polyrnn-pp.pth"

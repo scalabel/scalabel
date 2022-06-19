@@ -23,7 +23,7 @@ import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
 import { ProjectStore } from "./project_store"
 import { RedisCache } from "./redis_cache"
 import { RedisClient } from "./redis_client"
-import { RedisPubSub } from "./redis_pub_sub"
+import { RedisPubSub, makeRedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
@@ -137,30 +137,26 @@ function startHTTPServer(
 }
 
 /**
- * Make a publisher or subscriber for redis
- * Subscribers can't take other actions, so separate clients for pub and sub
- *
- * @param config
- */
-function makeRedisPubSub(config: ServerConfig): RedisPubSub {
-  const client = new RedisClient(config.redis)
-  return new RedisPubSub(client)
-}
-
-/**
  * Starts a bot manager if config says to
  *
  * @param config
+ * @param publisher
  * @param subscriber
  * @param cacheClient
  */
 async function makeBotManager(
   config: ServerConfig,
+  publisher: RedisPubSub,
   subscriber: RedisPubSub,
   cacheClient: RedisClient
 ): Promise<void> {
   if (config.bot.on) {
-    const botManager = new BotManager(config.bot, subscriber, cacheClient)
+    const botManager = new BotManager(
+      config,
+      publisher,
+      subscriber,
+      cacheClient
+    )
     await botManager.listen()
   }
 }
@@ -192,6 +188,25 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
   })
 
   redisProc.stderr.on("data", (data) => {
+    process.stdout.write(data)
+  })
+}
+
+/**
+ * Launch the model server
+ *
+ * @param config
+ */
+async function launchModelServer(): Promise<void> {
+  const modelServerProc = child.spawn("python", [
+    "-m",
+    "scalabel.automatic.servers.ray_server_new"
+  ])
+  modelServerProc.stdout.on("data", (data) => {
+    process.stdout.write(data)
+  })
+
+  modelServerProc.stderr.on("data", (data) => {
     process.stdout.write(data)
   })
 }
@@ -261,6 +276,14 @@ async function main(): Promise<void> {
 
   // Start the redis server
   await launchRedisServer(config)
+  if (config.bot.on) {
+    await launchModelServer()
+    // This sleep is to ensure the model server is successfully created.
+    const sleep = async (ms: number): Promise<unknown> => {
+      return await new Promise((resolve) => setTimeout(resolve, ms))
+    }
+    await sleep(15000)
+  }
 
   /**
    * Connect to redis server with clients
@@ -268,15 +291,15 @@ async function main(): Promise<void> {
    */
   const cacheClient = new RedisClient(config.redis)
   const redisStore = new RedisCache(config.redis, storage, cacheClient)
-  const publisher = makeRedisPubSub(config)
-  const subscriber = makeRedisPubSub(config)
+  const publisher = makeRedisPubSub(config.redis)
+  const subscriber = makeRedisPubSub(config.redis)
 
   // Initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 
-  await makeBotManager(config, subscriber, cacheClient)
+  await makeBotManager(config, publisher, subscriber, cacheClient)
   await startServers(config, projectStore, userManager, publisher)
 }
 

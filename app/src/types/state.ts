@@ -534,6 +534,13 @@ export const enum ModeStatus {
   SELECTING
 }
 
+export const enum ModelStatus {
+  INVALID,
+  LOADING,
+  READY,
+  IDLE
+}
+
 export interface AlertType {
   /** alert id */
   id: string
@@ -574,6 +581,8 @@ export interface SessionType {
   status: ConnectionStatus
   /** Current mode */
   mode: ModeStatus
+  /** Current model status */
+  modelStatus: ModelStatus
   /** Number of time status has changed */
   numUpdates: number
   /** Alerts */

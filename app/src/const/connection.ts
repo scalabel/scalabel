@@ -28,3 +28,13 @@ export const enum EventName {
   CONNECT = "connect",
   DISCONNECT = "disconnect"
 }
+
+/* redis channels */
+export const enum RedisChannel {
+  REGISTER_EVENT = "registerEvent",
+  MODEL_REGISTER = "modelRegister",
+  MODEL_REQUEST = "modelRequest",
+  MODEL_RESPONSE = "modelResponse",
+  MODEL_STATUS = "modelStatus",
+  MODEL_NOTIFY = "modelNotify"
+}

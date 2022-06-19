@@ -144,7 +144,11 @@ export enum Key {
   W_LOW = "w",
   X_LOW = "x",
   Y_LOW = "y",
-  Z_LOW = "z"
+  Z_LOW = "z",
+  ONE = "1",
+  TWO = "2",
+  THREE = "3",
+  FOUR = "4"
 }
 
 export enum TrackPolicyType {
@@ -164,4 +168,9 @@ export enum QueryArg {
   TASK_INDEX = "task_index",
   TASK_ID = "task_id",
   DEV_MODE = "dev"
+}
+
+export enum ModelRequestType {
+  INFERENCE = "inference",
+  TRAIN = "train"
 }

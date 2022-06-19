@@ -54,6 +54,10 @@ interface StateProps {
   statusText: string
   /** Whether to hide or show status text */
   statusTextHide: boolean
+  /** Text for the model status banner */
+  modelStatusText: string
+  /** Whether to hide or show model status text */
+  modelStatusTextHide: boolean
 }
 
 interface DispatchProps {
@@ -152,6 +156,8 @@ class TitleBar extends Component<Props> {
     const { autosave } = this.props
     const { statusText } = this.props
     const { statusTextHide } = this.props
+    const { modelStatusText } = this.props
+    const { modelStatusTextHide } = this.props
 
     const keyboardLink = "https://doc.scalabel.ai/keyboard.html"
 
@@ -193,6 +199,9 @@ class TitleBar extends Component<Props> {
             <StatusMessageBox>{statusText}</StatusMessageBox>
           </Fade>
           <div className={classes.grow} />
+          <Fade in={!modelStatusTextHide} timeout={300}>
+            <StatusMessageBox>{modelStatusText}</StatusMessageBox>
+          </Fade>
           {buttons}
         </Toolbar>
       </AppBar>
@@ -207,7 +216,9 @@ const mapStateToProps = (state: ReduxState): StateProps => {
     dashboardLink: selector.getDashboardLink(state),
     autosave: selector.getAutosaveFlag(state),
     statusText: selector.getStatusText(state),
-    statusTextHide: selector.shouldStatusTextHide(state)
+    statusTextHide: selector.shouldStatusTextHide(state),
+    modelStatusText: selector.getModelStatusText(state),
+    modelStatusTextHide: selector.shouldModelStatusTextHide(state)
   }
 }
 

@@ -26,8 +26,7 @@ describe("test model interface query construction", () => {
       y2: 10
     })
     const itemIndex = 1
-    const query = modelInterface.makeRectQuery(rect, url, itemIndex)
-    expect(query.endpoint).toBe(ModelEndpoint.PREDICT_POLY)
+    const query = modelInterface.makeRectRequest(rect, url, itemIndex)
     expect(query.itemIndex).toBe(itemIndex)
 
     const itemData = query.data

@@ -11,6 +11,7 @@ import {
   changeSelect,
   changeViewerConfig,
   mergeTracks,
+  sendPredictionRequest,
   splitTrack,
   startLinkTrack
 } from "../action/common"
@@ -80,6 +81,12 @@ export class ToolBar extends Component<Props> {
    */
   public onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
+      case Key.ONE:
+      case Key.TWO:
+      case Key.THREE:
+      case Key.FOUR:
+        this.changeLabelType(this.state, Number(e.key) - 1)
+        break
       case Key.BACKSPACE:
         this.deletePressed()
         break
@@ -217,6 +224,13 @@ export class ToolBar extends Component<Props> {
             <div>
               {makeButton("Break Track", () => {
                 this.unlinkSelectedTrack(this.state)
+              })}
+            </div>
+          )}
+          {this.state.task.config.bots && (
+            <div>
+              {makeButton("Predict", () => {
+                this.startPrediction(this.state)
               })}
             </div>
           )}
@@ -433,6 +447,36 @@ export class ToolBar extends Component<Props> {
    */
   private startLinkTrack(): void {
     Session.dispatch(startLinkTrack())
+  }
+
+  /**
+   * Send a prediction request
+   *
+   * @param state
+   */
+  private startPrediction(state: State): void {
+    Session.dispatch(sendPredictionRequest(state.user.select.item))
+  }
+
+  /**
+   * Change the label type
+   *
+   * @param state
+   * @param labelType
+   */
+  private changeLabelType(state: State, labelType: number): void {
+    if (labelType > state.task.config.labelTypes.length - 1) {
+      alert(Severity.WARNING, "The chosen label type is not available")
+      return
+    }
+    Session.dispatch(changeSelect({ labelType }))
+    toast(
+      `Change the selected label type to ${state.task.config.labelTypes[labelType]}`,
+      {
+        position: "top-center",
+        autoClose: 2000
+      }
+    )
   }
 
   /**
