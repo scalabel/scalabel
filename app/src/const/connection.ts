@@ -33,8 +33,13 @@ export const enum EventName {
 export const enum RedisChannel {
   REGISTER_EVENT = "registerEvent",
   MODEL_REGISTER = "modelRegister",
-  MODEL_REQUEST = "modelRequest",
-  MODEL_RESPONSE = "modelResponse",
+  MODEL_REQUEST = "REQUESTS",
+  MODEL_RESPONSE = "RESPONSES",
   MODEL_STATUS = "modelStatus",
-  MODEL_NOTIFY = "modelNotify"
+  MODEL_NOTIFY = "NOTIFICATIONS"
+}
+
+export const enum RedisStream {
+  MODEL_REQUEST = "REQUESTS",
+  MODEL_RESPONSE = "RESPONSES-scalabel"
 }

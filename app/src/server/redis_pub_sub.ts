@@ -51,10 +51,8 @@ export class RedisPubSub {
       }
       case RedisChannel.MODEL_REQUEST: {
         data = data as ModelRequestMessageType
-        const projectName: string = data.projectName
-        const taskId: string = data.taskId
-        channel = `${RedisChannel.MODEL_REQUEST}_${projectName}_${taskId}`
-        this.client.publish(channel, JSON.stringify(data))
+        channel = `${RedisChannel.MODEL_REQUEST}`
+        this.client.xadd(channel, JSON.stringify(data))
         break
       }
       case RedisChannel.MODEL_STATUS: {
@@ -86,6 +84,20 @@ export class RedisPubSub {
       })
     })
   }
+
+  /**
+   * Listens for incoming registration events
+   *
+   * @param stream
+   * @param handler
+   */
+  // public async subscribeStream(
+  //   stream: string,
+  //   handler: (stream: string, message: string) => void
+  // ): Promise<void> {
+  //   this.client.on("message", handler)
+  //   this.client.xread(stream)
+  // }
 }
 
 /**

@@ -412,9 +412,9 @@ export class Bot {
     const actions: AddLabelsAction[] = []
 
     const receivedData = JSON.parse(modelResponse)
-    const shapes: number[][] = receivedData[0]
-    const itemIndices: number[] = receivedData[1]
-    const actionPacketId: string = receivedData[2]
+    const shapes: number[][] = receivedData.output.boxes
+    const itemIndices: number[] = receivedData.itemIndices
+    const actionPacketId: string = receivedData.actionPacketId
 
     if (this.labelType === LabelTypeName.BOX_2D) {
       shapes.forEach((shape: number[]) => {

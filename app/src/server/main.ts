@@ -194,20 +194,19 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
 
 /**
  * Launch the model server
- *
- * @param config
  */
 async function launchModelServer(): Promise<void> {
   const modelServerProc = child.spawn("python", [
     "-m",
-    "scalabel.automatic.servers.ray_server_new"
+    "scalabel.automatic.scalabel_bot.main",
+    "--cpu"
   ])
-  modelServerProc.stdout.on("data", (data) => {
-    process.stdout.write(data)
-  })
+  // modelServerProc.stdout.on("data", (data) => {
+  //   process.stdout.write(data)
+  // })
 
   modelServerProc.stderr.on("data", (data) => {
-    process.stdout.write(data)
+    process.stderr.write(data)
   })
 }
 
