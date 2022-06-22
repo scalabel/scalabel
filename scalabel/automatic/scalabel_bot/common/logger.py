@@ -101,7 +101,7 @@ class Formatter(logging.Formatter):
 verboselogs.install()
 logging.captureWarnings(True)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 stdout_handler = logging.StreamHandler(sys.stdout)
 stdout_handler.setLevel(logging.INFO)

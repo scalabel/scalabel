@@ -61,6 +61,8 @@ export interface ModelStatusMessageType {
 export interface ModelRequestMessageType {
   /** Request type */
   type: ModelRequestType
+  /** Task type */
+  taskType: string
   /** Project name */
   projectName: string
   /** Task Id. It is supposed to be index2str(taskIndex) */

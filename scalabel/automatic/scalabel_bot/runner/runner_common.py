@@ -3,24 +3,22 @@ from scalabel.automatic.scalabel_bot.profiling.timer import timer
 
 
 class ModelSummary:
-    def __init__(self, mode, device, model_name, model_class):
+    def __init__(self, mode, devices, model_name, model_class):
         """ """
-        self.mode = mode
-        self.device = device
-        self.model_name = model_name
-        self.model_class = model_class
+        self._mode = mode
+        self._devices = devices
+        self._model_name = model_name
+        self._model_class = model_class
+        self._func = None
 
-    @timer(Timers.THREAD_TIMER)
+    @timer(Timers.PERF_COUNTER)
     def execute(self, task, data):
-        return self.func(task, data)
+        return self._func(task, data)
 
     @timer(Timers.THREAD_TIMER)
     def load_model(self):
-        (
-            self.model,
-            self.func,
-        ) = self.model_class().import_task(self.device)
+        self._func = self._model_class().import_task(self._devices)
 
     @timer(Timers.THREAD_TIMER)
     def load_data(self, task):
-        return self.model_class().import_data(task)
+        return self._model_class().import_data(task)

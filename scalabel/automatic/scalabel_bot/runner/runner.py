@@ -26,7 +26,7 @@ from threading import Thread
 
 from detectron2.structures import Boxes, Instances
 
-from scalabel.automatic.scalabel_bot.common.consts import State, Timers
+from scalabel.automatic.scalabel_bot.common.consts import MODELS, State, Timers
 from scalabel.automatic.scalabel_bot.common.logger import logger
 from scalabel.automatic.scalabel_bot.profiling.timer import timer
 from scalabel.automatic.scalabel_bot.runner.runner_common import ModelSummary
@@ -100,7 +100,7 @@ class Runner(Process):
             for model_name, model_class in self._model_classes.items():
                 model_summary: ModelSummary = ModelSummary(
                     mode=self._mode,
-                    device=self._device,
+                    devices=self._device,
                     model_name=model_name,
                     model_class=model_class,
                 )
@@ -141,7 +141,7 @@ class Runner(Process):
             self._update_status(State.BUSY)
             if self._mode == "gpu":
                 model_summary: ModelSummary = self._models[
-                    f"{task['model_name']}_{task['task_type']}"
+                    f"{MODELS[task['taskType']]}_{task['type']}"
                 ]
                 output = self._execute_task(task, model_summary)
             else:
@@ -149,20 +149,6 @@ class Runner(Process):
                     f"{self._name} {self._device}: CPU debug mode task"
                     " execution"
                 )
-                # output = Instances(image_size=(1440, 720))
-                # boxes = torch.Tensor(
-                #     [
-                #         [756.9658, 74.6526, 778.7913, 145.0611],
-                #         [789.4540, 242.1837, 809.1858, 306.8611],
-                #         [1262.9159, 0.0000, 1291.4207, 48.2529],
-                #         [375.8231, 152.2029, 461.0862, 243.1769],
-                #     ]
-                # )
-                # scores = torch.Tensor([0.8418, 0.7967, 0.7857, 0.7330])
-                # pred_classes = torch.Tensor([9, 9, 9, 11])
-                # output.pred_boxes = Boxes(boxes)
-                # output.scores = scores
-                # output.pred_classes = pred_classes
                 output = {
                     "boxes": [
                         [700.7190, 69.1574, 720.9227, 134.3829],
@@ -211,14 +197,14 @@ class Runner(Process):
     ) -> Any:
         """Executes a task."""
         data = model_summary.load_data(task)
-        logger.debug(
-            f"{self._name} {self._device}: retrieved data for task"
-            f" {task['model_name']} {task['task_type']} with id"
-            f" {task['task_id']} from client {task['client_id']}"
-        )
-        logger.spam(f"{self._name} {self._device} data: \n{pformat(data)}")
+        # logger.debug(
+        #     f"{self._name} {self._device}: retrieved data for task"
+        #     f" {task['model_name']} {task['task_type']} with id"
+        #     f" {task['task_id']} from client {task['client_id']}"
+        # )
+        # logger.spam(f"{self._name} {self._device} data: \n{pformat(data)}")
         output = model_summary.execute(task, data)
-        logger.spam(f"{self._name} {self._device} output: \n{pformat(output)}")
+        # logger.spam(f"{self._name} {self._device} output: \n{pformat(output)}")
         return output
 
     @timer(Timers.THREAD_TIMER)
@@ -231,10 +217,6 @@ class Runner(Process):
                 if load_job.is_alive():
                     load_job.terminate()
         logger.debug(f"{self._name} {self._device}: stopped!")
-
-    @property
-    def model_in(self):
-        return self._model_in
 
     @property
     def task_in(self):

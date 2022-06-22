@@ -55,3 +55,6 @@ class Timers(Enum):
     PERF_COUNTER = "PERF_COUNTER"
     PROCESS_TIMER = "PROCESS_TIMER"
     THREAD_TIMER = "THREAD_TIMER"
+
+
+MODELS = {"box2d": "fsdet", "box3d": "dd3d"}

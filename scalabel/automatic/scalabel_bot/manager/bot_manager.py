@@ -24,7 +24,7 @@ from typing import (  # pylint: disable=unused-import
 )
 from multiprocessing.managers import DictProxy
 from torch.multiprocessing import Manager, Process, Queue
-from pprint import pprint
+from pprint import pformat
 import json
 
 from scalabel.automatic.scalabel_bot.common.consts import (
@@ -119,6 +119,7 @@ class BotManager:
             )
             while self._do_run:
                 task: OrderedDict[str, object] = self._requests_queue.get()
+                logger.debug(pformat(task))
                 # logger.info(
                 #     f"{self._name}: {self._requests_queue.qsize() + 1} task(s)"
                 #     " in requests queue"
@@ -206,7 +207,7 @@ class BotManager:
         self._load_model_list(file_name=MODEL_LIST_FILE)
         for model_name in self._model_list:
             model_module = importlib.import_module(
-                "pipeswitch.task." + model_name
+                "scalabel.automatic.scalabel_bot.task." + model_name
             )
             model_class: object = model_module.MODEL_CLASS
             self._model_classes[model_name] = model_class

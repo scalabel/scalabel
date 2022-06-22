@@ -299,6 +299,7 @@ export class Bot {
       if (sendData.length > 0) {
         const modelRequestMessage: ModelRequestMessageType = {
           type: ModelRequestType.INFERENCE,
+          taskType: this.labelType,
           projectName: this.projectName,
           taskId: index2str(this.taskIndex),
           items: sendData,
@@ -412,42 +413,50 @@ export class Bot {
     const actions: AddLabelsAction[] = []
 
     const receivedData = JSON.parse(modelResponse)
-    const shapes: number[][] = receivedData.output.boxes
-    const itemIndices: number[] = receivedData.itemIndices
-    const actionPacketId: string = receivedData.actionPacketId
+    for (const item of receivedData.output) {
+      const shapes: number[][] = item.boxes
+      const itemIndices: number[] = receivedData.itemIndices
+      const actionPacketId: string = receivedData.actionPacketId
 
-    if (this.labelType === LabelTypeName.BOX_2D) {
-      shapes.forEach((shape: number[]) => {
-        const action = this.modelInterface.makeRectAction(shape, itemIndices[0])
-        actions.push(action)
-      })
-    } else if (this.labelType === LabelTypeName.BOX_3D) {
-      for (const box of shapes) {
-        if (box[0] === 0 || box[1] === 0 || box[2] === 0) {
-          Logger.info(`Ignoring box with 0 dimension: ${String(box)}`)
-          continue
-        } else {
-          Logger.info(`Creating box: ${String(box)}`)
-          const action = this.modelInterface.makeBox3dAction(
-            box,
+      if (this.labelType === LabelTypeName.BOX_2D) {
+        shapes.forEach((shape: number[]) => {
+          const action = this.modelInterface.makeRectAction(
+            shape,
             itemIndices[0]
           )
           actions.push(action)
+        })
+      } else if (this.labelType === LabelTypeName.BOX_3D) {
+        for (const box of shapes) {
+          if (box[0] === 0 || box[1] === 0 || box[2] === 0) {
+            Logger.info(`Ignoring box with 0 dimension: ${String(box)}`)
+            continue
+          } else {
+            Logger.info(`Creating box: ${String(box)}`)
+            const action = this.modelInterface.makeBox3dAction(
+              box,
+              itemIndices[0]
+            )
+            actions.push(action)
+          }
         }
+      } else {
+        const action = this.modelInterface.makePolyAction(
+          shapes,
+          itemIndices[0]
+        )
+        actions.push(action)
       }
-    } else {
-      const action = this.modelInterface.makePolyAction(shapes, itemIndices[0])
-      actions.push(action)
-    }
 
-    // Dispatch the predicted actions locally
-    for (const action of actions) {
-      this.store.dispatch(action)
-    }
+      // Dispatch the predicted actions locally
+      for (const action of actions) {
+        this.store.dispatch(action)
+      }
 
-    // Broadcast the predicted actions to other session
-    if (actions.length > 0) {
-      this.broadcastActions(actions, actionPacketId)
+      // Broadcast the predicted actions to other session
+      if (actions.length > 0) {
+        this.broadcastActions(actions, actionPacketId)
+      }
     }
   }
 

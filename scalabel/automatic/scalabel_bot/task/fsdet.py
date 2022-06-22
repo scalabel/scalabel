@@ -7,8 +7,12 @@ from pprint import pformat
 from tqdm import tqdm
 
 from detectron2.data.detection_utils import read_image
-from few_shot_detection.fsdet.config import get_cfg
-from few_shot_detection.fsdet.engine import DefaultPredictor
+from scalabel.automatic.model_repo.few_shot_detection.fsdet.config import (
+    get_cfg,
+)
+from scalabel.automatic.model_repo.few_shot_detection.fsdet.engine import (
+    DefaultPredictor,
+)
 
 from scalabel.automatic.scalabel_bot.common.consts import (
     REDIS_HOST,
