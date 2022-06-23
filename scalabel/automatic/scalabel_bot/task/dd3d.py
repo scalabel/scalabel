@@ -1,4 +1,5 @@
-import requests
+import os
+from urllib import request
 from io import BytesIO
 from PIL import Image
 import numpy as np
@@ -15,6 +16,7 @@ from detectron2.modeling import build_model
 from detectron2.solver import build_optimizer
 from detectron2.config import get_cfg
 from detectron2.utils.events import EventStorage, get_event_storage
+from detectron2.data.detection_utils import read_image
 import detectron2.data.transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
@@ -49,18 +51,24 @@ class DD3D:
         self.model.cuda().eval()
 
     @staticmethod
-    def url_to_img(url):
-        img_response = requests.get(url)
-        # TODO: convert to bgr
-        img = np.array(Image.open(BytesIO(img_response.content)))
+    def url_to_img(url, img_dir):
+        img_name = url.split("/")[-1]
+        img_path = os.path.join(img_dir, img_name)
+        if not os.path.exists(img_path):
+            os.makedirs(img_dir, exist_ok=True)
+            request.urlretrieve(url, img_path)
+        img = read_image(img_path, format="BGR")
         height, width = img.shape[:2]
         img = torch.as_tensor(img.astype("float32").transpose(2, 0, 1))
         return {"image": img, "height": height, "width": width}
 
     def import_data(self, task):
         image_list = []
+        img_dir = os.path.join(
+            "data", f"{task['projectName']}_{task['taskId']}"
+        )
         for item in task["items"]:
-            img = self.url_to_img(item["url"])
+            img = self.url_to_img(item["url"], img_dir)
             if task["items"][0]["intrinsics"] is not None:
                 intrinsics = item["intrinsics"]
                 intrinsics_tensor = torch.Tensor(
@@ -79,7 +87,6 @@ class DD3D:
             predictions = self.model(inputs)
             return predictions
 
-    # 0 for inference, 1 for training
     def __call__(self, inputs):
         results = self.handle_batch_detection(inputs)
         instances = results[0]["instances"]
@@ -130,19 +137,10 @@ class DD3D:
 
         # Filter overlapping boxes
         boxes3d.sort(key=lambda box: (np.linalg.norm(box[3:6]), box[3]))
-        result.append(boxes3d[1])
-        for idx in range(1, len(boxes3d)):
-            if not overlaps(boxes3d[idx], boxes3d[idx - 1]):
-                result.append(boxes3d[idx])
+        if len(boxes3d) > 1:
+            result.append(boxes3d[1])
+            for idx in range(1, len(boxes3d)):
+                if not overlaps(boxes3d[idx], boxes3d[idx - 1]):
+                    result.append(boxes3d[idx])
 
         return {"boxes": result}
-
-    def idle(self):
-        self.model.cpu()
-        torch.cuda.empty_cache()
-
-    def activate(self):
-        self.model.cuda()
-
-    def save(self, dir):
-        torch.save({"model": self.model.state_dict()}, dir)

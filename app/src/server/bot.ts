@@ -12,7 +12,6 @@ import {
   UpdateModelStatusAction
 } from "../types/action"
 import { RedisConfig } from "../types/config"
-import { ItemExport } from "../types/export"
 import {
   ActionPacketType,
   BotData,
@@ -24,7 +23,7 @@ import {
   SyncActionMessageType
 } from "../types/message"
 import { ReduxStore } from "../types/redux"
-import { ModelStatus, RectType, State } from "../types/state"
+import { IntrinsicsType, ModelStatus, RectType, State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
 import { makeRedisPubSub, RedisPubSub } from "./redis_pub_sub"
@@ -195,12 +194,9 @@ export class Bot {
       return
     }
 
-    console.log("Handling action broadcast")
-
     this.ackedPackets.add(actionPacket.id)
 
     const modelRequests = this.packetToRequests(actionPacket)
-    console.log("model requests:", modelRequests)
     // Send the requests for execution on the model server
     this.executeRequests(modelRequests, actionPacket.id)
   }
@@ -285,32 +281,31 @@ export class Bot {
    * @param actionPacketId
    */
   private executeRequests(
-    modelRequests: ModelRequest[],
+    modelRequests: Array<ModelRequest | null>,
     actionPacketId: string
   ): void {
-    const sendData: ItemExport[] = []
-    const itemIndices: number[] = []
-    for (const request of modelRequests) {
-      sendData.push(request.data)
-      itemIndices.push(request.itemIndex)
-    }
-
-    try {
-      if (sendData.length > 0) {
-        const modelRequestMessage: ModelRequestMessageType = {
-          type: ModelRequestType.INFERENCE,
-          taskType: this.labelType,
-          projectName: this.projectName,
-          taskId: index2str(this.taskIndex),
-          items: sendData,
-          itemIndices: itemIndices,
-          actionPacketId: actionPacketId
-        }
-        this.publisher.publishEvent(
-          RedisChannel.MODEL_REQUEST,
-          modelRequestMessage
-        )
+    const items = []
+    const itemIndices = []
+    for (const modelRequest of modelRequests) {
+      if (modelRequest !== null) {
+        items.push(modelRequest.data[0])
+        itemIndices.push(modelRequest.itemIndices[0])
       }
+    }
+    try {
+      const modelRequestMessage: ModelRequestMessageType = {
+        type: ModelRequestType.INFERENCE,
+        taskType: this.labelType,
+        projectName: this.projectName,
+        taskId: index2str(this.taskIndex),
+        items: items,
+        itemIndices: itemIndices,
+        actionPacketId: actionPacketId
+      }
+      this.publisher.publishEvent(
+        RedisChannel.MODEL_REQUEST,
+        modelRequestMessage
+      )
     } catch (e) {
       Logger.info("Failed!")
     }
@@ -321,8 +316,10 @@ export class Bot {
    *
    * @param packet
    */
-  private packetToRequests(packet: ActionPacketType): ModelRequest[] {
-    const modelRequests: ModelRequest[] = []
+  private packetToRequests(
+    packet: ActionPacketType
+  ): Array<ModelRequest | null> {
+    const modelRequests: Array<ModelRequest | null> = []
     for (const action of packet.actions) {
       if (action.sessionId !== this.sessionId) {
         this.actionCount += 1
@@ -336,9 +333,7 @@ export class Bot {
             state,
             action as PredictionAction
           )
-          if (request !== null) {
-            modelRequests.push(request)
-          }
+          modelRequests.push(request)
         } else if (action.type === ADD_LABELS) {
           if (this.labelType === LabelTypeName.POLYGON_2D) {
             const request = this.boxActionToRequest(
@@ -366,13 +361,20 @@ export class Bot {
     state: State,
     action: PredictionAction
   ): ModelRequest | null {
-    const itemIndex = action.itemIndices[0]
-    const item = state.task.items[itemIndex]
-    const url = Object.values(item.urls)[0]
-    const intrinsics =
-      item.intrinsics != null ? Object.values(item.intrinsics)[0] : undefined
-
-    return this.modelInterface.makeImageRequest(url, itemIndex, intrinsics)
+    const urls: string[] = []
+    const intrinsics: Array<IntrinsicsType | undefined> = []
+    for (const index of action.itemIndices) {
+      const item = state.task.items[index]
+      urls.push(Object.values(item.urls)[0])
+      intrinsics.push(
+        item.intrinsics != null ? Object.values(item.intrinsics)[0] : undefined
+      )
+    }
+    return this.modelInterface.makeImageRequest(
+      urls,
+      action.itemIndices,
+      intrinsics
+    )
   }
 
   /**
@@ -413,17 +415,14 @@ export class Bot {
     const actions: AddLabelsAction[] = []
 
     const receivedData = JSON.parse(modelResponse)
-    for (const item of receivedData.output) {
-      const shapes: number[][] = item.boxes
-      const itemIndices: number[] = receivedData.itemIndices
+    for (let index = 0; index < receivedData.output.length; index++) {
+      const shapes: number[][] = receivedData.output[index].boxes
+      const itemIndex: number = receivedData.itemIndices[index]
       const actionPacketId: string = receivedData.actionPacketId
 
       if (this.labelType === LabelTypeName.BOX_2D) {
         shapes.forEach((shape: number[]) => {
-          const action = this.modelInterface.makeRectAction(
-            shape,
-            itemIndices[0]
-          )
+          const action = this.modelInterface.makeRectAction(shape, itemIndex)
           actions.push(action)
         })
       } else if (this.labelType === LabelTypeName.BOX_3D) {
@@ -433,18 +432,12 @@ export class Bot {
             continue
           } else {
             Logger.info(`Creating box: ${String(box)}`)
-            const action = this.modelInterface.makeBox3dAction(
-              box,
-              itemIndices[0]
-            )
+            const action = this.modelInterface.makeBox3dAction(box, itemIndex)
             actions.push(action)
           }
         }
       } else {
-        const action = this.modelInterface.makePolyAction(
-          shapes,
-          itemIndices[0]
-        )
+        const action = this.modelInterface.makePolyAction(shapes, itemIndex)
         actions.push(action)
       }
 

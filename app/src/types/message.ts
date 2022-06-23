@@ -112,7 +112,7 @@ export interface ModelQuery {
 /** the form of request sent to bot session */
 export interface ModelRequest {
   /** the data in scalabel format */
-  data: ItemExport
+  data: ItemExport[]
   /** the index of the item modified */
-  itemIndex: number
+  itemIndices: number[]
 }

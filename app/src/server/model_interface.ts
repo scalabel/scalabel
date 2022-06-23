@@ -19,6 +19,7 @@ import {
 } from "../types/state"
 import { intrinsicsToExport } from "./bdd_type_transformers"
 import { convertPolygonToExport } from "./export"
+import { ItemExport } from "../types/export"
 
 /**
  * API between redux style data and data for the models
@@ -61,8 +62,8 @@ export class ModelInterface {
       labels: [label]
     })
     return {
-      data: item,
-      itemIndex
+      data: [item],
+      itemIndices: [itemIndex]
     }
   }
 
@@ -99,26 +100,30 @@ export class ModelInterface {
   /**
    * Request for image prediction
    *
-   * @param url
-   * @param itemIndex
+   * @param urls
+   * @param itemIndices
    * @param intrinsics
    */
   public makeImageRequest(
-    url: string,
-    itemIndex: number,
-    intrinsics?: IntrinsicsType
+    urls: string[],
+    itemIndices: number[],
+    intrinsics: Array<IntrinsicsType | undefined>
   ): ModelRequest {
-    const item = makeItemExport({
-      name: this.projectName,
-      url,
-      intrinsics:
-        intrinsics !== null && intrinsics !== undefined
-          ? intrinsicsToExport(intrinsics)
-          : undefined
-    })
+    const items: ItemExport[] = []
+    for (let index = 0; index < urls.length; index++) {
+      const item = makeItemExport({
+        name: this.projectName,
+        url: urls[index],
+        intrinsics:
+          intrinsics[index] !== null && intrinsics[index] !== undefined
+            ? intrinsicsToExport(intrinsics[index] as IntrinsicsType)
+            : undefined
+      })
+      items.push(item)
+    }
     return {
-      data: item,
-      itemIndex
+      data: items,
+      itemIndices
     }
   }
 
