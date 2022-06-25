@@ -47,8 +47,6 @@ afterAll(() => {
   fs.removeSync(dataDir)
 })
 
-// TODO- test that form is loaded correctly
-
 describe("test project.json creation", () => {
   test("image project creation", async () => {
     return await testProjectCreation(

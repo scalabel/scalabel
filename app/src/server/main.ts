@@ -17,6 +17,7 @@ import { Hub } from "./hub"
 import { Listeners } from "./listeners"
 import Logger from "./logger"
 import auth from "./middleware/cognitoAuth"
+import { multipartFormData as formDataMiddleware } from "./middleware/multipart"
 import errorHandler from "./middleware/errorHandler"
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
 import { ProjectStore } from "./project_store"
@@ -114,29 +115,10 @@ function startHTTPServer(
     listeners.deleteProjectHandler.bind(listeners)
   )
 
-  const maxFileSize = 1000 * 1024 * 1024 // 1G
   app.post(
     Endpoint.POST_PROJECT,
     authMiddleWare,
-    (req, _, next) => {
-      /**
-       * If we need to use formidable at more places, we had better make this a middleware.
-       */
-      const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
-      form.parse(req, (err, fields, files) => {
-        // err is defined as any in formidable types
-        // eslint-disable-next-line  @typescript-eslint/strict-boolean-expressions
-        if (err) {
-          return next(err)
-        }
-
-        Object.assign(req, {
-          fields,
-          files
-        })
-        return next()
-      })
-    },
+    formDataMiddleware,
     listeners.postProjectHandler.bind(listeners)
   )
   app.post(
