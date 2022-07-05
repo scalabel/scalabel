@@ -4,7 +4,6 @@ import json
 from typing import AbstractSet, Dict, List, Optional, Union
 
 import numpy as np
-from sklearn.metrics import classification_report  # type: ignore
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -13,6 +12,7 @@ from ..common.typing import NDArrayI32
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
 from ..label.utils import get_parent_categories
+from .classification_report import classification_report  # type: ignore
 from .result import AVERAGE, Result, Scores, ScoresList
 from .utils import reorder_preds
 
@@ -36,9 +36,7 @@ class TaggingResult(Result):
     ) -> Scores:
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
-        for metric, scores_list in self.dict(
-            include=include, exclude=exclude  # type: ignore
-        ).items():
+        for metric, scores_list in self.dict(include=include, exclude=exclude).items():  # type: ignore
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
             summary_dict[metric] = scores_list[-1][AVERAGE]
@@ -83,22 +81,14 @@ def evaluate_tagging(
         parray: NDArrayI32 = np.array(preds_cls, dtype=np.int32)
         garray: NDArrayI32 = np.array(gts_cls, dtype=np.int32)
         gt_classes = [classes[cid] for cid in sorted(set(gts_cls + preds_cls))]
-        scores = classification_report(
-            garray, parray, target_names=gt_classes, output_dict=True
-        )
+        scores = classification_report(garray, parray, gt_classes)
         out: Dict[str, Scores] = {}
         for metric in ["precision", "recall", "f1-score"]:
             met = metric if metric != "f1-score" else "f1_score"
             out[met] = {}
             for cat in classes:
-                out[met][f"{tag}.{cat}"] = (
-                    scores[cat][metric] * 100.0 if cat in scores else np.nan
-                )
-            avgs[met][tag.upper()] = (
-                scores["macro avg"][metric] * 100.0
-                if len(scores) > 3
-                else np.nan
-            )
+                out[met][f"{tag}.{cat}"] = scores[cat][metric] * 100.0 if cat in scores else np.nan
+            avgs[met][tag.upper()] = scores["macro avg"][metric] * 100.0 if len(scores) > 3 else np.nan
         out["accuracy"] = {f"{tag}.{cat}": np.nan for cat in classes}
         avgs["accuracy"][tag.upper()] = scores["accuracy"] * 100.0
         for m, v in out.items():
@@ -112,12 +102,8 @@ def evaluate_tagging(
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="Tagging evaluation.")
-    parser.add_argument(
-        "--gt", "-g", required=True, help="path to tagging ground truth"
-    )
-    parser.add_argument(
-        "--result", "-r", required=True, help="path to tagging results"
-    )
+    parser.add_argument("--gt", "-g", required=True, help="path to tagging ground truth")
+    parser.add_argument("--result", "-r", required=True, help="path to tagging results")
     parser.add_argument(
         "--config",
         "-c",
@@ -150,8 +136,7 @@ if __name__ == "__main__":
         cfg = load_label_config(args.config)
     if cfg is None:
         raise ValueError(
-            "Dataset config is not specified. Please use --config"
-            " to specify a config for this dataset."
+            "Dataset config is not specified. Please use --config" " to specify a config for this dataset."
         )
     eval_result = evaluate_tagging(gts, preds, cfg, args.nproc)
     logger.info(eval_result)
