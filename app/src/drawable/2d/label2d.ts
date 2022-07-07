@@ -518,4 +518,10 @@ export abstract class Label2D {
   protected abstract initTempLabel(state: State, _start: Vector2D): LabelType
 }
 
+export abstract class Label2DModifier {
+  public abstract onClickHandler(label: Label2D, handlerIdx: number): void
+  public abstract onKeyDown(e: KeyboardEvent): void
+  public abstract onFinish(fn: () => void): void
+}
+
 export default Label2D

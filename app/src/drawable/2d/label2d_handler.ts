@@ -19,17 +19,16 @@ import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
-import { Label2D } from "./label2d"
+import { Label2D, Label2DModifier } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
+import { checkModifierFromKeyboard } from "./label2d_modifier"
 import { makeTrack } from "../../functional/states"
-import { InteractionHijacker, InteractionHijackerDelegate } from "./hijacker/label2d"
-import { Polygon2DBoundaryCloner } from "./hijacker/polygon2d_boundary_cloner"
 
 /**
  * List of drawable labels
  * ViewController for the labels
  */
-export class Label2DHandler extends InteractionHijackerDelegate {
+export class Label2DHandler {
   /** Drawable label list */
   private readonly _labelList: Label2DList
   /** Recorded state of last update */
@@ -37,11 +36,11 @@ export class Label2DHandler extends InteractionHijackerDelegate {
   /** Highlighted label */
   private _highlightedLabel: Label2D | null
   /** The hashed list of keys currently down */
-  private _keyDownMap: { [key: string]: boolean }
+  private _pressedKey: Set<string>
   /** Index of currently selected item */
   private _selectedItemIndex: number
-  /** State of boundary clone */
-  private _hijacker: InteractionHijacker | undefined
+  /** Active modifier */
+  private _modifier: Label2DModifier | undefined
 
   /**
    * Constructor
@@ -49,11 +48,9 @@ export class Label2DHandler extends InteractionHijackerDelegate {
    * @param labelList
    */
   constructor(labelList: Label2DList) {
-    super()
-
     this._highlightedLabel = null
     this._state = Session.getState()
-    this._keyDownMap = {}
+    this._pressedKey = new Set<string>()
     this._selectedItemIndex = -1
     this._labelList = labelList
 
@@ -150,9 +147,9 @@ export class Label2DHandler extends InteractionHijackerDelegate {
     _labelIndex: number,
     _handleIndex: number
   ): void {
-    if (this._hijacker !== undefined) {
+    if (this._modifier !== undefined) {
       const label = this._labelList.labelList[_labelIndex]
-      this._hijacker.onClickHandler(label, _handleIndex)
+      this._modifier.onClickHandler(label, _handleIndex)
       return
     }
 
@@ -197,14 +194,12 @@ export class Label2DHandler extends InteractionHijackerDelegate {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    if (this._hijacker === undefined) {
-      if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
-        for (const label of this._labelList.selectedLabels) {
-          label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
-          label.setManual()
-        }
-        return true
+    if (this.hasSelectedLabels() && this.isEditingSelectedLabels() && this._modifier === undefined) {
+      for (const label of this._labelList.selectedLabels) {
+        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+        label.setManual()
       }
+      return true
     }
 
     if (labelIndex >= 0) {
@@ -230,35 +225,37 @@ export class Label2DHandler extends InteractionHijackerDelegate {
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
-    if (this._hijacker) {
-      this._hijacker.onKeyDown(e)
+    if (this._modifier) {
+      this._modifier.onKeyDown(e)
       return
     }
+ 
+    this._pressedKey.add(e.key)
 
-    this._keyDownMap[e.key] = true
-    if (!this.isKeyDown(Key.CONTROL)) {
-      for (const selectedLabel of this._labelList.selectedLabels) {
-        if (!selectedLabel.onKeyDown(e.key)) {
-          this._labelList.labelList.splice(
-            this._labelList.labelList.indexOf(this._labelList.selectedLabels[0]),
-            1
-          )
-          this._labelList.selectedLabels.length = 0
+    // Propagate the key-down event only when exactly one key is pressed.
+    if (this._pressedKey.size === 1) {
+      for (const sl of this._labelList.selectedLabels) {
+        if (sl.onKeyDown(e.key)) {
+          continue
         }
+
+        const l = this._labelList.selectedLabels[0]
+        const i = this._labelList.labelList.indexOf(l)
+        this._labelList.labelList.splice(i, 1)
+        this._labelList.selectedLabels.length = 0
       }
     }
 
+    if (this.isKeyDown(Key.CONTROL) && this._labelList.selectedLabels.length === 1) {
+      const modifier = checkModifierFromKeyboard(this._labelList.selectedLabels[0], e)
+      if (modifier) {
+        modifier.onFinish(() => this._modifier = undefined)
+        this._modifier = modifier
+      }
+      return
+    }
+
     switch (e.key) {
-      case Key.D_UP:
-      case Key.D_LOW:
-        if (this.isKeyDown(Key.CONTROL)) {
-          // Boundary clone mode
-          if (this._highlightedLabel) {
-            const target = this._highlightedLabel
-            this._hijacker = new Polygon2DBoundaryCloner(target, this)
-          }
-        }
-        break
       case Key.L_LOW:
         if (this.isKeyDown(Key.CONTROL)) {
           // Track link mode
@@ -349,8 +346,7 @@ export class Label2DHandler extends InteractionHijackerDelegate {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[e.key]
+    this._pressedKey.delete(e.key)
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
     }
@@ -362,10 +358,8 @@ export class Label2DHandler extends InteractionHijackerDelegate {
    * @param _isVisible
    */
   public onVisibilityChange(): void {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[Key.META]
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[Key.CONTROL]
+    this._pressedKey.delete(Key.META)
+    this._pressedKey.delete(Key.CONTROL)
   }
 
   /** returns whether selectedLabels is empty */
@@ -389,7 +383,7 @@ export class Label2DHandler extends InteractionHijackerDelegate {
    * @param key - the key to check
    */
   private isKeyDown(key: Key): boolean {
-    return this._keyDownMap[key]
+    return this._pressedKey.has(key)
   }
 
   /** Select highlighted label, if any */
@@ -544,9 +538,5 @@ export class Label2DHandler extends InteractionHijackerDelegate {
     const newTrackId = makeTrack().id
 
     Session.dispatch(splitTrack(track.id, newTrackId, select.item))
-  }
-
-  public didFinish() {
-    this._hijacker = undefined
   }
 }
