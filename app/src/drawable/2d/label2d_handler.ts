@@ -22,14 +22,14 @@ import { commit2DLabels } from "../states"
 import { Label2D } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
 import { makeTrack } from "../../functional/states"
-import { Polygon2D } from "./polygon2d"
-import { PathPoint2D } from "./path_point2d"
+import { InteractionHijacker, InteractionHijackerDelegate } from "./hijacker/label2d"
+import { Polygon2DBoundaryCloner } from "./hijacker/polygon2d_boundary_cloner"
 
 /**
  * List of drawable labels
  * ViewController for the labels
  */
-export class Label2DHandler {
+export class Label2DHandler extends InteractionHijackerDelegate {
   /** Drawable label list */
   private readonly _labelList: Label2DList
   /** Recorded state of last update */
@@ -41,13 +41,7 @@ export class Label2DHandler {
   /** Index of currently selected item */
   private _selectedItemIndex: number
   /** State of boundary clone */
-  private _pointsCache: PathPoint2D[] | undefined
-  private _boundaryClone: {
-    labelIdx: number
-    handler1Idx: number
-    handler2Idx: number | undefined
-    reversed: boolean
-  } | undefined
+  private _hijacker: InteractionHijacker | undefined
 
   /**
    * Constructor
@@ -55,6 +49,8 @@ export class Label2DHandler {
    * @param labelList
    */
   constructor(labelList: Label2DList) {
+    super()
+
     this._highlightedLabel = null
     this._state = Session.getState()
     this._keyDownMap = {}
@@ -154,32 +150,9 @@ export class Label2DHandler {
     _labelIndex: number,
     _handleIndex: number
   ): void {
-    if (this._pointsCache !== undefined) {
-      const { _boundaryClone: bc } = this
-      if (!bc || bc.labelIdx !== _labelIndex) {
-        // Set current handler to be the initial vertex of the boundary segment
-        // if no one is set yet or the current label is different from the
-        // previously select one.
-        this._boundaryClone = {
-          labelIdx: _labelIndex,
-          handler1Idx: _handleIndex,
-          handler2Idx: undefined,
-          reversed: false,
-        }
-      } else {
-        // Set current handler to be the second vertex
-        this._boundaryClone = {
-          ...bc,
-          handler2Idx: _handleIndex,
-        }
-        this.previewBoundaryClone(
-          bc.labelIdx,
-          bc.handler1Idx,
-          _handleIndex,
-          bc.reversed,
-        )
-      }
-
+    if (this._hijacker !== undefined) {
+      const label = this._labelList.labelList[_labelIndex]
+      this._hijacker.onClickHandler(label, _handleIndex)
       return
     }
 
@@ -224,12 +197,14 @@ export class Label2DHandler {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    if (this._pointsCache === undefined && this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
-      for (const label of this._labelList.selectedLabels) {
-        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
-        label.setManual()
+    if (this._hijacker === undefined) {
+      if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
+        for (const label of this._labelList.selectedLabels) {
+          label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+          label.setManual()
+        }
+        return true
       }
-      return true
     }
 
     if (labelIndex >= 0) {
@@ -255,8 +230,13 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
+    if (this._hijacker) {
+      this._hijacker.onKeyDown(e)
+      return
+    }
+
     this._keyDownMap[e.key] = true
-    if (this._pointsCache === undefined && !this.isKeyDown(Key.CONTROL)) {
+    if (!this.isKeyDown(Key.CONTROL)) {
       for (const selectedLabel of this._labelList.selectedLabels) {
         if (!selectedLabel.onKeyDown(e.key)) {
           this._labelList.labelList.splice(
@@ -273,9 +253,9 @@ export class Label2DHandler {
       case Key.D_LOW:
         if (this.isKeyDown(Key.CONTROL)) {
           // Boundary clone mode
-          // Session.dispatch(startCloneBoundary())
           if (this._highlightedLabel) {
-            this._pointsCache = (this._highlightedLabel as Polygon2D).points
+            const target = this._highlightedLabel
+            this._hijacker = new Polygon2DBoundaryCloner(target, this)
           }
         }
         break
@@ -331,9 +311,7 @@ export class Label2DHandler {
         }
         break
       case Key.ENTER:
-        if (this._pointsCache !== undefined) {
-          this.cloneBoundary()
-        } else if (this._state.session.trackLinking) {
+        if (this._state.session.trackLinking) {
           this.mergeTracks()
         } else {
           commit2DLabels([...this._labelList.popUpdatedLabels()])
@@ -349,20 +327,6 @@ export class Label2DHandler {
           }
         }
         break
-      case Key.ALT:
-        if (this._pointsCache !== undefined) {
-          // Reverse the boundary segment.
-          // Perform only when the second (thus both) vertex is set.
-          if (this._boundaryClone?.handler2Idx !== undefined) {
-            this._boundaryClone.reversed = !this._boundaryClone.reversed
-            this.previewBoundaryClone(
-              this._boundaryClone.labelIdx,
-              this._boundaryClone.handler1Idx,
-              this._boundaryClone.handler2Idx,
-              this._boundaryClone.reversed,
-            )
-          }
-        }
     }
   }
 
@@ -571,39 +535,6 @@ export class Label2DHandler {
     }
   }
 
-  private previewBoundaryClone(labelIdx: number, handler1Idx: number, handler2Idx: number, reversed: boolean): void {
-    if (this._pointsCache === undefined) {
-      return
-    }
-
-    const source = this._labelList.labelList[labelIdx] as Polygon2D
-    const qs = source.points
-
-    const ps = [...this._pointsCache]
-    const advance = reversed ? (i: number) => (i - 2 + qs.length) % qs.length + 1 : (i: number) => i % qs.length + 1
-    for (let idx = handler1Idx; idx !== handler2Idx; idx = advance(idx)) {
-      const q = qs[idx - 1]
-      ps.push(q)
-    }
-    const q = qs[handler2Idx - 1].clone()
-    ps.push(q)
-
-    const target = this._labelList.selectedLabels[0] as Polygon2D
-    target.points = ps
-  }
-
-  /**
-   * Clone boundary to the current selected label.
-   */
-  private cloneBoundary(): void {
-    const { _boundaryClone: bc } = this
-    if (!bc || bc.handler2Idx === undefined) {
-      return
-    }
-    this._pointsCache = undefined
-    // alert(Severity.SUCCESS, "Selected tracks have been successfuly linked.")
-  }
-
   /**
    * Unlink selected track
    */
@@ -613,5 +544,9 @@ export class Label2DHandler {
     const newTrackId = makeTrack().id
 
     Session.dispatch(splitTrack(track.id, newTrackId, select.item))
+  }
+
+  public didFinish() {
+    this._hijacker = undefined
   }
 }
