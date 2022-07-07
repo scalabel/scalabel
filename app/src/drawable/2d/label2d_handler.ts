@@ -36,11 +36,11 @@ export class Label2DHandler {
   /** Highlighted label */
   private _highlightedLabel: Label2D | null
   /** The hashed list of keys currently down */
-  private _pressedKey: Set<string>
+  private readonly _pressedKey: Set<string>
   /** Index of currently selected item */
   private _selectedItemIndex: number
   /** Active modifier */
-  private _modifier: Label2DModifier | undefined
+  private _modifier: Label2DModifier | null
 
   /**
    * Constructor
@@ -53,6 +53,7 @@ export class Label2DHandler {
     this._pressedKey = new Set<string>()
     this._selectedItemIndex = -1
     this._labelList = labelList
+    this._modifier = null
 
     addVisibilityListener(() => this.onVisibilityChange())
   }
@@ -147,7 +148,7 @@ export class Label2DHandler {
     _labelIndex: number,
     _handleIndex: number
   ): void {
-    if (this._modifier !== undefined) {
+    if (this._modifier !== null) {
       const label = this._labelList.labelList[_labelIndex]
       this._modifier.onClickHandler(label, _handleIndex)
       return
@@ -194,7 +195,11 @@ export class Label2DHandler {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    if (this.hasSelectedLabels() && this.isEditingSelectedLabels() && this._modifier === undefined) {
+    if (
+      this.hasSelectedLabels() &&
+      this.isEditingSelectedLabels() &&
+      this._modifier === null
+    ) {
       for (const label of this._labelList.selectedLabels) {
         label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
         label.setManual()
@@ -225,11 +230,11 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
-    if (this._modifier) {
+    if (this._modifier != null) {
       this._modifier.onKeyDown(e)
       return
     }
- 
+
     this._pressedKey.add(e.key)
 
     // Propagate the key-down event only when exactly one key is pressed.
@@ -246,10 +251,16 @@ export class Label2DHandler {
       }
     }
 
-    if (this.isKeyDown(Key.CONTROL) && this._labelList.selectedLabels.length === 1) {
-      const modifier = checkModifierFromKeyboard(this._labelList.selectedLabels[0], e)
-      if (modifier) {
-        modifier.onFinish(() => this._modifier = undefined)
+    if (
+      this.isKeyDown(Key.CONTROL) &&
+      this._labelList.selectedLabels.length === 1
+    ) {
+      const modifier = checkModifierFromKeyboard(
+        this._labelList.selectedLabels[0],
+        e
+      )
+      if (modifier != null) {
+        modifier.onFinish(() => (this._modifier = null))
         this._modifier = modifier
       }
       return

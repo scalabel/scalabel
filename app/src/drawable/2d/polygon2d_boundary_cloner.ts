@@ -1,20 +1,29 @@
 import { Key, LabelTypeName } from "../../const/common"
-import { Label2D } from "./label2d"
+import { Label2D, Label2DModifier } from "./label2d"
 import { Polygon2D } from "./polygon2d"
 import { PathPoint2D } from "./path_point2d"
 import { PathPointType } from "../../types/state"
-import { Label2DModifier } from "./label2d"
 
+/**
+ * Polygon2DBoundaryCloner is a 2d label modifier for polygons.
+ * It clone a segment of the boundary of some other polygon to the target one.
+ */
 export class Polygon2DBoundaryCloner extends Label2DModifier {
   private _target: Polygon2D
-  private _initialPoints: PathPoint2D[]
+  private readonly _initialPoints: PathPoint2D[]
   private _label: Polygon2D | undefined
   private _handler1Idx: number | undefined
   private _handler2Idx: number | undefined
   private _reversed: boolean
   private _finishCallback: (() => void) | undefined
 
-  constructor (target: Label2D) {
+  /**
+   * Constructor
+   *
+   * @param target: the label to append the cloned boundary segment.
+   * @param target
+   */
+  constructor(target: Label2D) {
     super()
 
     this._target = target as Polygon2D
@@ -22,7 +31,13 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
     this._reversed = false
   }
 
-  public onClickHandler(label: Label2D, handlerIdx: number) {
+  /**
+   * Implementation of the `onClickHandler` abstract method.
+   *
+   * @param label
+   * @param handlerIdx
+   */
+  public onClickHandler(label: Label2D, handlerIdx: number): void {
     if (label.type !== LabelTypeName.POLYGON_2D) {
       console.warn(`attempt to clone boundary on ${label.type}`)
       return
@@ -34,7 +49,11 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       return
     }
 
-    if (this._label === undefined || this._handler1Idx === undefined || this._label.labelId !== label.labelId) {
+    if (
+      this._label === undefined ||
+      this._handler1Idx === undefined ||
+      this._label.labelId !== label.labelId
+    ) {
       // Set current handler to be the initial vertex of the boundary segment
       // if no one is set yet or the current label is different from the
       // previously select one.
@@ -49,7 +68,12 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
     this.updateRender()
   }
 
-  public onKeyDown(e: KeyboardEvent) {
+  /**
+   * Implementation of the `onKeyDown` abstract method.
+   *
+   * @param e
+   */
+  public onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
       case Key.ALT:
         this._reversed = !this._reversed
@@ -58,22 +82,41 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       case Key.ENTER:
         this._finishCallback?.()
         break
+      case Key.ESCAPE:
+        this._target.points = [...this._initialPoints]
+        this._finishCallback?.()
+        break
     }
   }
 
-  public onFinish(fn: () => void) {
+  /**
+   * Implementation of the `onFinish` abstract method.
+   *
+   * @param fn
+   */
+  public onFinish(fn: () => void): void {
     this._finishCallback = fn
   }
 
+  /**
+   * Update the rendering of the target for preview purpose
+   */
   private updateRender(): void {
-    const { _label: source, _reversed: reversed, _handler1Idx: h1, _handler2Idx: h2 } = this
+    const {
+      _label: source,
+      _reversed: reversed,
+      _handler1Idx: h1,
+      _handler2Idx: h2
+    } = this
     if (source === undefined || h1 === undefined || h2 === undefined) {
       return
     }
 
     const qs = source.points
     const ps = [...this._initialPoints]
-    const advance = reversed ? (i: number) => (i - 2 + qs.length) % qs.length + 1 : (i: number) => i % qs.length + 1
+    const advance = reversed
+      ? (i: number) => ((i - 2 + qs.length) % qs.length) + 1
+      : (i: number) => (i % qs.length) + 1
     for (let idx = h1; idx !== h2; idx = advance(idx)) {
       const q = qs[idx - 1]
       ps.push(q)

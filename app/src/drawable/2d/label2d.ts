@@ -518,6 +518,9 @@ export abstract class Label2D {
   protected abstract initTempLabel(state: State, _start: Vector2D): LabelType
 }
 
+/**
+ * Abstract class for 2D label modifier.
+ */
 export abstract class Label2DModifier {
   public abstract onClickHandler(label: Label2D, handlerIdx: number): void
   public abstract onKeyDown(e: KeyboardEvent): void

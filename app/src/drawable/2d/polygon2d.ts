@@ -106,7 +106,7 @@ export class Polygon2D extends Label2D {
   public get points(): PathPoint2D[] {
     return this._points.map((p) => p.clone())
   }
- 
+
   /**
    * Draw the label on viewing or control canvas
    *
