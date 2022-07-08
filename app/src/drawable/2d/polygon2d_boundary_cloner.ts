@@ -1,5 +1,7 @@
 import Session from "../../common/session"
 import { updateBoundaryClone } from "../../action/common"
+import { alert } from "../../common/alert"
+import { Severity } from "../../types/common"
 
 import { Key, LabelTypeName } from "../../const/common"
 import { Label2D, Label2DModifier } from "./label2d"
@@ -51,6 +53,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
     const l = label as Polygon2D
     if (l.points[handlerIdx - 1].type !== PathPointType.LINE) {
       // Can only select line point
+      alert(Severity.WARNING, `Can select only normal vertex`)
       return
     }
 

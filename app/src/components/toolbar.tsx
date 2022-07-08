@@ -1,6 +1,6 @@
 import "react-toastify/dist/ReactToastify.css"
 import List from "@material-ui/core/List/List"
-// import ListItem from "@material-ui/core/ListItem"
+import ListItem from "@material-ui/core/ListItem/ListItem"
 import _ from "lodash"
 import React from "react"
 import { Slide, toast, ToastContainer } from "react-toastify"
@@ -219,6 +219,16 @@ export class ToolBar extends Component<Props> {
                 this.unlinkSelectedTrack(this.state)
               })}
             </div>
+          )}
+          {this.state.task.config.labelTypes.includes("polygon2d") && (
+            <List>
+              <ListItem>
+                <div>
+                  <div style={{ fontWeight: "bold" }}>Share Boundary</div>
+                  <div>Ctrl + D</div>
+                </div>
+              </ListItem>
+            </List>
           )}
         </div>
         <ToastContainer hideProgressBar transition={Slide} />
