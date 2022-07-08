@@ -1,4 +1,5 @@
 import { Key, LabelTypeName } from "../../const/common"
+import { Polygon2D } from "./polygon2d"
 import { Polygon2DBoundaryCloner } from "./polygon2d_boundary_cloner"
 import { Label2D, Label2DModifier } from "./label2d"
 
@@ -16,7 +17,7 @@ export function checkModifierFromKeyboard(
     case Key.D_UP:
     case Key.D_LOW:
       if (target.type === LabelTypeName.POLYGON_2D) {
-        return new Polygon2DBoundaryCloner(target)
+        return new Polygon2DBoundaryCloner(target as Polygon2D)
       }
   }
 
