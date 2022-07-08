@@ -462,11 +462,9 @@ export class ToolBar extends Component<Props> {
    * @param state
    */
   private startBatchPrediction(state: State): void {
-    const itemIndices: number[] = []
     for (const item of state.task.items) {
-      itemIndices.push(item.index)
+      Session.dispatch(sendPredictionRequest([item.index]))
     }
-    Session.dispatch(sendPredictionRequest(itemIndices))
   }
 
   /**

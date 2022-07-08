@@ -300,7 +300,13 @@ export class Bot {
         taskId: index2str(this.taskIndex),
         items: items,
         itemIndices: itemIndices,
-        actionPacketId: actionPacketId
+        actionPacketId: actionPacketId,
+        channel:
+          RedisChannel.MODEL_RESPONSE +
+          "_" +
+          this.projectName +
+          "_" +
+          index2str(this.taskIndex)
       }
       this.publisher.publishEvent(
         RedisChannel.MODEL_REQUEST,

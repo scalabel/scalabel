@@ -18,44 +18,44 @@ DATASETS:
   TRAIN:
     NAME: synscapes_finetune_10_2
     CANONICAL_BOX3D_SIZES:
-    - - 1.61876949
-      - 3.89154523
-      - 1.52969237
-    - - 0.62806586
-      - 0.82038497
-      - 1.76784787
-    - - 0.56898187
-      - 1.77149234
-      - 1.7237099
-    - - 1.9134491
-      - 5.15499603
-      - 2.18998422
-    - - 2.61168401
-      - 9.22692319
-      - 3.36492722
-    - - 0.5390196
-      - 1.08098042
-      - 1.28392158
-    - - 2.36044838
-      - 15.56991038
-      - 3.5289238
-    - - 1.24489164
-      - 2.51495357
-      - 1.61402478
+      - - 1.61876949
+        - 3.89154523
+        - 1.52969237
+      - - 0.62806586
+        - 0.82038497
+        - 1.76784787
+      - - 0.56898187
+        - 1.77149234
+        - 1.7237099
+      - - 1.9134491
+        - 5.15499603
+        - 2.18998422
+      - - 2.61168401
+        - 9.22692319
+        - 3.36492722
+      - - 0.5390196
+        - 1.08098042
+        - 1.28392158
+      - - 2.36044838
+        - 15.56991038
+        - 3.5289238
+      - - 1.24489164
+        - 2.51495357
+        - 1.61402478
     DATASET_MAPPER: default
     NUM_CLASSES: 5
     MEAN_DEPTH_PER_LEVEL:
-    - 32.594
-    - 15.178
-    - 8.424
-    - 5.004
-    - 4.662
+      - 32.594
+      - 15.178
+      - 8.424
+      - 5.004
+      - 4.662
     STD_DEPTH_PER_LEVEL:
-    - 14.682
-    - 7.139
-    - 4.345
-    - 2.399
-    - 2.587
+      - 14.682
+      - 7.139
+      - 4.345
+      - 2.399
+      - 2.587
   TEST:
     NAME: synscapes_finetune_val
     NUSC_SAMPLE_AGGREGATE_IN_INFERENCE: false
@@ -63,9 +63,9 @@ DATASETS:
 FE:
   FPN:
     IN_FEATURES:
-    - level3
-    - level4
-    - level5
+      - level3
+      - level4
+      - level5
     OUT_FEATURES: null
     OUT_CHANNELS: 256
     NORM: FrozenBN
@@ -74,9 +74,9 @@ FE:
   BACKBONE:
     NAME: DLA-34
     OUT_FEATURES:
-    - level3
-    - level4
-    - level5
+      - level3
+      - level4
+      - level5
     NORM: FrozenBN
   OUT_FEATURES: null
 DD3D:
@@ -84,10 +84,10 @@ DD3D:
   NUM_CLASSES: 5
   FEATURE_LOCATIONS_OFFSET: none
   SIZES_OF_INTEREST:
-  - 64
-  - 128
-  - 256
-  - 512
+    - 64
+    - 128
+    - 256
+    - 512
   INFERENCE:
     DO_NMS: true
     DO_POSTPROCESS: true
@@ -123,44 +123,44 @@ DD3D:
     SCALE_DEPTH_BY_FOCAL_LENGTHS: true
     SCALE_DEPTH_BY_FOCAL_LENGTHS_FACTOR: 500.0
     MEAN_DEPTH_PER_LEVEL:
-    - 32.594
-    - 15.178
-    - 8.424
-    - 5.004
-    - 4.662
+      - 32.594
+      - 15.178
+      - 8.424
+      - 5.004
+      - 4.662
     STD_DEPTH_PER_LEVEL:
-    - 14.682
-    - 7.139
-    - 4.345
-    - 2.399
-    - 2.587
+      - 14.682
+      - 7.139
+      - 4.345
+      - 2.399
+      - 2.587
     MIN_DEPTH: 0.1
     MAX_DEPTH: 80.0
     CANONICAL_BOX3D_SIZES:
-    - - 1.61876949
-      - 3.89154523
-      - 1.52969237
-    - - 0.62806586
-      - 0.82038497
-      - 1.76784787
-    - - 0.56898187
-      - 1.77149234
-      - 1.7237099
-    - - 1.9134491
-      - 5.15499603
-      - 2.18998422
-    - - 2.61168401
-      - 9.22692319
-      - 3.36492722
-    - - 0.5390196
-      - 1.08098042
-      - 1.28392158
-    - - 2.36044838
-      - 15.56991038
-      - 3.5289238
-    - - 1.24489164
-      - 2.51495357
-      - 1.61402478
+      - - 1.61876949
+        - 3.89154523
+        - 1.52969237
+      - - 0.62806586
+        - 0.82038497
+        - 1.76784787
+      - - 0.56898187
+        - 1.77149234
+        - 1.7237099
+      - - 1.9134491
+        - 5.15499603
+        - 2.18998422
+      - - 2.61168401
+        - 9.22692319
+        - 3.36492722
+      - - 0.5390196
+        - 1.08098042
+        - 1.28392158
+      - - 2.36044838
+        - 15.56991038
+        - 3.5289238
+      - - 1.24489164
+        - 2.51495357
+        - 1.61402478
     CLASS_AGNOSTIC_BOX3D: false
     PREDICT_ALLOCENTRIC_ROT: true
     PREDICT_DISTANCE: false
@@ -206,20 +206,20 @@ INPUT:
   RESIZE:
     ENABLED: true
     MIN_SIZE_TRAIN:
-    - 288
-    - 304
-    - 320
-    - 336
-    - 352
-    - 368
-    - 384
-    - 400
-    - 416
-    - 448
-    - 480
-    - 512
-    - 544
-    - 576
+      - 288
+      - 304
+      - 320
+      - 336
+      - 352
+      - 368
+      - 384
+      - 400
+      - 416
+      - 448
+      - 480
+      - 512
+      - 544
+      - 576
     MIN_SIZE_TRAIN_SAMPLING: choice
     MAX_SIZE_TRAIN: 10000
     MIN_SIZE_TEST: 384
@@ -228,8 +228,8 @@ INPUT:
     ENABLED: false
     TYPE: relative_range
     SIZE:
-    - 0.9
-    - 0.9
+      - 0.9
+      - 0.9
   RANDOM_FLIP:
     ENABLED: true
     HORIZONTAL: true
@@ -237,25 +237,25 @@ INPUT:
   COLOR_JITTER:
     ENABLED: true
     BRIGHTNESS:
-    - 0.2
-    - 0.2
+      - 0.2
+      - 0.2
     SATURATION:
-    - 0.2
-    - 0.2
+      - 0.2
+      - 0.2
     CONTRAST:
-    - 0.2
-    - 0.2
+      - 0.2
+      - 0.2
 MODEL:
-  DEVICE: cuda
+  # DEVICE: cuda
   META_ARCHITECTURE: DD3D
   PIXEL_MEAN:
-  - 103.53
-  - 116.28
-  - 123.675
+    - 103.53
+    - 116.28
+    - 123.675
   PIXEL_STD:
-  - 57.375
-  - 57.12
-  - 58.395
+    - 57.375
+    - 57.12
+    - 58.395
   CKPT: /scratch/egroenewald/tmp/tmph0rotj_9.pth
   BOX2D_ON: true
   BOX3D_ON: true
@@ -282,7 +282,7 @@ SOLVER:
   GAMMA: 0.1
   LR_SCHEDULER_NAME: WarmupMultiStepLR
   STEPS:
-  - 1200
+    - 1200
   WARMUP_FACTOR: 0.0001
   WARMUP_ITERS: 0
   WARMUP_METHOD: linear
@@ -306,16 +306,16 @@ TEST:
   AUG:
     ENABLED: true
     MIN_SIZES:
-    - 320
-    - 384
-    - 448
-    - 512
-    - 576
+      - 320
+      - 384
+      - 448
+      - 512
+      - 576
     MAX_SIZE: 100000
     FLIP: true
 EVALUATORS:
   KITTI3D:
     IOU_THRESHOLDS:
-    - 0.5
-    - 0.7
+      - 0.5
+      - 0.7
     ONLY_PREPARE_SUBMISSION: false

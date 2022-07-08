@@ -198,7 +198,7 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
 // async function launchModelServer(): Promise<void> {
 //   const modelServerProc = child.spawn("python", [
 //     "-m",
-//     "scalabel.automatic.scalabel_bot.main",
+//     "scalabel_bot.main",
 //     "--num_gpus",
 //     "8"
 //   ])

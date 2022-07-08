@@ -73,6 +73,8 @@ export interface ModelRequestMessageType {
   itemIndices: number[]
   /** which action triggers this prediction request */
   actionPacketId: string
+  /** responses channel to receive results */
+  channel: string
 }
 
 /** type for transmitted packet of actions */
