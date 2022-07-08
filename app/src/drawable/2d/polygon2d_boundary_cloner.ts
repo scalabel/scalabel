@@ -27,8 +27,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
   /**
    * Constructor
    *
-   * @param target: the label to append the cloned boundary segment.
-   * @param target
+   * @param target the label to append the cloned boundary segment.
    */
   constructor(target: Polygon2D) {
     super()
@@ -133,7 +132,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       _label: source,
       _handler1Idx: h1,
       _handler2Idx: h2,
-      _reverse: reverse,
+      _reverse: reverse
     } = this
     if (source === undefined || h1 === undefined || h2 === undefined) {
       return

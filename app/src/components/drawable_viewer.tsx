@@ -281,8 +281,10 @@ export abstract class DrawableViewer<
    * Get possible banner messages based on current state.
    */
   private bannerMessage(): string | undefined {
-    const { session: { polygon2DBoundaryClone: status } } = this.state
-    if (!status) {
+    const {
+      session: { polygon2DBoundaryClone: status }
+    } = this.state
+    if (status == null) {
       return
     }
     const { labelId, handler1Idx, handler2Idx } = status
