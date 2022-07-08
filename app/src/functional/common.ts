@@ -1558,6 +1558,22 @@ export function startLinkTrack(state: State): State {
 }
 
 /**
+ * Update boundary clone.
+ *
+ * @param state
+ * @param action
+ */
+export function updateBoundaryClone(
+  state: State,
+  action: actionTypes.UpdateBoundaryCloneAction
+): State {
+  const { status: boundaryClone } = action
+  const { session: oldSession } = state
+  const session = updateObject(oldSession, { boundaryClone })
+  return updateObject(state, { ...state, session })
+}
+
+/**
  * Update session status, if it should be updated
  *
  * @param state

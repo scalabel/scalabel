@@ -554,6 +554,13 @@ export interface Info3DType {
   showGroundPlane: boolean
 }
 
+export interface BoundaryCloneStatusType {
+  labelId: IdType | undefined
+  handler1Idx: number | undefined
+  handler2Idx: number | undefined
+  reverse: boolean
+}
+
 /**
  * Information for this particular session
  */
@@ -570,6 +577,8 @@ export interface SessionType {
   itemStatuses: ItemStatus[]
   /** Track linking toggled */
   trackLinking: boolean
+  /** Track linking toggled */
+  boundaryClone: BoundaryCloneStatusType | undefined
   /** Current connection status */
   status: ConnectionStatus
   /** Current mode */

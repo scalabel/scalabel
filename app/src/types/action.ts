@@ -16,7 +16,8 @@ import {
   State,
   SubmitData,
   TaskType,
-  ViewerConfigType
+  ViewerConfigType,
+  BoundaryCloneStatusType
 } from "./state"
 
 export interface BaseAction {
@@ -224,6 +225,10 @@ export interface RemoveAlertAction extends BaseAction {
   alertId: string
 }
 
+export interface UpdateBoundaryCloneAction extends BaseAction {
+  status: BoundaryCloneStatusType | undefined
+}
+
 export type ActivateSpanAction = BaseAction
 
 export type DeactivateSpanAction = BaseAction
@@ -262,6 +267,7 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
+  | UpdateBoundaryCloneAction
 
 export type Info3DActionType =
   | ActivateSpanAction

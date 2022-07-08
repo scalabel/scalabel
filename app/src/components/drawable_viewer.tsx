@@ -113,8 +113,30 @@ export abstract class DrawableViewer<
     this._viewerConfig = this.state.user.viewerConfigs[this._viewerId]
     this._item = this.state.user.select.item
 
+    const bannerMessage = this.bannerMessage()
     return (
-      <div className={this.props.classes.viewer_container}>
+      <div
+        className={this.props.classes.viewer_container}
+        style={{ display: "flex", flexDirection: "column" }}
+      >
+        <Grid justifyContent={"flex-start"} container direction="row">
+          {...this.getMenuComponents()}
+          {bannerMessage !== undefined && (
+            <div style={{ flexGrow: 1, height: "48px" }}>
+              <div
+                style={{
+                  background: "#007aff",
+                  lineHeight: "32px",
+                  padding: "0 16px",
+                  margin: "8px",
+                  float: "left"
+                }}
+              >
+                {bannerMessage}
+              </div>
+            </div>
+          )}
+        </Grid>
         <div
           ref={(element) => {
             if (element !== null && this._container !== element) {
@@ -126,7 +148,7 @@ export abstract class DrawableViewer<
               this.forceUpdate()
             }
           }}
-          className={this.props.classes.viewer_container}
+          style={{ flexGrow: 1, position: "relative" }}
           onMouseDown={(e) => this.onMouseDown(e)}
           onMouseUp={(e) => this.onMouseUp(e)}
           onMouseMove={(e) => this.onMouseMove(e)}
@@ -136,9 +158,6 @@ export abstract class DrawableViewer<
         >
           {this.getDrawableComponents()}
         </div>
-        <Grid justifyContent={"flex-start"} container direction="row">
-          {...this.getMenuComponents()}
-        </Grid>
       </div>
     )
   }
@@ -256,5 +275,25 @@ export abstract class DrawableViewer<
    */
   protected onKeyDown(e: KeyboardEvent): void {
     this._keyDownMap[e.key] = true
+  }
+
+  /**
+   * Get possible banner messages based on current state.
+   */
+  private bannerMessage(): string | undefined {
+    const {
+      session: { boundaryClone }
+    } = this.state
+    if (boundaryClone == null) {
+      return
+    }
+    const { labelId, handler1Idx, handler2Idx } = boundaryClone
+    if (labelId === undefined || handler1Idx === undefined) {
+      return "Click on one handler of the boundary segment you want to share. Press [esc] to quit."
+    }
+    if (handler2Idx === undefined) {
+      return "Click on the handler of the other end. Press [esc] to quit."
+    }
+    return "Press [alt] to swith direction, [enter] to commit, or [esc] to quit."
   }
 }

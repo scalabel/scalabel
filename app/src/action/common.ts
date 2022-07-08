@@ -20,7 +20,8 @@ import {
   SplitType,
   State,
   TaskType,
-  ViewerConfigType
+  ViewerConfigType,
+  BoundaryCloneStatusType
 } from "../types/state"
 
 let getState = getStateGetter()
@@ -558,6 +559,20 @@ export function submit(): actionTypes.SubmitAction {
  */
 export function startLinkTrack(): actionTypes.BaseAction {
   return makeBaseAction(actionConsts.START_LINK_TRACK)
+}
+
+/**
+ * update boundary clone status
+ *
+ * @param status
+ */
+export function updateBoundaryClone(
+  status: BoundaryCloneStatusType | undefined
+): actionTypes.UpdateBoundaryCloneAction {
+  return {
+    ...makeBaseAction(actionConsts.UPDATE_BOUNDAY_CLONE),
+    status
+  }
 }
 
 /**

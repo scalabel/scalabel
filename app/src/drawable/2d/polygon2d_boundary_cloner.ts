@@ -1,3 +1,6 @@
+import Session from "../../common/session"
+import { updateBoundaryClone } from "../../action/common"
+
 import { Key, LabelTypeName } from "../../const/common"
 import { Label2D, Label2DModifier } from "./label2d"
 import { Polygon2D } from "./polygon2d"
@@ -14,7 +17,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
   private _label: Polygon2D | undefined
   private _handler1Idx: number | undefined
   private _handler2Idx: number | undefined
-  private _reversed: boolean
+  private _reverse: boolean
   private _finishCallback: (() => void) | undefined
 
   /**
@@ -28,7 +31,9 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
 
     this._target = target
     this._initialPoints = [...this._target.points]
-    this._reversed = false
+    this._reverse = false
+
+    this.syncUpdate()
   }
 
   /**
@@ -59,13 +64,16 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       // previously select one.
       this._label = label as Polygon2D
       this._handler1Idx = handlerIdx
-      this._reversed = false
-      return
+      this._handler2Idx = undefined
+      this._reverse = false
+      this.reset()
+    } else {
+      // Set current handler to be the second vertex
+      this._handler2Idx = handlerIdx
+      this.update()
     }
 
-    // Set current handler to be the second vertex
-    this._handler2Idx = handlerIdx
-    this.updateRender()
+    this.syncUpdate()
   }
 
   /**
@@ -76,15 +84,16 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
   public onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
       case Key.ALT:
-        this._reversed = !this._reversed
-        this.updateRender()
+        this._reverse = !this._reverse
+        this.update()
+        this.syncUpdate()
         break
       case Key.ENTER:
-        this._finishCallback?.()
+        this.finish()
         break
       case Key.ESCAPE:
-        this._target.points = [...this._initialPoints]
-        this._finishCallback?.()
+        this.reset()
+        this.finish()
         break
     }
   }
@@ -99,12 +108,19 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
   }
 
   /**
+   * Reset to initial points.
+   */
+  private reset(): void {
+    this._target.points = [...this._initialPoints]
+  }
+
+  /**
    * Update the rendering of the target for preview purpose
    */
-  private updateRender(): void {
+  private update(): void {
     const {
       _label: source,
-      _reversed: reversed,
+      _reverse: reversed,
       _handler1Idx: h1,
       _handler2Idx: h2
     } = this
@@ -125,5 +141,27 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
     ps.push(q)
 
     this._target.points = ps
+  }
+
+  /**
+   * Finished.
+   */
+  private finish(): void {
+    this._finishCallback?.()
+    Session.dispatch(updateBoundaryClone(undefined))
+  }
+
+  /**
+   * Sync the update to the global state.
+   */
+  private syncUpdate(): void {
+    Session.dispatch(
+      updateBoundaryClone({
+        labelId: this._label?.labelId,
+        handler1Idx: this._handler1Idx,
+        handler2Idx: this._handler2Idx,
+        reverse: this._reverse
+      })
+    )
   }
 }

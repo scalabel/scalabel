@@ -44,6 +44,7 @@ export const UPDATE_PANE = "UPDATE_PANE"
 export const SPLIT_PANE = "SPLIT_PANE"
 export const DELETE_PANE = "DELETE_PANE"
 export const START_LINK_TRACK = "START_LINK_TRACK"
+export const UPDATE_BOUNDAY_CLONE = "UPDATE_BOUNDAY_CLONE"
 
 // Sync based events
 export const REGISTER_SESSION = "REGISTER_SESSION"
