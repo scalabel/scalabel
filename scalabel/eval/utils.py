@@ -187,7 +187,9 @@ def combine_stuff_masks(
     combine_iids: List[int] = []
     for class_id in sorted(set(class_ids)):
         category = classes[class_id]
-        rles_c = [rle for rle, c_id in zip(rles, class_ids) if c_id == class_id]
+        rles_c = [
+            rle for rle, c_id in zip(rles, class_ids) if c_id == class_id
+        ]
         iids_c = [
             iid for iid, c_id in zip(inst_ids, class_ids) if c_id == class_id
         ]
