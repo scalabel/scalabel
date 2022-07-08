@@ -14,14 +14,14 @@ import {
   LabelType,
   ModeStatus,
   PaneType,
+  Polygon2DBoundaryCloneStatusType,
   Select,
   ShapeAllType,
   ShapeType,
   SplitType,
   State,
   TaskType,
-  ViewerConfigType,
-  BoundaryCloneStatusType
+  ViewerConfigType
 } from "../types/state"
 
 let getState = getStateGetter()
@@ -562,15 +562,15 @@ export function startLinkTrack(): actionTypes.BaseAction {
 }
 
 /**
- * update boundary clone status
+ * update polygon 2d boundary clone status
  *
  * @param status
  */
-export function updateBoundaryClone(
-  status: BoundaryCloneStatusType | undefined
-): actionTypes.UpdateBoundaryCloneAction {
+export function updatePolygon2DBoundaryCloneStatus(
+  status: Polygon2DBoundaryCloneStatusType | undefined
+): actionTypes.UpdatePolygon2DBoundaryCloneStatusAction {
   return {
-    ...makeBaseAction(actionConsts.UPDATE_BOUNDAY_CLONE),
+    ...makeBaseAction(actionConsts.UPDATE_POLYGON2D_BOUNDARY_CLONE),
     status
   }
 }

@@ -1,5 +1,5 @@
 import Session from "../../common/session"
-import { updateBoundaryClone } from "../../action/common"
+import { updatePolygon2DBoundaryCloneStatus } from "../../action/common"
 import { alert } from "../../common/alert"
 import { Severity } from "../../types/common"
 
@@ -10,16 +10,18 @@ import { PathPoint2D } from "./path_point2d"
 import { PathPointType } from "../../types/state"
 
 /**
- * Polygon2DBoundaryCloner is modifies a single Pylogon2D by cloning a segment
+ * Polygon2DBoundaryCloner modifies a single Pylogon2D by cloning a segment
  * of the boundary of some other Polygon2D to the target one.
  */
 export class Polygon2DBoundaryCloner extends Label2DModifier {
   private _target: Polygon2D
   private readonly _initialPoints: PathPoint2D[]
+
   private _label: Polygon2D | undefined
   private _handler1Idx: number | undefined
   private _handler2Idx: number | undefined
   private _reverse: boolean
+
   private _finishCallback: (() => void) | undefined
 
   /**
@@ -35,7 +37,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
     this._initialPoints = [...this._target.points]
     this._reverse = false
 
-    this.syncUpdate()
+    this.syncState()
   }
 
   /**
@@ -65,18 +67,24 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       // Set current handler to be the initial vertex of the boundary segment
       // if no one is set yet or the current label is different from the
       // previously select one.
-      this._label = label as Polygon2D
+      this._label = l
       this._handler1Idx = handlerIdx
       this._handler2Idx = undefined
       this._reverse = false
       this.reset()
     } else {
       // Set current handler to be the second vertex
+      if (this._handler1Idx === handlerIdx) {
+        // Must select a diffent one
+        alert(Severity.WARNING, `The second handler must be a different one.`)
+        return
+      }
+
       this._handler2Idx = handlerIdx
       this.update()
     }
 
-    this.syncUpdate()
+    this.syncState()
   }
 
   /**
@@ -89,7 +97,7 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
       case Key.ALT:
         this._reverse = !this._reverse
         this.update()
-        this.syncUpdate()
+        this.syncState()
         break
       case Key.ENTER:
         this.finish()
@@ -123,19 +131,22 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
   private update(): void {
     const {
       _label: source,
-      _reverse: reversed,
       _handler1Idx: h1,
-      _handler2Idx: h2
+      _handler2Idx: h2,
+      _reverse: reverse,
     } = this
     if (source === undefined || h1 === undefined || h2 === undefined) {
       return
     }
 
     const qs = source.points
+
+    const n = qs.length // should be >= 2 upon reaching here
+    const advance = reverse
+      ? (i: number) => ((i - 2 + n) % n) + 1
+      : (i: number) => (i % n) + 1
+
     const ps = [...this._initialPoints]
-    const advance = reversed
-      ? (i: number) => ((i - 2 + qs.length) % qs.length) + 1
-      : (i: number) => (i % qs.length) + 1
     for (let idx = h1; idx !== h2; idx = advance(idx)) {
       const q = qs[idx - 1]
       ps.push(q)
@@ -151,15 +162,15 @@ export class Polygon2DBoundaryCloner extends Label2DModifier {
    */
   private finish(): void {
     this._finishCallback?.()
-    Session.dispatch(updateBoundaryClone(undefined))
+    Session.dispatch(updatePolygon2DBoundaryCloneStatus(undefined))
   }
 
   /**
    * Sync the update to the global state.
    */
-  private syncUpdate(): void {
+  private syncState(): void {
     Session.dispatch(
-      updateBoundaryClone({
+      updatePolygon2DBoundaryCloneStatus({
         labelId: this._label?.labelId,
         handler1Idx: this._handler1Idx,
         handler2Idx: this._handler2Idx,

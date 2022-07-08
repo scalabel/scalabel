@@ -17,10 +17,10 @@ export function checkModifierFromKeyboard(
     case Key.D_UP:
     case Key.D_LOW:
       if (activeLabels.length === 1) {
-        // Pressing D with exactly one active Polygon2D label
-        // trigger the Polygon2D boundary cloner modifier.
         const target = activeLabels[0]
         if (target.type === LabelTypeName.POLYGON_2D) {
+          // Pressing D with exactly one active Polygon2D label
+          // trigger the Polygon2D boundary cloner modifier.
           return new Polygon2DBoundaryCloner(target as Polygon2D)
         }
       }

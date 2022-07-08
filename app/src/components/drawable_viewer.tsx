@@ -281,13 +281,11 @@ export abstract class DrawableViewer<
    * Get possible banner messages based on current state.
    */
   private bannerMessage(): string | undefined {
-    const {
-      session: { boundaryClone }
-    } = this.state
-    if (boundaryClone == null) {
+    const { session: { polygon2DBoundaryClone: status } } = this.state
+    if (!status) {
       return
     }
-    const { labelId, handler1Idx, handler2Idx } = boundaryClone
+    const { labelId, handler1Idx, handler2Idx } = status
     if (labelId === undefined || handler1Idx === undefined) {
       return "Click on one handler of the boundary segment you want to share. Press [esc] to quit."
     }

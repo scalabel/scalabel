@@ -150,8 +150,11 @@ export class Label2DHandler {
   ): void {
     // Hijack the event by the modifier.
     if (this._modifier !== null) {
-      const label = this._labelList.labelList[_labelIndex]
-      this._modifier.onClickHandler(label, _handleIndex)
+      // Notify the modifier only when a handler is clicked.
+      if (_labelIndex >= 0 && _handleIndex >= 0) {
+        const label = this._labelList.labelList[_labelIndex]
+        this._modifier.onClickHandler(label, _handleIndex)
+      }
       return
     }
 

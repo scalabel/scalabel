@@ -1563,13 +1563,13 @@ export function startLinkTrack(state: State): State {
  * @param state
  * @param action
  */
-export function updateBoundaryClone(
+export function updatePolygon2DBoundaryCloneStatus(
   state: State,
-  action: actionTypes.UpdateBoundaryCloneAction
+  action: actionTypes.UpdatePolygon2DBoundaryCloneStatusAction
 ): State {
-  const { status: boundaryClone } = action
+  const { status: polygon2DBoundaryClone } = action
   const { session: oldSession } = state
-  const session = updateObject(oldSession, { boundaryClone })
+  const session = updateObject(oldSession, { polygon2DBoundaryClone })
   return updateObject(state, { ...state, session })
 }
 

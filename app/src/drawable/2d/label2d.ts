@@ -520,11 +520,11 @@ export abstract class Label2D {
 
 /**
  * Abstract class for a 2D label modifier, which performs some kind of
- * modification (upon some label) in response to user interactions, such as
- * clicking on some handler of some label, or pressing down some key.
+ * modification (upon some label(s)) in response to user interactions, such as
+ * clicking on some handler of some (other) label, or pressing down some key.
  *
  * Upon activated, it will hijack the user interaction from the canvas
- * until it is finished, like entering a editing mode with higher priority.
+ * until it is finished, like entering an editing mode with higher priority.
  */
 export abstract class Label2DModifier {
   public abstract onClickHandler(label: Label2D, handlerIdx: number): void
