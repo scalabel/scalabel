@@ -10,8 +10,8 @@ import { PathPoint2D } from "./path_point2d"
 import { PathPointType } from "../../types/state"
 
 /**
- * Polygon2DBoundaryCloner is a 2d label modifier for polygons.
- * It clone a segment of the boundary of some other polygon to the target one.
+ * Polygon2DBoundaryCloner is modifies a single Pylogon2D by cloning a segment
+ * of the boundary of some other Polygon2D to the target one.
  */
 export class Polygon2DBoundaryCloner extends Label2DModifier {
   private _target: Polygon2D

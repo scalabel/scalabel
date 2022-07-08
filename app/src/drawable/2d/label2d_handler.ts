@@ -148,6 +148,7 @@ export class Label2DHandler {
     _labelIndex: number,
     _handleIndex: number
   ): void {
+    // Hijack the event by the modifier.
     if (this._modifier !== null) {
       const label = this._labelList.labelList[_labelIndex]
       this._modifier.onClickHandler(label, _handleIndex)
@@ -195,16 +196,15 @@ export class Label2DHandler {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    if (
-      this.hasSelectedLabels() &&
-      this.isEditingSelectedLabels() &&
-      this._modifier === null
-    ) {
-      for (const label of this._labelList.selectedLabels) {
-        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
-        label.setManual()
+    // Freeze the selected labels when a modifier is activated.
+    if (this._modifier === null) {
+      if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
+        for (const label of this._labelList.selectedLabels) {
+          label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+          label.setManual()
+        }
+        return true
       }
-      return true
     }
 
     if (labelIndex >= 0) {
@@ -230,6 +230,7 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
+    // Hijack the event by the modifier.
     if (this._modifier != null) {
       this._modifier.onKeyDown(e)
       return
@@ -238,6 +239,7 @@ export class Label2DHandler {
     this._pressedKey.add(e.key)
 
     // Propagate the key-down event only when exactly one key is pressed.
+    // Otherwise, pressing `Ctrl + D` will delete the active label.
     if (this._pressedKey.size === 1) {
       for (const sl of this._labelList.selectedLabels) {
         if (sl.onKeyDown(e.key)) {
@@ -251,19 +253,18 @@ export class Label2DHandler {
       }
     }
 
-    if (
-      this.isKeyDown(Key.CONTROL) &&
-      this._labelList.selectedLabels.length === 1
-    ) {
-      const modifier = checkModifierFromKeyboard(
-        this._labelList.selectedLabels[0],
-        e
-      )
+    // Check if some modifier is suitable when `Ctrl` is pressed.
+    if (this.isKeyDown(Key.CONTROL)) {
+      const { selectedLabels: labels } = this._labelList
+      const modifier = checkModifierFromKeyboard(labels, e)
       if (modifier != null) {
+        // Hit one.
         modifier.onFinish(() => (this._modifier = null))
         this._modifier = modifier
+
+        // No fallthrough.
+        return
       }
-      return
     }
 
     switch (e.key) {
