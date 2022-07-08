@@ -417,15 +417,22 @@ def _precision_recall_fscore_support(
     y_true: NDArrayI32,
     y_pred: NDArrayI32,
     labels: NDArrayI32,
+    average: Optional[str] = None,
     beta: float = 1.0,
-):
+) -> Tuple[np.float64, np.float64, np.float64, Optional[NDArrayI32]]:
     """Compute precision, recall, F-measure and support for each class."""
     mcm = _multilabel_confusion_matrix(y_true, y_pred, labels)
-    tp_sum = mcm[:, 1, 1]
+    tp_sum: NDArrayI32 = mcm[:, 1, 1]
     pred_sum = tp_sum + mcm[:, 0, 1]
-    true_sum = tp_sum + mcm[:, 1, 0]
+    true_sum: Optional[NDArrayI32] = tp_sum + mcm[:, 1, 0]
 
-    beta2 = beta ** 2
+    if average == "micro":
+        tp_sum = np.array([tp_sum.sum()])
+        pred_sum = np.array([pred_sum.sum()])
+        assert true_sum is not None
+        true_sum = np.array([true_sum.sum()])
+
+    beta2 = beta**2
 
     # divide and set scores
     precision = _prf_divide(tp_sum, pred_sum)
@@ -441,7 +448,38 @@ def _precision_recall_fscore_support(
         denom[denom == 0.0] = 1  # avoid division by 0
         f_score = (1 + beta2) * precision * recall / denom
 
-    weights = None
+    if average == "weighted":
+        weights = true_sum
+        assert weights is not None
+        if weights.sum() == 0:
+            zero_division_value = np.float64(1.0)
+            # precision is zero_division if there are no positive predictions
+            # recall is zero_division if there are no positive labels
+            # fscore is zero_division if all labels AND predictions are
+            # negative
+            if pred_sum.sum() == 0:
+                return (
+                    zero_division_value,
+                    zero_division_value,
+                    zero_division_value,
+                    None,
+                )
+            else:
+                return (
+                    np.float64(0.0),
+                    zero_division_value,
+                    np.float64(0.0),
+                    None,
+                )
+    else:
+        weights = None
+
+    if average is not None:
+        assert average != "binary" or len(precision) == 1
+        precision = np.average(precision, weights=weights)
+        recall = np.average(recall, weights=weights)
+        f_score = np.average(f_score, weights=weights)
+        true_sum = None  # return no support
 
     return precision, recall, f_score, true_sum
 
@@ -465,11 +503,29 @@ def compute_scores(
     # compute per-class results without averaging
     p, r, f1, s = _precision_recall_fscore_support(y_true, y_pred, labels)
     rows = zip(target_names, p, r, f1, s)
+    average_options = ("micro", "macro", "weighted")
 
     report_dict = {label[0]: label[1:] for label in rows}
     for label, scores in report_dict.items():
         report_dict[label] = dict(zip(headers, [i.item() for i in scores]))
 
+    # compute all applicable averages
+    for average in average_options:
+        line_heading = average + " avg"
+
+        # compute averages with specified averaging method
+        avg_p, avg_r, avg_f1, _ = _precision_recall_fscore_support(
+            y_true,
+            y_pred,
+            labels=labels,
+            average=average,
+        )
+        avg = [avg_p, avg_r, avg_f1, np.sum(s)]
+
+        report_dict[line_heading] = dict(zip(headers, [i.item() for i in avg]))
+
+    if "accuracy" in report_dict.keys():
+        report_dict["accuracy"] = report_dict["accuracy"]["precision"]
     return report_dict
 
 
