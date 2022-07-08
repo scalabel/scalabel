@@ -47,7 +47,9 @@ def label_ids_to_int(frames: List[Frame]) -> None:
                     label.id = str(ids_to_int[label.id])
 
 
-def check_overlap_frame(frame: Frame, categories: List[str], image_size: Optional[ImageSize] = None) -> bool:
+def check_overlap_frame(
+    frame: Frame, categories: List[str], image_size: Optional[ImageSize] = None
+) -> bool:
     """Check overlap of segmentation masks for a single frame."""
     if frame.labels is None:
         return False
@@ -60,7 +62,9 @@ def check_overlap_frame(frame: Frame, categories: List[str], image_size: Optiona
         if label.rle is not None:
             mask = rle_to_mask(label.rle)
         elif label.poly2d is not None:
-            assert image_size is not None, "Requires ImageSize for Poly2D conversion to RLE"
+            assert (
+                image_size is not None
+            ), "Requires ImageSize for Poly2D conversion to RLE"
             mask = poly2ds_to_mask(image_size, label.poly2d)
         if len(overlap_mask) == 0:
             overlap_mask = mask
@@ -72,7 +76,9 @@ def check_overlap_frame(frame: Frame, categories: List[str], image_size: Optiona
     return False
 
 
-def check_overlap(frames: List[Frame], config: Config, nproc: int = NPROC) -> bool:
+def check_overlap(
+    frames: List[Frame], config: Config, nproc: int = NPROC
+) -> bool:
     """Check overlap of segmentation masks.
 
     Returns True if overlap found in masks of any frame.
@@ -90,7 +96,10 @@ def check_overlap(frames: List[Frame], config: Config, nproc: int = NPROC) -> bo
                 tqdm(frames),
             )
     else:
-        overlaps = [check_overlap_frame(frame, category_names, config.imageSize) for frame in tqdm(frames)]
+        overlaps = [
+            check_overlap_frame(frame, category_names, config.imageSize)
+            for frame in tqdm(frames)
+        ]
     for is_overlap, frame in zip(overlaps, frames):
         if is_overlap:
             # remove predictions with overlap
@@ -131,11 +140,16 @@ def handle_inconsistent_length(
                 "You have videos not in the test set: %s",
                 str(outlier_results),
             )
-            raise ValueError(f"You have videos not in the test set: " f"{str(outlier_results)}")
+            raise ValueError(
+                f"You have videos not in the test set: "
+                f"{str(outlier_results)}"
+            )
 
         if missing_video_names:
             logger.critical(
-                "The results are missing for " "following video sequences: " "%s",
+                "The results are missing for "
+                "following video sequences: "
+                "%s",
                 str(missing_video_names),
             )
 
@@ -152,7 +166,9 @@ def handle_inconsistent_length(
 
                 results.append(gt_without_labels)
 
-            results = sorted(results, key=lambda frames: str(frames[0].videoName))
+            results = sorted(
+                results, key=lambda frames: str(frames[0].videoName)
+            )
     elif len(results) > len(gts):
         raise ValueError("You have videos not in the test set.")
 
@@ -172,7 +188,9 @@ def combine_stuff_masks(
     for class_id in sorted(set(class_ids)):
         category = classes[class_id]
         rles_c = [rle for rle, c_id in zip(rles, class_ids) if c_id == class_id]
-        iids_c = [iid for iid, c_id in zip(inst_ids, class_ids) if c_id == class_id]
+        iids_c = [
+            iid for iid, c_id in zip(inst_ids, class_ids) if c_id == class_id
+        ]
         if category.isThing is None or category.isThing:
             combine_rles.extend(rles_c)
             combine_cids.extend([class_id] * len(rles_c))
@@ -198,7 +216,9 @@ def parse_seg_objects(
         if obj.rle is not None:
             rle = obj.rle
         elif obj.poly2d is not None:
-            assert image_size is not None, "Requires ImageSize for Poly2D conversion to RLE"
+            assert (
+                image_size is not None
+            ), "Requires ImageSize for Poly2D conversion to RLE"
             rle = mask_to_rle(poly2ds_to_mask(image_size, obj.poly2d))
         else:
             continue
@@ -213,7 +233,10 @@ def parse_seg_objects(
         else:
             if not ignore_unknown_cats:
                 raise KeyError(f"Unknown category: {category}")
-    if any(category.isThing is not None and not category.isThing for category in classes):
+    if any(
+        category.isThing is not None and not category.isThing
+        for category in classes
+    ):
         rles, labels, ids = combine_stuff_masks(rles, labels, ids, classes)
     rles_dict = [rle.dict() for rle in rles]
     ignore_rles_dict = [rle.dict() for rle in ignore_rles]
@@ -222,15 +245,22 @@ def parse_seg_objects(
     return (rles_dict, labels_arr, ids_arr, ignore_rles_dict)
 
 
-def reorder_preds(ann_frames: List[Frame], pred_frames: List[Frame]) -> List[Frame]:
+def reorder_preds(
+    ann_frames: List[Frame], pred_frames: List[Frame]
+) -> List[Frame]:
     """Reorder predictions and add empty frames for missing predictions."""
     pred_names = [f.name for f in pred_frames]
     use_video = False
     if len(pred_names) != len(set(pred_names)):
         # handling non-unique prediction frames names with videoName
-        use_video = all(f.videoName for f in pred_frames) and all(f.videoName for f in ann_frames)
+        use_video = all(f.videoName for f in pred_frames) and all(
+            f.videoName for f in ann_frames
+        )
         if not use_video:
-            logger.critical("Prediction frames names are not unique, but videoName is not " "specified for all frames.")
+            logger.critical(
+                "Prediction frames names are not unique, but videoName is not "
+                "specified for all frames."
+            )
     pred_map: Dict[str, Frame] = {}
     for pred_frame in pred_frames:
         name = pred_frame.name
