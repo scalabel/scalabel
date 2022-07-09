@@ -142,8 +142,9 @@ function startHTTPServer(
  *
  * @param config
  */
-function makeRedisPubSub(config: ServerConfig): RedisPubSub {
+async function makeRedisPubSub(config: ServerConfig): Promise<RedisPubSub> {
   const client = new RedisClient(config.redis)
+  await client.setup()
   return new RedisPubSub(client)
 }
 
@@ -267,9 +268,11 @@ async function main(): Promise<void> {
    * Need separate clients for different roles
    */
   const cacheClient = new RedisClient(config.redis)
+  await cacheClient.setup()
   const redisStore = new RedisCache(config.redis, storage, cacheClient)
-  const publisher = makeRedisPubSub(config)
-  const subscriber = makeRedisPubSub(config)
+  await redisStore.setup()
+  const publisher = await makeRedisPubSub(config)
+  const subscriber = await makeRedisPubSub(config)
 
   // Initialize high level managers
   const projectStore = new ProjectStore(storage, redisStore)

@@ -55,7 +55,7 @@ const mockSocket = {
   id: socketId
 }
 
-beforeAll(() => {
+beforeAll(async () => {
   projectName = "testProject"
   taskIndex = 0
   taskId = index2str(taskIndex)
@@ -65,7 +65,9 @@ beforeAll(() => {
 
   mockStorage = new FileStorage("fakeDataDir")
   const client = new RedisClient(serverConfig.redis)
+  await client.setup()
   const redisStore = new RedisCache(serverConfig.redis, mockStorage, client)
+  await redisStore.setup()
   mockPubSub = new RedisPubSub(client)
   mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)

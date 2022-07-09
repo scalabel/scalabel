@@ -1,5 +1,3 @@
-import { promisify } from "util"
-
 import { RedisConfig } from "../types/config"
 import Logger from "./logger"
 import * as path from "./path"
@@ -42,10 +40,13 @@ export class RedisCache {
     this.writebackCount = config.writebackCount
     this.storage = storage
     this.client = client
-    this.client.config("SET", "notify-keyspace-events", "Ex")
+    this.client.configSet("notify-keyspace-events", "Ex")
+  }
 
+  /** Setup client */
+  public async setup(): Promise<void> {
     // Subscribe to reminder expirations for saving
-    this.client.subscribe("__keyevent@0__:expired")
+    await this.client.subscribe("__keyevent@0__:expired")
     this.client.on(
       "message",
       // The .on() function argument type caused the lint error
@@ -74,13 +75,12 @@ export class RedisCache {
     }
     setArgs.forEach((v) => {
       if (v[2] > 0) {
-        multi.psetex(v[0], v[2] * 1000, v[1])
+        multi.pSetEx(v[0], v[2] * 1000, v[1])
       } else {
         multi.set(v[0], v[1])
       }
     })
-    const multiExecAsync = promisify(multi.exec).bind(multi)
-    await multiExecAsync()
+    await multi.exec()
   }
 
   /**

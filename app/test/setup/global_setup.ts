@@ -1,6 +1,5 @@
 import * as child from "child_process"
 import * as redis from "redis"
-import { promisify } from "util"
 
 import Logger from "../../src/server/logger"
 import { getTestConfig } from "../server/util/util"
@@ -37,13 +36,15 @@ module.exports = async () => {
     "Info logger is muted for concise test status report. " +
       "The switch is in test/setup/local_setup.ts"
   )
-  const client = redis.createClient(getTestConfig().redis.port)
-
-  client.send_command("ping", undefined, function (_err, res) {
-    if (res === undefined) {
-      Logger.info("Can't find redis server. Launch local redis server.")
-      launchRedisServer()
+  const client = redis.createClient({
+    socket: {
+      port: getTestConfig().redis.port
     }
   })
-  await promisify(client.quit).bind(client)()
+  await client.connect().catch(() => {
+    Logger.info("Can't find redis server. Launch local redis server.")
+    launchRedisServer()
+  })
+  await client.ping()
+  await client.quit()
 }

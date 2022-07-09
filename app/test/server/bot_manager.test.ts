@@ -15,7 +15,9 @@ let config: ServerConfig
 beforeAll(async () => {
   config = getTestConfig()
   client = new RedisClient(config.redis)
+  await client.setup()
   subClient = new RedisClient(config.redis)
+  await subClient.setup()
   subscriber = new RedisPubSub(subClient)
 })
 
