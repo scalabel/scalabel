@@ -172,24 +172,17 @@ def _encode(values: NDArrayI32, uniques: Sequence[np.int32]) -> NDArrayI32:
 
 
 def _unique_np(
-    values: Sequence[np.int32],
-    return_inverse: bool = False,
+    values: NDArrayI32,
     return_counts: bool = False,
 ) -> Sequence[np.int32]:
     """Helper function to find unique values, accounts for nans."""
-    uniques: NDArrayI32 = np.unique(
-        values, return_inverse=return_inverse, return_counts=return_counts
-    )
+    uniques: NDArrayI32 = np.unique(values, return_counts=return_counts)
 
-    inverse, counts = None, None
-
+    counts = None
     if return_counts:
         *uniques, counts = uniques
 
-    if return_inverse:
-        *uniques, inverse = uniques
-
-    if return_counts or return_inverse:
+    if return_counts:
         uniques = uniques[0]
 
     # np.unique will have duplicate missing values at the end of `uniques`
@@ -201,8 +194,6 @@ def _unique_np(
     ):
         nan_idx = np.searchsorted(uniques, np.nan)
         uniques = uniques[: nan_idx + 1]
-        if return_inverse:
-            inverse[inverse > nan_idx] = nan_idx
 
         if return_counts:
             counts[nan_idx] = np.sum(counts[nan_idx:])
@@ -210,70 +201,10 @@ def _unique_np(
 
     ret = (uniques,)
 
-    if return_inverse:
-        ret += (inverse,)
-
     if return_counts:
         ret += (counts,)
 
     return ret[0] if len(ret) == 1 else ret
-
-
-def _get_counts(values: NDArrayI32, uniques: Sequence[np.int32]):
-    """Get the count of each of the `uniques` in `values`.
-
-    The counts will use the order passed in by `uniques`. For non-object dtypes,
-    `uniques` is assumed to be sorted and `np.nan` is at the end.
-    """
-    if values.dtype.kind in "OU":
-        counter = _NaNCounter(values)
-        output = np.zeros(len(uniques), dtype=np.int64)
-        for i, item in enumerate(uniques):
-            with suppress(KeyError):
-                output[i] = counter[item]
-        return output
-
-    unique_values, counts = _unique_np(values, return_counts=True)
-
-    # Recorder unique_values based on input: `uniques`
-    uniques_in_values = np.isin(uniques, unique_values, assume_unique=True)
-    if np.isnan(unique_values[-1]) and np.isnan(uniques[-1]):
-        uniques_in_values[-1] = True
-
-    unique_valid_indices = np.searchsorted(
-        unique_values, uniques[uniques_in_values]
-    )
-    output = np.zeros_like(uniques, dtype=np.int64)
-    output[uniques_in_values] = counts[unique_valid_indices]
-    return output
-
-
-def _unique_python(values: NDArrayI32) -> Sequence[np.int32]:
-    # Only used in `_uniques`, see docstring there for details
-    try:
-        uniques_set = set(values)
-        uniques_set, missing_values = _extract_missing(uniques_set)
-
-        uniques = sorted(uniques_set)
-        uniques.extend(missing_values.to_list())
-        uniques = np.array(uniques, dtype=values.dtype)
-    except TypeError:
-        types = sorted(t.__qualname__ for t in set(type(v) for v in values))
-        raise TypeError(
-            "Encoders require their input to be uniformly "
-            f"strings or numbers. Got {types}"
-        )
-    ret = (uniques,)
-
-    return ret[0] if len(ret) == 1 else ret
-
-
-def _unique(values: NDArrayI32) -> Sequence[np.int32]:
-    """Helper function to find unique values with support for python objects."""
-    if values.dtype == object:
-        return _unique_python(values)
-    # numerical
-    return _unique_np(values)
 
 
 class _LabelEncoder:
@@ -285,7 +216,7 @@ class _LabelEncoder:
     def fit(self, y: NDArrayI32):
         """Fit label encoder."""
         y = _column_or_1d(y)
-        self.classes_ = _unique(y)
+        self.classes_ = _unique_np(y)
         return self
 
     def transform(self, y: NDArrayI32):
@@ -432,7 +363,7 @@ def _precision_recall_fscore_support(
         assert true_sum is not None
         true_sum = np.array([true_sum.sum()])
 
-    beta2 = beta**2
+    beta2 = beta ** 2
 
     # divide and set scores
     precision = _prf_divide(tp_sum, pred_sum)
