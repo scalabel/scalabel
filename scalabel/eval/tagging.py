@@ -32,7 +32,7 @@ from .result import AVERAGE, Result, Scores, ScoresList
 from .utils import reorder_preds
 
 
-def _column_or_1d(y: NDArrayI32) -> NDArrayI32:
+def _column_or_1d(y: Sequence[np.int32]) -> Sequence[np.int32]:
     """Ravel column or 1d numpy array, else raises an error."""
     y = np.asarray(y)
     shape = np.shape(y)
@@ -46,32 +46,6 @@ def _column_or_1d(y: NDArrayI32) -> NDArrayI32:
             shape
         )
     )
-
-
-def _num_samples(x: NDArrayI32) -> int:
-    """Return number of samples in array-like x."""
-    message = "Expected sequence or array-like, got %s" % type(x)
-    if not hasattr(x, "__len__") and not hasattr(x, "shape"):
-        if hasattr(x, "__array__"):
-            x = np.asarray(x)
-        else:
-            raise TypeError(message)
-
-    if hasattr(x, "shape") and x.shape is not None:
-        if len(x.shape) == 0:
-            raise TypeError(
-                "Singleton array %r cannot be considered a valid collection."
-                % x
-            )
-        # Check that shape is returning an integer or default to len
-        # Dask dataframes may not return numeric shape[0] value
-        if isinstance(x.shape[0], numbers.Integral):
-            return x.shape[0]
-
-    try:
-        return len(x)
-    except TypeError as type_error:
-        raise TypeError(message) from type_error
 
 
 class _MissingValues(NamedTuple):
@@ -159,18 +133,6 @@ class _NaNCounter(Counter):
         raise KeyError(key)
 
 
-def _encode(values: NDArrayI32, uniques: Sequence[np.int32]) -> NDArrayI32:
-    """Helper function to encode values into [0, n_uniques - 1]."""
-    if values.dtype.kind in "OUS":
-        try:
-            table = _nandict({val: i for i, val in enumerate(uniques)})
-            return np.array([table[v] for v in values])
-        except KeyError as e:
-            raise ValueError(f"y contains previously unseen labels: {str(e)}")
-    else:
-        return np.searchsorted(uniques, values)
-
-
 def _unique_np(
     values: NDArrayI32,
     return_counts: bool = False,
@@ -213,20 +175,19 @@ class _LabelEncoder:
     def __init__(self):
         self.classes_ = []
 
-    def fit(self, y: NDArrayI32):
+    def fit(self, y: Sequence[np.int32]):
         """Fit label encoder."""
         y = _column_or_1d(y)
         self.classes_ = _unique_np(y)
         return self
 
-    def transform(self, y: NDArrayI32):
+    def transform(self, y: Sequence[np.int32]) -> NDArrayI32:
         """Transform labels to normalized encoding."""
         y = _column_or_1d(y)
-        # transform of empty array is empty array
-        if _num_samples(y) == 0:
+        if len(y) == 0:
             return np.array([])
 
-        return _encode(y, self.classes_)
+        return np.searchsorted(self.classes_, y)
 
 
 def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
@@ -270,8 +231,8 @@ def _count_nonzero(x, axis=None, sample_weight=None):
         raise ValueError("Unsupported axis: {0}".format(axis))
 
 
-def _multilabel_confusion_matrix(
-    y_true: NDArrayI32, y_pred: NDArrayI32, labels: NDArrayI32
+def _confusion_matrix(
+    y_true: NDArrayI32, y_pred: NDArrayI32, labels: Sequence[np.int32]
 ) -> NDArrayI32:
     """Compute a confusion matrix for each class or sample."""
     present_labels = _unique_labels(y_true, y_pred)
@@ -352,7 +313,7 @@ def _precision_recall_fscore_support(
     beta: float = 1.0,
 ) -> Tuple[np.float64, np.float64, np.float64, Optional[NDArrayI32]]:
     """Compute precision, recall, F-measure and support for each class."""
-    mcm = _multilabel_confusion_matrix(y_true, y_pred, labels)
+    mcm = _confusion_matrix(y_true, y_pred, labels)
     tp_sum: NDArrayI32 = mcm[:, 1, 1]
     pred_sum = tp_sum + mcm[:, 0, 1]
     true_sum: Optional[NDArrayI32] = tp_sum + mcm[:, 1, 0]
@@ -379,31 +340,7 @@ def _precision_recall_fscore_support(
         denom[denom == 0.0] = 1  # avoid division by 0
         f_score = (1 + beta2) * precision * recall / denom
 
-    if average == "weighted":
-        weights = true_sum
-        assert weights is not None
-        if weights.sum() == 0:
-            zero_division_value = np.float64(1.0)
-            # precision is zero_division if there are no positive predictions
-            # recall is zero_division if there are no positive labels
-            # fscore is zero_division if all labels AND predictions are
-            # negative
-            if pred_sum.sum() == 0:
-                return (
-                    zero_division_value,
-                    zero_division_value,
-                    zero_division_value,
-                    None,
-                )
-            else:
-                return (
-                    np.float64(0.0),
-                    zero_division_value,
-                    np.float64(0.0),
-                    None,
-                )
-    else:
-        weights = None
+    weights = None
 
     if average is not None:
         assert average != "binary" or len(precision) == 1
@@ -434,7 +371,7 @@ def compute_scores(
     # compute per-class results without averaging
     p, r, f1, s = _precision_recall_fscore_support(y_true, y_pred, labels)
     rows = zip(target_names, p, r, f1, s)
-    average_options = ("micro", "macro", "weighted")
+    average_options = ("micro", "macro")
 
     report_dict = {label[0]: label[1:] for label in rows}
     for label, scores in report_dict.items():
@@ -442,7 +379,10 @@ def compute_scores(
 
     # compute all applicable averages
     for average in average_options:
-        line_heading = average + " avg"
+        if average.startswith("micro"):
+            line_heading = "accuracy"
+        else:
+            line_heading = average + " avg"
 
         # compute averages with specified averaging method
         avg_p, avg_r, avg_f1, _ = _precision_recall_fscore_support(
