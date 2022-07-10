@@ -6,16 +6,15 @@ import numbers
 from itertools import chain
 from typing import (
     AbstractSet,
-    Counter,
     Dict,
     Iterable,
     List,
     NamedTuple,
     Optional,
-    Sequence,
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 import numpy as np
@@ -92,44 +91,6 @@ def _is_scalar_nan(maybe_nan: np.int32) -> bool:
     return isinstance(maybe_nan, numbers.Real) and math.isnan(maybe_nan)
 
 
-class _nandict(dict):
-    """Dictionary with support for nans."""
-
-    def __init__(self, mapping):
-        super().__init__(mapping)
-        for key, value in mapping.items():
-            if _is_scalar_nan(key):
-                self.nan_value = value
-                break
-
-    def __missing__(self, key):
-        if hasattr(self, "nan_value") and _is_scalar_nan(key):
-            return self.nan_value
-        raise KeyError(key)
-
-
-class _NaNCounter(Counter):  # type: ignore
-    """Counter with support for nan values."""
-
-    def __init__(self, items):
-        super().__init__(self._generate_items(items))
-
-    def _generate_items(self, items):
-        """Generate items without nans. Stores the nan counts separately."""
-        for item in items:
-            if not _is_scalar_nan(item):
-                yield item
-                continue
-            if not hasattr(self, "nan_count"):
-                self.nan_count = 0
-            self.nan_count += 1
-
-    def __missing__(self, key):
-        if hasattr(self, "nan_count") and _is_scalar_nan(key):
-            return self.nan_count
-        raise KeyError(key)
-
-
 def _unique_np(values: NDArrayI32) -> NDArrayI32:
     """Helper function to find unique values, accounts for nans."""
     uniques: NDArrayI32 = np.unique(values)
@@ -137,9 +98,9 @@ def _unique_np(values: NDArrayI32) -> NDArrayI32:
     # np.unique will have duplicate missing values at the end of `uniques`
     # here we clip the nans and remove it from uniques
     if (
-        uniques.size  # type: ignore
-        and isinstance(uniques[-1], numbers.Real)  # type: ignore
-        and math.isnan(uniques[-1])  # type: ignore
+        uniques.size
+        and isinstance(uniques[-1], numbers.Real)
+        and math.isnan(uniques[-1])
     ):
         nan_idx: np.int64 = np.searchsorted(uniques, np.nan)
         uniques = uniques[: nan_idx + 1]  # type: ignore
@@ -150,10 +111,10 @@ def _unique_np(values: NDArrayI32) -> NDArrayI32:
 class _LabelEncoder:
     """Encode target labels with value between 0 and n_classes-1."""
 
-    def __init__(self):
-        self.classes_ = []
+    def __init__(self) -> None:
+        self.classes_: NDArrayI32 = np.array([])
 
-    def fit(self, arr: NDArrayI32):
+    def fit(self, arr: NDArrayI32) -> "_LabelEncoder":
         """Fit label encoder."""
         np_arr = _column_or_1d(arr)
         self.classes_ = _unique_np(np_arr)
@@ -173,33 +134,6 @@ def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
         chain.from_iterable(set(np.unique(y)) for y in (y_true, y_pred))
     )
     return np.array(sorted(ys_labels))  # type: ignore
-
-
-def _count_nonzero(arr, axis=None, sample_weight=None):
-    """A variant of x.getnnz() with extension to weighting on axis 0.
-
-    Useful in efficiently calculating multilabel metrics.
-    """
-    if axis == -1:
-        axis = 1
-    elif axis == -2:
-        axis = 0
-    elif arr.format != "csr":
-        raise TypeError(f"Expected CSR sparse format, got {arr.format}")
-
-    # We rely here on the fact that np.diff(Y.indptr) for a CSR
-    # will return the number of nonzero entries in each row.
-    # A bincount over Y.indices will return the number of nonzeros
-    # in each column. See ``csr_matrix.getnnz`` in scipy >= 0.14.
-    if axis is None:
-        return np.dot(np.diff(arr.indptr), sample_weight)
-    if axis == 1:
-        out = np.diff(arr.indptr)
-        return out * sample_weight
-    if axis == 0:
-        weights = np.repeat(sample_weight, np.diff(arr.indptr))
-        return np.bincount(arr.indices, minlength=arr.shape[1], weights=weights)
-    raise ValueError(f"Unsupported axis: {axis}")
 
 
 def _confusion_matrix(
@@ -222,18 +156,23 @@ def _confusion_matrix(
         # labels are now from 0 to len(labels) - 1 -> use bincount
         tp = y_true == y_pred
         tp_bins = y_true[tp]
-        tp_bins_weights = None
 
-        true_sum = pred_sum = tp_sum = np.zeros(len(labels))
+        true_sum = np.zeros(len(labels))
+        pred_sum = tp_sum = true_sum
         if len(tp_bins):
             tp_sum = np.bincount(
-                tp_bins, weights=tp_bins_weights, minlength=len(labels)
-            )
+                tp_bins,
+                minlength=len(labels),
+            )  # type: ignore
 
         if len(y_pred):
-            pred_sum = np.bincount(y_pred, minlength=len(labels))
+            pred_sum = np.bincount(
+                y_pred, minlength=len(labels)
+            )  # type: ignore
         if len(y_true):
-            true_sum = np.bincount(y_true, minlength=len(labels))
+            true_sum = np.bincount(
+                y_true, minlength=len(labels)
+            )  # type: ignore
 
         # retain only selected labels
         indices = np.searchsorted(sorted_labels, labels[:n_labels])
@@ -242,16 +181,24 @@ def _confusion_matrix(
         pred_sum = pred_sum[indices]
 
     else:
-        sum_axis = 0
         if n_labels is not None:
             y_true = y_true[:, labels[:n_labels]]
             y_pred = y_pred[:, labels[:n_labels]]
 
         # calculate weighted counts
-        true_and_pred = y_true.multiply(y_pred)
-        tp_sum = _count_nonzero(true_and_pred, axis=sum_axis)
-        pred_sum = _count_nonzero(y_pred, axis=sum_axis)
-        true_sum = _count_nonzero(y_true, axis=sum_axis)
+        true_and_pred = y_true * y_pred
+        tp_sum = np.bincount(
+            true_and_pred.indices,  # type: ignore
+            minlength=true_and_pred.shape[1],
+        )
+        pred_sum = np.bincount(
+            y_pred.indices,  # type: ignore
+            minlength=y_pred.shape[1],
+        )
+        true_sum = np.bincount(
+            y_true.indices,  # type: ignore
+            minlength=y_true.shape[1],
+        )
 
     fp = pred_sum - tp_sum
     fn = true_sum - tp_sum
@@ -261,7 +208,7 @@ def _confusion_matrix(
     return np.array([tn, fp, fn, tp]).T.reshape(-1, 2, 2)
 
 
-def _prf_divide(numerator, denominator):
+def _prf_divide(numerator: NDArrayI32, denominator: NDArrayI32) -> NDArrayF64:
     """Performs division and handles divide-by-zero."""
     mask = denominator == 0.0
     denominator = denominator.copy()
@@ -272,7 +219,7 @@ def _prf_divide(numerator, denominator):
         return result
 
     # address zero division by setting 0s to 1s
-    result[mask] = 1.0
+    result[mask] = 0
     return result
 
 
@@ -288,11 +235,11 @@ def _precision_recall_fscore(
     tp_sum: NDArrayI32 = mcm[:, 1, 1]
     pred_sum = tp_sum + mcm[:, 0, 1]
     true_sum: Optional[NDArrayI32] = tp_sum + mcm[:, 1, 0]
+    assert true_sum is not None
 
     if average == "micro":
         tp_sum = np.array([tp_sum.sum()])
         pred_sum = np.array([pred_sum.sum()])
-        assert true_sum is not None
         true_sum = np.array([true_sum.sum()])
 
     beta2 = beta ** 2
@@ -312,12 +259,11 @@ def _precision_recall_fscore(
         f_score = (1 + beta2) * precision * recall / denom
 
     weights = None
-
     if average is not None:
         assert average != "binary" or len(precision) == 1
-        precision = np.average(precision, weights=weights)
-        recall = np.average(recall, weights=weights)
-        f_score = np.average(f_score, weights=weights)
+        precision = np.average(precision, weights=weights)  # type: ignore
+        recall = np.average(recall, weights=weights)  # type: ignore
+        f_score = np.average(f_score, weights=weights)  # type: ignore
         true_sum = None  # return no support
 
     return precision, recall, f_score, true_sum
@@ -327,7 +273,7 @@ def compute_scores(
     y_true: NDArrayI32,
     y_pred: NDArrayI32,
     target_names: List[str],
-):
+) -> Dict[str, Union[float, Dict[str, float]]]:
     """Build a text report showing the main classification metrics."""
     labels = _unique_labels(y_true, y_pred)
 
@@ -341,12 +287,19 @@ def compute_scores(
     headers = ["precision", "recall", "f1-score", "support"]
     # compute per-class results without averaging
     p, r, f1, s = _precision_recall_fscore(y_true, y_pred, labels)
+    assert s is not None
     rows = zip(target_names, p, r, f1, s)
     average_options = ("micro", "macro")
 
-    report_dict = {label[0]: label[1:] for label in rows}
-    for label, scores in report_dict.items():
-        report_dict[label] = dict(zip(headers, [i.item() for i in scores]))
+    report_dict: Dict[str, Union[float, Dict[str, float]]] = {}
+    scores_dict = {label[0]: label[1:] for label in rows}
+    for label, scores in scores_dict.items():
+        report_dict[label] = dict(
+            zip(
+                headers,
+                [i.item() for i in scores],
+            )
+        )
 
     # compute all applicable averages
     for average in average_options:
@@ -370,10 +323,12 @@ def compute_scores(
                 headers,
                 [i.item() for i in avg],
             )
-        )  # type: ignore
+        )
 
-    if "accuracy" in report_dict.keys():
-        report_dict["accuracy"] = report_dict["accuracy"]["precision"]
+    if "accuracy" in report_dict:
+        report_dict["accuracy"] = cast(
+            Dict[str, float], report_dict["accuracy"]
+        )["precision"]
     return report_dict
 
 
@@ -450,19 +405,24 @@ def evaluate_tagging(
             met = metric if metric != "f1-score" else "f1_score"
             out[met] = {}
             for cat in classes:
+                m: float = cast(Dict[str, float], scores.get(cat, {})).get(
+                    metric, 0.0
+                )
                 out[met][f"{tag}.{cat}"] = (
-                    scores[cat][metric] * 100.0 if cat in scores else np.nan
+                    m * 100.0 if cat in scores else np.nan
                 )
             avgs[met][tag.upper()] = (
-                scores["macro avg"][metric] * 100.0
+                cast(Dict[str, float], scores["macro avg"])[metric] * 100.0
                 if len(scores) > 3
                 else np.nan
             )
         out["accuracy"] = {f"{tag}.{cat}": np.nan for cat in classes}
-        avgs["accuracy"][tag.upper()] = scores["accuracy"] * 100.0
-        for m, v in out.items():
+        avgs["accuracy"][tag.upper()] = cast(float, scores["accuracy"]) * 100.0
+        for m, v in out.items():  # type: ignore
+            assert isinstance(m, str)
             outputs[m].append(v)
-    for m, v in avgs.items():
+    for m, v in avgs.items():  # type: ignore
+        assert isinstance(m, str)
         outputs[m].append(v)
         outputs[m].append({AVERAGE: np.nanmean(list(v.values()))})
     return TaggingResult(**outputs)
@@ -516,5 +476,5 @@ if __name__ == "__main__":
     logger.info(eval_result)
     logger.info(eval_result.summary())
     if args.out_file:
-        with open_write_text(args.out_file) as fp:
-            json.dump(eval_result.json(), fp)
+        with open_write_text(args.out_file) as file:
+            json.dump(eval_result.json(), file)
