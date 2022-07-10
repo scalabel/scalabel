@@ -3,13 +3,12 @@ import argparse
 import json
 import math
 import numbers
-from contextlib import suppress
 from itertools import chain
 from typing import (
     AbstractSet,
-    Any,
     Counter,
     Dict,
+    Iterable,
     List,
     NamedTuple,
     Optional,
@@ -24,7 +23,7 @@ import numpy as np
 from ..common.io import open_write_text
 from ..common.logger import logger
 from ..common.parallel import NPROC
-from ..common.typing import NDArrayI32
+from ..common.typing import NDArrayF64, NDArrayI32
 from ..label.io import load, load_label_config
 from ..label.typing import Config, Frame
 from ..label.utils import get_parent_categories
@@ -32,19 +31,17 @@ from .result import AVERAGE, Result, Scores, ScoresList
 from .utils import reorder_preds
 
 
-def _column_or_1d(y: Sequence[np.int32]) -> Sequence[np.int32]:
+def _column_or_1d(arr: NDArrayI32) -> NDArrayI32:
     """Ravel column or 1d numpy array, else raises an error."""
-    y = np.asarray(y)
-    shape = np.shape(y)
+    np_arr = np.asarray(arr)
+    shape = np.shape(np_arr)
     if len(shape) == 1:
-        return np.ravel(y)
+        return np.ravel(arr)
     if len(shape) == 2 and shape[1] == 1:
-        return np.ravel(y)
+        return np.ravel(arr)
 
     raise ValueError(
-        "y should be a 1d array, got an array of shape {} instead.".format(
-            shape
-        )
+        f"input should be a 1d array, got an array of shape {shape} instead."
     )
 
 
@@ -90,9 +87,9 @@ def _extract_missing(
     return output, output_missing_values
 
 
-def _is_scalar_nan(x: np.int32) -> bool:
-    """Tests if x is NaN."""
-    return isinstance(x, numbers.Real) and math.isnan(x)
+def _is_scalar_nan(maybe_nan: np.int32) -> bool:
+    """Tests if input is NaN."""
+    return isinstance(maybe_nan, numbers.Real) and math.isnan(maybe_nan)
 
 
 class _nandict(dict):
@@ -111,7 +108,7 @@ class _nandict(dict):
         raise KeyError(key)
 
 
-class _NaNCounter(Counter):
+class _NaNCounter(Counter):  # type: ignore
     """Counter with support for nan values."""
 
     def __init__(self, items):
@@ -133,40 +130,21 @@ class _NaNCounter(Counter):
         raise KeyError(key)
 
 
-def _unique_np(
-    values: NDArrayI32,
-    return_counts: bool = False,
-) -> Sequence[np.int32]:
+def _unique_np(values: NDArrayI32) -> NDArrayI32:
     """Helper function to find unique values, accounts for nans."""
-    uniques: NDArrayI32 = np.unique(values, return_counts=return_counts)
-
-    counts = None
-    if return_counts:
-        *uniques, counts = uniques
-
-    if return_counts:
-        uniques = uniques[0]
+    uniques: NDArrayI32 = np.unique(values)
 
     # np.unique will have duplicate missing values at the end of `uniques`
     # here we clip the nans and remove it from uniques
     if (
-        uniques.size
-        and isinstance(uniques[-1], numbers.Real)
-        and math.isnan(uniques[-1])
+        uniques.size  # type: ignore
+        and isinstance(uniques[-1], numbers.Real)  # type: ignore
+        and math.isnan(uniques[-1])  # type: ignore
     ):
-        nan_idx = np.searchsorted(uniques, np.nan)
-        uniques = uniques[: nan_idx + 1]
+        nan_idx: np.int64 = np.searchsorted(uniques, np.nan)
+        uniques = uniques[: nan_idx + 1]  # type: ignore
 
-        if return_counts:
-            counts[nan_idx] = np.sum(counts[nan_idx:])
-            counts = counts[: nan_idx + 1]
-
-    ret = (uniques,)
-
-    if return_counts:
-        ret += (counts,)
-
-    return ret[0] if len(ret) == 1 else ret
+    return uniques
 
 
 class _LabelEncoder:
@@ -175,35 +153,29 @@ class _LabelEncoder:
     def __init__(self):
         self.classes_ = []
 
-    def fit(self, y: Sequence[np.int32]):
+    def fit(self, arr: NDArrayI32):
         """Fit label encoder."""
-        y = _column_or_1d(y)
-        self.classes_ = _unique_np(y)
+        np_arr = _column_or_1d(arr)
+        self.classes_ = _unique_np(np_arr)
         return self
 
-    def transform(self, y: Sequence[np.int32]) -> NDArrayI32:
+    def transform(self, arr: NDArrayI32) -> NDArrayI32:
         """Transform labels to normalized encoding."""
-        y = _column_or_1d(y)
-        if len(y) == 0:
+        if arr.size == 0:
             return np.array([])
 
-        return np.searchsorted(self.classes_, y)
+        return np.searchsorted(self.classes_, arr)
 
 
 def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
-    def __unique_labels(y):
-        if hasattr(y, "__array__"):
-            return np.unique(np.asarray(y))
-        else:
-            return set(y)
-
-    ys_labels = set(
-        chain.from_iterable(__unique_labels(y) for y in (y_true, y_pred))
+    """Chain and remove duplicates from the input."""
+    ys_labels: Iterable[np.int32] = set(
+        chain.from_iterable(set(np.unique(y)) for y in (y_true, y_pred))
     )
-    return np.array(sorted(ys_labels))
+    return np.array(sorted(ys_labels))  # type: ignore
 
 
-def _count_nonzero(x, axis=None, sample_weight=None):
+def _count_nonzero(arr, axis=None, sample_weight=None):
     """A variant of x.getnnz() with extension to weighting on axis 0.
 
     Useful in efficiently calculating multilabel metrics.
@@ -212,31 +184,30 @@ def _count_nonzero(x, axis=None, sample_weight=None):
         axis = 1
     elif axis == -2:
         axis = 0
-    elif x.format != "csr":
-        raise TypeError("Expected CSR sparse format, got {0}".format(x.format))
+    elif arr.format != "csr":
+        raise TypeError(f"Expected CSR sparse format, got {arr.format}")
 
     # We rely here on the fact that np.diff(Y.indptr) for a CSR
     # will return the number of nonzero entries in each row.
     # A bincount over Y.indices will return the number of nonzeros
     # in each column. See ``csr_matrix.getnnz`` in scipy >= 0.14.
     if axis is None:
-        return np.dot(np.diff(x.indptr), sample_weight)
-    elif axis == 1:
-        out = np.diff(x.indptr)
+        return np.dot(np.diff(arr.indptr), sample_weight)
+    if axis == 1:
+        out = np.diff(arr.indptr)
         return out * sample_weight
-    elif axis == 0:
-        weights = np.repeat(sample_weight, np.diff(x.indptr))
-        return np.bincount(x.indices, minlength=x.shape[1], weights=weights)
-    else:
-        raise ValueError("Unsupported axis: {0}".format(axis))
+    if axis == 0:
+        weights = np.repeat(sample_weight, np.diff(arr.indptr))
+        return np.bincount(arr.indices, minlength=arr.shape[1], weights=weights)
+    raise ValueError(f"Unsupported axis: {axis}")
 
 
 def _confusion_matrix(
-    y_true: NDArrayI32, y_pred: NDArrayI32, labels: Sequence[np.int32]
+    y_true: NDArrayI32, y_pred: NDArrayI32, labels: NDArrayI32
 ) -> NDArrayI32:
     """Compute a confusion matrix for each class or sample."""
     present_labels = _unique_labels(y_true, y_pred)
-    n_labels = len(labels)
+    n_labels = labels.size
     labels = np.hstack(
         [labels, np.setdiff1d(present_labels, labels, assume_unique=True)]
     )
@@ -305,13 +276,13 @@ def _prf_divide(numerator, denominator):
     return result
 
 
-def _precision_recall_fscore_support(
+def _precision_recall_fscore(
     y_true: NDArrayI32,
     y_pred: NDArrayI32,
     labels: NDArrayI32,
     average: Optional[str] = None,
     beta: float = 1.0,
-) -> Tuple[np.float64, np.float64, np.float64, Optional[NDArrayI32]]:
+) -> Tuple[NDArrayF64, NDArrayF64, NDArrayF64, Optional[NDArrayI32]]:
     """Compute precision, recall, F-measure and support for each class."""
     mcm = _confusion_matrix(y_true, y_pred, labels)
     tp_sum: NDArrayI32 = mcm[:, 1, 1]
@@ -360,16 +331,16 @@ def compute_scores(
     """Build a text report showing the main classification metrics."""
     labels = _unique_labels(y_true, y_pred)
 
-    if target_names and len(labels) != len(target_names):
+    if target_names and labels.size != len(target_names):
         raise ValueError(
-            "Number of classes, {0}, does not match size of "
-            "target_names, {1}. Try specifying the labels "
-            "parameter".format(len(labels), len(target_names))
+            f"Number of classes, {labels.size}, does not match size of "
+            f"target_names, {len(target_names)}. Try specifying the labels "
+            "parameter"
         )
 
     headers = ["precision", "recall", "f1-score", "support"]
     # compute per-class results without averaging
-    p, r, f1, s = _precision_recall_fscore_support(y_true, y_pred, labels)
+    p, r, f1, s = _precision_recall_fscore(y_true, y_pred, labels)
     rows = zip(target_names, p, r, f1, s)
     average_options = ("micro", "macro")
 
@@ -385,15 +356,21 @@ def compute_scores(
             line_heading = average + " avg"
 
         # compute averages with specified averaging method
-        avg_p, avg_r, avg_f1, _ = _precision_recall_fscore_support(
+        avg_p, avg_r, avg_f1, _ = _precision_recall_fscore(
             y_true,
             y_pred,
             labels=labels,
             average=average,
         )
+        assert s is not None
         avg = [avg_p, avg_r, avg_f1, np.sum(s)]
 
-        report_dict[line_heading] = dict(zip(headers, [i.item() for i in avg]))
+        report_dict[line_heading] = dict(
+            zip(
+                headers,
+                [i.item() for i in avg],
+            )
+        )  # type: ignore
 
     if "accuracy" in report_dict.keys():
         report_dict["accuracy"] = report_dict["accuracy"]["precision"]
@@ -419,7 +396,10 @@ class TaggingResult(Result):
     ) -> Scores:
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
-        for metric, scores_list in self.dict(include=include, exclude=exclude).items():  # type: ignore
+        for metric, scores_list in self.dict(
+            include=include,  # type: ignore
+            exclude=exclude,  # type: ignore
+        ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
             summary_dict[metric] = scores_list[-1][AVERAGE]

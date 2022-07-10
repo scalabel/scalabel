@@ -1,7 +1,6 @@
 """Utility functions for eval."""
 import copy
 from functools import partial
-from itertools import chain
 from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -187,9 +186,7 @@ def combine_stuff_masks(
     combine_iids: List[int] = []
     for class_id in sorted(set(class_ids)):
         category = classes[class_id]
-        rles_c = [
-            rle for rle, c_id in zip(rles, class_ids) if c_id == class_id
-        ]
+        rles_c = [rle for rle, c_id in zip(rles, class_ids) if c_id == class_id]
         iids_c = [
             iid for iid, c_id in zip(inst_ids, class_ids) if c_id == class_id
         ]
@@ -198,7 +195,9 @@ def combine_stuff_masks(
             combine_cids.extend([class_id] * len(rles_c))
             combine_iids.extend(iids_c)
         else:
-            combine_mask: NDArrayU8 = sum(rle_to_mask(rle) for rle in rles_c)  # type: ignore
+            combine_mask: NDArrayU8 = sum(
+                rle_to_mask(rle) for rle in rles_c
+            )  # type: ignore
             combine_rles.append(mask_to_rle(combine_mask))
             combine_cids.append(class_id)
             combine_iids.append(iids_c[0])
