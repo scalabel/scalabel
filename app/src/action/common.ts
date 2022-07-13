@@ -562,6 +562,13 @@ export function startLinkTrack(): actionTypes.BaseAction {
 }
 
 /**
+ * stop to link tracks
+ */
+ export function stopLinkTrack(): actionTypes.BaseAction {
+  return makeBaseAction(actionConsts.STOP_LINK_TRACK)
+}
+
+/**
  * update polygon 2d boundary clone status
  *
  * @param status

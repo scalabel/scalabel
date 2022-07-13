@@ -7,6 +7,7 @@ import { IdType } from "aws-sdk/clients/workdocs"
 import _ from "lodash"
 
 import { uid } from "../common/uid"
+import md5 from "blueimp-md5"
 import * as actionConsts from "../const/action"
 import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import * as actionTypes from "../types/action"
@@ -387,8 +388,18 @@ function mergeTracksInItems(
   const track = _.cloneDeep(tracks[0])
   for (let i = 1; i < tracks.length; i += 1) {
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
-      labelIds[Number(itemIndex)].push(labelId)
-      props[Number(itemIndex)].push(prop)
+      const idx = Number(itemIndex)
+      const item = items[idx]
+      const all = [labelId]
+      for (let i = 0; i < all.length; i++) {
+        const currId = all[i]
+        labelIds[idx].push(currId)
+        props[idx].push(prop)
+
+        item.labels[currId].children.forEach((c) => {
+          all.push(c)
+        })
+      }
     })
     track.labels = { ...track.labels, ...tracks[i].labels }
   }
@@ -577,7 +588,8 @@ function changeLabelsInItem(
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
-    const newLabel = updateObject(oldLabel, _.cloneDeep(props[index]))
+    const { parent, ...rest } = props[index]
+    const newLabel = updateObject(oldLabel, _.cloneDeep(rest))
     newLabels[labelId] = newLabel
     // Find the shapes to change and delete from the old label
     const newLabelShapeIds = new Set(newLabel.shapes)
@@ -734,8 +746,14 @@ function createParentLabel(
   let tracks = state.task.tracks
   const labelsToMerge = idList.map((id) => item.labels[id])
 
+  // Randomly generating an id for the parent label will cause inconsistency
+  // between the client and the server. To rescue, we determinstically assign
+  // an id to this parent label based on its children.
+  const seed = labelsToMerge.map((l) => l.id).sort().join("_")
+  const pid = md5(seed)
+
   // Make parent label
-  const parentLabel: LabelType = makeLabel(label)
+  const parentLabel: LabelType = makeLabel({ ...label, id: pid }, false)
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
@@ -1551,6 +1569,20 @@ export function submit(state: State, action: actionTypes.SubmitAction): State {
 export function startLinkTrack(state: State): State {
   const newSession = updateObject(state.session, {
     trackLinking: true
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Stop to link track.
+ *
+ * @param state Previous state
+ */
+ export function stopLinkTrack(state: State): State {
+  const newSession = updateObject(state.session, {
+    trackLinking: false
   })
   return updateObject(state, {
     session: newSession

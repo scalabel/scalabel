@@ -5,6 +5,7 @@ import {
   linkLabels,
   mergeTracks,
   startLinkTrack,
+  stopLinkTrack,
   unlinkLabels,
   splitTrack
 } from "../../action/common"
@@ -278,6 +279,9 @@ export class Label2DHandler {
         } else if (!this._state.task.config.tracking) {
           // Linking
           this.linkLabels()
+        } else if (!this._state.session.trackLinking) {
+          // Linking
+          this.linkLabels()
         }
         break
       case Key.L_UP:
@@ -337,6 +341,11 @@ export class Label2DHandler {
               commit2DLabels([...this._labelList.popUpdatedLabels()])
             }
           }
+        }
+        break
+      case Key.ESCAPE:
+        if (this._state.session.trackLinking) {
+          Session.dispatch(stopLinkTrack())
         }
         break
     }
@@ -403,45 +412,47 @@ export class Label2DHandler {
 
   /** Select highlighted label, if any */
   private selectHighlighted(): void {
-    if (this._highlightedLabel !== null) {
-      const item = this._state.task.items[this._state.user.select.item]
-      const labelIds = this._highlightedLabel.isValid()
-        ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
-        : [this._highlightedLabel.labelId]
-      const highlightedAlreadySelected =
-        this._labelList.selectedLabels.includes(this._highlightedLabel)
-      if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-        if (highlightedAlreadySelected) {
-          Session.dispatch(
-            unselectLabels(
-              this._labelList.selectedLabelIds,
-              this._selectedItemIndex,
-              labelIds
-            )
+    if (!this._highlightedLabel) {
+      return
+    }
+
+    const item = this._state.task.items[this._state.user.select.item]
+    const labelIds = this._highlightedLabel.isValid()
+      ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
+      : [this._highlightedLabel.labelId]
+    const highlightedAlreadySelected =
+      this._labelList.selectedLabels.includes(this._highlightedLabel)
+    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
+      if (highlightedAlreadySelected) {
+        Session.dispatch(
+          unselectLabels(
+            this._labelList.selectedLabelIds,
+            this._selectedItemIndex,
+            labelIds
           )
-        } else {
-          Session.dispatch(
-            selectLabels(
-              this._labelList.selectedLabelIds,
-              this._selectedItemIndex,
-              labelIds,
-              this._highlightedLabel.category[0],
-              this._highlightedLabel.attributes,
-              true
-            )
-          )
-        }
-      } else if (!highlightedAlreadySelected) {
+        )
+      } else {
         Session.dispatch(
           selectLabels(
             this._labelList.selectedLabelIds,
             this._selectedItemIndex,
             labelIds,
             this._highlightedLabel.category[0],
-            this._highlightedLabel.attributes
+            this._highlightedLabel.attributes,
+            true
           )
         )
       }
+    } else if (!highlightedAlreadySelected) {
+      Session.dispatch(
+        selectLabels(
+          this._labelList.selectedLabelIds,
+          this._selectedItemIndex,
+          labelIds,
+          this._highlightedLabel.category[0],
+          this._highlightedLabel.attributes
+        )
+      )
     }
   }
 
