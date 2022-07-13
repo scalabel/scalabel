@@ -38,6 +38,8 @@ export class Cube3D extends Shape3D {
   private readonly _closestFaceNormal: THREE.Vector3
   /** Control points */
   private readonly _controlSpheres: THREE.Mesh[]
+  /** Material for cube faces */
+  private readonly _cubeMaterials: THREE.MeshBasicMaterial[]
   /** Highlighted control point */
   private _highlightedSphere: THREE.Mesh | null
   /** Plane shape */
@@ -56,14 +58,47 @@ export class Cube3D extends Shape3D {
   constructor(label: Label3D) {
     super(label)
     this._color = label.color.map((v) => v / 255)
-    this._box = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
+    this._cubeMaterials = [
       new THREE.MeshBasicMaterial({
         color: this.color3(),
-        vertexColors: true,
         transparent: true,
-        opacity: 0.35
+        opacity: 0.05,
+        side: THREE.BackSide
+      }),
+      new THREE.MeshBasicMaterial({
+        color: this.color3(),
+        transparent: true,
+        opacity: 0.05,
+        side: THREE.BackSide
+      }),
+      new THREE.MeshBasicMaterial({
+        color: this.color3(),
+        transparent: true,
+        opacity: 0.05,
+        side: THREE.BackSide
+      }),
+      new THREE.MeshBasicMaterial({
+        color: this.color3(),
+        transparent: true,
+        opacity: 0.05,
+        side: THREE.BackSide
+      }),
+      new THREE.MeshBasicMaterial({
+        color: this.color3(),
+        transparent: true,
+        opacity: 0.05,
+        side: THREE.BackSide
+      }),
+      new THREE.MeshBasicMaterial({
+        color: this.color3(),
+        transparent: true,
+        opacity: 0.5,
+        side: THREE.DoubleSide
       })
+    ]
+    this._box = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 1),
+      this._cubeMaterials
     )
     this.add(this._box)
     this._box.geometry.computeBoundingBox()
@@ -244,12 +279,7 @@ export class Cube3D extends Shape3D {
    * @param id
    */
   public updateState(shape: ShapeType, id: IdType): void {
-    this._box.material = new THREE.MeshBasicMaterial({
-      color: this.color3(),
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.35
-    })
+    this._box.material = this._cubeMaterials
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy(new Vector3D().fromState(cube.center).toThree())
