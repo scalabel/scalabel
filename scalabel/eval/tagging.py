@@ -44,53 +44,6 @@ def _column_or_1d(arr: NDArrayI32) -> NDArrayI32:
     )
 
 
-class _MissingValues(NamedTuple):
-    """Data class for missing data information."""
-
-    nan: bool
-    none: bool
-
-    def to_list(self) -> List[Optional[float]]:
-        """Convert tuple to a list where None is always first."""
-        output: List[Optional[float]] = []
-        if self.none:
-            output.append(None)
-        if self.nan:
-            output.append(np.nan)
-        return output
-
-
-def _extract_missing(
-    values: Set[np.int32],
-) -> Tuple[Set[np.int32], _MissingValues]:
-    """Extract missing values from `values`."""
-    missing_values_set = {
-        value for value in values if value is None or _is_scalar_nan(value)
-    }
-
-    if not missing_values_set:
-        return values, _MissingValues(nan=False, none=False)
-
-    if None in missing_values_set:
-        if len(missing_values_set) == 1:
-            output_missing_values = _MissingValues(nan=False, none=True)
-        else:
-            # If there is more than one missing value, then it has to be
-            # float('nan') or np.nan
-            output_missing_values = _MissingValues(nan=True, none=True)
-    else:
-        output_missing_values = _MissingValues(nan=True, none=False)
-
-    # create set without the missing values
-    output = values - missing_values_set
-    return output, output_missing_values
-
-
-def _is_scalar_nan(maybe_nan: np.int32) -> bool:
-    """Tests if input is NaN."""
-    return isinstance(maybe_nan, numbers.Real) and math.isnan(maybe_nan)
-
-
 def _unique_np(values: NDArrayI32) -> NDArrayI32:
     """Helper function to find unique values, accounts for nans."""
     uniques: NDArrayI32 = np.unique(values)
@@ -106,26 +59,6 @@ def _unique_np(values: NDArrayI32) -> NDArrayI32:
         uniques = uniques[: nan_idx + 1]  # type: ignore
 
     return uniques
-
-
-class _LabelEncoder:
-    """Encode target labels with value between 0 and n_classes-1."""
-
-    def __init__(self) -> None:
-        self.classes_: NDArrayI32 = np.array([])
-
-    def fit(self, arr: NDArrayI32) -> "_LabelEncoder":
-        """Fit label encoder."""
-        np_arr = _column_or_1d(arr)
-        self.classes_ = _unique_np(np_arr)
-        return self
-
-    def transform(self, arr: NDArrayI32) -> NDArrayI32:
-        """Transform labels to normalized encoding."""
-        if arr.size == 0:
-            return np.array([])
-
-        return np.searchsorted(self.classes_, arr)
 
 
 def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
@@ -147,11 +80,10 @@ def _confusion_matrix(
     )
 
     if y_true.ndim == 1:
-        le = _LabelEncoder()
-        le.fit(labels)
-        y_true = le.transform(y_true)
-        y_pred = le.transform(y_pred)
-        sorted_labels = le.classes_
+        sorted_labels = _unique_np(_column_or_1d(labels))
+
+        y_true = np.searchsorted(sorted_labels, y_true)
+        y_pred = np.searchsorted(sorted_labels, y_pred)
 
         # labels are now from 0 to len(labels) - 1 -> use bincount
         tp = y_true == y_pred
@@ -275,7 +207,11 @@ def compute_scores(
     y_pred: NDArrayI32,
     target_names: List[str],
 ) -> Dict[str, Union[float, Dict[str, float]]]:
-    """Build a text report showing the main classification metrics."""
+    """Build a text report showing the main classification metrics.
+
+    Adapted from:
+    https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/_classification.py
+    """
     labels = _unique_labels(y_true, y_pred)
 
     if target_names and labels.size != len(target_names):
