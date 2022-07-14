@@ -390,14 +390,15 @@ function mergeTracksInItems(
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
       const idx = Number(itemIndex)
       const item = items[idx]
-      const all = [labelId]
-      for (let i = 0; i < all.length; i++) {
-        const currId = all[i]
+
+      // Change current label as well as all its descents.
+      const descents = [labelId]
+      for (let i = 0; i < descents.length; i++) {
+        const currId = descents[i]
         labelIds[idx].push(currId)
         props[idx].push(prop)
-
         item.labels[currId].children.forEach((c) => {
-          all.push(c)
+          descents.push(c)
         })
       }
     })
@@ -588,8 +589,7 @@ function changeLabelsInItem(
       props[index].children = children.filter((id) => isValidId(id))
     }
     const oldLabel = item.labels[labelId]
-    const { parent, ...rest } = props[index]
-    const newLabel = updateObject(oldLabel, _.cloneDeep(rest))
+    const newLabel = updateObject(oldLabel, _.cloneDeep(props[index]))
     newLabels[labelId] = newLabel
     // Find the shapes to change and delete from the old label
     const newLabelShapeIds = new Set(newLabel.shapes)
@@ -749,7 +749,10 @@ function createParentLabel(
   // Randomly generating an id for the parent label will cause inconsistency
   // between the client and the server. To rescue, we determinstically assign
   // an id to this parent label based on its children.
-  const seed = labelsToMerge.map((l) => l.id).sort().join("_")
+  const seed = labelsToMerge
+    .map((l) => l.id)
+    .sort()
+    .join("_")
   const pid = md5(seed)
 
   // Make parent label
@@ -1576,11 +1579,11 @@ export function startLinkTrack(state: State): State {
 }
 
 /**
- * Stop to link track.
+ * Stop linking track.
  *
  * @param state Previous state
  */
- export function stopLinkTrack(state: State): State {
+export function stopLinkTrack(state: State): State {
   const newSession = updateObject(state.session, {
     trackLinking: false
   })

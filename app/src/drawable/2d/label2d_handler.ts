@@ -280,7 +280,7 @@ export class Label2DHandler {
           // Linking
           this.linkLabels()
         } else if (!this._state.session.trackLinking) {
-          // Linking
+          // Enable link in trakcing mode when track linking is not activated.
           this.linkLabels()
         }
         break
@@ -412,7 +412,7 @@ export class Label2DHandler {
 
   /** Select highlighted label, if any */
   private selectHighlighted(): void {
-    if (!this._highlightedLabel) {
+    if (this._highlightedLabel == null) {
       return
     }
 
@@ -420,8 +420,9 @@ export class Label2DHandler {
     const labelIds = this._highlightedLabel.isValid()
       ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
       : [this._highlightedLabel.labelId]
-    const highlightedAlreadySelected =
-      this._labelList.selectedLabels.includes(this._highlightedLabel)
+    const highlightedAlreadySelected = this._labelList.selectedLabels.includes(
+      this._highlightedLabel
+    )
     if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
       if (highlightedAlreadySelected) {
         Session.dispatch(

@@ -562,9 +562,9 @@ export function startLinkTrack(): actionTypes.BaseAction {
 }
 
 /**
- * stop to link tracks
+ * stop linking tracks
  */
- export function stopLinkTrack(): actionTypes.BaseAction {
+export function stopLinkTrack(): actionTypes.BaseAction {
   return makeBaseAction(actionConsts.STOP_LINK_TRACK)
 }
 
