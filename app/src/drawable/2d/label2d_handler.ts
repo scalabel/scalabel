@@ -412,48 +412,45 @@ export class Label2DHandler {
 
   /** Select highlighted label, if any */
   private selectHighlighted(): void {
-    if (this._highlightedLabel == null) {
-      return
-    }
-
-    const item = this._state.task.items[this._state.user.select.item]
-    const labelIds = this._highlightedLabel.isValid()
-      ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
-      : [this._highlightedLabel.labelId]
-    const highlightedAlreadySelected = this._labelList.selectedLabels.includes(
-      this._highlightedLabel
-    )
-    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-      if (highlightedAlreadySelected) {
-        Session.dispatch(
-          unselectLabels(
-            this._labelList.selectedLabelIds,
-            this._selectedItemIndex,
-            labelIds
+    if (this._highlightedLabel !== null) {
+      const item = this._state.task.items[this._state.user.select.item]
+      const labelIds = this._highlightedLabel.isValid()
+        ? getLinkedLabelIds(item, this._highlightedLabel.labelId)
+        : [this._highlightedLabel.labelId]
+      const highlightedAlreadySelected =
+        this._labelList.selectedLabels.includes(this._highlightedLabel)
+      if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
+        if (highlightedAlreadySelected) {
+          Session.dispatch(
+            unselectLabels(
+              this._labelList.selectedLabelIds,
+              this._selectedItemIndex,
+              labelIds
+            )
           )
-        )
-      } else {
+        } else {
+          Session.dispatch(
+            selectLabels(
+              this._labelList.selectedLabelIds,
+              this._selectedItemIndex,
+              labelIds,
+              this._highlightedLabel.category[0],
+              this._highlightedLabel.attributes,
+              true
+            )
+          )
+        }
+      } else if (!highlightedAlreadySelected) {
         Session.dispatch(
           selectLabels(
             this._labelList.selectedLabelIds,
             this._selectedItemIndex,
             labelIds,
             this._highlightedLabel.category[0],
-            this._highlightedLabel.attributes,
-            true
+            this._highlightedLabel.attributes
           )
         )
       }
-    } else if (!highlightedAlreadySelected) {
-      Session.dispatch(
-        selectLabels(
-          this._labelList.selectedLabelIds,
-          this._selectedItemIndex,
-          labelIds,
-          this._highlightedLabel.category[0],
-          this._highlightedLabel.attributes
-        )
-      )
     }
   }
 
