@@ -1,4 +1,5 @@
 import * as THREE from "three"
+import { getMainSensor } from "../../common/util"
 
 import { LabelTypeName } from "../../const/common"
 import { makeLabel, makeTrack } from "../../functional/states"
@@ -324,11 +325,14 @@ export class Box3D extends Label3D {
     if (!this.editing) {
       this._shape.color = this.color
       this._shape.setHighlighted()
+      const mainSensor = getMainSensor(state)
+      const forward = new Vector3D().fromThree(mainSensor.forward).normalize()
       const label = state.task.items[itemIndex].labels[labelId]
       this._shape.updateState(
         state.task.items[itemIndex].shapes[label.shapes[0]],
         label.shapes[0]
       )
+      this._shape.setForward(forward)
     }
   }
 

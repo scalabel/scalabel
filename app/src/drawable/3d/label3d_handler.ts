@@ -488,6 +488,41 @@ export class Label3DHandler {
   }
 
   /**
+   * Change heading of 3d box, if currently selected
+   */
+  private changeBoxHeading(): void {
+    const { up } = this.getAxes()
+    const label = Session.label3dList.selectedLabel
+    if (label !== null && label.type === LabelTypeName.BOX_3D) {
+      const shape = Session.label3dList.getCurrentShape() as CubeType
+      Session.label3dList.addShapeToHistShapes(shape)
+
+      // Swap width and length
+      const newShape: CubeType = { ...shape }
+      const size = shape.size
+      newShape.size =
+        up.y !== 0
+          ? { x: size.z, y: size.y, z: size.x }
+          : { x: size.y, y: size.x, z: size.z }
+
+      label.setShape(newShape)
+
+      // Rotate box
+      const normal = up.toThree()
+      normal.applyQuaternion(label.orientation)
+      const rotation = new THREE.Quaternion().setFromAxisAngle(
+        normal,
+        Math.PI / 2
+      )
+      label.rotate(rotation)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+    }
+  }
+
+  /**
    * Create ground plane
    *
    * @param itemIndex
@@ -632,31 +667,7 @@ export class Label3DHandler {
       // Change box heading
       case Key.F_UP:
       case Key.F_LOW: {
-        const label = Session.label3dList.selectedLabel
-        if (label !== null && label.type === LabelTypeName.BOX_3D) {
-          const shape = Session.label3dList.getCurrentShape() as CubeType
-          Session.label3dList.addShapeToHistShapes(shape)
-
-          // Swap width and length
-          const newShape: CubeType = { ...shape }
-          const size = shape.size
-          newShape.size = { x: size.z, y: size.y, z: size.x }
-
-          label.setShape(newShape)
-
-          // Rotate box
-          const normal = new THREE.Vector3(0, 1, 0)
-          normal.applyQuaternion(label.orientation)
-          const rotation = new THREE.Quaternion().setFromAxisAngle(
-            normal,
-            Math.PI / 2
-          )
-          label.rotate(rotation)
-          commitLabels(
-            [...Session.label3dList.updatedLabels.values()],
-            this._tracking
-          )
-        }
+        this.changeBoxHeading()
         break
       }
       case Key.Z_UP:
