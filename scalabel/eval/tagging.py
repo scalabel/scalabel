@@ -110,26 +110,6 @@ def _confusion_matrix(
         true_sum = true_sum[indices]
         pred_sum = pred_sum[indices]
 
-    else:
-        if n_labels is not None:
-            y_true = y_true[:, labels[:n_labels]]
-            y_pred = y_pred[:, labels[:n_labels]]
-
-        # calculate weighted counts
-        true_and_pred = y_true * y_pred
-        tp_sum = np.bincount(
-            true_and_pred.indices,  # type: ignore
-            minlength=true_and_pred.shape[1],
-        )
-        pred_sum = np.bincount(
-            y_pred.indices,  # type: ignore
-            minlength=y_pred.shape[1],
-        )
-        true_sum = np.bincount(
-            y_true.indices,  # type: ignore
-            minlength=y_true.shape[1],
-        )
-
     fp = pred_sum - tp_sum
     fn = true_sum - tp_sum
     tp = tp_sum
@@ -173,7 +153,7 @@ def _precision_recall_fscore(
         pred_sum = np.array([pred_sum.sum()])
         true_sum = np.array([true_sum.sum()])
 
-    beta2 = beta**2
+    beta2 = beta ** 2
 
     # divide and set scores
     precision = _prf_divide(tp_sum, pred_sum)
