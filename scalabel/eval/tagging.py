@@ -28,7 +28,7 @@ from .result import AVERAGE, Result, Scores, ScoresList
 from .utils import reorder_preds
 
 
-def _column_or_1d(arr: NDArrayI32) -> NDArrayI32:
+def column_or_1d(arr: NDArrayI32) -> NDArrayI32:
     """Ravel column or 1d numpy array, else raises an error."""
     np_arr = np.asarray(arr)
     shape = np.shape(np_arr)
@@ -42,24 +42,7 @@ def _column_or_1d(arr: NDArrayI32) -> NDArrayI32:
     )
 
 
-def _unique_np(values: NDArrayI32) -> NDArrayI32:
-    """Helper function to find unique values, accounts for nans."""
-    uniques: NDArrayI32 = np.unique(values)
-
-    # np.unique will have duplicate missing values at the end of `uniques`
-    # here we clip the nans and remove it from uniques
-    if (
-        uniques.size
-        and isinstance(uniques[-1], numbers.Real)
-        and math.isnan(uniques[-1])
-    ):
-        nan_idx: np.int64 = np.searchsorted(uniques, np.nan)
-        uniques = uniques[: nan_idx + 1]  # type: ignore
-
-    return uniques
-
-
-def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
+def unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
     """Chain and remove duplicates from the input."""
     ys_labels: Iterable[np.int32] = set(
         chain.from_iterable(set(np.unique(y)) for y in (y_true, y_pred))
@@ -67,48 +50,43 @@ def _unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
     return np.array(sorted(ys_labels))  # type: ignore
 
 
-def _confusion_matrix(
+def confusion_matrix(
     y_true: NDArrayI32, y_pred: NDArrayI32, labels: NDArrayI32
 ) -> NDArrayI32:
     """Compute a confusion matrix for each class or sample."""
-    present_labels = _unique_labels(y_true, y_pred)
+    present_labels = unique_labels(y_true, y_pred)
     n_labels = labels.size
     labels = np.hstack(
         [labels, np.setdiff1d(present_labels, labels, assume_unique=True)]
     )
 
-    if y_true.ndim == 1:
-        sorted_labels = _unique_np(_column_or_1d(labels))
+    sorted_labels = column_or_1d(labels)
 
-        y_true = np.searchsorted(sorted_labels, y_true)
-        y_pred = np.searchsorted(sorted_labels, y_pred)
+    y_true = np.searchsorted(sorted_labels, y_true)
+    y_pred = np.searchsorted(sorted_labels, y_pred)
 
-        # labels are now from 0 to len(labels) - 1 -> use bincount
-        tp = y_true == y_pred
-        tp_bins = y_true[tp]
+    # labels are now from 0 to len(labels) - 1 -> use bincount
+    tp = y_true == y_pred
+    tp_bins = y_true[tp]
 
-        true_sum = np.zeros(len(labels))
-        pred_sum = tp_sum = true_sum
-        if len(tp_bins):
-            tp_sum = np.bincount(
-                tp_bins,
-                minlength=len(labels),
-            )  # type: ignore
+    true_sum = np.zeros(len(labels))
+    pred_sum = tp_sum = true_sum
+    if len(tp_bins):
+        tp_sum = np.bincount(
+            tp_bins,
+            minlength=len(labels),
+        )  # type: ignore
 
-        if len(y_pred):
-            pred_sum = np.bincount(
-                y_pred, minlength=len(labels)
-            )  # type: ignore
-        if len(y_true):
-            true_sum = np.bincount(
-                y_true, minlength=len(labels)
-            )  # type: ignore
+    if len(y_pred):
+        pred_sum = np.bincount(y_pred, minlength=len(labels))  # type: ignore
+    if len(y_true):
+        true_sum = np.bincount(y_true, minlength=len(labels))  # type: ignore
 
-        # retain only selected labels
-        indices = np.searchsorted(sorted_labels, labels[:n_labels])
-        tp_sum = tp_sum[indices]
-        true_sum = true_sum[indices]
-        pred_sum = pred_sum[indices]
+    # retain only selected labels
+    indices = np.searchsorted(sorted_labels, labels[:n_labels])
+    tp_sum = tp_sum[indices]
+    true_sum = true_sum[indices]
+    pred_sum = pred_sum[indices]
 
     fp = pred_sum - tp_sum
     fn = true_sum - tp_sum
@@ -134,7 +112,7 @@ def _prf_divide(numerator: NDArrayI32, denominator: NDArrayI32) -> NDArrayF64:
     return result
 
 
-def _precision_recall_fscore(
+def precision_recall_fscore(
     y_true: NDArrayI32,
     y_pred: NDArrayI32,
     labels: NDArrayI32,
@@ -142,7 +120,7 @@ def _precision_recall_fscore(
     beta: float = 1.0,
 ) -> Tuple[NDArrayF64, NDArrayF64, NDArrayF64, Optional[NDArrayI32]]:
     """Compute precision, recall, F-measure and support for each class."""
-    mcm = _confusion_matrix(y_true, y_pred, labels)
+    mcm = confusion_matrix(y_true, y_pred, labels)
     tp_sum: NDArrayI32 = mcm[:, 1, 1]
     pred_sum = tp_sum + mcm[:, 0, 1]
     true_sum: Optional[NDArrayI32] = tp_sum + mcm[:, 1, 0]
@@ -153,7 +131,7 @@ def _precision_recall_fscore(
         pred_sum = np.array([pred_sum.sum()])
         true_sum = np.array([true_sum.sum()])
 
-    beta2 = beta**2
+    beta2 = beta ** 2
 
     # divide and set scores
     precision = _prf_divide(tp_sum, pred_sum)
@@ -190,7 +168,7 @@ def compute_scores(
     Adapted from:
     https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/metrics/_classification.py
     """
-    labels = _unique_labels(y_true, y_pred)
+    labels = unique_labels(y_true, y_pred)
 
     if target_names and labels.size != len(target_names):
         raise ValueError(
@@ -201,7 +179,7 @@ def compute_scores(
 
     headers = ["precision", "recall", "f1-score", "support"]
     # compute per-class results without averaging
-    p, r, f1, s = _precision_recall_fscore(y_true, y_pred, labels)
+    p, r, f1, s = precision_recall_fscore(y_true, y_pred, labels)
     assert s is not None
     rows = zip(target_names, p, r, f1, s)
     average_options = ("micro", "macro")
@@ -224,7 +202,7 @@ def compute_scores(
             line_heading = average + " avg"
 
         # compute averages with specified averaging method
-        avg_p, avg_r, avg_f1, _ = _precision_recall_fscore(
+        avg_p, avg_r, avg_f1, _ = precision_recall_fscore(
             y_true,
             y_pred,
             labels=labels,
