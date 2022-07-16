@@ -1,8 +1,6 @@
 """Evaluation procedures for image tagging."""
 import argparse
 import json
-import math
-import numbers
 from itertools import chain
 from typing import (
     AbstractSet,
