@@ -131,7 +131,7 @@ def precision_recall_fscore(
         pred_sum = np.array([pred_sum.sum()])
         true_sum = np.array([true_sum.sum()])
 
-    beta2 = beta ** 2
+    beta2 = beta**2
 
     # divide and set scores
     precision = _prf_divide(tp_sum, pred_sum)
