@@ -32,7 +32,7 @@ setuptools.setup(
     python_requires=">=3.7",
     install_requires=[
         "motmetrics",
-        "trackeval",
+        "git+https://github.com/bdd100k/TrackEval.git"
         "nanoid",
         "numpy",
         "Pillow",
