@@ -459,15 +459,27 @@ function splitTrackInItems(
   }
 
   _.forEach(track.labels, (labelId, itemIndex) => {
-    if (Number(itemIndex) < splitIndex) {
-      splitedTrack0.labels[Number(itemIndex)] = labelId
+    const idx = Number(itemIndex)
+
+    if (idx < splitIndex) {
+      splitedTrack0.labels[idx] = labelId
     } else {
-      splitedTrack1.labels[Number(itemIndex)] = labelId
-      labelIds[Number(itemIndex)].push(labelId)
-      if (Number(itemIndex) === splitIndex) {
-        props[Number(itemIndex)].push({ ...prop, manual: true })
-      } else {
-        props[Number(itemIndex)].push(prop)
+      splitedTrack1.labels[idx] = labelId
+
+      const descents = [labelId]
+      for (let i = 0; i < descents.length; i++) {
+        const currId = descents[i]
+        labelIds[idx].push(currId)
+        if (idx === splitIndex) {
+          props[idx].push({ ...prop, manual: true })
+        } else {
+          props[idx].push({ ...prop })
+        }
+
+        const curr = items[idx].labels[currId]
+        curr.children.forEach((l) => {
+          descents.push(l)
+        })
       }
     }
   })
@@ -840,6 +852,15 @@ export function linkLabels(
             : null
         )
         .filter((lbl) => lbl !== null) as string[]
+
+      // collect all descents
+      for (let i = 0; i < labelIdsToMerge.length; i++) {
+        const currId = labelIdsToMerge[i]
+        taskItem.labels[currId].children.forEach((c) => {
+          labelIdsToMerge.push(c)
+        })
+      }
+
       if (labelIdsToMerge.length > 0) {
         state = createParentLabel(
           state,
@@ -1038,9 +1059,14 @@ function deleteLabelsFromItem(
   labelIds: IdType[]
 ): [ItemType, LabelType[]] {
   let labels = item.labels
-  labelIds = labelIds.concat(
-    ...labelIds.map((labelId) => item.labels[labelId].children)
-  )
+
+  // Collect all descents
+  for (let i = 0; i < labelIds.length; i++) {
+    const currId = labelIds[i]
+    item.labels[currId].children.forEach((c) => {
+      labelIds.push(c)
+    })
+  }
 
   const deletedLabels = pickObject(item.labels, labelIds)
 
