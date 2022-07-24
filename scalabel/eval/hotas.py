@@ -123,7 +123,7 @@ class BDD100K(TrackEvalKittiMOTS):  # type: ignore
             all_masks = []
             labels = data[t].labels
             if labels is None:
-                continue
+                labels=[]
             for i, ann in enumerate(labels):
                 if is_gt and (
                     ann.category in self.distractor_classes
