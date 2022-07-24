@@ -136,6 +136,7 @@ def evaluate_box_track(
     t = time.time()
     gts = [bdd100k_to_scalabel(gt, config) for gt in gts]
     results = [bdd100k_to_scalabel(result, config) for result in results]
+    hota_result = evaluate_track_hota(gts, results, config, nproc)
     mot_result = evaluate_track(
         acc_single_video_mot,
         gts,
@@ -146,7 +147,7 @@ def evaluate_box_track(
         ignore_unknown_cats,
         nproc,
     )
-    hota_result = evaluate_track_hota(gts, results, config, nproc)
+
     result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict()})
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)

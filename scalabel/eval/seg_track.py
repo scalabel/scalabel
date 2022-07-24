@@ -43,6 +43,7 @@ def evaluate_seg_track_all(
     t = time.time()
     gts = [bdd100k_to_scalabel(gt, config) for gt in gts]
     results = [bdd100k_to_scalabel(result, config) for result in results]
+    hota_result = evaluate_seg_track_hota(gts, results, config, nproc)
     mot_result = evaluate_seg_track(
         acc_single_video_mots,
         gts,
@@ -53,7 +54,7 @@ def evaluate_seg_track_all(
         ignore_unknown_cats,
         nproc,
     )
-    hota_result = evaluate_seg_track_hota(gts, results, config, nproc)
+
     result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict()})
     logger.info("evaluation finishes with %.1f s.", t)
     return result
