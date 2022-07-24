@@ -211,6 +211,7 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
         for k, v in key_map.items():
             raw_data[v] = raw_data.pop(k)
         raw_data["num_timesteps"] = num_timesteps
+        raw_data["seq"] = seq
         return raw_data
 
 
