@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Dict
 
 # Redis host address
 REDIS_HOST = "127.0.0.1"
@@ -58,3 +59,8 @@ class Timers(Enum):
 
 
 MODELS = {"box2d": "fsdet", "box3d": "dd3d", "textgen": "opt"}
+
+ESTCT: Dict[str, Dict[str, int]] = {
+    "inference": {"dd3d": 113, "fsdet": 172, "opt": 19980},
+    "training": {},
+}

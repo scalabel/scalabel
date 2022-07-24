@@ -170,6 +170,7 @@ class Client:
                 "taskId": task_id,
                 "taskType": task_type,
                 "taskKey": task_key,
+                "dataSize": 50,
                 "items": items,
                 "modelName": model_name,
                 "channel": self._req_server.sub_stream,

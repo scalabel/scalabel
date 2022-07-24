@@ -35,7 +35,7 @@ from scalabel_bot.common.consts import (
     Timers,
 )
 from scalabel_bot.common.exceptions import GPUError
-
+from scalabel_bot.common.func import cantor_pairing
 from scalabel_bot.common.logger import logger
 from scalabel_bot.common.servers import (
     ManagerRequestsPubSub,
@@ -90,7 +90,9 @@ class BotManager:
         self._gpu_ids: List[int] = gpu_ids
         self._manager = Manager()
         self._runner_status: DictProxy = self._manager.dict()
-        self._runner_status_queue: "Queue[Tuple[int, State]]" = Queue()
+        self._runner_status_queue: "Queue[Tuple[int, int, State]]" = Queue()
+        self._runner_ect: DictProxy = self._manager.dict()
+        self._runner_ect_queue: "Queue[Tuple[int, int, int]]" = Queue()
         self._requests_queue: "Queue[Dict[str, object]]" = Queue()
         self._req_stream: ManagerRequestsStream = ManagerRequestsStream(
             host=REDIS_HOST,
@@ -122,9 +124,10 @@ class BotManager:
             self._allocated_gpus = [*range(self._num_gpus)]
         self._load_models()
         self._runner_scheduler: RunnerScheduler = RunnerScheduler(
-            num_runners=self._allocated_gpus,
             runner_status=self._runner_status,
             runner_status_queue=self._runner_status_queue,
+            runner_ect=self._runner_ect,
+            runner_ect_queue=self._runner_ect_queue,
         )
         self._runner_scheduler.daemon = True
         self._runner_scheduler.start()
@@ -151,7 +154,9 @@ class BotManager:
             logger.debug(
                 f"{self._name}: Waiting for at least one runner to be ready"
             )
-            while len(self._runner_status) < 1:
+            while (len(self._runner_status) < len(self._runners)) and (
+                len(self._runner_ect) < len(self._runners)
+            ):
                 sleep(1)
             logger.success(
                 "\n******************************************\n"
@@ -232,19 +237,24 @@ class BotManager:
     @timer(Timers.PERF_COUNTER)
     def _create_runners(self) -> None:
         """Create runner for each available GPU."""
-        for runner_id in self._allocated_gpus:
-            runner: Runner = Runner(
-                mode=self._mode,
-                device=runner_id,
-                runner_status_queue=self._runner_status_queue,
-                model_list=self._model_list,
-                model_classes=self._model_classes,
-                results_queue=self._results_queue,
-            )
-            runner.daemon = True
-            runner.start()
-            self._runners[runner_id] = runner
-            logger.debug(f"{self._name}: Created runner in GPU {runner_id}")
+        for device in self._allocated_gpus:
+            for runner_id in range(1):
+                runner: Runner = Runner(
+                    mode=self._mode,
+                    device=device,
+                    runner_id=runner_id,
+                    runner_status_queue=self._runner_status_queue,
+                    runner_ect_queue=self._runner_ect_queue,
+                    model_list=self._model_list,
+                    model_classes=self._model_classes,
+                    results_queue=self._results_queue,
+                )
+                runner.daemon = True
+                runner.start()
+                self._runners[cantor_pairing(device, runner_id)] = runner
+                logger.debug(
+                    f"{self._name}: Created runner {runner_id} in GPU {device}"
+                )
 
     @timer(Timers.PERF_COUNTER)
     def _allocate_task(self, task: Dict[str, object]) -> None:
@@ -257,6 +267,8 @@ class BotManager:
         #     f" runner {runner_id}"
         # )
         runner.task_in.send(task)
+        if runner.task_in.recv() == "OK":
+            return
 
     @timer(Timers.PERF_COUNTER)
     def _check_result(self) -> None:
