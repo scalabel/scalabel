@@ -139,6 +139,8 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
             ig_ids = []
             keep_ids = []
             labels = data[t].labels
+            if labels is None:
+                continue
             for i, ann in enumerate(labels):
                 if is_gt and (
                     ann.category in self.distractor_classes
