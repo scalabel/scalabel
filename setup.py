@@ -33,6 +33,7 @@ setuptools.setup(
     install_requires=[
         "motmetrics",
         "nanoid",
+        "trackeval"
         "numpy",
         "Pillow",
         "plyfile",
