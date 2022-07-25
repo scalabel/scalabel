@@ -111,6 +111,13 @@ class BoxTrackResult(Result):
                 for key in scores_list[0]:
                     summary_dict[metric + '-' + key] = scores_list[0][key]
 
+            elif metric == 'IDF1':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL
+                )
+                for key in scores_list[0]:
+                    summary_dict[metric + '-' + key] = scores_list[0][key]
+
             else:
                 summary_dict[metric] = scores_list[-1].get(
                     OVERALL, scores_list[-1].get(AVERAGE)
