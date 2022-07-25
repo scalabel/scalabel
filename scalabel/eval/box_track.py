@@ -2,6 +2,7 @@
 import argparse
 import json
 import time
+import math
 from typing import Dict, List, Optional,  AbstractSet, Union
 
 from ..common.io import open_write_text
@@ -108,6 +109,10 @@ class BoxTrackResult(Result):
                 summary_dict[metric] = scores_list[-1].get(
                     OVERALL, scores_list[-1].get(AVERAGE)
                 )
+        for metric in summary_dict:
+            if math.isnan(summary_dict[metric]):
+                summary_dict[metric] = '-'
+
         return summary_dict
 
 
