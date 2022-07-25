@@ -2,7 +2,7 @@
 import argparse
 import json
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional,  AbstractSet, Union
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -28,7 +28,10 @@ NAME_MAPPING = {
     "person": "pedestrian",
     "van": "car",
 }
-
+Scores = Dict[str, Union[int, float]]
+ScoresList = List[Scores]
+AVERAGE = "AVERAGE"
+OVERALL = "OVERALL"
 
 class BoxTrackResult(Result):
     """The class for bounding box tracking evaluation results."""
@@ -68,6 +71,44 @@ class BoxTrackResult(Result):
     def __str__(self) -> str:
         """Convert the data into a printable string."""
         return self.table(exclude=set(EXCLUDE_METRICS))
+
+    def summary(
+        self,
+        include: Optional[AbstractSet[str]] = None,
+        exclude: Optional[AbstractSet[str]] = None,
+    ) -> Scores:
+        """Convert the data into a flattened dict as the summary.
+
+        This function is different to the `.dict()` function.
+        As a comparison, `.dict()` will export all data fields as a nested
+        dict, While `.summary()` only exports most important information,
+        like the overall scores, as a flattened compact dict.
+
+        Args:
+            include (set[str]): Optional, the metrics to convert
+            exclude (set[str]): Optional, the metrics not to convert
+        Returns:
+            dict[str, int | float]: returned summary of the result
+        """
+        summary_dict: Dict[str, Union[int, float]] = {}
+        for metric, scores_list in self.dict(
+            include=include, exclude=exclude  # type: ignore
+        ).items():
+            if not isinstance(scores_list, list):
+                summary_dict[metric] = scores_list
+            elif metric == 'HOTA':
+                for key in scores_list[0]:
+                    summary_dict[metric +'-'+key] = scores_list[0][key]
+
+            elif metric == 'MOTA':
+                for key in scores_list[0]:
+                    summary_dict[metric + '-' + key] = scores_list[0][key]
+
+            else:
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL, scores_list[-1].get(AVERAGE)
+                )
+        return summary_dict
 
 
 def deal_bdd100k_category(
