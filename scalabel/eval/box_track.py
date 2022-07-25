@@ -98,10 +98,16 @@ class BoxTrackResult(Result):
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
             elif metric == 'HOTA':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL
+                )
                 for key in scores_list[0]:
                     summary_dict[metric +'-'+key] = scores_list[0][key]
 
             elif metric == 'MOTA':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL
+                )
                 for key in scores_list[0]:
                     summary_dict[metric + '-' + key] = scores_list[0][key]
 
