@@ -26,7 +26,6 @@ try:
         label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
         label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
         label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
-        label_pb2.Label.Type.TYPE_SIGN: "sign",
     }
     # pylint: enable=no-member
 except ImportError:
@@ -273,9 +272,10 @@ def parse_frame_attributes(
     ocs = s.laser_object_counts if use_lidar_labels else s.camera_object_counts
     sensor = "laser" if use_lidar_labels else "camera"
     for oc in ocs:
-        o_name = classes_type2name[oc.type]
-        attribute_name = f"{sensor}_{o_name}_counts"
-        attributes[attribute_name] = oc.count
+        o_name = classes_type2name.get(oc.type, None)
+        if o_name is not None:
+            attribute_name = f"{sensor}_{o_name}_counts"
+            attributes[attribute_name] = oc.count
 
     return attributes
 
@@ -322,6 +322,7 @@ def parse_frame(
     frame: dataset_pb2.Frame,
     frame_id: int,
     output_dir: str,
+    split: str,
     save_images: bool = False,
     use_lidar_labels: bool = False,
 ) -> Tuple[List[Frame], List[FrameGroup]]:
@@ -369,11 +370,12 @@ def parse_frame(
             intrinsics=intrinsics,
             labels=labels,
             attributes=attributes,
+            timestamp=frame.timestamp_micros,
         )
         frame_names.append(img_name)
         results.append(f)
 
-    url = f"segment-{frame.context.name}_with_camera_labels.tfrecord"
+    url = f"{split}/segment-{frame.context.name}_with_camera_labels.tfrecord"
 
     lidar2car_mat: NDArrayF64 = np.array(
         frame.context.laser_calibrations[
@@ -405,6 +407,7 @@ def parse_frame(
 
 def parse_record(
     output_dir: str,
+    split: str,
     save_images: bool,
     use_lidar_labels: bool,
     record_name: str,
@@ -420,7 +423,7 @@ def parse_record(
 
         # add images and annotations to coco
         frame, group = parse_frame(
-            frame, frame_id, output_dir, save_images, use_lidar_labels
+            frame, frame_id, output_dir, split, save_images, use_lidar_labels
         )
         frames.extend(frame)
         groups.extend(group)
@@ -436,13 +439,15 @@ def from_waymo(
     nproc: int = NPROC,
 ) -> Dataset:
     """Function converting Waymo data to Scalabel format."""
-    output_dir = os.path.join(data_path, "images_png")
+    output_dir = os.path.join(data_path, "images")
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
     data_path = os.path.join(data_path, split)
 
-    func = partial(parse_record, output_dir, save_images, use_lidar_labels)
+    func = partial(
+        parse_record, output_dir, split, save_images, use_lidar_labels
+    )
     if nproc > 1:
         partial_results = pmap(
             func,

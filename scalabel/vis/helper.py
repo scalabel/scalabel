@@ -1,5 +1,6 @@
 """Helper functions used by the visualizer."""
 import copy
+import colorsys
 import io
 import os
 import urllib.request
@@ -17,9 +18,25 @@ from ..label.utils import get_matrix_from_intrinsics
 from .geometry import Label3d
 
 
-def random_color() -> NDArrayF64:
+def generate_colors(length: int) -> List[Tuple[int]]:
+    """Generate a color palette of [length] colors."""
+    brightness = 0.7
+    hsv = [(i / length, 1, brightness) for i in range(length)]
+    colors = list(map(lambda c: colorsys.hsv_to_rgb(*c), hsv))
+    s = np.random.get_state()
+    np.random.seed(0)
+    result = [tuple(colors[i]) for i in np.random.permutation(len(colors))]
+    np.random.set_state(s)
+    return result
+
+
+NUM_COLORS = 50
+COLOR_PALETTE = generate_colors(NUM_COLORS)
+
+
+def random_color(track_id: str) -> NDArrayF64:
     """Generate a random color (RGB)."""
-    return np.array(np.random.rand(3))
+    return COLOR_PALETTE[int(track_id) % NUM_COLORS]
 
 
 # Function to fetch images
@@ -73,15 +90,15 @@ def gen_2d_rect(
 
 
 def check_edge_visibility(
-    edge: List[List[float]], img_center: Tuple[float, float]
+    edge: List[List[float]], img_w: int, img_h: int
 ) -> bool:
     """Check whether both ends of the edges is inside the picture."""
     return (
-        (0 >= edge[0][0] or edge[0][0] >= img_center[0] * 2 - 1)
-        or (0 >= edge[0][1] or edge[0][1] >= img_center[1] * 2 - 1)
+        (0 >= edge[0][0] or edge[0][0] >= img_w)
+        or (0 >= edge[0][1] or edge[0][1] >= img_h)
     ) and (
-        (0 >= edge[1][0] or edge[1][0] >= img_center[0] * 2 - 1)
-        or (0 >= edge[1][1] or edge[1][1] >= img_center[1] * 2 - 1)
+        (0 >= edge[1][0] or edge[1][0] >= img_w)
+        or (0 >= edge[1][1] or edge[1][1] >= img_h)
     )
 
 
@@ -90,6 +107,8 @@ def gen_3d_cube(
     color: List[float],
     linewidth: int,
     intrinsics: Intrinsics,
+    img_w: int,
+    img_h: int,
     alpha: float,
 ) -> Tuple[Label3d, List[mpatches.Polygon]]:
     """Generate individual bounding box from 3d label.
@@ -111,7 +130,7 @@ def gen_3d_cube(
 
     lines = []
     for edge in edges["dashed"]:
-        if check_edge_visibility(edge, intrinsics.center):
+        if check_edge_visibility(edge, img_w, img_h):
             continue
         lines.append(
             mpatches.Polygon(
@@ -125,7 +144,7 @@ def gen_3d_cube(
             )
         )
     for edge in edges["solid"]:
-        if check_edge_visibility(edge, intrinsics.center):
+        if check_edge_visibility(edge, img_w, img_h):
             continue
         lines.append(
             mpatches.Polygon(

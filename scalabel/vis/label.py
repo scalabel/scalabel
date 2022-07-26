@@ -22,7 +22,15 @@ from ..common.logger import logger
 from ..common.parallel import NPROC
 from ..common.typing import NDArrayF64, NDArrayU8
 from ..label.transforms import rle_to_mask
-from ..label.typing import Config, Edge, Frame, Intrinsics, Label, Node
+from ..label.typing import (
+    Config,
+    Edge,
+    Frame,
+    Intrinsics,
+    Extrinsics,
+    Label,
+    Node,
+)
 from ..label.utils import (
     check_crowd,
     check_ignored,
@@ -46,6 +54,7 @@ from .helper import (
     poly2patch,
     random_color,
 )
+from scipy.spatial.transform import Rotation as R
 
 # Necessary due to Queue being generic in stubs but not at runtime
 # https://mypy.readthedocs.io/en/stable/runtime_troubles.html#not-generic-runtime
@@ -173,6 +182,7 @@ class LabelViewer:
         self.fig = plt.figure(figsize=figsize, dpi=self.ui_cfg.dpi)
         self.ax: Axes = self.fig.add_axes([0.0, 0.0, 1.0, 1.0], frameon=False)
         self.ax.axis("off")
+        self.trajectories = {}
 
     def run_with_controller(self, controller: ViewController) -> None:
         """Start running with the controller."""
@@ -230,7 +240,12 @@ class LabelViewer:
         if with_box2d:
             self.draw_box2ds(labels, with_tags=with_tags)
         if with_box3d and frame.intrinsics is not None:
-            self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
+            self.draw_box3ds(
+                labels,
+                frame.intrinsics,
+                frame.extrinsics,
+                with_tags=with_tags,
+            )
         if with_poly2d and (not with_rle or not has_rle):
             self.draw_poly2ds(
                 labels,
@@ -262,7 +277,7 @@ class LabelViewer:
 
         label_id = label.id
         if label_id not in self._label_colors:
-            self._label_colors[label_id] = random_color()
+            self._label_colors[label_id] = random_color(label_id)
         return self._label_colors[label_id]
 
     def draw_attributes(self, frame: Frame) -> None:
@@ -338,20 +353,60 @@ class LabelViewer:
         self,
         labels: List[Label],
         intrinsics: Intrinsics,
+        extrinsics: Optional[Extrinsics] = None,
         with_tags: bool = True,
     ) -> None:
         """Draw Box3d on the axes."""
         for label in labels:
             if label.box3d is not None:
-                color = self._get_label_color(label).tolist()
+                color = self._get_label_color(label)
                 occluded = check_occluded(label)
                 alpha = 0.5 if occluded else 0.8
                 label3d, lines = gen_3d_cube(
-                    label, color, int(2 * self.ui_cfg.scale), intrinsics, alpha
+                    label,
+                    color,
+                    int(2 * self.ui_cfg.scale),
+                    intrinsics,
+                    img_h=self.ui_cfg.height,
+                    img_w=self.ui_cfg.width,
+                    alpha=alpha,
                 )
                 if not label3d.behind_camera:
+                    sensor2global = R.from_euler(
+                        "xyz", extrinsics.rotation
+                    ).as_matrix()
+                    translation = np.dot(
+                        sensor2global, label.box3d.location
+                    ) + np.array(extrinsics.location)
+                    if label.id in self.trajectories:
+                        if len(self.trajectories[label.id]) == 15:
+                            self.trajectories[label.id] = self.trajectories[
+                                label.id
+                            ][1:]
+                        self.trajectories[label.id].append(translation)
+                    else:
+                        self.trajectories[label.id] = [translation]
                     for line in lines:
                         self.ax.add_patch(line)
+                        for translation in self.trajectories[label.id]:
+                            cam_center = translation - np.array(
+                                extrinsics.location
+                            )
+                            cam_center = np.dot(sensor2global.T, cam_center)
+                            center, _ = vector_3d_to_2d(
+                                cam_center,
+                                get_matrix_from_intrinsics(intrinsics),
+                            )
+                            self.ax.add_patch(
+                                mpatches.Circle(
+                                    center,
+                                    edgecolor=color,
+                                    facecolor=color,
+                                    fill=True,
+                                    alpha=alpha,
+                                    radius=3,
+                                )
+                            )
 
                     if with_tags:
                         point_1, _ = vector_3d_to_2d(
