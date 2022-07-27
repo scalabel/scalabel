@@ -1,4 +1,4 @@
-"""Multi-object Tracking evaluation code."""
+"""Multi-object Tracking CLEAR MOT evaluation code."""
 import argparse
 import json
 import time

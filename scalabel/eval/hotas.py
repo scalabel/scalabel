@@ -215,7 +215,7 @@ def evaluate_videos(
     return res
 
 
-def evaluate_seg_track(
+def evaluate_seg_track_hota(
     gts: List[List[Frame]],
     results: List[List[Frame]],
     config: Config,
@@ -312,7 +312,7 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_seg_track(
+    eval_result = evaluate_seg_track_hota(
         group_and_sort(gt_frames),
         group_and_sort(load(args.result, args.nproc).frames),
         cfg,

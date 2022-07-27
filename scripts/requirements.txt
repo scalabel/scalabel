@@ -22,7 +22,6 @@ PyWavelets
 PyYAML
 requests
 scikit-image
-scikit-learn
 scipy
 seaborn
 tabulate

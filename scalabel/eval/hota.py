@@ -328,7 +328,7 @@ def generate_results(
     return HOTAResult(**res_dict)
 
 
-def evaluate_track(
+def evaluate_track_hota(
     gts: List[List[Frame]],
     results: List[List[Frame]],
     config: Config,
@@ -416,7 +416,7 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_track(
+    eval_result = evaluate_track_hota(
         group_and_sort(gt_frames),
         group_and_sort(load(args.result, args.nproc).frames),
         cfg,
