@@ -278,6 +278,8 @@ export interface SensorType {
   intrinsics?: IntrinsicsType
   /** extrinsics */
   extrinsics?: ExtrinsicsType
+  /** sensor height */
+  height?: number
 }
 
 export interface SensorMapType {
