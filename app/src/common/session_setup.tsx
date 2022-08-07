@@ -154,7 +154,6 @@ function loadImages(
         attemptsMap[sensorId] = 0
         const url = item.urls[sensorId]
         const image = new Image()
-        image.crossOrigin = "Anonymous"
         image.onload = () => {
           dispatch(loadItem(item.index, sensorId))
         }
