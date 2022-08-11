@@ -55,6 +55,7 @@ export function polyIsComplex(vertices: Array<[number, number]>): number[][] {
       }
     }
   }
+  vertices.splice(vertices.length - 1, 1)
   return intersections
 }
 

@@ -18,7 +18,6 @@ import { activateSpan, deactivateSpan } from "../action/span3d"
 import {
   changeSelectedLabelsAttributes,
   deleteSelectedLabels,
-  deleteSelectedLabelsfromTracks,
   terminateSelectedTracks
 } from "../action/select"
 import { addLabelTag } from "../action/tag"
@@ -237,12 +236,16 @@ export class ToolBar extends Component<Props> {
       const trackId = item.labels[Object.values(select.labels)[0][0]].track
       if (trackId !== undefined) {
         if (isValidId(trackId)) {
-          if (!this.isKeyDown(Key.S_LOW)) {
-            Session.dispatch(terminateSelectedTracks(this.state, select.item))
+          if (!this.isKeyDown(Key.S_LOW) && !this.isKeyDown(Key.REVSLASH)) {
+            if (
+              confirm(
+                `Confirm to delete labels for the current frame and following frames?\nIf you want to delete label only in this frame, please use \n\\ + backspace or s + backspace.`
+              )
+            ) {
+              Session.dispatch(terminateSelectedTracks(this.state, select.item))
+            }
           } else {
-            Session.dispatch(
-              deleteSelectedLabelsfromTracks(this.state, select.item)
-            )
+            Session.dispatch(deleteSelectedLabels(this.state))
           }
         } else {
           Session.dispatch(deleteSelectedLabels(this.state))

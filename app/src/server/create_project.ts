@@ -562,11 +562,12 @@ export function filterIntersectedPolygonsInProject(
     if (item.labels !== undefined) {
       const filteredLabels: LabelExport[] = []
       item.labels.forEach((label) => {
+        let keep: boolean = false
         if (label.poly2d !== undefined && label.poly2d !== null) {
           label.poly2d.forEach((poly) => {
             // If it is a polyline label, do not check intersection
             if (!poly.closed) {
-              filteredLabels.push(label)
+              keep = true
             } else {
               // This is a workaround for importing bdd100k labels.
               // Its polygon may contain vertices that is very close (<1)
@@ -587,10 +588,13 @@ export function filterIntersectedPolygonsInProject(
                   msg += `\n`
                 })
               } else {
-                filteredLabels.push(label)
+                keep = true
               }
             }
           })
+          if (keep) {
+            filteredLabels.push(label)
+          }
         } else {
           filteredLabels.push(label)
         }
