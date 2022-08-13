@@ -5,6 +5,7 @@ import {
   linkLabels,
   mergeTracks,
   startLinkTrack,
+  stopLinkTrack,
   unlinkLabels,
   splitTrack
 } from "../../action/common"
@@ -278,6 +279,9 @@ export class Label2DHandler {
         } else if (!this._state.task.config.tracking) {
           // Linking
           this.linkLabels()
+        } else if (!this._state.session.trackLinking) {
+          // Enable link in trakcing mode when track linking is not activated.
+          this.linkLabels()
         }
         break
       case Key.L_UP:
@@ -337,6 +341,11 @@ export class Label2DHandler {
               commit2DLabels([...this._labelList.popUpdatedLabels()])
             }
           }
+        }
+        break
+      case Key.ESCAPE:
+        if (this._state.session.trackLinking) {
+          Session.dispatch(stopLinkTrack())
         }
         break
     }

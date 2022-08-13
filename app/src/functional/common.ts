@@ -7,6 +7,7 @@ import { IdType } from "aws-sdk/clients/workdocs"
 import _ from "lodash"
 
 import { uid } from "../common/uid"
+import md5 from "blueimp-md5"
 import * as actionConsts from "../const/action"
 import { LabelTypeName, ViewerConfigTypeName } from "../const/common"
 import * as actionTypes from "../types/action"
@@ -387,8 +388,19 @@ function mergeTracksInItems(
   const track = _.cloneDeep(tracks[0])
   for (let i = 1; i < tracks.length; i += 1) {
     _.forEach(tracks[i].labels, (labelId, itemIndex) => {
-      labelIds[Number(itemIndex)].push(labelId)
-      props[Number(itemIndex)].push(prop)
+      const idx = Number(itemIndex)
+      const item = items[idx]
+
+      // Change current label as well as all its descents.
+      const descents = [labelId]
+      for (let i = 0; i < descents.length; i++) {
+        const currId = descents[i]
+        labelIds[idx].push(currId)
+        props[idx].push(prop)
+        item.labels[currId].children.forEach((c) => {
+          descents.push(c)
+        })
+      }
     })
     track.labels = { ...track.labels, ...tracks[i].labels }
   }
@@ -447,15 +459,27 @@ function splitTrackInItems(
   }
 
   _.forEach(track.labels, (labelId, itemIndex) => {
-    if (Number(itemIndex) < splitIndex) {
-      splitedTrack0.labels[Number(itemIndex)] = labelId
+    const idx = Number(itemIndex)
+
+    if (idx < splitIndex) {
+      splitedTrack0.labels[idx] = labelId
     } else {
-      splitedTrack1.labels[Number(itemIndex)] = labelId
-      labelIds[Number(itemIndex)].push(labelId)
-      if (Number(itemIndex) === splitIndex) {
-        props[Number(itemIndex)].push({ ...prop, manual: true })
-      } else {
-        props[Number(itemIndex)].push(prop)
+      splitedTrack1.labels[idx] = labelId
+
+      const descents = [labelId]
+      for (let i = 0; i < descents.length; i++) {
+        const currId = descents[i]
+        labelIds[idx].push(currId)
+        if (idx === splitIndex) {
+          props[idx].push({ ...prop, manual: true })
+        } else {
+          props[idx].push({ ...prop })
+        }
+
+        const curr = items[idx].labels[currId]
+        curr.children.forEach((l) => {
+          descents.push(l)
+        })
       }
     }
   })
@@ -734,8 +758,17 @@ function createParentLabel(
   let tracks = state.task.tracks
   const labelsToMerge = idList.map((id) => item.labels[id])
 
+  // Randomly generating an id for the parent label will cause inconsistency
+  // between the client and the server. To rescue, we determinstically assign
+  // an id to this parent label based on its children.
+  const seed = labelsToMerge
+    .map((l) => l.id)
+    .sort()
+    .join("_")
+  const pid = md5(seed)
+
   // Make parent label
-  const parentLabel: LabelType = makeLabel(label)
+  const parentLabel: LabelType = makeLabel({ ...label, id: pid }, false)
   parentLabel.parent = INVALID_ID
   parentLabel.shapes = []
   parentLabel.children = [...idList]
@@ -819,6 +852,15 @@ export function linkLabels(
             : null
         )
         .filter((lbl) => lbl !== null) as string[]
+
+      // collect all descents
+      for (let i = 0; i < labelIdsToMerge.length; i++) {
+        const currId = labelIdsToMerge[i]
+        taskItem.labels[currId].children.forEach((c) => {
+          labelIdsToMerge.push(c)
+        })
+      }
+
       if (labelIdsToMerge.length > 0) {
         state = createParentLabel(
           state,
@@ -1017,9 +1059,14 @@ function deleteLabelsFromItem(
   labelIds: IdType[]
 ): [ItemType, LabelType[]] {
   let labels = item.labels
-  labelIds = labelIds.concat(
-    ...labelIds.map((labelId) => item.labels[labelId].children)
-  )
+
+  // Collect all descents
+  for (let i = 0; i < labelIds.length; i++) {
+    const currId = labelIds[i]
+    item.labels[currId].children.forEach((c) => {
+      labelIds.push(c)
+    })
+  }
 
   const deletedLabels = pickObject(item.labels, labelIds)
 
@@ -1551,6 +1598,20 @@ export function submit(state: State, action: actionTypes.SubmitAction): State {
 export function startLinkTrack(state: State): State {
   const newSession = updateObject(state.session, {
     trackLinking: true
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
+ * Stop linking track.
+ *
+ * @param state Previous state
+ */
+export function stopLinkTrack(state: State): State {
+  const newSession = updateObject(state.session, {
+    trackLinking: false
   })
   return updateObject(state, {
     session: newSession

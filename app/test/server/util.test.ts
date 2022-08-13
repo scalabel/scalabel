@@ -96,9 +96,6 @@ describe("test general utility methods", () => {
     handlers.forEach((labels, item) => {
       labels.forEach((want, label) => {
         const handler = util.getHandlerUrl(item, label)
-        // @ts-expect-error: `expect` is extended to support an extra error message
-        // argument through `jest-expect-message` library but was loaded only
-        // at testing time.
         expect(handler, `expect ${item} + ${label} => ${want}`).toBe(want)
       })
     })
@@ -110,9 +107,6 @@ describe("test general utility methods", () => {
           return
         }
         const handler = util.getHandlerUrl(item, label)
-        // @ts-expect-error: `expect` is extended to support an extra error message
-        // argument through `jest-expect-message` library but was loaded only
-        // at testing time.
         expect(handler, `expect ${item} + ${label} => invalid`).toBe(
           HandlerUrl.INVALID
         )
