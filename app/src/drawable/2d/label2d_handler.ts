@@ -263,7 +263,15 @@ export class Label2DHandler {
       const modifier = checkModifierFromKeyboard(labels, e)
       if (modifier != null) {
         // Hit one.
-        modifier.onFinish(() => (this._modifier = null))
+
+        // Somehow the `_highlightedLabel` will be set null after entering
+        // the modifying mode. Therefore, we remember the old value and
+        // set it back later.
+        const old = this._highlightedLabel
+        modifier.onFinish(() => {
+          this._modifier = null;
+          this._highlightedLabel = old
+        })
         this._modifier = modifier
 
         // No fallthrough.
