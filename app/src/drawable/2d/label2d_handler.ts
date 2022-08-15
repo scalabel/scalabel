@@ -269,7 +269,7 @@ export class Label2DHandler {
         // set it back later.
         const old = this._highlightedLabel
         modifier.onFinish(() => {
-          this._modifier = null;
+          this._modifier = null
           this._highlightedLabel = old
         })
         this._modifier = modifier
