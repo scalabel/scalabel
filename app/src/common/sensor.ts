@@ -26,6 +26,8 @@ export class Sensor {
   private readonly _up: THREE.Vector3
   /** forward direction for sensor coordinates */
   private readonly _forward: THREE.Vector3
+  /** Height above ground */
+  private readonly _height: number | null
 
   /**
    * Constructor
@@ -36,6 +38,7 @@ export class Sensor {
    * @param intrinsics
    * @param extrinsics
    * @param image
+   * @param height
    */
   constructor(
     id: number,
@@ -43,7 +46,8 @@ export class Sensor {
     type: string,
     intrinsics?: IntrinsicsType,
     extrinsics?: ExtrinsicsType,
-    image?: HTMLImageElement
+    image?: HTMLImageElement,
+    height?: number
   ) {
     this._id = id
     this._name = name
@@ -53,6 +57,7 @@ export class Sensor {
     this._projectionMatrix = null
     this._transformationMatrix = null
     this._inverseTransformationMatrix = null
+    this._height = height ?? null
 
     if (image !== undefined) {
       this.calculateProjectionMatrix(image)
@@ -135,7 +140,15 @@ export class Sensor {
     s: SensorType,
     image?: HTMLImageElement
   ): Sensor {
-    return new Sensor(s.id, s.name, s.type, s.intrinsics, s.extrinsics, image)
+    return new Sensor(
+      s.id,
+      s.name,
+      s.type,
+      s.intrinsics,
+      s.extrinsics,
+      image,
+      s.height
+    )
   }
 
   /**
@@ -256,5 +269,12 @@ export class Sensor {
    */
   public hasIntrinsics(): boolean {
     return this._intrinsics !== null
+  }
+
+  /**
+   * Height of sensor above ground
+   */
+  public get height(): number | null {
+    return this._height
   }
 }
