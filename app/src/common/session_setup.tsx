@@ -286,9 +286,7 @@ function initViewerConfigs(
       if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "25%"
       }
-      dispatch(
-        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
-      )
+      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize }))
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
@@ -316,9 +314,7 @@ function initViewerConfigs(
       if (minSensorIds[types.ViewerConfigTypeName.IMAGE] >= 0) {
         primarySize = "33%"
       }
-      dispatch(
-        updatePane(state.user.layout.maxPaneId, { primarySize: primarySize })
-      )
+      dispatch(updatePane(state.user.layout.maxPaneId, { primarySize }))
 
       state = getState()
       config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]

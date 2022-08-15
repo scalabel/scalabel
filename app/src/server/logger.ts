@@ -76,7 +76,7 @@ class Logger {
     if (message !== "" && !this._silent) {
       this._logger.log({
         level: "warn",
-        message: message
+        message
       })
     }
   }
