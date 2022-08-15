@@ -12,7 +12,7 @@ import { addAlert } from "../action/common"
 export function alert(severity: Severity, msg: string): void {
   const alert = {
     id: uid(),
-    severity: severity,
+    severity,
     message: msg,
     timeout: 12000
   }
