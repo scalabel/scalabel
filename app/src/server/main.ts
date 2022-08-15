@@ -212,7 +212,12 @@ async function startServers(
 ): Promise<void> {
   const app: Application = express()
   const httpServer = createServer(app)
-  const io = new Server(httpServer)
+  const io = new Server(httpServer, {
+    // socket.io by default allows messages no more than 1MB, which is
+    // insufficient in some video tracking tasks.
+    // https://socket.io/docs/v4/server-options/#maxhttpbuffersize
+    maxHttpBufferSize: 1e8
+  })
 
   // Set up http handlers
   startHTTPServer(config, app, projectStore, userManager)

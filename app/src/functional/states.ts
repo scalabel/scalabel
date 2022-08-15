@@ -662,6 +662,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     startTime: 0,
     itemStatuses: [],
     trackLinking: false,
+    polygon2DBoundaryClone: undefined,
     status: ConnectionStatus.UNSAVED,
     mode: ModeStatus.ANNOTATING,
     numUpdates: 0,

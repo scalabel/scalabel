@@ -5,6 +5,7 @@ import {
   linkLabels,
   mergeTracks,
   startLinkTrack,
+  stopLinkTrack,
   unlinkLabels,
   splitTrack
 } from "../../action/common"
@@ -19,8 +20,9 @@ import { Size2D } from "../../math/size2d"
 import { Vector2D } from "../../math/vector2d"
 import { IdType, State } from "../../types/state"
 import { commit2DLabels } from "../states"
-import { Label2D } from "./label2d"
+import { Label2D, Label2DModifier } from "./label2d"
 import { Label2DList, makeDrawableLabel2D } from "./label2d_list"
+import { checkModifierFromKeyboard } from "./label2d_modifier"
 import { makeTrack } from "../../functional/states"
 
 /**
@@ -35,9 +37,11 @@ export class Label2DHandler {
   /** Highlighted label */
   private _highlightedLabel: Label2D | null
   /** The hashed list of keys currently down */
-  private _keyDownMap: { [key: string]: boolean }
+  private readonly _pressedKey: Set<string>
   /** Index of currently selected item */
   private _selectedItemIndex: number
+  /** Active modifier */
+  private _modifier: Label2DModifier | null
 
   /**
    * Constructor
@@ -47,9 +51,10 @@ export class Label2DHandler {
   constructor(labelList: Label2DList) {
     this._highlightedLabel = null
     this._state = Session.getState()
-    this._keyDownMap = {}
+    this._pressedKey = new Set<string>()
     this._selectedItemIndex = -1
     this._labelList = labelList
+    this._modifier = null
 
     addVisibilityListener(() => this.onVisibilityChange())
   }
@@ -144,6 +149,16 @@ export class Label2DHandler {
     _labelIndex: number,
     _handleIndex: number
   ): void {
+    // Hijack the event by the modifier.
+    if (this._modifier !== null) {
+      // Notify the modifier only when a handler is clicked.
+      if (_labelIndex >= 0 && _handleIndex >= 0) {
+        const label = this._labelList.labelList[_labelIndex]
+        this._modifier.onClickHandler(label, _handleIndex)
+      }
+      return
+    }
+
     if (this.hasSelectedLabels() && !this.isKeyDown(Key.META)) {
       const labelsToRemove: Label2D[] = []
       this._labelList.selectedLabels.forEach((selectedLabel) => {
@@ -185,27 +200,31 @@ export class Label2DHandler {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
-      for (const label of this._labelList.selectedLabels) {
-        label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
-        label.setManual()
-      }
-      return true
-    } else {
-      if (labelIndex >= 0) {
-        if (this._highlightedLabel === null) {
-          this._highlightedLabel = this._labelList.labelList[labelIndex]
+    // Freeze the selected labels when a modifier is activated.
+    if (this._modifier === null) {
+      if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
+        for (const label of this._labelList.selectedLabels) {
+          label.onMouseMove(coord, canvasLimit, labelIndex, handleIndex)
+          label.setManual()
         }
-        if (this._highlightedLabel.index !== labelIndex) {
-          this._highlightedLabel.setHighlighted(false)
-          this._highlightedLabel = this._labelList.labelList[labelIndex]
-        }
-        this._highlightedLabel.setHighlighted(true, handleIndex)
-      } else if (this._highlightedLabel !== null) {
-        this._highlightedLabel.setHighlighted(false)
-        this._highlightedLabel = null
+        return true
       }
     }
+
+    if (labelIndex >= 0) {
+      if (this._highlightedLabel === null) {
+        this._highlightedLabel = this._labelList.labelList[labelIndex]
+      }
+      if (this._highlightedLabel.index !== labelIndex) {
+        this._highlightedLabel.setHighlighted(false)
+        this._highlightedLabel = this._labelList.labelList[labelIndex]
+      }
+      this._highlightedLabel.setHighlighted(true, handleIndex)
+    } else if (this._highlightedLabel !== null) {
+      this._highlightedLabel.setHighlighted(false)
+      this._highlightedLabel = null
+    }
+
     return false
   }
 
@@ -215,16 +234,51 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyDown(e: KeyboardEvent): void {
-    this._keyDownMap[e.key] = true
-    for (const selectedLabel of this._labelList.selectedLabels) {
-      if (!selectedLabel.onKeyDown(e.key)) {
-        this._labelList.labelList.splice(
-          this._labelList.labelList.indexOf(this._labelList.selectedLabels[0]),
-          1
-        )
+    // Hijack the event by the modifier.
+    if (this._modifier != null) {
+      this._modifier.onKeyDown(e)
+      return
+    }
+
+    this._pressedKey.add(e.key)
+
+    // Propagate the key-down event only when exactly one key is pressed.
+    // Otherwise, pressing `Ctrl + D` will delete the active label.
+    if (this._pressedKey.size === 1) {
+      for (const sl of this._labelList.selectedLabels) {
+        if (sl.onKeyDown(e.key)) {
+          continue
+        }
+
+        const l = this._labelList.selectedLabels[0]
+        const i = this._labelList.labelList.indexOf(l)
+        this._labelList.labelList.splice(i, 1)
         this._labelList.selectedLabels.length = 0
       }
     }
+
+    // Check if some modifier is suitable when `Ctrl` is pressed.
+    if (this.isKeyDown(Key.CONTROL)) {
+      const { selectedLabels: labels } = this._labelList
+      const modifier = checkModifierFromKeyboard(labels, e)
+      if (modifier != null) {
+        // Hit one.
+
+        // Somehow the `_highlightedLabel` will be set null after entering
+        // the modifying mode. Therefore, we remember the old value and
+        // set it back later.
+        const old = this._highlightedLabel
+        modifier.onFinish(() => {
+          this._modifier = null
+          this._highlightedLabel = old
+        })
+        this._modifier = modifier
+
+        // No fallthrough.
+        return
+      }
+    }
+
     switch (e.key) {
       case Key.L_LOW:
         if (this.isKeyDown(Key.CONTROL)) {
@@ -232,6 +286,9 @@ export class Label2DHandler {
           Session.dispatch(startLinkTrack())
         } else if (!this._state.task.config.tracking) {
           // Linking
+          this.linkLabels()
+        } else if (!this._state.session.trackLinking) {
+          // Enable link in trakcing mode when track linking is not activated.
           this.linkLabels()
         }
         break
@@ -293,6 +350,12 @@ export class Label2DHandler {
             }
           }
         }
+        break
+      case Key.ESCAPE:
+        if (this._state.session.trackLinking) {
+          Session.dispatch(stopLinkTrack())
+        }
+        break
     }
   }
 
@@ -315,8 +378,7 @@ export class Label2DHandler {
    * @param e
    */
   public onKeyUp(e: KeyboardEvent): void {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[e.key]
+    this._pressedKey.delete(e.key)
     for (const selectedLabel of this._labelList.selectedLabels) {
       selectedLabel.onKeyUp(e.key)
     }
@@ -328,10 +390,8 @@ export class Label2DHandler {
    * @param _isVisible
    */
   public onVisibilityChange(): void {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[Key.META]
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete this._keyDownMap[Key.CONTROL]
+    this._pressedKey.delete(Key.META)
+    this._pressedKey.delete(Key.CONTROL)
   }
 
   /** returns whether selectedLabels is empty */
@@ -355,7 +415,7 @@ export class Label2DHandler {
    * @param key - the key to check
    */
   private isKeyDown(key: Key): boolean {
-    return this._keyDownMap[key]
+    return this._pressedKey.has(key)
   }
 
   /** Select highlighted label, if any */

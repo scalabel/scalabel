@@ -556,6 +556,17 @@ export interface Info3DType {
   showGroundPlane: boolean
 }
 
+export interface Polygon2DBoundaryCloneStatusType {
+  /** Id of ther label to be clone from */
+  labelId: IdType | undefined
+  /** Index of the first handler */
+  handler1Idx: number | undefined
+  /** Index of the second handler */
+  handler2Idx: number | undefined
+  /** If to clone the other way around */
+  reverse: boolean
+}
+
 /**
  * Information for this particular session
  */
@@ -572,6 +583,8 @@ export interface SessionType {
   itemStatuses: ItemStatus[]
   /** Track linking toggled */
   trackLinking: boolean
+  /** Polygon2D boundary clone status */
+  polygon2DBoundaryClone: Polygon2DBoundaryCloneStatusType | undefined
   /** Current connection status */
   status: ConnectionStatus
   /** Current mode */
