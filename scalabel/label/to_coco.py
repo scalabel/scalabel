@@ -165,7 +165,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes
+            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["file_name"] = image_anns.url
@@ -229,7 +229,7 @@ def scalabel2coco_ins_seg(
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes
+            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["file_name"] = image_anns.url
@@ -328,7 +328,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 height=img_shape.height,
                 width=img_shape.width,
                 id=image_id,
-                attributes=video_attributes
+                attributes=video_attributes,
             )
             if image_anns.url is not None:
                 image["file_name"] = image_anns.url
@@ -411,7 +411,7 @@ def scalabel2coco_seg_track(
                 height=img_shape.height,
                 width=img_shape.width,
                 id=image_id,
-                attributes=video_attributes
+                attributes=video_attributes,
             )
             shapes.append(img_shape)
             if image_anns.url is not None:
@@ -474,7 +474,7 @@ def scalabel2coco_pose(frames: List[Frame], config: Config) -> GtType:
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes
+            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["coco_url"] = image_anns.url
