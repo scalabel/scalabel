@@ -392,7 +392,9 @@ def scalabel2coco_seg_track(
         video_name = video_anns[0].videoName
         video_attributes = video_anns[0].attributes
         assert video_name is not None, "Tracking annotations have no videoName"
-        video = VidType(id=video_id, name=video_name)
+        video = VidType(
+            id=video_id, name=video_name, attributes=video_attributes
+        )
         videos.append(video)
 
         for image_anns in frames:
