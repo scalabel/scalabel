@@ -1,7 +1,7 @@
 """Type definitions for the COCO format."""
 
 import sys
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 if sys.version_info >= (3, 8):
     from typing import TypedDict
@@ -53,6 +53,9 @@ class ImgType(TypedDict, total=False):
     coco_url: Optional[str]
     video_id: Optional[int]
     frame_id: Optional[int]
+    attributes: Optional[
+        Dict[str, Union[bool, float, str, List[float], List[str]]]
+    ]
 
 
 class VidType(TypedDict):
@@ -60,6 +63,9 @@ class VidType(TypedDict):
 
     id: int
     name: str
+    attributes: Optional[
+        Dict[str, Union[bool, float, str, List[float], List[str]]]
+    ]
 
 
 class GtType(TypedDict, total=False):

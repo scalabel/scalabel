@@ -104,7 +104,8 @@ def intersection_over_area(preds: NDArrayF64, gts: NDArrayF64) -> NDArrayF64:
         for j, g in enumerate(gts):
             w = min(p[0] + p[2], g[0] + g[2]) - max(p[0], g[0])
             h = min(p[1] + p[3], g[1] + g[3]) - max(p[1], g[1])
-            out[i][j] = max(w, 0) * max(h, 0) / float(p[2] * p[3])
+            area = float(p[2] * p[3])
+            out[i][j] = max(w, 0) * max(h, 0) / area if area != 0 else 0.0
     return out
 
 
