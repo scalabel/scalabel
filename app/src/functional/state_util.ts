@@ -250,11 +250,19 @@ export function getCurrentViewerConfig(
 export function getSelectedTracks(state: State): TrackType[] {
   const selectedLabels = getSelectedLabels(state)
   const tracks: TrackType[] = []
+  const added = new Set<string>()
 
   for (const key of Object.keys(selectedLabels)) {
     const itemIndex = Number(key)
     for (const labelId of selectedLabels[itemIndex]) {
       const trackId = state.task.items[itemIndex].labels[labelId].track
+
+      // Deduplicate since linked labels belongs to same track.
+      if (added.has(trackId)) {
+        continue
+      }
+      added.add(trackId)
+
       tracks.push(getTrack(state, trackId))
     }
   }

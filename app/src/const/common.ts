@@ -76,6 +76,7 @@ export enum Key {
   ESCAPE = "Escape",
   CONTROL = "Control",
   META = "Meta",
+  ALT = "Alt",
   SHIFT = "Shift",
   BACKSPACE = "Backspace",
   SPACE = " ",

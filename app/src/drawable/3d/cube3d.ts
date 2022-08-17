@@ -38,6 +38,8 @@ export class Cube3D extends Shape3D {
   private readonly _closestFaceNormal: THREE.Vector3
   /** Control points */
   private readonly _controlSpheres: THREE.Mesh[]
+  /** Material for cube faces */
+  private _cubeMaterials: THREE.MeshBasicMaterial[]
   /** Highlighted control point */
   private _highlightedSphere: THREE.Mesh | null
   /** Plane shape */
@@ -46,6 +48,8 @@ export class Cube3D extends Shape3D {
   private _firstCorner: Vector2D | null
   /** internal shape state */
   private _cubeShape: CubeType
+  /** forward direction of coordinate system */
+  private _forward: Vector3D
 
   /**
    * Make box with assigned id
@@ -55,15 +59,25 @@ export class Cube3D extends Shape3D {
    */
   constructor(label: Label3D) {
     super(label)
+    this._forward = new Vector3D(0, 0, 1)
     this._color = label.color.map((v) => v / 255)
+    const baseMaterial = new THREE.MeshBasicMaterial({
+      color: this.color3(),
+      transparent: true,
+      opacity: 0.05,
+      side: THREE.BackSide
+    })
+    this._cubeMaterials = [
+      baseMaterial,
+      baseMaterial,
+      baseMaterial,
+      baseMaterial,
+      baseMaterial,
+      baseMaterial
+    ]
     this._box = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshBasicMaterial({
-        color: this.color3(),
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.35
-      })
+      this._cubeMaterials
     )
     this.add(this._box)
     this._box.geometry.computeBoundingBox()
@@ -244,12 +258,7 @@ export class Cube3D extends Shape3D {
    * @param id
    */
   public updateState(shape: ShapeType, id: IdType): void {
-    this._box.material = new THREE.MeshBasicMaterial({
-      color: this.color3(),
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.35
-    })
+    this._box.material = this._cubeMaterials
     super.updateState(shape, id)
     const cube = shape as CubeType
     this.position.copy(new Vector3D().fromState(cube.center).toThree())
@@ -304,6 +313,36 @@ export class Cube3D extends Shape3D {
     if (this._grid === null) {
       scene.add(this)
     }
+  }
+
+  /**
+   * Set forward direction, update heading visual
+   *
+   * @param forward
+   */
+  public setForward(forward: Vector3D): void {
+    this._forward = forward
+    const baseMaterial = new THREE.MeshBasicMaterial({
+      color: this.color3(),
+      transparent: true,
+      opacity: 0.05,
+      side: THREE.BackSide
+    })
+    const frontFaceMaterial = new THREE.MeshBasicMaterial({
+      color: this.color3(),
+      transparent: true,
+      opacity: 0.5,
+      side: THREE.DoubleSide
+    })
+    this._cubeMaterials = [
+      baseMaterial,
+      this._forward.x === 1 ? frontFaceMaterial : baseMaterial,
+      baseMaterial,
+      baseMaterial,
+      baseMaterial,
+      this._forward.z === 1 ? frontFaceMaterial : baseMaterial
+    ]
+    this._box.material = this._cubeMaterials
   }
 
   /**

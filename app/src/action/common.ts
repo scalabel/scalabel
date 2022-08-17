@@ -15,6 +15,7 @@ import {
   ModelStatus,
   ModeStatus,
   PaneType,
+  Polygon2DBoundaryCloneStatusType,
   Select,
   ShapeAllType,
   ShapeType,
@@ -559,6 +560,27 @@ export function submit(): actionTypes.SubmitAction {
  */
 export function startLinkTrack(): actionTypes.BaseAction {
   return makeBaseAction(actionConsts.START_LINK_TRACK)
+}
+
+/**
+ * stop linking tracks
+ */
+export function stopLinkTrack(): actionTypes.BaseAction {
+  return makeBaseAction(actionConsts.STOP_LINK_TRACK)
+}
+
+/**
+ * update polygon 2d boundary clone status
+ *
+ * @param status
+ */
+export function updatePolygon2DBoundaryCloneStatus(
+  status: Polygon2DBoundaryCloneStatusType | undefined
+): actionTypes.UpdatePolygon2DBoundaryCloneStatusAction {
+  return {
+    ...makeBaseAction(actionConsts.UPDATE_POLYGON2D_BOUNDARY_CLONE),
+    status
+  }
 }
 
 /**

@@ -11,6 +11,7 @@ import {
   ModelStatus,
   ModeStatus,
   PaneType,
+  Polygon2DBoundaryCloneStatusType,
   Select,
   ShapeType,
   SplitType,
@@ -235,6 +236,11 @@ export interface RemoveAlertAction extends BaseAction {
   alertId: string
 }
 
+export interface UpdatePolygon2DBoundaryCloneStatusAction extends BaseAction {
+  /** current interaction status */
+  status: Polygon2DBoundaryCloneStatusType | undefined
+}
+
 export type ActivateSpanAction = BaseAction
 
 export type DeactivateSpanAction = BaseAction
@@ -273,6 +279,7 @@ export type SessionActionType =
   | AddAlertAction
   | RemoveAlertAction
   | SyncActionType
+  | UpdatePolygon2DBoundaryCloneStatusAction
 
 export type Info3DActionType =
   | ActivateSpanAction

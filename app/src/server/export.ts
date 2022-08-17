@@ -73,7 +73,7 @@ export function convertItemToExport(
       name = item.names[sensor]
     }
     itemExports[sensor] = {
-      name: name,
+      name,
       url,
       videoName,
       timestamp,

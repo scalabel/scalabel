@@ -133,6 +133,8 @@ export class Label3DHandler {
    */
   public onDoubleClick(x: number, y: number): boolean {
     const selectedLabel = Session.label3dList.selectedLabel
+    const state = this._state
+    const mainSensor = getMainSensor(state)
     if (
       this._highlightedLabel === null &&
       selectLabel !== null &&
@@ -143,23 +145,30 @@ export class Label3DHandler {
       Session.label3dList.addShapeToHistShapes(shape)
       const planeLabel = selectedLabel as Plane3D
       // Get interception with plane
+      let planeCenter = planeLabel.center
+      if (mainSensor.height !== null) {
+        const { up } = this.getAxes()
+        planeCenter = up
+          .toThree()
+          .normalize()
+          .multiplyScalar(-1)
+          .multiplyScalar(mainSensor.height)
+      }
       const plane = new THREE.Plane()
       const normal = new THREE.Vector3(0, 0, 1)
       normal.applyQuaternion(planeLabel.orientation)
-      plane.setFromNormalAndCoplanarPoint(normal, planeLabel.center)
+      plane.setFromNormalAndCoplanarPoint(normal, planeCenter)
       const projection = projectionFromNDC(x, y, this._camera)
       const point3d = new THREE.Vector3()
       projection.intersectPlane(plane, point3d)
 
       // If point cloud, move to closest point
-      const state = this._state
       const sensors = Object.values(state.task.sensors)
       const hasPointCloud = sensors.reduce(
         (prev: boolean, curr) => prev || curr.type === DataType.POINT_CLOUD,
         false
       )
       if (hasPointCloud) {
-        const mainSensor = getMainSensor(state)
         const itemIndex = state.user.select.item
         const pointCloud = new THREE.Points(
           Session.pointClouds[itemIndex][mainSensor.id]
@@ -488,12 +497,48 @@ export class Label3DHandler {
   }
 
   /**
+   * Change heading of 3d box, if currently selected
+   */
+  private changeBoxHeading(): void {
+    const { up } = this.getAxes()
+    const label = Session.label3dList.selectedLabel
+    if (label !== null && label.type === LabelTypeName.BOX_3D) {
+      const shape = Session.label3dList.getCurrentShape() as CubeType
+      Session.label3dList.addShapeToHistShapes(shape)
+
+      // Swap width and length
+      const newShape: CubeType = { ...shape }
+      const size = shape.size
+      newShape.size =
+        up.y !== 0
+          ? { x: size.z, y: size.y, z: size.x }
+          : { x: size.y, y: size.x, z: size.z }
+
+      label.setShape(newShape)
+
+      // Rotate box
+      const normal = up.toThree()
+      normal.applyQuaternion(label.orientation)
+      const rotation = new THREE.Quaternion().setFromAxisAngle(
+        normal,
+        Math.PI / 2
+      )
+      label.rotate(rotation)
+      commitLabels(
+        [...Session.label3dList.updatedLabels.values()],
+        this._tracking
+      )
+    }
+  }
+
+  /**
    * Create ground plane
    *
    * @param itemIndex
    */
   public createGroundPlane(itemIndex: number): void {
     const state = this._state
+    const mainSensor = getMainSensor(state)
     const item = state.task.items[itemIndex]
     const isLoaded = isItemLoaded(state, item.index)
     const hasGroundPlane =
@@ -506,7 +551,7 @@ export class Label3DHandler {
     const isPointCloud = sensor.type === DataType.POINT_CLOUD
     if (isLoaded && !hasGroundPlane) {
       // estimate ground plane
-      let center = new THREE.Vector3(0, 1.5, 10)
+      let center = new THREE.Vector3(0, mainSensor.height ?? 1.5, 10)
       let rotation = new THREE.Vector3(Math.PI / 2, 0, 0)
       if (isPointCloud) {
         const rawGeometry = Session.pointClouds[item.index][sensorIdx]
@@ -629,21 +674,12 @@ export class Label3DHandler {
           }
         }
         break
+      // Change box heading
       case Key.F_UP:
-      case Key.F_LOW:
-        if (Session.label3dList.selectedLabel !== null) {
-          const shape = Session.label3dList.getCurrentShape()
-          Session.label3dList.addShapeToHistShapes(shape)
-
-          const quaternionInverse =
-            Session.label3dList.selectedLabel.orientation.clone().invert()
-          Session.label3dList.selectedLabel.rotate(quaternionInverse)
-          commitLabels(
-            [...Session.label3dList.updatedLabels.values()],
-            this._tracking
-          )
-        }
+      case Key.F_LOW: {
+        this.changeBoxHeading()
         break
+      }
       case Key.Z_UP:
       case Key.Z_LOW:
         if (this.isKeyDown(Key.META) || this.isKeyDown(Key.CONTROL)) {

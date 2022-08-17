@@ -40,6 +40,19 @@ frame of its last occurrence. The bounding box labels after this frame will be
 deleted.
 
 
+Polygons Linking
+=====================================
+As in the 2D segmentaion case, sometimes an instance can be divided into
+multiple parts in the image due to occlusion. To link different polygons, first
+press Ctrl (Cmd) to select polygons you want to link, then press l (lowercase)
+to link these selected polygons.
+
+However, unlike the 2D segmentaion case, **not only these two polygons but also
+the two entire tracks to which they belong will be merged into one**. Further
+more, **unlinking is not supported**, due to the ambiguity of the assignment of
+polygon components across images among new tracks. Therefore, please double
+check all linking candidates before proceeding.
+
 Track Linking
 =====================================
 Sometimes an object reappears in the frame due to occlusion or re-entrance, and
@@ -53,7 +66,7 @@ hit ``Enter`` to finish this operation.
 .. figure:: ../media/doc/videos/box2d_tracking_track-link.gif
     :width: 600px
 
-Track linking for 2D bounding box does not allow the tracks to be linked to have
+Track linking does not allow the tracks to be linked to have
 overlapping frames; make sure to end object tracks correctly for all tracks
 before the linking operation.
 
