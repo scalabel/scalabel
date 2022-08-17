@@ -74,3 +74,6 @@ sync.sh
 **/*.pth
 
 *.log
+
+# model files
+models/
