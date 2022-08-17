@@ -3,8 +3,8 @@ import time
 import torch
 import torch.nn as nn
 
-import pipeswitch.task.common as util
-import pipeswitch.task.resnet152 as resnet152
+import scalabel_bot.task.common as util
+import scalabel_bot.task.resnet152 as resnet152
 
 TASK_NAME = "resnet152_training"
 
@@ -32,7 +32,10 @@ def import_func():
         weight_decay = 1e-4
         criterion = nn.CrossEntropyLoss().cuda()
         optimizer = torch.optim.SGD(
-            model.parameters(), lr, momentum=momentum, weight_decay=weight_decay
+            model.parameters(),
+            lr,
+            momentum=momentum,
+            weight_decay=weight_decay,
         )
 
         loss = None

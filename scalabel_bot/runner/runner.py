@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""PipeSwitch Runner
+"""PipeSwitch Runner.
 
 This module spawns workers and allocates tasks to available workers.
 
@@ -7,31 +7,19 @@ Todo:
     * None
 """
 from time import sleep
-from typing import (  # pylint: disable=unused-import
-    Any,
-    Dict,
-    List,
-    Tuple,
-)
+from typing import Dict, List, Tuple
 import torch
-from torch.multiprocessing import (  # pylint: disable=unused-import
-    Event,
-    Pipe,
-    Process,
-    Queue,
-)
-import jsonpickle
-from pprint import pprint
+from queue import Queue
+from multiprocessing import Event, Pipe, Process
 from threading import Thread
 import gc
-
-from detectron2.structures import Boxes, Instances
+from pprint import pprint
 
 from scalabel_bot.common.consts import ESTCT, MODELS, State, Timers
-
-from scalabel_bot.common.logger import logger
+from scalabel.common.logger import logger
+from scalabel_bot.common.message import TaskMessage
 from scalabel_bot.profiling.timer import timer
-from scalabel_bot.runner.runner_common import ModelSummary
+from scalabel_bot.runner.task_model import TaskModel
 
 
 class Runner(Process):
@@ -69,34 +57,35 @@ class Runner(Process):
     @timer(Timers.THREAD_TIMER)
     def __init__(
         self,
+        stop_run: Event,
         mode: str,
         device: int,
         runner_id: int,
-        runner_status_queue: "Queue[Tuple[int, int, State]]",
-        runner_ect_queue: "Queue[Tuple[int, int, int]]",
+        runner_status_queue: Queue[Tuple[int, int, State]],
+        runner_ect_queue: Queue[Tuple[int, int, int]],
         model_list: List[str],
         model_classes: Dict[str, object],
-        results_queue: "Queue[Dict[str, object]]",
+        results_queue: Queue[TaskMessage],
+        clients: Dict[str, int],
     ) -> None:
         super().__init__()
         self._name = self.__class__.__name__
-        self._stop_run: Event = Event()
+        self._stop_run: Event = stop_run
         self._mode: str = mode
         self._device: int = device
         self._id: int = runner_id
         self._status: State = State.STARTUP
-        self._runner_status_queue: "Queue[Tuple[int, int, State]]" = (
-            runner_status_queue
-        )
-        self._runner_ect_queue: "Queue[Tuple[int, int, int]]" = (
-            runner_ect_queue
-        )
+        self._runner_status_queue: Queue[
+            Tuple[int, int, State]
+        ] = runner_status_queue
+        self._runner_ect_queue: Queue[Tuple[int, int, int]] = runner_ect_queue
         self._task_in, self._task_out = Pipe()
-        self._task_queue: "Queue[Dict[str, object]]" = Queue()
-        self._results_queue: "Queue[Dict[str, object]]" = results_queue
+        self._task_queue: List[TaskMessage] = []
+        self._results_queue: Queue[TaskMessage] = results_queue
+        self._clients: Dict[str, int] = clients
         self._model_list = model_list
         self._model_classes: Dict[str, object] = model_classes
-        self._models: Dict[str, ModelSummary] = {}
+        self._models: Dict[str, TaskModel] = {}
         self._max_retries: int = 2
         self._ect: int = 0
 
@@ -113,30 +102,38 @@ class Runner(Process):
             )
             self._load_jobs: List[Thread] = []
             for model_name, model_class in self._model_classes.items():
-                model_summary: ModelSummary = ModelSummary(
+                task_model: TaskModel = TaskModel(
                     mode=self._mode,
                     devices=self._device,
                     model_name=model_name,
                     model_class=model_class,
                 )
-                load_model = Thread(target=model_summary.load_model)
+                load_model = Thread(target=task_model.load_model)
                 load_model.daemon = True
                 load_model.start()
                 load_model.join()
                 self._load_jobs.append(load_model)
-                self._models[model_name] = model_summary
+                self._models[model_name] = task_model
+                # break
             logger.debug(
                 f"{self._name} {self._device}-{self._id}: import models"
             )
-
         recv_task = Thread(target=self._recv_task)
         recv_task.daemon = True
         recv_task.start()
         self._update_ect()
         self._update_status(State.IDLE)
-        while not self._stop_run.is_set():
-            task: Dict[str, object] = self._task_queue.get()
-            self._manage_task(task)
+
+        try:
+            while not self._stop_run.is_set():
+                if not self._task_queue:
+                    continue
+                task: TaskMessage = self._task_queue.pop(0)
+                if task["clientId"] in self._clients:
+                    self._manage_task(task)
+                self._update_ect("remove", task)
+        except KeyboardInterrupt:
+            return
 
     @timer(Timers.THREAD_TIMER)
     def _update_status(self, status: State) -> None:
@@ -153,13 +150,11 @@ class Runner(Process):
         except KeyboardInterrupt as kb_err:
             raise KeyboardInterrupt from kb_err
 
-    def _calc_ect(self, task: Dict[str, object]) -> int:
-        stct: int = ESTCT[str(task["type"])][str(task["modelName"])]
+    def _calc_ect(self, task: TaskMessage) -> int:
+        stct: int = ESTCT[task["mode"]][MODELS[task["taskType"]]]
         return stct * task["dataSize"]
 
-    def _update_ect(
-        self, mode: str = "", task: Dict[str, object] = None
-    ) -> None:
+    def _update_ect(self, mode: str = "", task: TaskMessage = None) -> None:
         if task:
             if mode == "append":
                 self._ect += self._calc_ect(task)
@@ -168,112 +163,82 @@ class Runner(Process):
         self._runner_ect_queue.put((self._device, self._id, self._ect))
 
     def _recv_task(self) -> None:
-        while not self._stop_run.is_set():
-            task: Dict[str, object] = self._task_out.recv()
-            self._task_queue.put(task)
-            self._update_ect("append", task)
-            sleep(0.05)
-            self._task_out.send("OK")
+        try:
+            while not self._stop_run.is_set():
+                task: TaskMessage = self._task_out.recv()
+                if task["clientId"] in self._clients:
+                    self._task_queue.append(task)
+                    self._update_ect("append", task)
+        except KeyboardInterrupt:
+            return
 
     @timer(Timers.PERF_COUNTER)
-    def _manage_task(self, task: Dict[str, object]) -> None:
+    def _manage_task(self, task: TaskMessage) -> None:
+        if self._mode == "gpu":
+            task_model: TaskModel = self._models[
+                f"{MODELS[str(task['taskType'])]}_{task['mode']}"
+            ]
+            output: object | None = self._execute_task(task, task_model)
+        else:
+            logger.debug(
+                f"{self._name} {self._device}-{self._id}: CPU debug"
+                " mode task execution"
+            )
+            output = {
+                "boxes": [
+                    [700.7190, 69.1574, 720.9227, 134.3829],
+                    [730.7932, 224.3562, 749.0588, 284.2728],
+                    [1169.0742, 0.0000, 1195.4609, 44.7009],
+                    [347.8973, 140.9991, 426.8250, 225.2764],
+                ],
+                "scores": [0.8418, 0.7967, 0.7857, 0.7330],
+                "pred_classes": [9, 9, 9, 11],
+            }
+            sleep(task["ect"] / 1000)
+        if output is not None:
+            task["status"] = State.SUCCESS.value
+        else:
+            task["status"] = State.FAILED.value
+        task["output"] = output
+        self._results_queue.put(task)
+        # with torch.no_grad():
+        #     gc.collect()
+        #     torch.cuda.empty_cache()
+
+    def _execute_task(
+        self, task: TaskMessage, task_model: TaskModel
+    ) -> object | None:
+        """Executes a task."""
+        data: List[object] = []
+        output: List[object] = []
         for attempt in range(self._max_retries):
+            if attempt > 0:
+                logger.info(f"Retrying task #{attempt}")
             try:
-                # logger.debug(
-                #     f"{self._name} {self._device}: received task"
-                #     f" {task['model_name']} {task['task_type']} with id"
-                #     f" {task['task_id']} from client {task['client_id']}"
-                # )
-                # self._update_status(State.BUSY)
-                if attempt > 0:
-                    logger.info(f"Retrying task #{attempt}")
-                if self._mode == "gpu":
-                    model_summary: ModelSummary = self._models[
-                        f"{MODELS[str(task['taskType'])]}_{task['type']}"
-                    ]
-                    output = self._execute_task(task, model_summary)
-                else:
-                    logger.debug(
-                        f"{self._name} {self._device}-{self._id}: CPU debug mode task"
-                        " execution"
-                    )
-                    output = {
-                        "boxes": [
-                            [700.7190, 69.1574, 720.9227, 134.3829],
-                            [730.7932, 224.3562, 749.0588, 284.2728],
-                            [1169.0742, 0.0000, 1195.4609, 44.7009],
-                            [347.8973, 140.9991, 426.8250, 225.2764],
-                        ],
-                        "scores": [0.8418, 0.7967, 0.7857, 0.7330],
-                        "pred_classes": [9, 9, 9, 11],
-                    }
-                # task: OrderedDict[str, Any] = {
-                #     "client_id": task["client_id"],
-                #     "task_type": task["task_type"],
-                #     "task_id": task["task_id"],
-                #     "model_name": task["model_name"],
-                #     "status": State.SUCCESS,
-                #     "output": jsonpickle.encode(output),
-                # }
-                task["status"] = State.SUCCESS
-                task["output"] = output
-                self._results_queue.put(task)
-                # logger.debug(
-                #     f"{self._name} {self._device}: task"
-                #     f" {task['task_id']} {task['task_type']} with id"
-                #     f" {task['task_id']} complete"
-                # )
-                gc.collect()
-                torch.cuda.empty_cache()
-                self._update_status(State.IDLE)
-                self._update_ect("remove", task)
-                return
+                if not data:
+                    data = task_model.load_data(task)
+            except RuntimeError as runtime_err:
+                logger.error(runtime_err)
+                logger.error(
+                    f"{self._name} {self._device}-{self._id}: data loading"
+                    " failed!"
+                )
+                continue
+            try:
+                if not output:
+                    output = task_model.execute(task, data)
+                    return output
             except RuntimeError as runtime_err:
                 logger.error(runtime_err)
                 logger.error(
                     f"{self._name} {self._device}-{self._id}: task failed!"
                 )
-                # msg: Dict[str, object] = {
-                #     "client_id": task["client_id"],
-                #     "task_type": task["task_type"],
-                #     "task_id": task["task_id"],
-                #     "model_name": task["model_name"],
-                #     "status": State.FAILED,
-                # }
-                # self._results_queue.put(msg)
-                # self._update_status(State.IDLE)
-            except KeyboardInterrupt as kb_err:
-                raise KeyboardInterrupt from kb_err
+                continue
         logger.error(
             f"{self._name} {self._device}-{self._id}: max retries exceeded, "
             "skipping task"
         )
-
-    def _execute_task(
-        self, task: Dict[str, object], model_summary: ModelSummary
-    ) -> object:
-        """Executes a task."""
-        data = model_summary.load_data(task)
-        # logger.debug(
-        #     f"{self._name} {self._device}: retrieved data for task"
-        #     f" {task['model_name']} {task['task_type']} with id"
-        #     f" {task['task_id']} from client {task['client_id']}"
-        # )
-        # logger.spam(f"{self._name} {self._device} data: \n{pformat(data)}")
-        output = model_summary.execute(task, data)
-        # logger.spam(f"{self._name} {self._device} output: \n{pformat(output)}")
-        return output
-
-    @timer(Timers.THREAD_TIMER)
-    def shutdown(self):
-        """Shutdown the runner."""
-        logger.debug(f"{self._name} {self._device}-{self._id}: stopping...")
-        self._stop_run.set()
-        if hasattr(self, "_load_jobs"):
-            for load_job in self._load_jobs:
-                if load_job.is_alive():
-                    load_job.terminate()
-        logger.debug(f"{self._name} {self._device}-{self._id}: stopped!")
+        return None
 
     @property
     def task_in(self):

@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-"""PipeSwitch Manager.
+"""Scalabel Bot Manager.
 
-This module is the main entry point for the PipeSwitch Manager.
-
-Example:
-    Run this file from the main directory of the project::
-
-        $ python3 manager/manager.py
+This module creates and manages various runners and schedulers.
 
 Todo:
     * None
@@ -16,16 +11,14 @@ Todo:
 from time import sleep
 import os
 import importlib
-from typing import (  # pylint: disable=unused-import
-    List,
-    Dict,
-    Tuple,
-)
-from multiprocessing.managers import DictProxy
-from torch.multiprocessing import Manager, Process, Queue
+from typing import List, Dict, Tuple
 from threading import Thread
 from pprint import pformat
 import json
+from queue import Queue
+from multiprocessing import Manager, Queue as MPQueue
+from multiprocessing.managers import SyncManager
+from multiprocessing.synchronize import Event as EventClass
 
 from scalabel_bot.common.consts import (
     MODEL_LIST_FILE,
@@ -34,85 +27,110 @@ from scalabel_bot.common.consts import (
     State,
     Timers,
 )
-from scalabel_bot.common.exceptions import GPUError
 from scalabel_bot.common.func import cantor_pairing
-from scalabel_bot.common.logger import logger
-from scalabel_bot.common.servers import (
-    ManagerRequestsPubSub,
-    ManagerRequestsStream,
-)
-
-# from scalabel_bot.manager.client_manager import (
-#     ClientManager,
-# )
-from scalabel_bot.manager.gpu_resource_allocator import (
-    GPUResourceAllocator,
-)
-from scalabel_bot.manager.runner_scheduler import RunnerScheduler
-from scalabel_bot.manager.task_scheduler import TaskScheduler
+from scalabel.common.logger import logger
+from scalabel_bot.common.message import TaskMessage
+from scalabel_bot.manager.gpu_resource_allocator import GPUResourceAllocator
+from scalabel_bot.scheduler.task_scheduler import TaskScheduler
+from scalabel_bot.manager.client_manager import ClientManager
 from scalabel_bot.profiling.timer import timer
 from scalabel_bot.runner.runner import Runner
+from scalabel_bot.server.stream import ManagerRequestsStream
+from scalabel_bot.server.pubsub import ManagerRequestsPubSub
 
 
 class BotManager:
     """Manager thread that acts as a middleman between clients and runners.
 
     It has two main functions:
-        1. It receives requests from clients and sends them
-           to the appropriate runner.
-        2. It receives results from runners and sends them
+        1. It receives task requests from clients and sends them
+           to the task scheduler to be allocated to runners.
+        2. It receives task results from runners and sends them
            to the appropriate client.
 
     Attributes:
-        do_run (`bool`): Manager run flag.
-        gra (`GPUResourceAllocator`):
-            Thread that polls for available GPUs and reserves them.
-        req_server (`ManagerRequestsServer`):
-            Redis server for receiving requests from clients
-            and sending tasks to runners.
-        res_server (ManagerResultsServer):
-            Redis server for receiving results from runners
-            and sending them to clients.
-        model_list (`List[str]`): List of ML models to be loaded into memory.
-        runners (`OrderedDict[int, RunnerThd]`): Database of runners.
-        scheduler (`Scheduler`): Thread that schedules tasks to runners.
+        _name (`str`): Name of the manager class.
+        _stop_run (`EventClass`): Manager run flag.
+        _mode (`str`): Mode of the manager (CPU or GPU).
+
+        _num_gpus (`int`): Number of GPUs specified by the user.
+        _gpu_ids (`List[int]`): List of GPU IDs specified by the user.
+            Defaults to an empty list, which means all available GPUs are used.
+        _allocated_gpus (`List[int]`): List of GPUs that have been
+            allocated to runners.
+        _gra (`GPUResourceAllocator`):
+            Object that polls for available GPUs and reserves them.
+
+        _manager (`SyncManager`): Multiprocessing manager object that manages
+            shared data structures across processes.
+
+        _clients (`Dict[str, int]`): Dictionary of client IDs and their TTLs.
+        _client_manager (`ClientManager`): Client manager process that
+            manages client connections.
+
+        _runner_status (`Dict[int, State]`): Dictionary of runner IDs and
+            their current status.
+        _runner_status_queue (`Queue[Tuple[int, int, State]]`): Queue for
+            runners to update their status.
+        _runner_ect (`Dict[int, int]`): Dictionary of runner IDs and their
+            overall estimated task completion time.
+        _runner_ect_queue (`Queue[Tuple[int, int, int]]`): Queue for runners to
+            update their overall estimated task completion time.
+        _runners (`Dict[int, Runner]`): Dictionary of runner IDs and
+            runner processes.
+
+        _requests_queue (`List[TaskMessage]`): Queue where incoming task
+            requests are stored.
+        _results_queue (`Queue[TaskMessage]`): Queue where incoming task
+            results are stored.
+        _req_stream (`ManagerRequestsStream`): Redis stream thread that
+            1. Receives task requests and stores them in the requests queue.
+            2. Sends task results to the appropriate client.
+        _req_pubsub (`ManagerRequestsPubSub`): Redis pubsub thread that
+            1. Receives task requests and stores them in the requests queue.
+            2. Sends task results to the appropriate client.
+
+        _model_list (`List[str]`): List of models to be loaded into memory.
+        _model_classes (`Dict[str, object]`): Dictionary of model names and
+            their object classes.
+
+        _task_scheduler (`TaskScheduler`): Process that manages task
+            and runner allocation.
+        _results_checker (`Thread`): Thread that polls for
+            task results from runners.
+
+        _tasks_complete (`int`): Number of tasks that have been completed.
+        _tasks_failed (`int`): Number of tasks that have failed.
     """
 
     @timer(Timers.PERF_COUNTER)
     def __init__(
-        self, mode: str = "gpu", num_gpus: int = -1, gpu_ids: List[int] = []
+        self,
+        stop_run: EventClass,
+        mode: str = "gpu",
+        num_gpus: int = 0,
+        gpu_ids: List[int] = None,
     ) -> None:
-        super().__init__()
-        self._name: str = self.__class__.__name__
-        self._do_run: bool = True
-        self._mode: str = mode
-        self._num_gpus: int = num_gpus
-        self._gpu_ids: List[int] = gpu_ids
-        self._manager = Manager()
-        self._runner_status: DictProxy = self._manager.dict()
-        self._runner_status_queue: "Queue[Tuple[int, int, State]]" = Queue()
-        self._runner_ect: DictProxy = self._manager.dict()
-        self._runner_ect_queue: "Queue[Tuple[int, int, int]]" = Queue()
-        self._requests_queue: "Queue[Dict[str, object]]" = Queue()
-        self._req_stream: ManagerRequestsStream = ManagerRequestsStream(
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._requests_queue,
-        )
-        self._req_pubsub: ManagerRequestsPubSub = ManagerRequestsPubSub(
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._requests_queue,
-        )
-        self._results_queue: "Queue[Dict[str, object]]" = Queue()
-        self._model_classes: DictProxy = self._manager.dict()
-        self._models: Dict[str, object] = {}
-        self._runners: Dict[int, Runner] = {}
-        self._tasks_complete: int = 0
-        self._tasks_failed: int = 0
+        """Initialize the BotManager class.
 
-        self._req_stream.run()
-        self._req_pubsub.run()
+        Args:
+            stop_run (`EventClass`): Manager run flag.
+            mode (`str`, optional): Mode of the manager (CPU or GPU).
+                Defaults to "gpu".
+            num_gpus (`int`, optional): Number of GPUs specified by the user.
+                Defaults to 0, which means all available GPUs are used.
+            gpu_ids (`List[int]`, optional): List of GPU IDs specified by the
+                user. Defaults to None, which means all available GPUs are used.
+        """
+        super().__init__()
+
+        self._name: str = self.__class__.__name__
+        self._stop_run: EventClass = stop_run
+        self._mode: str = mode
+
+        self._num_gpus: int = num_gpus
+        self._gpu_ids: List[int] = gpu_ids if gpu_ids else []
+        self._allocated_gpus: List[int] = []
         if self._mode == "gpu":
             self._gra: GPUResourceAllocator = GPUResourceAllocator()
             self._allocated_gpus = self._gra.reserve_gpus(
@@ -122,20 +140,62 @@ class BotManager:
             self._gra.warmup_gpus(gpus=self._allocated_gpus)
         else:
             self._allocated_gpus = [*range(self._num_gpus)]
-        self._load_models()
-        self._runner_scheduler: RunnerScheduler = RunnerScheduler(
+
+        self._manager: SyncManager = Manager()
+
+        self._clients: Dict[str, int] = self._manager.dict()
+        self._client_manager: ClientManager = ClientManager(
+            stop_run=self._stop_run,
+            clients=self._clients,
+        )
+
+        self._runner_status: Dict[int, State] = self._manager.dict()
+        self._runner_status_queue: Queue[Tuple[int, int, State]] = MPQueue()
+        self._runner_ect: Dict[int, int] = self._manager.dict()
+        self._runner_ect_queue: Queue[Tuple[int, int, int]] = MPQueue()
+        self._runners: Dict[int, Runner] = {}
+
+        self._requests_queue: List[TaskMessage] = self._manager.list()
+        self._results_queue: Queue[TaskMessage] = MPQueue()
+
+        self._requests_stream: ManagerRequestsStream = ManagerRequestsStream(
+            stop_run=self._stop_run,
+            host=REDIS_HOST,
+            port=REDIS_PORT,
+            sub_queue=self._requests_queue,
+        )
+        self._requests_pubsub: ManagerRequestsPubSub = ManagerRequestsPubSub(
+            stop_run=self._stop_run,
+            host=REDIS_HOST,
+            port=REDIS_PORT,
+            sub_queue=self._requests_queue,
+        )
+
+        self._model_list: List[str] = []
+        self._model_classes: Dict[str, object] = self._manager.dict()
+
+        self._task_scheduler: TaskScheduler = TaskScheduler(
+            stop_run=self._stop_run,
+            num_runners=len(self._allocated_gpus),
             runner_status=self._runner_status,
             runner_status_queue=self._runner_status_queue,
             runner_ect=self._runner_ect,
             runner_ect_queue=self._runner_ect_queue,
+            requests_queue=self._requests_queue,
+            clients=self._clients,
         )
-        self._runner_scheduler.daemon = True
-        self._runner_scheduler.start()
-        self._create_runners()
-        self._task_scheduler: TaskScheduler = TaskScheduler()
-        check_result = Thread(target=self._check_result)
-        check_result.daemon = True
-        check_result.start()
+
+        self._results_checker: Thread = Thread(
+            target=self._check_result,
+            args=(
+                self._results_queue,
+                self._requests_stream,
+                self._requests_pubsub,
+            ),
+        )
+
+        self._tasks_complete: int = 0
+        self._tasks_failed: int = 0
 
     def run(self) -> None:
         """Main manager function that sets up the manager and runs it.
@@ -143,65 +203,48 @@ class BotManager:
         Raises:
             `TypeError`: If the message received is not a JSON string.
         """
-        try:
-            # while not self._req_stream.ready:
-            #     sleep(0.001)
-            logger.success(
-                "\n*********************************************\n"
-                f"{self._name}: Ready to receive requests!\n"
-                "*********************************************"
-            )
-            logger.debug(
-                f"{self._name}: Waiting for at least one runner to be ready"
-            )
-            while (len(self._runner_status) < len(self._runners)) and (
-                len(self._runner_ect) < len(self._runners)
-            ):
-                sleep(1)
-            logger.success(
-                "\n******************************************\n"
-                f"{self._name}: Ready to execute tasks!\n"
-                "******************************************"
-            )
-            while self._do_run:
-                self._requests_queue = self._task_scheduler.reschedule(
-                    self._requests_queue
-                )
-                task: Dict[str, object] = self._requests_queue.get()
-                logger.debug(pformat(task))
-                # logger.info(
-                #     f"{self._name}: {self._requests_queue.qsize() + 1} task(s)"
-                #     " in requests queue"
-                # )
-                # logger.info(
-                #     f"{self._name}: Received task"
-                #     f" {task['model_name']} {task['task_type']} with id"
-                #     f" {task['task_id']} from client {task['client_id']}"
-                # )
-                self._allocate_task(task)
-        except GPUError:
-            return
-        except KeyboardInterrupt:
-            return
+        self._client_manager.daemon = True
+        self._client_manager.start()
 
-    @timer(Timers.PERF_COUNTER)
-    def shutdown(self) -> None:
-        logger.warning(f"{self._name}: Shutting down")
-        if hasattr(self, "_scheduler"):
-            if self._runner_scheduler.is_alive():
-                self._runner_scheduler.shutdown()
-                self._runner_scheduler.terminate()
-            logger.warning(f"{self._name}: Terminated scheduler")
-        if hasattr(self, "_runners"):
-            for runner in self._runners.values():
-                if runner.is_alive():
-                    runner.shutdown()
-                    runner.terminate()
-            logger.warning(f"{self._name}: Terminated runners")
-        self._do_run = False
-        if self._mode == "gpu" and hasattr(self, "_gra"):
-            self._gra.release_gpus()
-        logger.info(f"{self._name}: Successfully shut down")
+        self._requests_stream.daemon = True
+        self._requests_stream.start()
+
+        self._requests_pubsub.daemon = True
+        self._requests_pubsub.start()
+
+        logger.info(  # type: ignore
+            "\n*********************************************\n"
+            f"{self._name}: Ready to receive requests!\n"
+            "*********************************************"
+        )
+
+        self._load_models()
+
+        self._task_scheduler.daemon = True
+        self._task_scheduler.start()
+
+        self._create_runners()
+
+        self._results_checker.daemon = True
+        self._results_checker.start()
+
+        while (len(self._runner_status) < len(self._runners)) and (
+            len(self._runner_ect) < len(self._runners)
+        ):
+            sleep(1)
+        logger.info(  # type: ignore
+            "\n******************************************\n"
+            f"{self._name}: Ready to execute tasks!\n"
+            "******************************************"
+        )
+
+        try:
+            while not self._stop_run.is_set():
+                if self._requests_queue:
+                    self._allocate_task()
+        except KeyboardInterrupt:
+            self._stop_run.set()
+            self._requests_stream.shutdown()
 
     @timer(Timers.PERF_COUNTER)
     def _load_model_list(self, file_name: str) -> None:
@@ -217,12 +260,11 @@ class BotManager:
             logger.error(
                 f"{self._name}: Model list file {file_name} not found"
             )
-            raise KeyboardInterrupt
+
+            return
 
         with open(file=file_name, mode="r", encoding="utf-8") as f:
-            self._model_list: List[str] = [
-                line.strip() for line in f.readlines()
-            ]
+            self._model_list = [line.strip() for line in f.readlines()]
 
     @timer(Timers.PERF_COUNTER)
     def _load_models(self) -> None:
@@ -240,6 +282,7 @@ class BotManager:
         for device in self._allocated_gpus:
             for runner_id in range(1):
                 runner: Runner = Runner(
+                    stop_run=self._stop_run,
                     mode=self._mode,
                     device=device,
                     runner_id=runner_id,
@@ -248,44 +291,47 @@ class BotManager:
                     model_list=self._model_list,
                     model_classes=self._model_classes,
                     results_queue=self._results_queue,
+                    clients=self._clients,
                 )
                 runner.daemon = True
                 runner.start()
+
                 self._runners[cantor_pairing(device, runner_id)] = runner
                 logger.debug(
                     f"{self._name}: Created runner {runner_id} in GPU {device}"
                 )
 
     @timer(Timers.PERF_COUNTER)
-    def _allocate_task(self, task: Dict[str, object]) -> None:
-        runner_id = self._runner_scheduler.schedule()
+    def _allocate_task(self) -> None:
+        task, runner_id = self._task_scheduler.schedule()
+        logger.debug(pformat(task))
+
         runner: Runner = self._runners[runner_id]
-        # logger.debug(
-        #     f"{self._name}: Assigning task"
-        #     f" {task['model_name']} {task['task_type']} with id"
-        #     f" {task['task_id']} from client {task['client_id']} to"
-        #     f" runner {runner_id}"
-        # )
         runner.task_in.send(task)
-        if runner.task_in.recv() == "OK":
-            return
 
     @timer(Timers.PERF_COUNTER)
-    def _check_result(self) -> None:
+    def _check_result(
+        self,
+        results_queue: Queue[TaskMessage],
+        req_stream: ManagerRequestsStream,
+        req_pubsub: ManagerRequestsPubSub,
+    ) -> None:
+        tasks_complete = 0
+        tasks_failed = 0
         while True:
-            result: Dict[str, object] = self._results_queue.get()
-            if result["status"] == State.SUCCESS:
-                self._tasks_complete += 1
+            result: TaskMessage = results_queue.get()
+
+            if result["status"] == State.SUCCESS.value:
+                tasks_complete += 1
             else:
-                self._tasks_failed += 1
-            logger.success(
-                f"{self._name}: {self._tasks_complete} task(s) complete!"
+                tasks_failed += 1
+
+            logger.info(  # type: ignore
+                f"{self._name}: {tasks_complete} task(s) complete!"
             )
             if self._tasks_failed > 0:
-                logger.error(
-                    f"{self._name}: {self._tasks_failed} task(s) failed!"
-                )
-            result["status"] = result["status"].value
-            msg: Dict[str, object] = {"message": json.dumps(result)}
-            self._req_stream.publish(result["channel"], msg)
-            self._req_pubsub.publish(result["channel"], json.dumps(result))
+                logger.error(f"{self._name}: {tasks_failed} task(s) failed!")
+
+            msg: Dict[str, str] = {"message": json.dumps(result)}
+            req_stream.publish(result["channel"], msg)
+            req_pubsub.publish(result["channel"], json.dumps(result))

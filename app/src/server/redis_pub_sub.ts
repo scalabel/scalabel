@@ -1,6 +1,7 @@
 import Logger from "./logger"
 import { RedisConfig } from "../types/config"
 import {
+  ConnectionRequestMessageType,
   ModelStatusMessageType,
   ModelRegisterMessageType,
   ModelRequestMessageType,
@@ -35,6 +36,7 @@ export class RedisPubSub {
     channel: string,
     data:
       | RegisterMessageType
+      | ConnectionRequestMessageType
       | ModelRegisterMessageType
       | ModelRequestMessageType
       | ModelStatusMessageType
@@ -44,6 +46,11 @@ export class RedisPubSub {
         data = data as RegisterMessageType
         this.client.publish(channel, JSON.stringify(data))
         break
+      // case RedisChannel.CONNECTION:
+      //   data = data as ConnectionRequestMessageType
+      //   channel = `${RedisChannel.CONNECTION}`
+      //   this.client.xadd(channel, JSON.stringify(data))
+      //   break
       case RedisChannel.MODEL_REGISTER: {
         data = data as ModelRegisterMessageType
         this.client.publish(channel, JSON.stringify(data))

@@ -156,8 +156,8 @@ class TitleBar extends Component<Props> {
     const { autosave } = this.props
     const { statusText } = this.props
     const { statusTextHide } = this.props
-    const { modelStatusText } = this.props
-    const { modelStatusTextHide } = this.props
+    // const { modelStatusText } = this.props
+    // const { modelStatusTextHide } = this.props
 
     const keyboardLink = "https://doc.scalabel.ai/keyboard.html"
 
@@ -199,9 +199,9 @@ class TitleBar extends Component<Props> {
             <StatusMessageBox>{statusText}</StatusMessageBox>
           </Fade>
           <div className={classes.grow} />
-          <Fade in={!modelStatusTextHide} timeout={300}>
+          {/* <Fade in={!modelStatusTextHide} timeout={300}>
             <StatusMessageBox>{modelStatusText}</StatusMessageBox>
-          </Fade>
+          </Fade> */}
           {buttons}
         </Toolbar>
       </AppBar>

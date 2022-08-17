@@ -1,25 +1,14 @@
 import os
 from urllib import request
-from io import BytesIO
-from PIL import Image
 import numpy as np
-import time
-import copy
 import json
 from tqdm import tqdm
 from redis import Redis
-
 import torch
-from torch.multiprocessing import Pool
 
-from detectron2 import model_zoo
-from detectron2.structures import Boxes, Instances
 from detectron2.modeling import build_model
-from detectron2.solver import build_optimizer
 from detectron2.config import get_cfg
-from detectron2.utils.events import EventStorage, get_event_storage
 from detectron2.data.detection_utils import read_image
-import detectron2.data.transforms as T
 from detectron2.checkpoint import DetectionCheckpointer
 
 from scalabel_bot.common.consts import (
@@ -28,12 +17,10 @@ from scalabel_bot.common.consts import (
     Timers,
 )
 from scalabel_bot.profiling.timer import timer
-
-from scalabel_bot.common.logger import logger
-from scalabel.automatic.model_repo.dd3d.utils.convert import (
+from scalabel_bot.models.dd3d.utils.convert import (
     convert_3d_box_to_kitti,
 )
-from scalabel.automatic.model_repo.dd3d.config import add_dd3d_config
+from scalabel_bot.models.dd3d.config import add_dd3d_config
 
 
 MODEL_NAME = "DD3D"
@@ -41,9 +28,7 @@ MODEL_NAME = "DD3D"
 
 class DD3D:
     def __init__(self):
-        self.model_config = (
-            "scalabel/automatic/model_repo/configs/dd3d/dd3d.yaml"
-        )
+        self.model_config = "scalabel_bot/models/configs/dd3d/dd3d.yaml"
         self.cfg = None
         self.model = None
         self._data_loader = Redis(
@@ -61,8 +46,9 @@ class DD3D:
         cfg.MODEL.DEVICE = device
         self.cfg = cfg.clone()
         self.model = build_model(cfg)
+        self.model.to(torch.device(self.cfg.MODEL.DEVICE))
         checkpointer = DetectionCheckpointer(self.model, save_to_disk=True)
-        checkpointer.load(cfg.MODEL.WEIGHTS)
+        checkpointer.load(self.cfg.MODEL.WEIGHTS)
         if mode == "inference":
             self.model.eval()
         elif mode == "training":
@@ -84,10 +70,9 @@ class DD3D:
     def import_data(self, task):
         image_list = []
         img_dir = os.path.join("data", f"{task['projectName']}")
-        if "taskKey" in task.keys():
+        if "taskKey" in task:
             data_str = self._data_loader.get(task["taskKey"])
             data = json.loads(data_str)
-            # logger.spam(f"\n{pformat(data)}")
             img_urls = [item["urls"]["-1"] for item in data["task"]["items"]]
             for img_url in tqdm(
                 img_urls,
@@ -152,9 +137,7 @@ class DD3D:
             instances = item["instances"]
             boxes3d = []
             for pred_box3d in instances.pred_boxes3d:
-                w, l, h, x, y, z, rot_y, _ = convert_3d_box_to_kitti(
-                    pred_box3d
-                )
+                w, l, h, x, y, z, rot_y, _ = convert_3d_box_to_kitti(pred_box3d)
                 y = y - h / 2  # Add half height to get center
                 converted_box = [
                     w,

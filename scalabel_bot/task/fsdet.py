@@ -7,10 +7,10 @@ from pprint import pformat
 from tqdm import tqdm
 
 from detectron2.data.detection_utils import read_image
-from scalabel.automatic.model_repo.few_shot_detection.fsdet.config import (
+from scalabel_bot.models.few_shot_detection.fsdet.config import (
     get_cfg,
 )
-from scalabel.automatic.model_repo.few_shot_detection.fsdet.engine import (
+from scalabel_bot.models.few_shot_detection.fsdet.engine import (
     DefaultPredictor,
 )
 
@@ -19,7 +19,7 @@ from scalabel_bot.common.consts import (
     REDIS_PORT,
 )
 
-from scalabel_bot.common.logger import logger
+from scalabel.common.logger import logger
 
 
 MODEL_NAME = "FSDET"
@@ -30,7 +30,7 @@ class FSDET:
         self.args = self.get_parser().parse_args(
             [
                 "--config-file",
-                "scalabel/automatic/model_repo/few_shot_detection/configs/COCO-detection/faster_rcnn_R_101_FPN_ft_all_1shot.yaml",
+                "scalabel_bot/models/few_shot_detection/configs/COCO-detection/faster_rcnn_R_101_FPN_ft_all_1shot.yaml",
                 "--opts",
                 "MODEL.WEIGHTS",
                 "fsdet://coco/tfa_cos_1shot/model_final.pth",
@@ -106,7 +106,6 @@ class FSDET:
     def import_data(self, task):
         data_str = self._data_loader.get(task["taskKey"])
         data = json.loads(data_str)
-        logger.spam(f"\n{pformat(data)}")
         img_urls = [item["urls"]["-1"] for item in data["task"]["items"]]
         imgs = []
         for img_url in tqdm(

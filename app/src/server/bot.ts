@@ -27,7 +27,12 @@ import { IntrinsicsType, ModelStatus, RectType, State } from "../types/state"
 import Logger from "./logger"
 import { ModelInterface } from "./model_interface"
 import { makeRedisPubSub, RedisPubSub } from "./redis_pub_sub"
-import { LabelTypeName, ModelRequestType, ShapeTypeName } from "../const/common"
+import {
+  ConnectionRequestMode,
+  LabelTypeName,
+  ModelRequestMode,
+  ShapeTypeName
+} from "../const/common"
 import { updateModelStatus } from "../action/common"
 
 /**
@@ -64,6 +69,9 @@ export class Bot {
   protected responseSubscriber: RedisPubSub
   /** the redis message broker */
   protected notifySubscriber: RedisPubSub
+  private actionPacket: ActionPacketType
+  private modelRequests: Array<ModelRequest | null>
+  private readonly clientId: string
   /** Number of actions received via broadcast */
   private actionCount: number
 
@@ -117,16 +125,18 @@ export class Bot {
     this.modelAddress.port = botPort.toString()
 
     this.modelInterface = new ModelInterface(this.projectName, this.sessionId)
+
+    this.actionPacket = { actions: [], id: "" }
+    this.modelRequests = []
+    this.clientId = `${this.projectName}_${index2str(this.taskIndex)}`
   }
 
   /**
    * Listen for model response
    */
   public async listen(): Promise<void> {
-    const projectName = this.projectName
-    const taskId = index2str(this.taskIndex)
-    const responseChannel = `${RedisChannel.MODEL_RESPONSE}_${projectName}_${taskId}`
-    const notifyChannel = `${RedisChannel.MODEL_NOTIFY}_${projectName}_${taskId}`
+    const responseChannel = `${RedisChannel.MODEL_RESPONSE}_${this.clientId}`
+    const notifyChannel = `${RedisChannel.MODEL_NOTIFY}_${this.clientId}`
     await this.responseSubscriber.subscribeEvent(
       responseChannel,
       this.modelResponseHandler.bind(this)
@@ -164,10 +174,9 @@ export class Bot {
     this.store = configureStore(syncState)
 
     const modelRegisterMessage: ModelRegisterMessageType = {
-      projectName: this.projectName,
-      taskId: index2str(this.taskIndex),
-      items: this.store.getState().present.task.items,
-      taskType: this.labelType
+      clientId: this.clientId,
+      channel: `${RedisChannel.MODEL_NOTIFY}_${this.clientId}`,
+      request: ConnectionRequestMode.CONNECT
     }
     this.publisher.publishEvent(
       RedisChannel.MODEL_REGISTER,
@@ -184,21 +193,20 @@ export class Bot {
   public async actionBroadcastHandler(
     message: SyncActionMessageType
   ): Promise<void> {
-    const actionPacket = message.actions
+    this.actionPacket = message.actions
     // If action was already acked, or if action came from a bot, ignore it
     if (
-      this.ackedPackets.has(actionPacket.id) ||
+      this.ackedPackets.has(this.actionPacket.id) ||
       message.bot ||
       message.sessionId === this.sessionId
     ) {
       return
     }
 
-    this.ackedPackets.add(actionPacket.id)
+    this.ackedPackets.add(this.actionPacket.id)
 
-    const modelRequests = this.packetToRequests(actionPacket)
-    // Send the requests for execution on the model server
-    this.executeRequests(modelRequests, actionPacket.id)
+    this.modelRequests = this.packetToRequests(this.actionPacket)
+    this.executeRequests(this.modelRequests, this.actionPacket.id)
   }
 
   /**
@@ -294,12 +302,14 @@ export class Bot {
     }
     try {
       const modelRequestMessage: ModelRequestMessageType = {
-        type: ModelRequestType.INFERENCE,
+        clientId: this.clientId,
+        mode: ModelRequestMode.INFERENCE,
         taskType: this.labelType,
         projectName: this.projectName,
         taskId: index2str(this.taskIndex),
         items: items,
         itemIndices: itemIndices,
+        dataSize: items.length,
         actionPacketId: actionPacketId,
         channel:
           RedisChannel.MODEL_RESPONSE +
@@ -463,15 +473,20 @@ export class Bot {
    * returned fields of model response
    *
    * @param _channel
-   * @param modelStatus
+   * @param connectionResponse
    */
   private modelNotificationHandler(
     _channel: string,
-    modelStatus: string
+    connectionResponse: string
   ): void {
-    const action: UpdateModelStatusAction = updateModelStatus(
-      Number(modelStatus) as ModelStatus
-    )
-    this.broadcastActions([action])
+    const receivedData = JSON.parse(connectionResponse)
+    let action: UpdateModelStatusAction
+    if (receivedData.status === "OK") {
+      action = updateModelStatus(ModelStatus.READY)
+      this.broadcastActions([action])
+    } else {
+      action = updateModelStatus(ModelStatus.INVALID)
+      this.broadcastActions([action])
+    }
   }
 }

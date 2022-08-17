@@ -1,8 +1,8 @@
 import { ModelEndpoint } from "../const/connection"
 import { BaseAction } from "./action"
-import { ItemType } from "./state"
+// import { ItemType } from "./state"
 import { ItemExport } from "./export"
-import { ModelRequestType } from "../const/common"
+import { ConnectionRequestMode, ModelRequestMode } from "../const/common"
 
 export interface RegisterMessageType {
   /** Project name */
@@ -37,14 +37,12 @@ export interface SyncActionMessageType {
 
 /** model register message type */
 export interface ModelRegisterMessageType {
-  /** Project name */
-  projectName: string
-  /** Task Id. It is supposed to be index2str(taskIndex) */
-  taskId: string
-  /** item list */
-  items: ItemType[]
-  /** task type */
-  taskType: string
+  /** Client ID */
+  clientId: string
+  /** responses channel to receive results */
+  channel: string
+  /** Request mode */
+  request: ConnectionRequestMode
 }
 
 /** model register message type */
@@ -57,10 +55,21 @@ export interface ModelStatusMessageType {
   active: boolean
 }
 
+export interface ConnectionRequestMessageType {
+  /** Client ID */
+  clientId: string
+  /** responses channel to receive results */
+  channel: string
+  /** Request mode */
+  request: ConnectionRequestMode
+}
+
 /** model request message type */
 export interface ModelRequestMessageType {
-  /** Request type */
-  type: ModelRequestType
+  /** Client ID */
+  clientId: string
+  /** Request mode */
+  mode: ModelRequestMode
   /** Task type */
   taskType: string
   /** Project name */
@@ -71,6 +80,8 @@ export interface ModelRequestMessageType {
   items: ItemExport[]
   /** item indices list*/
   itemIndices: number[]
+  /** total number of items */
+  dataSize: number
   /** which action triggers this prediction request */
   actionPacketId: string
   /** responses channel to receive results */

@@ -13,12 +13,12 @@ class DD3DInference:
     def __init__(self) -> None:
         self.dd3d = DD3D()
 
+    def import_model(self, device=None):
+        self.dd3d.import_model(device, "inference")
+
     def import_data(self, task):
         data = self.dd3d.import_data(task)
         return data
-
-    def import_model(self, device=None):
-        self.dd3d.import_model(device, "inference")
 
     def import_func(self):
         def inference(task, data):
@@ -38,8 +38,7 @@ class DD3DInference:
     @timer(Timers.THREAD_TIMER)
     def import_task(self, device):
         self.import_model(device)
-        func = self.import_func()
-        return func
+        return self.import_func()
 
 
 MODEL_CLASS = DD3DInference

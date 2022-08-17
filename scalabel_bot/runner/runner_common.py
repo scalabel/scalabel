@@ -4,7 +4,6 @@ from scalabel_bot.profiling.timer import timer
 
 class ModelSummary:
     def __init__(self, mode, devices, model_name, model_class):
-        """ """
         self._mode = mode
         self._devices = devices
         self._model_name = model_name

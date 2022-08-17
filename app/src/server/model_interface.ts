@@ -75,7 +75,7 @@ export class ModelInterface {
    * @param itemIndex
    * @param labelType
    */
-  public makePolyQuery(
+  public makePolyRequest(
     points: PathPoint2DType[],
     url: string,
     itemIndex: number,

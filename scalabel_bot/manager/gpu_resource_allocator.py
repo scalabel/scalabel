@@ -16,7 +16,7 @@ import torch
 from scalabel_bot.common.consts import Timers
 from scalabel_bot.common.exceptions import GPUError
 
-from scalabel_bot.common.logger import logger
+from scalabel.common.logger import logger
 from scalabel_bot.profiling.timer import timer
 
 
@@ -39,9 +39,7 @@ class GPUResourceAllocator(object):
         self._cuda_init()
 
     @timer(Timers.PERF_COUNTER)
-    def reserve_gpus(
-        self, num_gpus: int = 0, gpu_ids: List[int] = []
-    ) -> List[int]:
+    def reserve_gpus(self, num_gpus: int, gpu_ids: List[int]) -> List[int]:
         """Reserves set amount of GPUs.
 
         Args:
@@ -55,9 +53,10 @@ class GPUResourceAllocator(object):
             logger.warning(
                 f"{self._name}: CUDA_VISIBLE_DEVICES is already set"
             )
-            available_gpus = list(
-                map(int, os.environ["CUDA_VISIBLE_DEVICES"].split(","))
-            )
+            available_gpus = [
+                int(gpu)
+                for gpu in os.environ["CUDA_VISIBLE_DEVICES"].split(",")
+            ]
             return available_gpus
 
         free_gpus: List[int] = self._get_free_gpus()

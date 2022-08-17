@@ -9,22 +9,22 @@ import torch.nn as nn
 
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
-from scalabel.automatic.model_repo.few_shot_detection.fsdet.config import (
+from scalabel_bot.models.few_shot_detection.fsdet.config import (
     get_cfg,
     set_global_cfg,
 )
-from scalabel.automatic.model_repo.few_shot_detection.fsdet.engine import (
+from scalabel_bot.models.few_shot_detection.fsdet.engine import (
     default_argument_parser,
     default_setup,
 )
-from scalabel.automatic.model_repo.few_shot_detection.fsdet.evaluation import (
+from scalabel_bot.models.few_shot_detection.fsdet.evaluation import (
     verify_results,
 )
-from scalabel.automatic.model_repo.few_shot_detection.tools.ckpt_surgery import (
+from scalabel_bot.models.few_shot_detection.tools.ckpt_surgery import (
     ckpt_surgery,
     combine_ckpts,
 )
-from scalabel.automatic.model_repo.few_shot_detection.tools.train_net import (
+from scalabel_bot.models.few_shot_detection.tools.train_net import (
     Trainer,
 )
 
@@ -104,8 +104,8 @@ class FSDETTraining:
 
         return parser
 
-    def import_data(self):
-        return self.fsdet.import_data()
+    def import_data(self, task):
+        return self.fsdet.import_data(task)
 
     def import_model(self):
         model = self.fsdet.import_model()

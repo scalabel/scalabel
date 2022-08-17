@@ -170,7 +170,13 @@ export enum QueryArg {
   DEV_MODE = "dev"
 }
 
-export enum ModelRequestType {
+export enum ConnectionRequestMode {
+  CONNECT = "connect",
+  DISCONNECT = "disconnect",
+  PING = "ping"
+}
+
+export enum ModelRequestMode {
   INFERENCE = "inference",
   TRAIN = "train"
 }

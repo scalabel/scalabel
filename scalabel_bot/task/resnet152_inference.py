@@ -5,9 +5,9 @@ import torch
 
 from scalabel_bot.common.consts import Timers
 
-from scalabel_bot.common.logger import logger
+from scalabel.common.logger import logger
 from scalabel_bot.profiling.timer import timer
-import pipeswitch.task.common as util
+import scalabel_bot.task.common as util
 from scalabel_bot.task.resnet152 import ResNet152
 
 

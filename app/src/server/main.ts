@@ -195,21 +195,23 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
 /**
  * Launch the model server
  */
-// async function launchModelServer(): Promise<void> {
-//   const modelServerProc = child.spawn("python", [
-//     "-m",
-//     "scalabel_bot.main",
-//     "--num_gpus",
-//     "8"
-//   ])
-//   // modelServerProc.stdout.on("data", (data) => {
-//   //   process.stdout.write(data)
-//   // })
+async function launchModelServer(): Promise<void> {
+  const modelServerProc = child.spawn("python", [
+    "-m",
+    "scalabel_bot.main",
+    "--num_gpus",
+    "1",
+    "--gpu_id",
+    "[0]"
+  ])
+  // modelServerProc.stdout.on("data", (data) => {
+  //   process.stdout.write(data)
+  // })
 
-//   modelServerProc.stderr.on("data", (data) => {
-//     process.stderr.write(data)
-//   })
-// }
+  modelServerProc.stderr.on("data", (data) => {
+    process.stderr.write(data)
+  })
+}
 
 /**
  * Start HTTP and socket io servers
@@ -277,7 +279,7 @@ async function main(): Promise<void> {
   // Start the redis server
   await launchRedisServer(config)
   if (config.bot.on) {
-    // await launchModelServer()
+    await launchModelServer()
     // This sleep is to ensure the model server is successfully created.
     const sleep = async (ms: number): Promise<unknown> => {
       return await new Promise((resolve) => setTimeout(resolve, ms))
