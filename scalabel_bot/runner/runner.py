@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-"""PipeSwitch Runner.
+"""Scalabel Bot Runner.
 
-This module spawns workers and allocates tasks to available workers.
+This module executes task requests from clients.
 
 Todo:
-    * None
+    * Efficient model switching
 """
+
+
 from time import sleep
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Type
 import torch
 from queue import Queue
-from multiprocessing import Event, Pipe, Process
+from multiprocessing import Pipe, Process
+from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 import gc
-from pprint import pprint
 
 from scalabel_bot.common.consts import ESTCT, MODELS, State, Timers
 from scalabel.common.logger import logger
 from scalabel_bot.common.message import TaskMessage
 from scalabel_bot.profiling.timer import timer
-from scalabel_bot.runner.task_model import TaskModel
+from scalabel_bot.runner.service_model import ServiceModel
+from scalabel_bot.services.common.generic_service import GenericService
 
 
 class Runner(Process):
@@ -57,20 +60,19 @@ class Runner(Process):
     @timer(Timers.THREAD_TIMER)
     def __init__(
         self,
-        stop_run: Event,
+        stop_run: EventClass,
         mode: str,
         device: int,
         runner_id: int,
         runner_status_queue: Queue[Tuple[int, int, State]],
         runner_ect_queue: Queue[Tuple[int, int, int]],
-        model_list: List[str],
-        model_classes: Dict[str, object],
+        services_classes: Dict[str, Type[GenericService]],
         results_queue: Queue[TaskMessage],
         clients: Dict[str, int],
     ) -> None:
         super().__init__()
         self._name = self.__class__.__name__
-        self._stop_run: Event = stop_run
+        self._stop_run: EventClass = stop_run
         self._mode: str = mode
         self._device: int = device
         self._id: int = runner_id
@@ -83,9 +85,10 @@ class Runner(Process):
         self._task_queue: List[TaskMessage] = []
         self._results_queue: Queue[TaskMessage] = results_queue
         self._clients: Dict[str, int] = clients
-        self._model_list = model_list
-        self._model_classes: Dict[str, object] = model_classes
-        self._models: Dict[str, TaskModel] = {}
+        self._services_classes: Dict[
+            str, Type[GenericService]
+        ] = services_classes
+        self._services_models: Dict[str, ServiceModel] = {}
         self._max_retries: int = 2
         self._ect: int = 0
 
@@ -101,19 +104,19 @@ class Runner(Process):
                 f"{self._name} {self._device}-{self._id}: share GPU memory"
             )
             self._load_jobs: List[Thread] = []
-            for model_name, model_class in self._model_classes.items():
-                task_model: TaskModel = TaskModel(
+            for service_name, service in self._services_classes.items():
+                service_model: ServiceModel = ServiceModel(
                     mode=self._mode,
                     devices=self._device,
-                    model_name=model_name,
-                    model_class=model_class,
+                    service_name=service_name,
+                    service=service(),
                 )
-                load_model = Thread(target=task_model.load_model)
+                load_model = Thread(target=service_model.load_model)
                 load_model.daemon = True
                 load_model.start()
                 load_model.join()
                 self._load_jobs.append(load_model)
-                self._models[model_name] = task_model
+                self._services_models[service_name] = service_model
                 # break
             logger.debug(
                 f"{self._name} {self._device}-{self._id}: import models"
@@ -137,7 +140,7 @@ class Runner(Process):
 
     @timer(Timers.THREAD_TIMER)
     def _update_status(self, status: State) -> None:
-        """Updates own runner status based on worker statuses"""
+        """Updates own runner status based on worker statuses."""
         try:
             self._status = status
             logger.debug(
@@ -166,6 +169,7 @@ class Runner(Process):
         try:
             while not self._stop_run.is_set():
                 task: TaskMessage = self._task_out.recv()
+                print(self._clients.items())
                 if task["clientId"] in self._clients:
                     self._task_queue.append(task)
                     self._update_ect("append", task)
@@ -175,10 +179,13 @@ class Runner(Process):
     @timer(Timers.PERF_COUNTER)
     def _manage_task(self, task: TaskMessage) -> None:
         if self._mode == "gpu":
-            task_model: TaskModel = self._models[
+            service_model: ServiceModel = self._services_models[
                 f"{MODELS[str(task['taskType'])]}_{task['mode']}"
             ]
-            output: object | None = self._execute_task(task, task_model)
+            if task["items"]:
+                output: object | None = self._execute_task(task, service_model)
+            else:
+                return
         else:
             logger.debug(
                 f"{self._name} {self._device}-{self._id}: CPU debug"
@@ -206,7 +213,7 @@ class Runner(Process):
         #     torch.cuda.empty_cache()
 
     def _execute_task(
-        self, task: TaskMessage, task_model: TaskModel
+        self, task: TaskMessage, service_model: ServiceModel
     ) -> object | None:
         """Executes a task."""
         data: List[object] = []
@@ -216,7 +223,7 @@ class Runner(Process):
                 logger.info(f"Retrying task #{attempt}")
             try:
                 if not data:
-                    data = task_model.load_data(task)
+                    data = service_model.load_data(task)
             except RuntimeError as runtime_err:
                 logger.error(runtime_err)
                 logger.error(
@@ -226,7 +233,7 @@ class Runner(Process):
                 continue
             try:
                 if not output:
-                    output = task_model.execute(task, data)
+                    output = service_model.execute(task, data)
                     return output
             except RuntimeError as runtime_err:
                 logger.error(runtime_err)

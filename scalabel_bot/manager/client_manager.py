@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
+"""Scalabel Bot Client Manager.
+
+This module communicates with clients regarding connections.
+
+Todo:
+    * None
+"""
+
+
 import json
 from time import sleep
 from typing import Dict, List
-from multiprocessing import Event, Process
-from threading import Thread
+from multiprocessing import Process
+from multiprocessing.synchronize import Event as EventClass
+
+# from threading import Thread
 
 from scalabel_bot.common.consts import (
     ConnectionRequest,
@@ -21,19 +32,46 @@ from scalabel_bot.server.stream import ManagerConnectionsStream
 
 
 class ClientManager(Process):
+    """Manager subprocess that manages the connections with clients.
+
+    Attributes:
+        _name (`str`): Name of the class.
+        _stop_run (`EventClass`): Manager run flag.
+        _clients (`Dict[str, int]`): Dictionary of client IDs and their TTLs.
+        _clients_queue (`List[str]`): Queue of incoming client IDs.
+        _conn_stream (`ManagerConnectionsStream`): Redis stream thread that
+            1. Receives connection requests from clients.
+            2. Sends connection handshakes to successfully connected clients.
+        _conn_pubsub (`ManagerConnectionsPubSub`): Redis pubsub thread that
+            1. Receives connection requests from clients.
+            2. Sends connection handshakes to successfully connected clients.
+
+    Returns:
+        _type_: _description_
+    """
+
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: Event,
+        stop_run: EventClass,
         clients: Dict[str, int],
+        requests_channel: str,
     ) -> None:
+        """Initializes the ClientManager class.
+
+        Args:
+            stop_run (`EventClass`): Global run flag.
+            clients (`Dict[str, int]`): Dictionary of client IDs and their TTLs.
+        """
         super().__init__()
         self._name = self.__class__.__name__
-        self._stop_run: Event = stop_run
+        self._stop_run: EventClass = stop_run
         self._clients: Dict[str, int] = clients
         self._clients_queue: List[Message] = []
+        self._requests_channel: str = requests_channel
 
     def run(self) -> None:
+        """Sets up the client manager and runs it."""
         self._conn_stream: ManagerConnectionsStream = ManagerConnectionsStream(
             stop_run=self._stop_run,
             host=REDIS_HOST,
@@ -62,6 +100,11 @@ class ClientManager(Process):
 
     @timer(Timers.PERF_COUNTER)
     def _connect(self, conn: ConnectionMessage) -> None:
+        """Processes connection request of a new or existing client.
+
+        Args:
+            conn (`ConnectionMessage`): Type of connection request.
+        """
         if conn["request"] == str(ConnectionRequest.CONNECT):
             logger.info(
                 "ClientManager: Received connection request from"
@@ -89,7 +132,7 @@ class ClientManager(Process):
         resp: ConnectionMessage = {
             "clientId": conn["clientId"],
             "status": str(ResponseStatus.OK),
-            "requestsChannel": "REQUESTS",
+            "requestsChannel": self._requests_channel,
             "host": REDIS_HOST,
             "port": REDIS_PORT,
         }
@@ -98,6 +141,7 @@ class ClientManager(Process):
         self._conn_pubsub.publish(conn["channel"], json.dumps(resp))
 
     def _check_clients(self) -> None:
+        """Checks if existing clients are still connected."""
         try:
             while not self._stop_run.is_set():
                 sleep(1)
@@ -114,4 +158,10 @@ class ClientManager(Process):
             return
 
     def ready(self) -> bool:
+        """Checks if the client manager is ready to receive connections.
+
+        Returns:
+            bool: True if the client manager is ready to receive connections,
+                False otherwise.
+        """
         return self._conn_stream.ready

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import Dict, List
@@ -22,48 +23,55 @@ class SchedulingPolicy(ABC):
 
 
 class RoundRobin(SchedulingPolicy):
+    @timer(Timers.PERF_COUNTER)
     def choose_task(self, task_list: List[TaskMessage]) -> TaskMessage:
         return task_list.pop(0)
 
-    @timer(Timers.THREAD_TIMER)
+    @timer(Timers.PERF_COUNTER)
     def choose_resource(self, runner_ect: Dict[int, int]) -> int:
         self._runner_count = (self._runner_count + 1) % len(runner_ect)
         return list(runner_ect)[self._runner_count]
 
 
 class ShortestJobFirst(SchedulingPolicy):
+    @timer(Timers.PERF_COUNTER)
     def choose_task(self, task_list: List[TaskMessage]) -> TaskMessage:
         next_task = min(task_list, key=lambda x: x["ect"])
         task_list.remove(next_task)
         return next_task
 
+    @timer(Timers.PERF_COUNTER)
     def choose_resource(self, runner_ect: Dict[int, int]) -> int:
         self._runner_count = (self._runner_count + 1) % len(runner_ect)
         return list(runner_ect)[self._runner_count]
 
 
 class LoadBalancing(SchedulingPolicy):
+    @timer(Timers.PERF_COUNTER)
     def choose_task(self, task_list: List[TaskMessage]) -> TaskMessage:
         return task_list.pop(0)
 
-    @timer(Timers.THREAD_TIMER)
+    @timer(Timers.PERF_COUNTER)
     def choose_resource(self, runner_ect: Dict[int, int]) -> int:
-        next_runner_id = min(runner_ect, key=runner_ect.get)
+        next_runner_id = min(runner_ect.items(), key=lambda x: x[1])[0]
         return next_runner_id
 
 
 class SJFLB(SchedulingPolicy):
+    @timer(Timers.PERF_COUNTER)
     def choose_task(self, task_list: List[TaskMessage]) -> TaskMessage:
         next_task = min(task_list, key=lambda x: x["ect"])
         task_list.remove(next_task)
         return next_task
 
+    @timer(Timers.PERF_COUNTER)
     def choose_resource(self, runner_ect: Dict[int, int]) -> int:
-        next_runner_id = min(runner_ect, key=runner_ect.get)
+        next_runner_id = min(runner_ect.items(), key=lambda x: x[1])[0]
         return next_runner_id
 
 
 class SJFLBAP(SchedulingPolicy):
+    @timer(Timers.PERF_COUNTER)
     def choose_task(self, task_list: List[TaskMessage]) -> TaskMessage:
         next_task = min(
             task_list,
@@ -80,8 +88,9 @@ class SJFLBAP(SchedulingPolicy):
             task_list[i] = task
         return next_task
 
+    @timer(Timers.PERF_COUNTER)
     def choose_resource(self, runner_ect: Dict[int, int]) -> int:
-        next_runner_id = min(runner_ect, key=runner_ect.get)
+        next_runner_id = min(runner_ect.items(), key=lambda x: x[1])[0]
         return next_runner_id
 
 

@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import numpy as np
 
-from scalabel_bot.task.dd3d import DD3D
+from scalabel_bot.services.dd3d import DD3D
 
 
 class DD3DTraining:

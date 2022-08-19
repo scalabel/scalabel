@@ -8,6 +8,7 @@ from queue import Queue
 from typing import Dict, List
 from threading import Thread
 from multiprocessing import Event
+from multiprocessing.synchronize import Event as EventClass
 
 from scalabel_bot.client.task_request import (
     get_image_item,
@@ -60,11 +61,11 @@ class Client:
     @timer(Timers.PERF_COUNTER)
     def __init__(self, model_name, batch_size, num_it) -> None:
         super().__init__()
-        self._stop_run: Event = Event()
+        self._stop_run: EventClass = Event()
         self._name: str = self.__class__.__name__
         self._client_id: str = str(uuid4())
         self._results_queue: List[TaskMessage] = []
-        self._handshakes_queue: List[TaskMessage] = []
+        self._handshakes_queue: List[ConnectionMessage] = []
         self._conn_server: ClientConnectionsStream = ClientConnectionsStream(
             stop_run=self._stop_run,
             idx=self._client_id,
@@ -72,13 +73,14 @@ class Client:
             port=REDIS_PORT,
             sub_queue=self._handshakes_queue,
         )
-        self._req_server: ClientRequestsStream = ClientRequestsStream(
+        self._requests_server: ClientRequestsStream = ClientRequestsStream(
             stop_run=self._stop_run,
             idx=self._client_id,
             host=REDIS_HOST,
             port=REDIS_PORT,
             sub_queue=self._results_queue,
         )
+        self._requests_channel: str = ""
         self._model_name: str = model_name
         self._batch_size: int = batch_size
         self._num_it: int = num_it
@@ -92,15 +94,15 @@ class Client:
             self._conn_server.start()
             while not self._conn_server.ready:
                 sleep(0.1)
-            self._req_server.daemon = True
-            self._req_server.start()
+            self._requests_server.daemon = True
+            self._requests_server.start()
             self._connect(ConnectionRequest.CONNECT)
             self._prepare_requests()
-            while not self._req_server.ready:
+            while not self._requests_server.ready:
                 sleep(0.1)
-            ping = Thread(target=self._ping)
-            ping.daemon = True
-            ping.start()
+            # ping = Thread(target=self._ping)
+            # ping.daemon = True
+            # ping.start()
             send_requests = Thread(target=self._send_requests)
             send_requests.daemon = True
             send_requests.start()
@@ -116,24 +118,31 @@ class Client:
             "channel": self._conn_server.sub_stream,
             "request": str(mode),
         }
-        msg: str = {"message": json.dumps(conn)}
+        msg: Dict[str, str] = {"message": json.dumps(conn)}
         channel: str = self._conn_server.pub_stream
         self._conn_server.publish(channel, msg)
         while not self._handshakes_queue:
             sleep(0.01)
-        resp: TaskMessage = self._handshakes_queue.pop(0)
+        resp: ConnectionMessage = self._handshakes_queue.pop(0)
         if resp["clientId"] == self._client_id:
             if resp["status"] == str(ResponseStatus.OK):
                 if mode == ConnectionRequest.CONNECT:
-                    logger.info(f"Client {self._client_id}: Connected")
+                    self._requests_channel = resp["requestsChannel"]
+                    logger.info(  # type: ignore
+                        f"Client {self._client_id}: Connected"
+                    )
                 elif mode == ConnectionRequest.PING:
-                    logger.info(f"Client {self._client_id}: Pinged")
+                    logger.info(  # type: ignore
+                        f"Client {self._client_id}: Pinged"
+                    )
                 elif mode == ConnectionRequest.DISCONNECT:
-                    logger.info(f"Client {self._client_id}: Disconnected")
+                    logger.info(  # type: ignore
+                        f"Client {self._client_id}: Disconnected"
+                    )
                 return
             elif resp["status"] == str(ResponseStatus.ERROR):
                 logger.error(
-                    f"Client {self._client_id} error msg: {resp['err_msg']}"
+                    f"Client {self._client_id} error msg: {resp['errMsg']}"
                 )
                 sys.exit(1)
         else:
@@ -178,7 +187,7 @@ class Client:
                 "modelName": self._model_name,
                 "ect": ESTCT[mode][MODELS[task_type]] * data_size,
                 "wait": 0,
-                "channel": self._req_server.sub_stream,
+                "channel": self._requests_server.sub_stream,
             }
             self._task_queue.put(task)
 
@@ -200,9 +209,8 @@ class Client:
             f" {task['taskId']}"
         )
         # self._pending_tasks[task["taskId"]] = task
-        stream: str = "REQUESTS"
         msg: Dict[str, str] = {"message": json.dumps(task)}
-        self._req_server.publish(stream, msg)
+        self._requests_server.publish(self._requests_channel, msg)
 
     @timer(Timers.PERF_COUNTER)
     def _receive_results(self) -> None:
@@ -212,11 +220,12 @@ class Client:
                 result: TaskMessage = self._results_queue.pop(0)
                 # if result["taskId"] in self._pending_tasks:
                 if result["status"] == State.SUCCESS.value:
-                    logger.info(
+                    logger.info(  # type: ignore
                         f"{self._name} {self._client_id}: received task"
                         f" {result['modelName']} {result['taskType']} with"
                         f" id {result['taskId']} result"
                     )
+                    logger.debug(result["output"])
                     task_count += 1
                     logger.info(
                         f"{self._name} {self._client_id}: completed task(s)"

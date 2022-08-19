@@ -1,4 +1,5 @@
-from multiprocessing import Event
+# -*- coding: utf-8 -*-
+from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple
@@ -37,14 +38,14 @@ class Stream(Thread, ABC):
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: Event,
+        stop_run: EventClass,
         host: str,
         port: int,
         sub_queue: List[TaskMessage],
         idx: str = "",
     ) -> None:
         super().__init__()
-        self._stop_run: Event = stop_run
+        self._stop_run: EventClass = stop_run
         self._ready: bool = False
         self._host: str = host
         self._port: int = port
@@ -71,6 +72,10 @@ class Stream(Thread, ABC):
 
     @timer(Timers.PERF_COUNTER)
     def publish(self, stream: str, msg: str) -> None:
+        logger.debug(
+            f"{self._server_name}: Publishing msg to stream"
+            f" {stream}\n{pformat(msg)}"
+        )
         self._redis.xadd(stream, msg)
 
     def _listen(self) -> None:
@@ -140,6 +145,7 @@ class ManagerConnectionsStream(Stream):
                 data: TaskMessage = json.loads(entry["message"])
                 self._sub_queue.append(data)
             self._msg_id = entry_id
+        logger.debug(f"{self._server_name}: Deleting message\n{pformat(msg)}")
         self._redis.xtrim(self.sub_stream, minid=self._msg_id)
 
     @property
@@ -162,15 +168,19 @@ class ManagerRequestsStream(Stream):
             entry_id, entry = msg_item[1][0]
             if "message" in entry.keys():
                 data: TaskMessage = json.loads(entry["message"])
-                if "ect" not in data:
-                    data["ect"] = (
-                        ESTCT[data["mode"]][MODELS[data["taskType"]]]
-                        * data["dataSize"]
-                    )
-                if "wait" not in data:
-                    data["wait"] = 0
-                self._sub_queue.append(data)
+                if ("items" in data and data["items"]) or (
+                    "taskKey" in data and data["taskKey"]
+                ):
+                    if "ect" not in data:
+                        data["ect"] = (
+                            ESTCT[data["mode"]][MODELS[data["taskType"]]]
+                            * data["dataSize"]
+                        )
+                    if "wait" not in data:
+                        data["wait"] = 0
+                    self._sub_queue.append(data)
             self._msg_id = entry_id
+        logger.debug(f"{self._server_name}: Deleting message\n{pformat(msg)}")
         self._redis.xtrim(self.sub_stream, minid=self._msg_id)
 
     @property
@@ -179,7 +189,7 @@ class ManagerRequestsStream(Stream):
 
     @property
     def sub_stream(self) -> str:
-        return "requests"
+        return "taskRequests"
 
 
 class ClientConnectionsStream(Stream):
@@ -195,6 +205,7 @@ class ClientConnectionsStream(Stream):
                 data: TaskMessage = json.loads(entry["message"])
                 self._sub_queue.append(data)
             self._msg_id = entry_id
+        logger.debug(f"{self._server_name}: Deleting message\n{pformat(msg)}")
         self._redis.xtrim(self.sub_stream, minid=self._msg_id)
 
     @property
@@ -219,11 +230,12 @@ class ClientRequestsStream(Stream):
                 data: TaskMessage = json.loads(entry["message"])
                 self._sub_queue.append(data)
             self._msg_id = entry_id
+        logger.debug(f"{self._server_name}: Deleting message\n{pformat(msg)}")
         self._redis.xtrim(self.sub_stream, minid=self._msg_id)
 
     @property
     def pub_stream(self) -> str:
-        return "requests"
+        return "taskRequests"
 
     @property
     def sub_stream(self) -> str:

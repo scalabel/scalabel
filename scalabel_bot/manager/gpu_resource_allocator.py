@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""PipeSwitch GPU Resource Allocator
+"""Scalabel Bot GPU Resource Allocator.
 
 This module queries available GPUs and allocates GPU resources
-for the PipeSwitch Manager.
+to the Scalabel Bot Manager.
 
 Todo:
     * None
@@ -34,6 +34,7 @@ class GPUResourceAllocator(object):
 
     @timer(Timers.PERF_COUNTER)
     def __init__(self) -> None:
+        """Initializes the GPUResourceAllocator class."""
         self._name: str = self.__class__.__name__
         self._gpus: OrderedDict[int, GPUStat] = self._get_gpus()
         self._cuda_init()
@@ -43,8 +44,12 @@ class GPUResourceAllocator(object):
         """Reserves set amount of GPUs.
 
         Args:
-            num_gpus (int, optional):
-                Total number of GPUs to reserve. Defaults to 0.
+            num_gpus (`int`): Total number of GPUs to reserve.
+            gpu_ids (`List`[int]): Specific GPU ids to reserve.
+
+        Raises:
+            GPUError: If the number of GPUs to reserve is greater than the
+                total number of available GPUs.
 
         Returns:
             List[int]: List of IDs of reserved GPUs.
@@ -88,7 +93,7 @@ class GPUResourceAllocator(object):
     def warmup_gpus(self, gpus: List[int]) -> None:
         """Warmup GPUs by running a dummy PyTorch function."""
         for gpu_id in gpus:
-            torch.randn(1024, device=gpu_id)
+            torch.randn(1024, device=torch.device(gpu_id))
 
     @timer(Timers.PERF_COUNTER)
     def release_gpus(self) -> None:
@@ -108,10 +113,9 @@ class GPUResourceAllocator(object):
         """Checks if available GPUs are visible by PyTorch.
 
         Raises:
-            `AssertionError`: If CUDA is not available.
-
-            `AssertionError`: If the number of GPUs visible by PyTorch
-                is not equal to the total number of available GPUs.
+            GPUError: If CUDA is not available or if the number of GPUs
+                visible by PyTorch is not equal to the total number of
+                available GPUs.
         """
         os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -153,7 +157,6 @@ class GPUResourceAllocator(object):
 
         Args:
             gpu_id (int): GPU id.
-
         """
         device: torch.device = torch.device(gpu_id)
         x_train: torch.Tensor = torch.FloatTensor([0.0, 1.0, 2.0]).to(device)

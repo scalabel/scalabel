@@ -1,18 +1,18 @@
 import numpy as np
 import torch
-
 from transformers import (
     GPT2Tokenizer,
     OPTForCausalLM,
 )
 
+from scalabel_bot.services.common.generic_model import GenericModel
 
-MODEL_NAME = "OPT"
 
-
-class OPT:
-    def __init__(self):
-        self.n_gpu = 1
+class OPT(GenericModel):
+    def __init__(self) -> None:
+        super().__init__()
+        self._name: str = "opt"
+        self.n_gpu: int = 1
         self.set_seed(42)
         self.max_length = int(10000)
         self.length = 50
@@ -33,7 +33,7 @@ class OPT:
             torch.cuda.manual_seed_all(seed)
 
     def adjust_length_to_model(self, length, max_sequence_length):
-        if length < 0 and max_sequence_length > 0:
+        if length < 0 < max_sequence_length:
             length = max_sequence_length
         elif 0 < max_sequence_length < length:
             length = (
@@ -43,7 +43,7 @@ class OPT:
             length = self.max_length  # avoid infinite loop
         return length
 
-    def __call__(self, inputs, length):
+    def __call__(self, prompt, length):
         self.length = self.adjust_length_to_model(
             length,
             max_sequence_length=self.model.config.max_position_embeddings,
@@ -51,9 +51,9 @@ class OPT:
 
         prefix = self.prefix if self.prefix else self.padding_text
         encoded_prompt = self.tokenizer.encode(
-            prefix + inputs, add_special_tokens=False, return_tensors="pt"
+            prefix + prompt, add_special_tokens=False, return_tensors="pt"
         )
-        encoded_prompt = encoded_prompt.to(self.device)
+        encoded_prompt = encoded_prompt.to(self._device)
 
         if encoded_prompt.size()[-1] == 0:
             input_ids = None
@@ -90,9 +90,10 @@ class OPT:
                 : text.find(self.stop_token) if self.stop_token else None
             ]
 
-            # Add the prompt at the beginning of the sequence. Remove the excess text that was used for pre-processing
+            # Add the prompt at the beginning of the sequence.
+            # Remove the excess text that was used for pre-processing
             total_sequence = (
-                inputs
+                prompt
                 + text[
                     len(
                         self.tokenizer.decode(
@@ -113,12 +114,17 @@ class OPT:
             inputs_list.append((item["prompt"], item["length"]))
         return inputs_list
 
-    def import_model(self, device):
-        self.device = device
+    def import_model(self, device, service_mode):
+        self._device = device
         model_class, tokenizer_class = OPTForCausalLM, GPT2Tokenizer
         self.tokenizer = tokenizer_class.from_pretrained("facebook/opt-2.7b")
         self.model = model_class.from_pretrained("facebook/opt-2.7b")
-        self.model.to(self.device)
+        self.model.to(self._device)
+
+        if service_mode == "inference":
+            self.model.eval()
+        elif service_mode == "train":
+            self.model.train()
 
         if self.fp16:
             self.model.half()

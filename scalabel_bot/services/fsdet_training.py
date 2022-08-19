@@ -2,8 +2,8 @@ import argparse
 import os
 import time
 
-import scalabel_bot.task.common as util
-from scalabel_bot.task.fsdet import FSDET
+import scalabel_bot.services.common as util
+from scalabel_bot.services.fsdet import FSDET
 import torch
 import torch.nn as nn
 

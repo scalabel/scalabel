@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from typing import Dict, List, Tuple
 from queue import Queue
-from multiprocessing import Event, Process
+from multiprocessing import Process
+from multiprocessing.synchronize import Event as EventClass
 
 from scalabel_bot.common.consts import State, Timers
 from scalabel_bot.common.func import cantor_pairing
@@ -14,7 +16,7 @@ class TaskScheduler(Process):
     @timer(Timers.THREAD_TIMER)
     def __init__(
         self,
-        stop_run: Event,
+        stop_run: EventClass,
         num_runners: int,
         runner_status: Dict[int, State],
         runner_status_queue: Queue[Tuple[int, int, State]],
@@ -25,7 +27,7 @@ class TaskScheduler(Process):
     ) -> None:
         super().__init__()
         self._name: str = self.__class__.__name__
-        self._stop_run: Event = stop_run
+        self._stop_run: EventClass = stop_run
         self._num_runners: int = num_runners
         self._runner_status: Dict[int, State] = runner_status
         self._runner_status_queue: Queue[

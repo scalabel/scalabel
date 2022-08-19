@@ -4,14 +4,15 @@
 This module creates and manages various runners and schedulers.
 
 Todo:
-    * None
+    * Dynamic allocation of GPUs to runners.
 """
 
 
 from time import sleep
 import os
 import importlib
-from typing import List, Dict, Tuple
+from types import ModuleType
+from typing import List, Dict, Tuple, Type
 from threading import Thread
 from pprint import pformat
 import json
@@ -37,10 +38,11 @@ from scalabel_bot.profiling.timer import timer
 from scalabel_bot.runner.runner import Runner
 from scalabel_bot.server.stream import ManagerRequestsStream
 from scalabel_bot.server.pubsub import ManagerRequestsPubSub
+from scalabel_bot.services.common.generic_service import GenericService
 
 
 class BotManager:
-    """Manager thread that acts as a middleman between clients and runners.
+    """Manager class that acts as a middleman between clients and runners.
 
     It has two main functions:
         1. It receives task requests from clients and sends them
@@ -49,8 +51,8 @@ class BotManager:
            to the appropriate client.
 
     Attributes:
-        _name (`str`): Name of the manager class.
-        _stop_run (`EventClass`): Manager run flag.
+        _name (`str`): Name of the class.
+        _stop_run (`EventClass`): Global run flag.
         _mode (`str`): Mode of the manager (CPU or GPU).
 
         _num_gpus (`int`): Number of GPUs specified by the user.
@@ -64,9 +66,7 @@ class BotManager:
         _manager (`SyncManager`): Multiprocessing manager object that manages
             shared data structures across processes.
 
-        _clients (`Dict[str, int]`): Dictionary of client IDs and their TTLs.
-        _client_manager (`ClientManager`): Client manager process that
-            manages client connections.
+
 
         _runner_status (`Dict[int, State]`): Dictionary of runner IDs and
             their current status.
@@ -90,9 +90,14 @@ class BotManager:
             1. Receives task requests and stores them in the requests queue.
             2. Sends task results to the appropriate client.
 
-        _model_list (`List[str]`): List of models to be loaded into memory.
-        _model_classes (`Dict[str, object]`): Dictionary of model names and
-            their object classes.
+        _clients (`Dict[str, int]`): Dictionary of client IDs and their TTLs.
+        _client_manager (`ClientManager`): Client manager process that
+            manages client connections.
+
+        _services_list (`List[str]`): List of model services to be loaded
+            into memory.
+        _services_classes (`Dict[str, object]`): Dictionary of model services
+            names and their object classes.
 
         _task_scheduler (`TaskScheduler`): Process that manages task
             and runner allocation.
@@ -111,10 +116,10 @@ class BotManager:
         num_gpus: int = 0,
         gpu_ids: List[int] = None,
     ) -> None:
-        """Initialize the BotManager class.
+        """Initializes the BotManager class.
 
         Args:
-            stop_run (`EventClass`): Manager run flag.
+            stop_run (`EventClass`): Global run flag.
             mode (`str`, optional): Mode of the manager (CPU or GPU).
                 Defaults to "gpu".
             num_gpus (`int`, optional): Number of GPUs specified by the user.
@@ -143,12 +148,6 @@ class BotManager:
 
         self._manager: SyncManager = Manager()
 
-        self._clients: Dict[str, int] = self._manager.dict()
-        self._client_manager: ClientManager = ClientManager(
-            stop_run=self._stop_run,
-            clients=self._clients,
-        )
-
         self._runner_status: Dict[int, State] = self._manager.dict()
         self._runner_status_queue: Queue[Tuple[int, int, State]] = MPQueue()
         self._runner_ect: Dict[int, int] = self._manager.dict()
@@ -171,8 +170,17 @@ class BotManager:
             sub_queue=self._requests_queue,
         )
 
-        self._model_list: List[str] = []
-        self._model_classes: Dict[str, object] = self._manager.dict()
+        self._clients: Dict[str, int] = self._manager.dict()
+        self._client_manager: ClientManager = ClientManager(
+            stop_run=self._stop_run,
+            clients=self._clients,
+            requests_channel=self._requests_stream.sub_stream,
+        )
+
+        self._services_list: List[str] = []
+        self._services_classes: Dict[
+            str, Type[GenericService]
+        ] = self._manager.dict()
 
         self._task_scheduler: TaskScheduler = TaskScheduler(
             stop_run=self._stop_run,
@@ -198,11 +206,7 @@ class BotManager:
         self._tasks_failed: int = 0
 
     def run(self) -> None:
-        """Main manager function that sets up the manager and runs it.
-
-        Raises:
-            `TypeError`: If the message received is not a JSON string.
-        """
+        """Sets up the bot manager and runs it."""
         self._client_manager.daemon = True
         self._client_manager.start()
 
@@ -247,38 +251,36 @@ class BotManager:
             self._requests_stream.shutdown()
 
     @timer(Timers.PERF_COUNTER)
-    def _load_model_list(self, file_name: str) -> None:
-        """Load a list of models to be used by the manager.
+    def _load_services_list(self, file_name: str) -> None:
+        """Loads a list of model services to be used by the runners.
 
         Args:
-            file_name (`str`): Path to the file containing the list of models.
-
-        Raises:
-            `AssertionError`: If the file does not exist.
+            file_name (`str`): Path to the file containing the list of
+                model services.
         """
         if not os.path.exists(file_name):
             logger.error(
-                f"{self._name}: Model list file {file_name} not found"
+                f"{self._name}: Model services list {file_name} not found"
             )
-
             return
 
         with open(file=file_name, mode="r", encoding="utf-8") as f:
-            self._model_list = [line.strip() for line in f.readlines()]
+            self._services_list = [line.strip() for line in f.readlines()]
 
     @timer(Timers.PERF_COUNTER)
     def _load_models(self) -> None:
-        self._load_model_list(file_name=MODEL_LIST_FILE)
-        for model_name in self._model_list:
-            model_module = importlib.import_module(
-                "scalabel_bot.task." + model_name
+        """Loads the model classes to be used by the runners."""
+        self._load_services_list(file_name=MODEL_LIST_FILE)
+        for service_name in self._services_list:
+            service_module: ModuleType = importlib.import_module(
+                "scalabel_bot.services." + service_name
             )
-            model_class: object = model_module.MODEL_CLASS
-            self._model_classes[model_name] = model_class
+            service_class: Type[GenericService] = service_module.service_class
+            self._services_classes[service_name] = service_class
 
     @timer(Timers.PERF_COUNTER)
     def _create_runners(self) -> None:
-        """Create runner for each available GPU."""
+        """Creates runner for each available GPU."""
         for device in self._allocated_gpus:
             for runner_id in range(1):
                 runner: Runner = Runner(
@@ -288,8 +290,7 @@ class BotManager:
                     runner_id=runner_id,
                     runner_status_queue=self._runner_status_queue,
                     runner_ect_queue=self._runner_ect_queue,
-                    model_list=self._model_list,
-                    model_classes=self._model_classes,
+                    services_classes=self._services_classes,
                     results_queue=self._results_queue,
                     clients=self._clients,
                 )
@@ -303,6 +304,7 @@ class BotManager:
 
     @timer(Timers.PERF_COUNTER)
     def _allocate_task(self) -> None:
+        """Allocates a task to a runner based on the task scheduler."""
         task, runner_id = self._task_scheduler.schedule()
         logger.debug(pformat(task))
 
@@ -316,6 +318,18 @@ class BotManager:
         req_stream: ManagerRequestsStream,
         req_pubsub: ManagerRequestsPubSub,
     ) -> None:
+        """Checks the results of completed tasks and sends them to the clients.
+
+        Args:
+            results_queue (`Queue`[TaskMessage]): Queue where incoming task
+                results are stored.
+            req_stream (`ManagerRequestsStream`): Redis stream thread that
+                1. Receives task requests and stores them in the requests queue.
+                2. Sends task results to the appropriate client.
+            req_pubsub (`ManagerRequestsPubSub`): Redis pubsub thread that
+                1. Receives task requests and stores them in the requests queue.
+                2. Sends task results to the appropriate client.
+        """
         tasks_complete = 0
         tasks_failed = 0
         while True:

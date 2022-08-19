@@ -24,6 +24,7 @@ def timer(t: Timers):
             t2 = execute_timer()
             execution_time = (t2 - t1) / 1000000
             func_name = f"'{args[0].__class__.__name__}.{func.__name__}'"
+            # logger.verbose(f"{func_name:<45} {execution_time:>17.6f} ms")
             return result
 
         return timer_func

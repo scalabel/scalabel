@@ -1,4 +1,5 @@
-from multiprocessing import Event
+# -*- coding: utf-8 -*-
+from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 from abc import ABC, abstractmethod
 from typing import Dict, List
@@ -36,14 +37,14 @@ class PubSub(Thread, ABC):
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: Event,
+        stop_run: EventClass,
         host: str,
         port: int,
         sub_queue: List[Message],
         idx: str = "",
     ) -> None:
         super().__init__()
-        self._stop_run: Event = stop_run
+        self._stop_run: EventClass = stop_run
         self._ready: bool = False
         self._host: str = host
         self._port: int = port
@@ -132,14 +133,17 @@ class ManagerConnectionsPubSub(PubSub):
 class ManagerRequestsPubSub(PubSub):
     def _process_msg(self, msg: Dict[str, str]) -> None:
         data: TaskMessage = json.loads(msg["data"])
-        if "ect" not in data:
-            data["ect"] = (
-                ESTCT[data["mode"]][MODELS[data["taskType"]]]
-                * data["dataSize"]
-            )
-        if "wait" not in data:
-            data["wait"] = 0
-        self._sub_queue.append(data)
+        if ("items" in data and data["items"]) or (
+            "taskKey" in data and data["taskKey"]
+        ):
+            if "ect" not in data:
+                data["ect"] = (
+                    ESTCT[data["mode"]][MODELS[data["taskType"]]]
+                    * data["dataSize"]
+                )
+            if "wait" not in data:
+                data["wait"] = 0
+            self._sub_queue.append(data)
 
     @property
     def pub_stream(self) -> str:

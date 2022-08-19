@@ -7,36 +7,35 @@ from pprint import pformat
 from tqdm import tqdm
 
 from detectron2.data.detection_utils import read_image
+
+from scalabel_bot.common.consts import REDIS_HOST, REDIS_PORT, ServiceMode
+from scalabel.common.logger import logger
 from scalabel_bot.models.few_shot_detection.fsdet.config import (
     get_cfg,
 )
 from scalabel_bot.models.few_shot_detection.fsdet.engine import (
     DefaultPredictor,
 )
-
-from scalabel_bot.common.consts import (
-    REDIS_HOST,
-    REDIS_PORT,
-)
-
-from scalabel.common.logger import logger
+from scalabel_bot.services.common.generic_model import GenericModel
 
 
-MODEL_NAME = "FSDET"
-
-
-class FSDET:
+class FSDET(GenericModel):
     def __init__(self):
-        self.args = self.get_parser().parse_args(
+        super().__init__()
+        self._name: str = "fsdet"
+        self._args = self.get_parser().parse_args(
             [
                 "--config-file",
-                "scalabel_bot/models/few_shot_detection/configs/COCO-detection/faster_rcnn_R_101_FPN_ft_all_1shot.yaml",
+                os.path.join(
+                    "scalabel_bot/models/few_shot_detection/configs",
+                    "COCO-detection/faster_rcnn_R_101_FPN_ft_all_1shot.yaml",
+                ),
                 "--opts",
                 "MODEL.WEIGHTS",
                 "fsdet://coco/tfa_cos_1shot/model_final.pth",
             ]
         )
-        # logger.info(f"Arguments: {str(self.args)}")
+        # logger.info(f"Arguments: {str(self._args)}")
         self._data_loader = Redis(
             host=REDIS_HOST,
             port=REDIS_PORT,
@@ -106,6 +105,7 @@ class FSDET:
     def import_data(self, task):
         data_str = self._data_loader.get(task["taskKey"])
         data = json.loads(data_str)
+        logger.spam(f"\n{pformat(data)}")
         img_urls = [item["urls"]["-1"] for item in data["task"]["items"]]
         imgs = []
         for img_url in tqdm(
@@ -125,11 +125,19 @@ class FSDET:
             imgs.append(img)
         return imgs
 
-    def import_model(self, device=None):
-        cfg = self.setup_cfg(self.args)
+    def import_model(self, device, service_mode):
+        cfg = self.setup_cfg(self._args)
         if device is not None:
             cfg.defrost()
             cfg.MODEL.DEVICE = device
             cfg.freeze()
-        predictor = DefaultPredictor(cfg)
-        return predictor
+        if service_mode == ServiceMode.INFERENCE:
+            self.predictor = DefaultPredictor(cfg)
+
+    def __call__(self, img):
+        predictions = self.predictor(img)
+        instances = predictions["instances"]
+        boxes = []
+        for pred_box in instances.pred_boxes:
+            boxes.append(pred_box.cpu().numpy().tolist())
+        return boxes

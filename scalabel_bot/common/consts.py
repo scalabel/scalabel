@@ -1,5 +1,7 @@
 from enum import Enum
-from typing import Dict
+from typing import Dict, TypeVar
+
+T = TypeVar("T")
 
 # Redis host address
 REDIS_HOST = "127.0.0.1"
@@ -59,6 +61,15 @@ class Timers(Enum):
     PERF_COUNTER = "perf_counter"
     PROCESS_TIMER = "process_timer"
     THREAD_TIMER = "thread_timer"
+
+
+class ServiceMode(Enum):
+    def __str__(self) -> str:
+        return str(self.value)
+
+    INFERENCE = "inference"
+    TRAIN = "train"
+    NONE = "none"
 
 
 MODELS = {"box2d": "fsdet", "box3d": "dd3d", "textgen": "opt"}
