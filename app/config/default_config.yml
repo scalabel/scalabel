@@ -1,6 +1,8 @@
 http:
-    port: 8686
+  port: 8686
 storage:
-    data: "./local-data/scalabel"
-    itemDir: "./local-data/items"
-    type: "local"
+  data: "./local-data/scalabel"
+  itemDir: "./local-data/items"
+  type: "local"
+bot:
+  on: true
