@@ -199,10 +199,11 @@ async function launchModelServer(): Promise<void> {
   const modelServerProc = child.spawn("python", [
     "-m",
     "scalabel_bot.main",
+    "--cpu",
     "--num_gpus",
     "1",
     "--gpu_id",
-    "[0]"
+    "[1]"
   ])
   // modelServerProc.stdout.on("data", (data) => {
   //   process.stdout.write(data)

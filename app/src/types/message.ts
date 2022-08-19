@@ -55,15 +55,6 @@ export interface ModelStatusMessageType {
   active: boolean
 }
 
-export interface ConnectionRequestMessageType {
-  /** Client ID */
-  clientId: string
-  /** responses channel to receive results */
-  channel: string
-  /** Request mode */
-  request: ConnectionRequestMode
-}
-
 /** model request message type */
 export interface ModelRequestMessageType {
   /** Client ID */

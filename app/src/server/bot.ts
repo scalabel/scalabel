@@ -63,15 +63,16 @@ export class Bot {
   protected modelAddress: URL
   /** interface with model data type */
   protected modelInterface: ModelInterface
-  /** the redis message broker */
+  /** the Redis message broker to publish messages */
   protected publisher: RedisPubSub
-  /** the redis message broker */
+  /** the Redis message broker to subscribe to model server responses */
   protected responseSubscriber: RedisPubSub
-  /** the redis message broker */
+  /** the Redis message broker to subscribe to connection notifications */
   protected notifySubscriber: RedisPubSub
-  private actionPacket: ActionPacketType
-  private modelRequests: Array<ModelRequest | null>
+  /** the unique id that is used for identification with the model server */
   private readonly clientId: string
+  /** the Redis channel to send task requests */
+  private requestsChannel: string
   /** Number of actions received via broadcast */
   private actionCount: number
 
@@ -126,9 +127,8 @@ export class Bot {
 
     this.modelInterface = new ModelInterface(this.projectName, this.sessionId)
 
-    this.actionPacket = { actions: [], id: "" }
-    this.modelRequests = []
     this.clientId = `${this.projectName}_${index2str(this.taskIndex)}`
+    this.requestsChannel = RedisChannel.MODEL_REQUEST
   }
 
   /**
@@ -193,20 +193,20 @@ export class Bot {
   public async actionBroadcastHandler(
     message: SyncActionMessageType
   ): Promise<void> {
-    this.actionPacket = message.actions
+    const actionPacket = message.actions
     // If action was already acked, or if action came from a bot, ignore it
     if (
-      this.ackedPackets.has(this.actionPacket.id) ||
+      this.ackedPackets.has(actionPacket.id) ||
       message.bot ||
       message.sessionId === this.sessionId
     ) {
       return
     }
 
-    this.ackedPackets.add(this.actionPacket.id)
+    this.ackedPackets.add(actionPacket.id)
 
-    this.modelRequests = this.packetToRequests(this.actionPacket)
-    this.executeRequests(this.modelRequests, this.actionPacket.id)
+    const modelRequests = this.packetToRequests(actionPacket)
+    this.executeRequests(modelRequests, actionPacket.id)
   }
 
   /**
@@ -240,7 +240,7 @@ export class Bot {
     const modelStatusMessage: ModelStatusMessageType = {
       projectName: this.projectName,
       taskId: index2str(this.taskIndex),
-      active: active
+      active
     }
     this.publisher.publishEvent(RedisChannel.MODEL_STATUS, modelStatusMessage)
     if (!active) {
@@ -307,10 +307,10 @@ export class Bot {
         taskType: this.labelType,
         projectName: this.projectName,
         taskId: index2str(this.taskIndex),
-        items: items,
-        itemIndices: itemIndices,
+        items,
+        itemIndices,
         dataSize: items.length,
-        actionPacketId: actionPacketId,
+        actionPacketId,
         channel:
           RedisChannel.MODEL_RESPONSE +
           "_" +
@@ -318,10 +318,7 @@ export class Bot {
           "_" +
           index2str(this.taskIndex)
       }
-      this.publisher.publishEvent(
-        RedisChannel.MODEL_REQUEST,
-        modelRequestMessage
-      )
+      this.publisher.publishEvent(this.requestsChannel, modelRequestMessage)
     } catch (e) {
       Logger.info("Failed!")
     }
@@ -484,6 +481,7 @@ export class Bot {
     if (receivedData.status === "OK") {
       action = updateModelStatus(ModelStatus.READY)
       this.broadcastActions([action])
+      this.requestsChannel = receivedData.requestsChannel
     } else {
       action = updateModelStatus(ModelStatus.INVALID)
       this.broadcastActions([action])

@@ -42,7 +42,7 @@ describe("test model interface query construction", () => {
     ]
     const itemIndex = 0
     const labelType = LabelTypeName.POLYGON_2D
-    const query = modelInterface.makePolyRequest(
+    const query = modelInterface.makePolyQuery(
       points,
       url,
       itemIndex,

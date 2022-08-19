@@ -35,7 +35,7 @@ export const enum RedisChannel {
   // CONNECTION = "CONNECTIONS",
   // CONNECTION_RESPONSE = "SCALABEL_CONNECTION_RESPONSE",
   MODEL_REGISTER = "modelRegister",
-  MODEL_REQUEST = "requests",
+  MODEL_REQUEST = "taskRequests",
   MODEL_RESPONSE = "responses",
   MODEL_STATUS = "modelStatus",
   MODEL_NOTIFY = "modelNotify"
