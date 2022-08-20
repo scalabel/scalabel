@@ -2,6 +2,7 @@ import _ from "lodash"
 
 import { ProjectOptions, TaskOptions } from "../components/dashboard"
 import { AttributeToolType } from "../const/common"
+import { isValidId } from "../functional/states"
 import { Project } from "../types/project"
 import { Attribute, ConfigType, LabelType, TaskType } from "../types/state"
 
@@ -28,7 +29,13 @@ export function getProjectOptions(project: Project): ProjectOptions {
  * @param task
  */
 export function countLabelsTask(task: TaskType): number {
-  const numPerItem = task.items.map((item) => _.size(item.labels))
+  const numPerItem = task.items.map((item) => {
+    // Collect all labels without parents, since linked labels should count 1.
+    const roots = Object.entries(item.labels).filter(
+      ([_id, l]) => !isValidId(l.parent)
+    )
+    return roots.length
+  })
   return _.sum(numPerItem)
 }
 
