@@ -1,5 +1,3 @@
-import * as fs from "fs-extra"
-
 import { LabelTypeName, ShapeTypeName } from "../../src/const/common"
 import { makePathPoint2D } from "../../src/functional/states"
 import {
@@ -11,7 +9,7 @@ import {
   convertPolygonToExport,
   convertStateToExport
 } from "../../src/server/export"
-import { PathPointType, State } from "../../src/types/state"
+import { PathPointType } from "../../src/types/state"
 import {
   sampleItemExportImageTagging,
   sampleItemExportImage,
@@ -22,6 +20,7 @@ import {
   sampleStateExportImage3dBox,
   sampleStateExportImagePolygonMulti
 } from "../test_states/test_export_objects"
+import { readSampleState } from "./util/io"
 
 const sampleStateFile = "./app/test/test_states/sample_state.json"
 const samplePolygonStateFile =
@@ -136,12 +135,3 @@ describe("test export functionality for 3d bounding box", () => {
     }
   })
 })
-
-/**
- * helper function to read sample state
- *
- * @param fileName
- */
-function readSampleState(fileName: string): State {
-  return JSON.parse(fs.readFileSync(fileName, "utf8"))
-}
