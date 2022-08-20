@@ -257,6 +257,7 @@ function parseExportAttributes(
  * @param category
  * @param attributes
  * @param labelTypes
+ * @param newLabelId
  */
 function convertLabelToImport(
   labelExport: LabelExport,
@@ -362,6 +363,14 @@ function convertLabelToImport(
   return [[labelImport], shapeImports]
 }
 
+/**
+ * convert an external polygon to internal label(s)
+ *
+ * @param labelExport
+ * @param item
+ * @param sensorId
+ * @param category
+ */
 function convertPolygonLabelToImport(
   labelExport: LabelExport,
   item: number,
@@ -370,7 +379,7 @@ function convertPolygonLabelToImport(
   attributes?: { [key: number]: number[] }
 ): [LabelType[], ShapeType[]] {
   const { poly2d: polygons, manualShape: manual } = labelExport
-  if (!polygons) {
+  if (polygons == null) {
     return [[], []]
   }
 

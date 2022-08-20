@@ -738,7 +738,7 @@ export async function createTasks(
       if (tracking) {
         for (const label of Object.values(newItem.labels)) {
           // Only use root label to create track.
-          if (label.parent) {
+          if (isValidId(label.parent)) {
             continue
           }
 

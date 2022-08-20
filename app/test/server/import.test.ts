@@ -1,3 +1,4 @@
+import { isValidId } from "../../src/functional/states"
 import { convertItemToImport } from "../../src/server/import"
 import { sampleStateExportImagePolygonMulti } from "../test_states/test_export_objects"
 
@@ -17,10 +18,10 @@ describe("test import functionality for polygon", () => {
       true,
       ["polygon2d"]
     )
-    const labels = Object.entries(item.labels).map(([_, l]) => l)
+    const labels = Object.entries(item.labels).map(([_id, l]) => l)
     expect(labels).toHaveLength(3)
 
-    const root = labels.find((l) => !l.parent)
+    const root = labels.find((l) => !isValidId(l.parent))
     expect(root).toBeTruthy()
 
     labels.forEach((l) => {

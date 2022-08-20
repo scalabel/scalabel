@@ -117,6 +117,13 @@ export function convertItemToExport(
   return Object.values(itemExports)
 }
 
+/**
+ * converts a list of labels to exportable format
+ *
+ * @param labelMap
+ * @param shapeMap
+ * @param config
+ */
 export function convertLabelsToExport(
   labelMap: LabelIdMap,
   shapeMap: ShapeIdMap,
@@ -130,16 +137,30 @@ export function convertLabelsToExport(
   return fn(labelMap, shapeMap, config)
 }
 
+/**
+ * converts a list of non-polygon labels to exportable format
+ *
+ * @param labelMap
+ * @param shapeMap
+ * @param config
+ */
 export function convertNonPolygonLabelsToExport(
   labelMap: LabelIdMap,
   shapeMap: ShapeIdMap,
   config: ConfigType
 ): LabelExport[] {
-  return Object.entries(labelMap).map(([_, l]) =>
+  return Object.entries(labelMap).map(([_id, l]) =>
     convertNonPolygonLabelToExport(l, shapeMap, config)
   )
 }
 
+/**
+ * converts a single non-polygon label to exportable format
+ *
+ * @param label
+ * @param shapeMap
+ * @param config
+ */
 export function convertNonPolygonLabelToExport(
   label: LabelType,
   shapeMap: ShapeIdMap,
@@ -167,7 +188,7 @@ export function convertNonPolygonLabelToExport(
       break
     case LabelTypeName.POLYGON_2D:
     case LabelTypeName.POLYLINE_2D:
-      throw "unexpectedly found polygon shape"
+      throw new Error("unexpectedly found polygon shape")
     case LabelTypeName.BOX_3D:
       labelExport.box3d = transformBox3D(shape0)
       break
@@ -191,6 +212,13 @@ export function convertNonPolygonLabelToExport(
   return labelExport
 }
 
+/**
+ * converts a list of polygon labels to exportable format
+ *
+ * @param labelMap
+ * @param shapeMap
+ * @param config
+ */
 export function convertPolygonLabelsToExport(
   labelMap: LabelIdMap,
   shapeMap: ShapeIdMap,
@@ -202,7 +230,7 @@ export function convertPolygonLabelsToExport(
   // Key is the root id of the tree of link labels.
   const polygons = new Map<string, PolygonExportType[]>()
 
-  Object.entries(labelMap).forEach(([_, l]) => {
+  Object.entries(labelMap).forEach(([_id, l]) => {
     const pts = l.shapes.map((sid) => shapeMap[sid]) as PathPoint2DType[]
     if (pts.length === 0) {
       return
