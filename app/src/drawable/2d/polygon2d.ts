@@ -584,6 +584,11 @@ export class Polygon2D extends Label2D {
         }
       }
     }
+
+    // The root of a set of linked polygons has no points.
+    if (this._points.length === 0) {
+      return
+    }
     if (this._closed) {
       const tmp = this._points[this._points.length - 1]
       if (tmp.type === PathPointType.LINE) {

@@ -19,12 +19,15 @@ import {
   sampleStateExportImage,
   sampleStateExportImagePolygon,
   sampleItemExportImage3dBox,
-  sampleStateExportImage3dBox
+  sampleStateExportImage3dBox,
+  sampleStateExportImagePolygonMulti
 } from "../test_states/test_export_objects"
 
 const sampleStateFile = "./app/test/test_states/sample_state.json"
 const samplePolygonStateFile =
   "./app/test/test_states/sample_state_polygon.json"
+const samplePolygonMultiStateFile =
+  "./app/test/test_states/sample_state_polygon_multi.json"
 const sampleTagStateFile = "./app/test/test_states/sample_state_tag.json"
 const sample3dBoxStateFile = "./app/test/test_states/sample_state_3d_box.json"
 
@@ -43,6 +46,14 @@ describe("test export functionality across multiple labeling types", () => {
       [0, 1],
       [0, 2]
     ])
+  })
+})
+
+describe("test export functionality for polygon", () => {
+  test("export multi-component polygons", () => {
+    const state = readSampleState(samplePolygonMultiStateFile)
+    const exportedState = convertStateToExport(state)
+    expect(exportedState).toEqual(sampleStateExportImagePolygonMulti)
   })
 })
 

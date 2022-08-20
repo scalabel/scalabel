@@ -5,9 +5,12 @@ import {
   Attribute,
   ConfigType,
   ItemType,
+  LabelIdMap,
+  LabelType,
   Node2DType,
   PathPoint2DType,
   PathPointType,
+  ShapeIdMap,
   State
 } from "../types/state"
 import {
@@ -90,68 +93,150 @@ export function convertItemToExport(
           : undefined
     }
   }
-  // TODO: Clean up the export code for naming and modularity
-  for (const key of Object.keys(item.labels)) {
-    const label = item.labels[key]
-    const labelExport: LabelExport = {
-      id: label.id,
-      category: config.categories[label.category[0]],
-      attributes: parseLabelAttributes(label.attributes, config.attributes),
-      manualShape: label.manual,
-      box2d: null,
-      poly2d: null,
-      box3d: null
+
+  const labels = convertLabelsToExport(item.labels, item.shapes, config)
+  labels.forEach((l) => {
+    const l0 = item.labels[l.id]
+
+    if (isValidId(l0.parent)) {
+      return
     }
-    if (label.shapes.length > 0) {
-      const shapeId0 = label.shapes[0]
-      const shape0 = item.shapes[shapeId0]
-      switch (label.type) {
-        case LabelTypeName.BOX_2D:
-          labelExport.box2d = transformBox2D(shape0)
-          break
-        case LabelTypeName.POLYGON_2D:
-        case LabelTypeName.POLYLINE_2D:
-          labelExport.poly2d = convertPolygonToExport(
-            label.shapes.map((s) => item.shapes[s]) as PathPoint2DType[],
-            label.type
-          )
-          break
-        case LabelTypeName.BOX_3D:
-          labelExport.box3d = transformBox3D(shape0)
-          break
-        case LabelTypeName.PLANE_3D:
-          labelExport.plane3d = transformPlane3D(shape0)
-          break
-        default:
-          if (label.type in config.label2DTemplates) {
-            const points: Array<[number, number]> = []
-            const names: string[] = []
-            const hidden: boolean[] = []
-            for (const shapeId of label.shapes) {
-              const node = item.shapes[shapeId] as Node2DType
-              points.push([node.x, node.y])
-              names.push(node.name)
-              hidden.push(Boolean(node.hidden))
-            }
-          }
-      }
-    }
-    if (isValidId(label.track)) {
-      // If the label is in a track, use id of the track as label id
-      labelExport.id = label.track
-    }
-    for (const sensor of label.sensors) {
-      if (label.type === LabelTypeName.TAG) {
+
+    for (const sensor of l0.sensors) {
+      if (l0.type === LabelTypeName.TAG) {
         itemExports[sensor].attributes = parseLabelAttributes(
-          label.attributes,
+          l0.attributes,
           config.attributes
         ) as { [key: string]: string | string[] }
       } else {
-        itemExports[sensor].labels.push(labelExport)
+        itemExports[sensor].labels.push(l)
       }
     }
-  }
+  })
+
   return Object.values(itemExports)
+}
+
+export function convertLabelsToExport(
+  labelMap: LabelIdMap,
+  shapeMap: ShapeIdMap,
+  config: ConfigType
+): LabelExport[] {
+  const polyTypes = [LabelTypeName.POLYGON_2D, LabelTypeName.POLYLINE_2D]
+  const isPolygon = polyTypes.some((p) => config.labelTypes.includes(p))
+  const fn = isPolygon
+    ? convertPolygonLabelsToExport
+    : convertNonPolygonLabelsToExport
+  return fn(labelMap, shapeMap, config)
+}
+
+export function convertNonPolygonLabelsToExport(
+  labelMap: LabelIdMap,
+  shapeMap: ShapeIdMap,
+  config: ConfigType
+): LabelExport[] {
+  return Object.entries(labelMap).map(([_, l]) =>
+    convertNonPolygonLabelToExport(l, shapeMap, config)
+  )
+}
+
+export function convertNonPolygonLabelToExport(
+  label: LabelType,
+  shapeMap: ShapeIdMap,
+  config: ConfigType
+): LabelExport {
+  const labelExport: LabelExport = {
+    id: label.id,
+    category: config.categories[label.category[0]],
+    attributes: parseLabelAttributes(label.attributes, config.attributes),
+    manualShape: label.manual,
+    box2d: null,
+    poly2d: null,
+    box3d: null
+  }
+
+  if (label.shapes.length === 0) {
+    return labelExport
+  }
+
+  const shapeId0 = label.shapes[0]
+  const shape0 = shapeMap[shapeId0]
+  switch (label.type) {
+    case LabelTypeName.BOX_2D:
+      labelExport.box2d = transformBox2D(shape0)
+      break
+    case LabelTypeName.POLYGON_2D:
+    case LabelTypeName.POLYLINE_2D:
+      throw "unexpectedly found polygon shape"
+    case LabelTypeName.BOX_3D:
+      labelExport.box3d = transformBox3D(shape0)
+      break
+    case LabelTypeName.PLANE_3D:
+      labelExport.plane3d = transformPlane3D(shape0)
+      break
+    default:
+      if (label.type in config.label2DTemplates) {
+        const points: Array<[number, number]> = []
+        const names: string[] = []
+        const hidden: boolean[] = []
+        for (const shapeId of label.shapes) {
+          const node = shapeMap[shapeId] as Node2DType
+          points.push([node.x, node.y])
+          names.push(node.name)
+          hidden.push(Boolean(node.hidden))
+        }
+      }
+  }
+
+  return labelExport
+}
+
+export function convertPolygonLabelsToExport(
+  labelMap: LabelIdMap,
+  shapeMap: ShapeIdMap,
+  config: ConfigType
+): LabelExport[] {
+  // All linked labels will be exported to a single label, with its polygon
+  // array filled with all polygons of these labels.
+
+  // Key is the root id of the tree of link labels.
+  const polygons = new Map<string, PolygonExportType[]>()
+
+  Object.entries(labelMap).forEach(([_, l]) => {
+    const pts = l.shapes.map((sid) => shapeMap[sid]) as PathPoint2DType[]
+    if (pts.length === 0) {
+      return
+    }
+
+    const ps = convertPolygonToExport(pts, l.type)
+
+    // Find the root of the tree to which this label belongs
+    while (isValidId(l.parent)) {
+      l = labelMap[l.parent]
+    }
+
+    // Append polygons to the array of the root
+    const rid = l.id
+    if (!polygons.has(rid)) {
+      polygons.set(rid, [])
+    }
+    polygons.get(rid)?.push(...ps)
+  })
+
+  const labels = Array.from(polygons).map(([rid, ps]) => {
+    const root = labelMap[rid]
+    return {
+      id: root.id,
+      category: config.categories[root.category[0]],
+      attributes: parseLabelAttributes(root.attributes, config.attributes),
+      manualShape: root.manual,
+      poly2d: ps,
+      box2d: null,
+      box3d: null
+    }
+  })
+
+  return labels
 }
 
 /**
