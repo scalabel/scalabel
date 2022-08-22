@@ -44,7 +44,7 @@ function convertAttributeToLabel(attributes: {
   [key: string]: string | string[]
 }): LabelExport {
   return makeLabelExport({
-    attributes: attributes
+    attributes
   })
 }
 

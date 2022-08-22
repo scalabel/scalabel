@@ -34,7 +34,7 @@ export async function parseMultipartFormData(
   req: IncomingMessage
 ): Promise<{ fields: Fields; files: Files }> {
   return await new Promise((resolve, reject) => {
-    const form = new formidable.IncomingForm({ maxFileSize: maxFileSize })
+    const form = new formidable.IncomingForm({ maxFileSize })
     form.parse(req, (err, fields, files) => {
       // `err` is defined as `any` by formidable.
       // eslint-disable-next-line  @typescript-eslint/strict-boolean-expressions

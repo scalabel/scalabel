@@ -80,6 +80,13 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
       return common.submit(state, action as actionTypes.SubmitAction)
     case actionConsts.START_LINK_TRACK:
       return common.startLinkTrack(state)
+    case actionConsts.STOP_LINK_TRACK:
+      return common.stopLinkTrack(state)
+    case actionConsts.UPDATE_POLYGON2D_BOUNDARY_CLONE:
+      return common.updatePolygon2DBoundaryCloneStatus(
+        state,
+        action as actionTypes.UpdatePolygon2DBoundaryCloneStatusAction
+      )
     case actionConsts.UPDATE_SESSION_STATUS:
       return common.updateSessionStatus(
         state,
