@@ -83,12 +83,14 @@ export function convertItemToExport(
       attributes: {},
       labels: [],
       sensor,
+      // `intrinsics` and `extrinsics` can somehow be `{"-1": null}`, thus we
+      // must check the existence of the value as well.
       intrinsics:
-        item.intrinsics !== undefined
+        !!item.intrinsics && !!item.intrinsics[sensor]
           ? intrinsicsToExport(item.intrinsics[sensor])
           : undefined,
       extrinsics:
-        item.extrinsics !== undefined
+        !!item.extrinsics && !!item.extrinsics[sensor]
           ? extrinsicsToExport(item.extrinsics[sensor])
           : undefined
     }
