@@ -9,28 +9,35 @@ class Message(TypedDict, total=False):
             instantiating the dictionary. Defaults to False.
     """
 
-    pass
-
-
-class ConnectionMessage(Message):
-    """Generic message template to establish connections."""
-
     clientId: str
-    channel: str
-    request: str
     status: str
+
+
+class ConnectionMessage(Message, total=False):
+    """Generic message template to establish connections.
+
+    Args:
+        total (bool, optional): Whether all fields are mandatory when
+            instantiating the dictionary. Defaults to False.
+    """
+
+    handshakeChannel: str
+    request: str
     requestsChannel: str
     host: str
     port: int
     errMsg: str
 
 
-class TaskMessage(Message):
-    """Generic message template for task requests and results."""
+class TaskMessage(Message, total=False):
+    """Generic message template for task requests and results.
 
-    clientId: str
+    Args:
+        total (bool, optional): Whether all fields are mandatory when
+            instantiating the dictionary. Defaults to False.
+    """
+
     mode: str
-    type: str
     projectName: str
     taskId: str
     taskType: str
@@ -42,4 +49,3 @@ class TaskMessage(Message):
     ect: int
     wait: float
     output: object | None
-    status: str

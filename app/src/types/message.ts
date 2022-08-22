@@ -39,8 +39,8 @@ export interface SyncActionMessageType {
 export interface ModelRegisterMessageType {
   /** Client ID */
   clientId: string
-  /** responses channel to receive results */
-  channel: string
+  /** responses channel to receive connection handshakes */
+  handshakeChannel: string
   /** Request mode */
   request: ConnectionRequestMode
 }

@@ -175,7 +175,7 @@ export class Bot {
 
     const modelRegisterMessage: ModelRegisterMessageType = {
       clientId: this.clientId,
-      channel: `${RedisChannel.MODEL_NOTIFY}_${this.clientId}`,
+      handshakeChannel: `${RedisChannel.MODEL_NOTIFY}_${this.clientId}`,
       request: ConnectionRequestMode.CONNECT
     }
     this.publisher.publishEvent(

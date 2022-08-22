@@ -115,7 +115,7 @@ class Client:
     def _connect(self, mode: ConnectionRequest) -> None:
         conn: ConnectionMessage = {
             "clientId": self._client_id,
-            "channel": self._conn_server.sub_stream,
+            "handshakeChannel": self._conn_server.sub_stream,
             "request": str(mode),
         }
         msg: Dict[str, str] = {"message": json.dumps(conn)}

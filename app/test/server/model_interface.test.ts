@@ -49,7 +49,7 @@ describe("test model interface query construction", () => {
       labelType
     )
     expect(query.endpoint).toBe(ModelEndpoint.REFINE_POLY)
-    expect(query.itemIndex).toBe(itemIndex)
+    expect(query.itemIndex).toBe([itemIndex])
 
     const itemData = query.data
     expect(itemData.name).toBe(projectName)

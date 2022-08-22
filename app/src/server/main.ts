@@ -199,7 +199,7 @@ async function launchModelServer(): Promise<void> {
   const modelServerProc = child.spawn("python", [
     "-m",
     "scalabel_bot.main",
-    "--cpu",
+    // "--cpu",
     "--num_gpus",
     "1",
     "--gpu_id",

@@ -137,8 +137,8 @@ class ClientManager(Process):
             "port": REDIS_PORT,
         }
         msg: Dict[str, str] = {"message": json.dumps(resp)}
-        self._conn_stream.publish(conn["channel"], msg)
-        self._conn_pubsub.publish(conn["channel"], json.dumps(resp))
+        self._conn_stream.publish(conn["handshakeChannel"], msg)
+        self._conn_pubsub.publish(conn["handshakeChannel"], json.dumps(resp))
 
     def _check_clients(self) -> None:
         """Checks if existing clients are still connected."""
