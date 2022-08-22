@@ -75,6 +75,11 @@ export function convertItemToExport(
     if (item.names !== undefined && Object.keys(item.names).includes(key)) {
       name = item.names[sensor]
     }
+
+    // `intrinsics` and `extrinsics` can somehow be `{"-1": null}`
+    const intrinsics = item.intrinsics?.[sensor] ?? undefined
+    const extrinsics = item.extrinsics?.[sensor] ?? undefined
+
     itemExports[sensor] = {
       name,
       url,
@@ -83,16 +88,10 @@ export function convertItemToExport(
       attributes: {},
       labels: [],
       sensor,
-      // `intrinsics` and `extrinsics` can somehow be `{"-1": null}`, thus we
-      // must check the existence of the value as well.
       intrinsics:
-        !!item.intrinsics && !!item.intrinsics[sensor]
-          ? intrinsicsToExport(item.intrinsics[sensor])
-          : undefined,
+        intrinsics !== undefined ? intrinsicsToExport(intrinsics) : undefined,
       extrinsics:
-        !!item.extrinsics && !!item.extrinsics[sensor]
-          ? extrinsicsToExport(item.extrinsics[sensor])
-          : undefined
+        extrinsics !== undefined ? extrinsicsToExport(extrinsics) : undefined
     }
   }
 
