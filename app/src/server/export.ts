@@ -76,7 +76,9 @@ export function convertItemToExport(
       name = item.names[sensor]
     }
 
-    // `intrinsics` and `extrinsics` can somehow be `{"-1": null}`
+    // `intrinsics` and `extrinsics` can somehow be `{"-1": null}`, which
+    // contradicts the definition of `ItemType` interface, unfortunately, thus
+    // care must be taken when checking the validity.
     const intrinsics = item.intrinsics?.[sensor] ?? undefined
     const extrinsics = item.extrinsics?.[sensor] ?? undefined
 
