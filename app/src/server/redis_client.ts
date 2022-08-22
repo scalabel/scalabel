@@ -48,8 +48,13 @@ export class RedisClient {
 
   /** Connect redis clients to the server */
   public async setup(): Promise<void> {
-    await this.client.connect()
-    await this.pubSub.connect()
+    await this.client.connect().catch(async (err) => {
+      return await Promise.reject(err)
+    })
+    await this.pubSub.connect().catch(async (err) => {
+      return await Promise.reject(err)
+    })
+    return await Promise.resolve()
   }
 
   /**

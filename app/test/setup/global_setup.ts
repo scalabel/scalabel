@@ -36,15 +36,13 @@ module.exports = async () => {
     "Info logger is muted for concise test status report. " +
       "The switch is in test/setup/local_setup.ts"
   )
+  launchRedisServer()
   const client = redis.createClient({
     socket: {
       port: getTestConfig().redis.port
     }
   })
-  await client.connect().catch(() => {
-    Logger.info("Can't find redis server. Launch local redis server.")
-    launchRedisServer()
-  })
+  await client.connect()
   await client.ping()
   await client.quit()
 }

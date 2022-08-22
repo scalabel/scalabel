@@ -270,7 +270,6 @@ function convertLabelToImport(
   if (newLabelId !== undefined) {
     labelId = newLabelId
   }
-
   /**
    * Convert each import shape based on their type
    * TODO: no polyline2d

@@ -19,8 +19,10 @@ describe("Test that redis clients catch errors", () => {
     const config = getTestConfig()
     config.redis.port = 6385
     const failClient = new RedisClient(config.redis)
-    await failClient.setup()
-    await failClient.close()
+    await failClient.setup().catch(async (err) => {
+      await failClient.close()
+      expect(err).toBeDefined()
+    })
   })
 })
 
@@ -32,7 +34,7 @@ describe("Test redis functions that are not tested elsewhere", () => {
       await client.setAdd(setName, memberKey)
     }
     const actualMemberKeys: string[] = await client.getSetMembers(setName)
-    expect(actualMemberKeys).toEqual(memberKeys)
+    expect(actualMemberKeys.sort()).toEqual(memberKeys.sort())
 
     for (const memberKey of memberKeys) {
       await client.setRemove(setName, memberKey)
