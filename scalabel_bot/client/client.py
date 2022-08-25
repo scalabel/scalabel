@@ -49,7 +49,7 @@ def get_parser() -> ArgumentParser:
         help="Batch size of data. Default is 8.",
     )
     parser.add_argument(
-        "--it",
+        "--tasks",
         type=int,
         default=1,
         help="Number of iterations of requests. Default is 1.",
@@ -59,7 +59,7 @@ def get_parser() -> ArgumentParser:
 
 class Client:
     @timer(Timers.PERF_COUNTER)
-    def __init__(self, model_name, batch_size, num_it) -> None:
+    def __init__(self, model_name, batch_size, num_tasks) -> None:
         super().__init__()
         self._stop_run: EventClass = Event()
         self._name: str = self.__class__.__name__
@@ -67,14 +67,12 @@ class Client:
         self._results_queue: List[TaskMessage] = []
         self._handshakes_queue: List[ConnectionMessage] = []
         self._conn_server: ClientConnectionsStream = ClientConnectionsStream(
-            stop_run=self._stop_run,
             idx=self._client_id,
             host=REDIS_HOST,
             port=REDIS_PORT,
             sub_queue=self._handshakes_queue,
         )
         self._requests_server: ClientRequestsStream = ClientRequestsStream(
-            stop_run=self._stop_run,
             idx=self._client_id,
             host=REDIS_HOST,
             port=REDIS_PORT,
@@ -83,7 +81,7 @@ class Client:
         self._requests_channel: str = ""
         self._model_name: str = model_name
         self._batch_size: int = batch_size
-        self._num_it: int = num_it
+        self._num_tasks: int = num_tasks
         self._task_queue: Queue[TaskMessage] = Queue()
         self._pending_tasks: Dict[str, TaskMessage] = {}
 
@@ -157,7 +155,7 @@ class Client:
 
     @timer(Timers.PERF_COUNTER)
     def _prepare_requests(self) -> None:
-        for _ in range(self._num_it):
+        for _ in range(self._num_tasks):
             task_id: str = str(uuid4())
             if self._model_name == "fsdet":
                 task_type = "box2d"
@@ -165,8 +163,8 @@ class Client:
                 task_type = "box3d"
             elif self._model_name == "opt":
                 task_type = "textgen"
-            # task_key: str = "projects/bot-batch/saved/000000"
-            task_key: str = "projects/image/saved/000025"
+            task_key: str = "projects/bot-batch/saved/000000"
+            # task_key: str = "projects/image/saved/000025"
 
             if self._model_name == "opt":
                 items = get_opt_items()
@@ -215,7 +213,7 @@ class Client:
     @timer(Timers.PERF_COUNTER)
     def _receive_results(self) -> None:
         task_count = 0
-        while task_count != self._num_it:
+        while task_count != self._num_tasks:
             if self._results_queue:
                 result: TaskMessage = self._results_queue.pop(0)
                 # if result["taskId"] in self._pending_tasks:
@@ -229,7 +227,7 @@ class Client:
                     task_count += 1
                     logger.info(
                         f"{self._name} {self._client_id}: completed task(s)"
-                        f" {task_count}/{self._num_it}"
+                        f" {task_count}/{self._num_tasks}"
                     )
                     # self._pending_tasks.pop(result["taskId"])
                 else:
@@ -249,7 +247,7 @@ class Client:
         total_time = perf_counter_ns() - self._start_time
         logger.info(f"Total time taken: {total_time / 1000000} ms")
         logger.info(
-            f"Average task time: {total_time / self._num_it / 1000000} ms"
+            f"Average task time: {total_time / self._num_tasks / 1000000} ms"
         )
 
     def _shutdown(self) -> None:
@@ -258,7 +256,9 @@ class Client:
 
 def launch():
     args: ArgumentParser = get_parser().parse_args()
-    client = Client(args.model, args.batch_size, args.it)
+    client = Client(
+        model_name=args.model, batch_size=args.batch_size, num_tasks=args.tasks
+    )
     client.run()
 
 

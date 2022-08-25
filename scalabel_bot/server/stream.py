@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from multiprocessing import Event
 from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 from abc import ABC, abstractmethod
@@ -38,14 +39,13 @@ class Stream(Thread, ABC):
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: EventClass,
         host: str,
         port: int,
         sub_queue: List[TaskMessage],
         idx: str = "",
     ) -> None:
         super().__init__()
-        self._stop_run: EventClass = stop_run
+        self._stop_run: EventClass = Event()
         self._ready: bool = False
         self._host: str = host
         self._port: int = port
@@ -91,8 +91,12 @@ class Stream(Thread, ABC):
                     block=0,
                 )
                 if len(msg) > 0:
+                    logger.debug(
+                        f"{self._server_name}: Message received:\n{pformat(msg)}"
+                    )
                     self._process_msg(msg)
         except KeyboardInterrupt:
+            self._stop_run.set()
             return
 
     @timer(Timers.PERF_COUNTER)
@@ -110,6 +114,7 @@ class Stream(Thread, ABC):
 
     def shutdown(self) -> None:
         self._delete_streams()
+        return
 
     @property
     def ready(self) -> bool:
@@ -136,7 +141,6 @@ class ManagerConnectionsStream(Stream):
     def _process_msg(
         self, msg: List[List[str | List[Tuple[str, Dict[str, str]]]]]
     ) -> None:
-        logger.debug(f"{self._server_name}: Message received:\n{pformat(msg)}")
         for msg_item in msg:
             if isinstance(msg_item[1], str):
                 continue
@@ -161,7 +165,6 @@ class ManagerRequestsStream(Stream):
     def _process_msg(
         self, msg: List[List[str | List[Tuple[str, Dict[str, str]]]]]
     ) -> None:
-        logger.debug(f"{self._server_name}: Message received:\n{pformat(msg)}")
         for msg_item in msg:
             if isinstance(msg_item[1], str):
                 continue
@@ -196,7 +199,6 @@ class ClientConnectionsStream(Stream):
     def _process_msg(
         self, msg: List[List[str | List[Tuple[str, Dict[str, str]]]]]
     ) -> None:
-        logger.debug(f"{self._server_name}: Message received:\n{pformat(msg)}")
         for msg_item in msg:
             if isinstance(msg_item[1], str):
                 continue
@@ -221,7 +223,6 @@ class ClientRequestsStream(Stream):
     def _process_msg(
         self, msg: List[List[str | List[Tuple[str, Dict[str, str]]]]]
     ) -> None:
-        logger.debug(f"{self._server_name}: Message received:\n{pformat(msg)}")
         for msg_item in msg:
             if isinstance(msg_item[1], str):
                 continue

@@ -1,3 +1,4 @@
+---
 http:
   port: 8686
 storage:

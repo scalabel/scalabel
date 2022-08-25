@@ -11,7 +11,7 @@ Todo:
 import json
 from time import sleep
 from typing import Dict, List
-from multiprocessing import Process
+from multiprocessing import Event, Process
 from multiprocessing.synchronize import Event as EventClass
 
 # from threading import Thread
@@ -53,7 +53,6 @@ class ClientManager(Process):
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: EventClass,
         clients: Dict[str, int],
         requests_channel: str,
     ) -> None:
@@ -65,38 +64,44 @@ class ClientManager(Process):
         """
         super().__init__()
         self._name = self.__class__.__name__
-        self._stop_run: EventClass = stop_run
+        self._stop_run: EventClass = Event()
         self._clients: Dict[str, int] = clients
         self._clients_queue: List[Message] = []
         self._requests_channel: str = requests_channel
 
     def run(self) -> None:
         """Sets up the client manager and runs it."""
-        self._conn_stream: ManagerConnectionsStream = ManagerConnectionsStream(
-            stop_run=self._stop_run,
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._clients_queue,
-        )
-        self._conn_stream.daemon = True
-        self._conn_stream.start()
-        self._conn_pubsub: ManagerConnectionsPubSub = ManagerConnectionsPubSub(
-            stop_run=self._stop_run,
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._clients_queue,
-        )
-        self._conn_pubsub.daemon = True
-        self._conn_pubsub.start()
-        # self._clients_checker = Thread(target=self._check_clients)
-        # self._clients_checker.daemon = True
-        # self._clients_checker.start()
         try:
+            self._conn_stream: ManagerConnectionsStream = (
+                ManagerConnectionsStream(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    sub_queue=self._clients_queue,
+                )
+            )
+            self._conn_stream.daemon = True
+            self._conn_stream.start()
+            self._conn_pubsub: ManagerConnectionsPubSub = (
+                ManagerConnectionsPubSub(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    sub_queue=self._clients_queue,
+                )
+            )
+            self._conn_pubsub.daemon = True
+            self._conn_pubsub.start()
+            # self._clients_checker = Thread(target=self._check_clients)
+            # self._clients_checker.daemon = True
+            # self._clients_checker.start()
+
             while not self._stop_run.is_set():
                 if self._clients_queue:
                     self._connect(self._clients_queue.pop(0))
+
         except KeyboardInterrupt:
+            self._stop_run.set()
             self._conn_stream.shutdown()
+            return
 
     @timer(Timers.PERF_COUNTER)
     def _connect(self, conn: ConnectionMessage) -> None:

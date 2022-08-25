@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from multiprocessing import Event
 from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 from abc import ABC, abstractmethod
@@ -37,14 +38,13 @@ class PubSub(Thread, ABC):
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: EventClass,
         host: str,
         port: int,
         sub_queue: List[Message],
         idx: str = "",
     ) -> None:
         super().__init__()
-        self._stop_run: EventClass = stop_run
+        self._stop_run: EventClass = Event()
         self._ready: bool = False
         self._host: str = host
         self._port: int = port
@@ -89,6 +89,7 @@ class PubSub(Thread, ABC):
                             )
                             self._process_msg(msg)
         except KeyboardInterrupt:
+            self._stop_run.set()
             return
 
     @abstractmethod
@@ -151,7 +152,7 @@ class ManagerRequestsPubSub(PubSub):
 
     @property
     def sub_stream(self) -> str:
-        return "requests"
+        return "taskRequests"
 
 
 class ClientConnectionsPubSub(PubSub):
@@ -175,7 +176,7 @@ class ClientRequestsPubSub(PubSub):
 
     @property
     def pub_stream(self) -> str:
-        return "requests"
+        return "taskRequests"
 
     @property
     def sub_stream(self) -> str:

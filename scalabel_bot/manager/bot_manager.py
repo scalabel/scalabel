@@ -17,7 +17,7 @@ from threading import Thread
 from pprint import pformat
 import json
 from queue import Queue
-from multiprocessing import Manager, Queue as MPQueue
+from multiprocessing import Event, Manager, Queue as MPQueue
 from multiprocessing.managers import SyncManager
 from multiprocessing.synchronize import Event as EventClass
 
@@ -28,6 +28,7 @@ from scalabel_bot.common.consts import (
     State,
     Timers,
 )
+from scalabel_bot.common.exceptions import GPUError
 from scalabel_bot.common.func import cantor_pairing
 from scalabel.common.logger import logger
 from scalabel_bot.common.message import TaskMessage
@@ -111,7 +112,6 @@ class BotManager:
     @timer(Timers.PERF_COUNTER)
     def __init__(
         self,
-        stop_run: EventClass,
         mode: str = "gpu",
         num_gpus: int = 0,
         gpu_ids: List[int] = None,
@@ -127,128 +127,152 @@ class BotManager:
             gpu_ids (`List[int]`, optional): List of GPU IDs specified by the
                 user. Defaults to None, which means all available GPUs are used.
         """
-        super().__init__()
+        try:
+            super().__init__()
 
-        self._name: str = self.__class__.__name__
-        self._stop_run: EventClass = stop_run
-        self._mode: str = mode
+            self._name: str = self.__class__.__name__
+            self._stop_run: EventClass = Event()
+            self._mode: str = mode
 
-        self._num_gpus: int = num_gpus
-        self._gpu_ids: List[int] = gpu_ids if gpu_ids else []
-        self._allocated_gpus: List[int] = []
-        if self._mode == "gpu":
-            self._gra: GPUResourceAllocator = GPUResourceAllocator()
-            self._allocated_gpus = self._gra.reserve_gpus(
-                self._num_gpus, self._gpu_ids
+            self._num_gpus: int = num_gpus
+            self._gpu_ids: List[int] = gpu_ids if gpu_ids else []
+            self._allocated_gpus: List[int] = []
+
+            if self._mode == "gpu":
+                try:
+                    self._gra: GPUResourceAllocator = GPUResourceAllocator()
+                    self._allocated_gpus = self._gra.reserve_gpus(
+                        self._num_gpus, self._gpu_ids
+                    )
+                    logger.info(
+                        f"{self._name}: Allocated GPUs {self._allocated_gpus}"
+                    )
+                    self._gra.warmup_gpus(gpus=self._allocated_gpus)
+                except GPUError:
+                    logger.error(f"{self._name}: Failed to allocate GPUs!")
+                    logger.warning(
+                        f"{self._name}: Switching to CPU execution mode..."
+                    )
+
+                    if self._mode == "gpu":
+                        self._mode = "cpu"
+
+                    self._allocated_gpus = [*range(self._num_gpus)]
+            else:
+                self._allocated_gpus = [*range(self._num_gpus)]
+
+            self._manager: SyncManager = Manager()
+
+            self._runner_status: Dict[int, State] = self._manager.dict()
+            self._runner_status_queue: Queue[
+                Tuple[int, int, State]
+            ] = MPQueue()
+            self._runner_ect: Dict[int, int] = self._manager.dict()
+            self._runner_ect_queue: Queue[Tuple[int, int, int]] = MPQueue()
+            self._runners: Dict[int, Runner] = {}
+
+            self._requests_queue: List[TaskMessage] = self._manager.list()
+            self._results_queue: Queue[TaskMessage] = MPQueue()
+
+            self._requests_stream: ManagerRequestsStream = (
+                ManagerRequestsStream(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    sub_queue=self._requests_queue,
+                )
             )
-            logger.info(f"{self._name}: Allocated GPUs {self._allocated_gpus}")
-            self._gra.warmup_gpus(gpus=self._allocated_gpus)
-        else:
-            self._allocated_gpus = [*range(self._num_gpus)]
+            self._requests_pubsub: ManagerRequestsPubSub = (
+                ManagerRequestsPubSub(
+                    host=REDIS_HOST,
+                    port=REDIS_PORT,
+                    sub_queue=self._requests_queue,
+                )
+            )
 
-        self._manager: SyncManager = Manager()
+            self._clients: Dict[str, int] = self._manager.dict()
+            self._client_manager: ClientManager = ClientManager(
+                clients=self._clients,
+                requests_channel=self._requests_stream.sub_stream,
+            )
 
-        self._runner_status: Dict[int, State] = self._manager.dict()
-        self._runner_status_queue: Queue[Tuple[int, int, State]] = MPQueue()
-        self._runner_ect: Dict[int, int] = self._manager.dict()
-        self._runner_ect_queue: Queue[Tuple[int, int, int]] = MPQueue()
-        self._runners: Dict[int, Runner] = {}
+            self._services_list: List[str] = []
+            self._services_classes: Dict[
+                str, Type[GenericService]
+            ] = self._manager.dict()
 
-        self._requests_queue: List[TaskMessage] = self._manager.list()
-        self._results_queue: Queue[TaskMessage] = MPQueue()
+            self._task_scheduler: TaskScheduler = TaskScheduler(
+                num_runners=len(self._allocated_gpus),
+                runner_status=self._runner_status,
+                runner_status_queue=self._runner_status_queue,
+                runner_ect=self._runner_ect,
+                runner_ect_queue=self._runner_ect_queue,
+                requests_queue=self._requests_queue,
+                clients=self._clients,
+            )
 
-        self._requests_stream: ManagerRequestsStream = ManagerRequestsStream(
-            stop_run=self._stop_run,
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._requests_queue,
-        )
-        self._requests_pubsub: ManagerRequestsPubSub = ManagerRequestsPubSub(
-            stop_run=self._stop_run,
-            host=REDIS_HOST,
-            port=REDIS_PORT,
-            sub_queue=self._requests_queue,
-        )
+            self._results_checker: Thread = Thread(
+                target=self._check_result,
+                args=(
+                    self._results_queue,
+                    self._requests_stream,
+                    self._requests_pubsub,
+                ),
+            )
 
-        self._clients: Dict[str, int] = self._manager.dict()
-        self._client_manager: ClientManager = ClientManager(
-            stop_run=self._stop_run,
-            clients=self._clients,
-            requests_channel=self._requests_stream.sub_stream,
-        )
+            self._tasks_complete: int = 0
+            self._tasks_failed: int = 0
 
-        self._services_list: List[str] = []
-        self._services_classes: Dict[
-            str, Type[GenericService]
-        ] = self._manager.dict()
-
-        self._task_scheduler: TaskScheduler = TaskScheduler(
-            stop_run=self._stop_run,
-            num_runners=len(self._allocated_gpus),
-            runner_status=self._runner_status,
-            runner_status_queue=self._runner_status_queue,
-            runner_ect=self._runner_ect,
-            runner_ect_queue=self._runner_ect_queue,
-            requests_queue=self._requests_queue,
-            clients=self._clients,
-        )
-
-        self._results_checker: Thread = Thread(
-            target=self._check_result,
-            args=(
-                self._results_queue,
-                self._requests_stream,
-                self._requests_pubsub,
-            ),
-        )
-
-        self._tasks_complete: int = 0
-        self._tasks_failed: int = 0
+        except KeyboardInterrupt:
+            logger.warning("Warning: Shutting down...")
+            self._stop_run.set()
+            return
 
     def run(self) -> None:
         """Sets up the bot manager and runs it."""
-        self._client_manager.daemon = True
-        self._client_manager.start()
-
-        self._requests_stream.daemon = True
-        self._requests_stream.start()
-
-        self._requests_pubsub.daemon = True
-        self._requests_pubsub.start()
-
-        logger.info(  # type: ignore
-            "\n*********************************************\n"
-            f"{self._name}: Ready to receive requests!\n"
-            "*********************************************"
-        )
-
-        self._load_models()
-
-        self._task_scheduler.daemon = True
-        self._task_scheduler.start()
-
-        self._create_runners()
-
-        self._results_checker.daemon = True
-        self._results_checker.start()
-
-        while (len(self._runner_status) < len(self._runners)) and (
-            len(self._runner_ect) < len(self._runners)
-        ):
-            sleep(1)
-        logger.info(  # type: ignore
-            "\n******************************************\n"
-            f"{self._name}: Ready to execute tasks!\n"
-            "******************************************"
-        )
-
         try:
+            self._client_manager.daemon = True
+            self._client_manager.start()
+
+            self._requests_stream.daemon = True
+            self._requests_stream.start()
+
+            self._requests_pubsub.daemon = True
+            self._requests_pubsub.start()
+
+            logger.info(  # type: ignore
+                "\n*********************************************\n"
+                f"{self._name}: Ready to receive requests!\n"
+                "*********************************************"
+            )
+
+            self._load_models()
+
+            self._task_scheduler.daemon = True
+            self._task_scheduler.start()
+
+            self._create_runners()
+
+            self._results_checker.daemon = True
+            self._results_checker.start()
+
+            while (len(self._runner_status) < len(self._runners)) and (
+                len(self._runner_ect) < len(self._runners)
+            ):
+                sleep(1)
+            logger.info(  # type: ignore
+                "\n******************************************\n"
+                f"{self._name}: Ready to execute tasks!\n"
+                "******************************************"
+            )
+
             while not self._stop_run.is_set():
                 if self._requests_queue:
                     self._allocate_task()
         except KeyboardInterrupt:
+            logger.warning("Warning: Shutting down...")
             self._stop_run.set()
             self._requests_stream.shutdown()
+            return
 
     @timer(Timers.PERF_COUNTER)
     def _load_services_list(self, file_name: str) -> None:
@@ -284,7 +308,6 @@ class BotManager:
         for device in self._allocated_gpus:
             for runner_id in range(1):
                 runner: Runner = Runner(
-                    stop_run=self._stop_run,
                     mode=self._mode,
                     device=device,
                     runner_id=runner_id,

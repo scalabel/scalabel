@@ -36,7 +36,10 @@ class GPUResourceAllocator(object):
     def __init__(self) -> None:
         """Initializes the GPUResourceAllocator class."""
         self._name: str = self.__class__.__name__
-        self._gpus: OrderedDict[int, GPUStat] = self._get_gpus()
+        try:
+            self._gpus: OrderedDict[int, GPUStat] = self._get_gpus()
+        except Exception as exc:
+            raise GPUError from exc
         self._cuda_init()
 
     @timer(Timers.PERF_COUNTER)
@@ -129,15 +132,21 @@ class GPUResourceAllocator(object):
     def _get_gpus(self) -> OrderedDict[int, GPUStat]:
         """Uses gpustat to query all GPUs in the system.
 
+        Raises:
+            GPUError: If there are no GPUs available.
+
         Returns:
             `OrderedDict[int, GPUStat]`:
                 A dictionary with GPU id as key and GPU stats as value.
         """
-        stats: GPUStatCollection = GPUStatCollection.new_query()
-        gpus: OrderedDict[int, GPUStat] = OrderedDict()
-        for gpu in stats:
-            gpus[gpu["index"]] = gpu
-        return gpus
+        try:
+            stats: GPUStatCollection = GPUStatCollection.new_query()
+            gpus: OrderedDict[int, GPUStat] = OrderedDict()
+            for gpu in stats:
+                gpus[gpu["index"]] = gpu
+            return gpus
+        except Exception as exc:
+            raise GPUError from exc
 
     @timer(Timers.PERF_COUNTER)
     def _get_free_gpus(self) -> List[int]:

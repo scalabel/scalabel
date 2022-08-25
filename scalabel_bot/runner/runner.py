@@ -5,6 +5,9 @@ This module executes task requests from clients.
 
 Todo:
     * Efficient model switching
+    * Unload model cache and data cache upon switching models
+    * Restart runner when there are any faults
+    * Catch runtime errors of tasks
 """
 
 
@@ -12,7 +15,7 @@ from time import sleep
 from typing import Dict, List, Tuple, Type
 import torch
 from queue import Queue
-from multiprocessing import Pipe, Process
+from multiprocessing import Event, Pipe, Process
 from multiprocessing.synchronize import Event as EventClass
 from threading import Thread
 import gc
@@ -60,7 +63,6 @@ class Runner(Process):
     @timer(Timers.THREAD_TIMER)
     def __init__(
         self,
-        stop_run: EventClass,
         mode: str,
         device: int,
         runner_id: int,
@@ -72,7 +74,7 @@ class Runner(Process):
     ) -> None:
         super().__init__()
         self._name = self.__class__.__name__
-        self._stop_run: EventClass = stop_run
+        self._stop_run: EventClass = Event()
         self._mode: str = mode
         self._device: int = device
         self._id: int = runner_id
@@ -98,36 +100,36 @@ class Runner(Process):
         Raises:
             `TypeError`: If the message received is not a JSON string.
         """
-        logger.debug(f"{self._name} {self._device}-{self._id}: start")
-        if self._mode == "gpu":
-            logger.debug(
-                f"{self._name} {self._device}-{self._id}: share GPU memory"
-            )
-            self._load_jobs: List[Thread] = []
-            for service_name, service in self._services_classes.items():
-                service_model: ServiceModel = ServiceModel(
-                    mode=self._mode,
-                    devices=self._device,
-                    service_name=service_name,
-                    service=service(),
-                )
-                load_model = Thread(target=service_model.load_model)
-                load_model.daemon = True
-                load_model.start()
-                load_model.join()
-                self._load_jobs.append(load_model)
-                self._services_models[service_name] = service_model
-                # break
-            logger.debug(
-                f"{self._name} {self._device}-{self._id}: import models"
-            )
-        recv_task = Thread(target=self._recv_task)
-        recv_task.daemon = True
-        recv_task.start()
-        self._update_ect()
-        self._update_status(State.IDLE)
-
         try:
+            logger.debug(f"{self._name} {self._device}-{self._id}: start")
+            if self._mode == "gpu":
+                logger.debug(
+                    f"{self._name} {self._device}-{self._id}: share GPU memory"
+                )
+                self._load_jobs: List[Thread] = []
+                for service_name, service in self._services_classes.items():
+                    service_model: ServiceModel = ServiceModel(
+                        mode=self._mode,
+                        devices=self._device,
+                        service_name=service_name,
+                        service=service(),
+                    )
+                    load_model = Thread(target=service_model.load_model)
+                    load_model.daemon = True
+                    load_model.start()
+                    load_model.join()
+                    self._load_jobs.append(load_model)
+                    self._services_models[service_name] = service_model
+                    # break
+                logger.debug(
+                    f"{self._name} {self._device}-{self._id}: import models"
+                )
+            recv_task = Thread(target=self._recv_task)
+            recv_task.daemon = True
+            recv_task.start()
+            self._update_ect()
+            self._update_status(State.IDLE)
+
             while not self._stop_run.is_set():
                 if not self._task_queue:
                     continue
@@ -136,6 +138,7 @@ class Runner(Process):
                     self._manage_task(task)
                 self._update_ect("remove", task)
         except KeyboardInterrupt:
+            self._stop_run.set()
             return
 
     @timer(Timers.THREAD_TIMER)

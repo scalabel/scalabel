@@ -105,7 +105,7 @@ class FSDET(GenericModel):
     def import_data(self, task):
         data_str = self._data_loader.get(task["taskKey"])
         data = json.loads(data_str)
-        logger.spam(f"\n{pformat(data)}")
+        # logger.spam(f"\n{pformat(data)}")
         img_urls = [item["urls"]["-1"] for item in data["task"]["items"]]
         imgs = []
         for img_url in tqdm(
