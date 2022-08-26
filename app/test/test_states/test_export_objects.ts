@@ -575,7 +575,7 @@ export const sampleStateExportImagePolygonMulti: ItemExport[] = [
     attributes: {},
     labels: [
       {
-        id: "4f1c0dbbf032b625384a7c10b293a2c8",
+        id: "3BL7RpItDkAjlBkd",
         category: "unlabeled",
         attributes: {},
         manualShape: true,
@@ -613,7 +613,7 @@ export const sampleStateExportImagePolygonMulti: ItemExport[] = [
     attributes: {},
     labels: [
       {
-        id: "7dbb37e4ade4751ae844bc1aec01c831",
+        id: "3BL7RpItDkAjlBkd",
         category: "unlabeled",
         attributes: {},
         manualShape: true,
