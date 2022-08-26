@@ -142,7 +142,7 @@ describe("Simple stat functions", () => {
     expect(stats.countLabelsProject(allTasks)).toBe(7)
 
     const state = readSampleState(
-      "./app/test/test_states/sample_state_polygon_multi.json"
+      "./app/test/test_states/sample_state_polygon_multi_track.json"
     )
     expect(stats.countLabelsTask(state.task)).toBe(2)
   })
