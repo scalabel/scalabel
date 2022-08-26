@@ -156,7 +156,7 @@ export abstract class DrawableViewer<
           onMouseLeave={(e) => this.onMouseLeave(e)}
           onDoubleClick={(e) => this.onDoubleClick(e)}
         >
-          {this.getDrawableComponents()}
+          <div>{this.getDrawableComponents()}</div>
         </div>
       </div>
     )
