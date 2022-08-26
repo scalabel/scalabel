@@ -112,6 +112,11 @@ export function convertItemToExport(
           config.attributes
         ) as { [key: string]: string | string[] }
       } else {
+        // Extrernally, all internal differnet labels of the same track should
+        // share a common id, which is conveniently set to the id of the track.
+        if (isValidId(l0.track)) {
+          l.id = l0.track
+        }
         itemExports[sensor].labels.push(l)
       }
     }

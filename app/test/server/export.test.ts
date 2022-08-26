@@ -27,6 +27,8 @@ const samplePolygonStateFile =
   "./app/test/test_states/sample_state_polygon.json"
 const samplePolygonMultiStateFile =
   "./app/test/test_states/sample_state_polygon_multi.json"
+const samplePolygonTrackStateFile =
+  "./app/test/test_states/sample_state_polygon_track.json"
 const sampleTagStateFile = "./app/test/test_states/sample_state_tag.json"
 const sample3dBoxStateFile = "./app/test/test_states/sample_state_3d_box.json"
 
@@ -53,6 +55,13 @@ describe("test export functionality for polygon", () => {
     const state = readSampleState(samplePolygonMultiStateFile)
     const exportedState = convertStateToExport(state)
     expect(exportedState).toEqual(sampleStateExportImagePolygonMulti)
+  })
+  test("export polygon track", () => {
+    const state = readSampleState(samplePolygonTrackStateFile)
+    const items = convertStateToExport(state)
+    const item0 = items[0]
+    const item1 = items[1]
+    expect(item0.labels[0].id).toEqual(item1.labels[0].id)
   })
 })
 
