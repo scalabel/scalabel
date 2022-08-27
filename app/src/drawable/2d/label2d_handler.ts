@@ -77,11 +77,6 @@ export class Label2DHandler {
     _labelIndex: number,
     handleIndex: number
   ): boolean {
-    // Pause labeling when control key is pressed, say to pan.
-    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-      return false
-    }
-
     if (!this.hasSelectedLabels() || !this.isEditingSelectedLabels()) {
       if (this._highlightedLabel !== null) {
         this.selectHighlighted()
@@ -154,11 +149,6 @@ export class Label2DHandler {
     _labelIndex: number,
     _handleIndex: number
   ): void {
-    // Pause labeling when control key is pressed, say to pan.
-    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-      return
-    }
-
     // Hijack the event by the modifier.
     if (this._modifier !== null) {
       // Notify the modifier only when a handler is clicked.
@@ -210,11 +200,6 @@ export class Label2DHandler {
     labelIndex: number,
     handleIndex: number
   ): boolean {
-    // Pause labeling when control key is pressed, say to pan.
-    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
-      return false
-    }
-
     // Freeze the selected labels when a modifier is activated.
     if (this._modifier === null) {
       if (this.hasSelectedLabels() && this.isEditingSelectedLabels()) {
