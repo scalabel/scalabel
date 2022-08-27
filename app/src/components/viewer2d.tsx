@@ -52,7 +52,8 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       const { displayLeft, displayTop } = config
 
       const content = this._container.firstElementChild as HTMLElement
-      content.style.transform = `translate(${displayLeft}px, ${displayTop}px)`
+      content.style.marginLeft = `${displayLeft}px`
+      content.style.marginTop = `${displayTop}px`
     }
 
     const views: React.ReactElement[] = []

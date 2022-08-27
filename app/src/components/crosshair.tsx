@@ -80,8 +80,8 @@ export class Crosshair2D extends React.Component<Props, State> {
           id="crosshair-h"
           className={classes.hair}
           style={{
-            top: this.state.y - this.state.displayY,
-            left: 0,
+            top: this.state.y,
+            left: this.state.displayX,
             width: this.state.displayW
           }}
         />
@@ -91,8 +91,8 @@ export class Crosshair2D extends React.Component<Props, State> {
           id="crosshair-v"
           className={classes.hair}
           style={{
-            left: this.state.x - this.state.displayX,
-            top: 0,
+            left: this.state.x,
+            top: this.state.displayY,
             height: this.state.displayH
           }}
         />
