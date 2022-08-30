@@ -173,13 +173,25 @@ export function changeSelectedLabelsCategories(
     for (const labelId of labelIds[0]) {
       const track = state.task.tracks[selectedItem.labels[labelId].track]
       for (const itemIndex of Object.keys(track.labels).map(Number)) {
-        if (
-          itemIndex in labelsInTracks &&
-          !(track.labels[itemIndex] in labelsInTracks[itemIndex])
-        ) {
-          labelsInTracks[itemIndex].push(track.labels[itemIndex])
-        } else {
-          labelsInTracks[itemIndex] = [track.labels[itemIndex]]
+        if (!(itemIndex in labelsInTracks)) {
+          labelsInTracks[itemIndex] = []
+        }
+        const ls = labelsInTracks[itemIndex]
+
+        const item = state.task.items[itemIndex]
+
+        // Collect the root as well as all children.
+        // TODO(hxu): add test
+        const roodId = track.labels[itemIndex]
+        const tree = [roodId]
+        for (let i = 0; i < tree.length; i++) {
+          const currId = tree[i]
+          if (!(currId in ls)) {
+            ls.push(currId)
+          }
+
+          const curr = item.labels[currId]
+          tree.push(...curr.children)
         }
       }
     }
