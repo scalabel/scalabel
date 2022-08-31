@@ -88,7 +88,7 @@ def load(
             raw_frames.extend(content["frames"])
             if "groups" in content and content["groups"] is not None:
                 raw_groups.extend(content["groups"])
-            if content["config"] is not None:
+            if "config" in content and content["config"] is not None:
                 raw_cfg = content["config"]
         elif isinstance(content, list):
             raw_frames.extend(content)
