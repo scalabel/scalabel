@@ -228,15 +228,15 @@ test("validation check for polygon2d", () => {
     canvasSize,
     [
       [0, 0],
-      [1, 0],
-      [0, 1]
+      [0.5, 0],
+      [0, 0.5]
     ],
     false,
     false
   )
   /**
    * polygon 1: (120, 120) (210, 210) (310, 260) (410, 210) (210, 110)
-   * polygon 2: (0, 0) (1, 0) (0, 1) too small, invalid
+   * polygon 2: (0, 0) (0.5, 0) (0, 0.5) too small, invalid
    */
   state = getState()
   expect(_.size(state.task.items[0].labels)).toEqual(1)
