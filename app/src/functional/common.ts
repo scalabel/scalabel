@@ -764,21 +764,8 @@ function createParentLabel(
   }
   parentLabel.type = LabelTypeName.EMPTY
   state = addLabel(state, index, parentLabel)
-
   item = state.task.items[index]
-  // Assign the children label properties
-  const newParentLabel = state.task.items[index].labels[parentLabel.id]
 
-  const newLabels = labelsToMerge.map((lbl) => {
-    const nLabel = _.cloneDeep(lbl)
-    nLabel.parent = parentLabel.id
-    nLabel.category = _.cloneDeep(newParentLabel.category)
-    nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
-    if (trackId !== undefined) {
-      nLabel.track = trackId
-    }
-    return nLabel
-  })
   if (trackId !== undefined) {
     // Update track information
     let track = state.task.tracks[trackId]
@@ -788,9 +775,29 @@ function createParentLabel(
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
+  // Assign the children label properties
+  const newParentLabel = item.labels[parentLabel.id]
+  const rootSet = new Set(idList)
+  const childrenList = idList.map((lid) => getChildLabelIds(item, lid))
+  const descents = ([] as string[]).concat(...childrenList)
+  const newDescents = descents.map((lid) => {
+    const lbl = item.labels[lid]
+    const nLabel = _.cloneDeep(lbl)
+    // Only the directly linking labels shall update their parents.
+    if (rootSet.has(lbl.id)) {
+      nLabel.parent = parentLabel.id
+    }
+    nLabel.category = _.cloneDeep(newParentLabel.category)
+    nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
+    if (trackId !== undefined) {
+      nLabel.track = trackId
+    }
+    return nLabel
+  })
+
   // Update the item
   item = updateObject(item, {
-    labels: updateObject(item.labels, _.zipObject(idList, newLabels))
+    labels: updateObject(item.labels, _.zipObject(descents, newDescents))
   })
   const items = updateListItem(state.task.items, index, item)
   const task = updateObject(state.task, { items, tracks })
