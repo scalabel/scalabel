@@ -574,6 +574,11 @@ test("2d polygons linking labels and moving", () => {
   mouseMoveClick(label2d, 50, 50)
 
   state = Session.getState()
+
+  // TODO(hxu): currently this test fails, since `getChildLabelIds` is
+  // changed to include the root label itself, which apparently makes more
+  // sense. To change the test or to rollback the `getChildLabelIds` function,
+  // it is a question to be discussed later.
   expect(state.user.select.labels[0].length).toEqual(2)
   expect(Session.label2dList.selectedLabels.length).toEqual(2)
 
