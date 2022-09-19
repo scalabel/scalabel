@@ -5,7 +5,7 @@ import os
 from multiprocessing import Process, Queue
 
 # Disabling unused import becase we need Tuple in typing
-from typing import (  # pylint: disable=unused-import
+from typing import (
     Callable,
     Iterable,
     List,
