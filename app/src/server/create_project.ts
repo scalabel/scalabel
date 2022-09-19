@@ -410,7 +410,8 @@ export async function createProject(
 function getLeafCategories(categoires: Category[]): string[] {
   let leafCategoires: string[] = []
   for (const category of categoires) {
-    if (category.subcategories !== undefined) {
+    if (category.subcategories !== undefined 
+        && category.subcategories !== null) {
       leafCategoires = leafCategoires.concat(
         getLeafCategories(category.subcategories)
       )
