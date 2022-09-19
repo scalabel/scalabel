@@ -60,8 +60,8 @@ def confusion_matrix(
 
     sorted_labels = column_or_1d(labels)
 
-    y_true = np.searchsorted(sorted_labels, y_true)  # type: ignore
-    y_pred = np.searchsorted(sorted_labels, y_pred)  # type: ignore
+    y_true = np.searchsorted(sorted_labels, y_true).astype(np.int32)
+    y_pred = np.searchsorted(sorted_labels, y_pred).astype(np.int32)
 
     # labels are now from 0 to len(labels) - 1 -> use bincount
     tp = y_true == y_pred
