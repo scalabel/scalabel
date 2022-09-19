@@ -5,14 +5,7 @@ import os
 from multiprocessing import Process, Queue
 
 # Disabling unused import becase we need Tuple in typing
-from typing import (  # pylint: disable=unused-import
-    Callable,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    TypeVar,
-)
+from typing import Callable, Iterable, List, Optional, Tuple, TypeVar
 
 Inputs = TypeVar("Inputs")
 Return = TypeVar("Return")

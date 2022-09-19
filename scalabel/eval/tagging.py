@@ -45,7 +45,7 @@ def unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
     ys_labels: Iterable[np.int32] = set(
         chain.from_iterable(set(np.unique(y)) for y in (y_true, y_pred))
     )
-    return np.array(sorted(ys_labels))  # type: ignore
+    return np.array(sorted(ys_labels))
 
 
 def confusion_matrix(
@@ -60,8 +60,8 @@ def confusion_matrix(
 
     sorted_labels = column_or_1d(labels)
 
-    y_true = np.searchsorted(sorted_labels, y_true)
-    y_pred = np.searchsorted(sorted_labels, y_pred)
+    y_true = np.searchsorted(sorted_labels, y_true).astype(np.int32)
+    y_pred = np.searchsorted(sorted_labels, y_pred).astype(np.int32)
 
     # labels are now from 0 to len(labels) - 1 -> use bincount
     tp = y_true == y_pred
@@ -207,7 +207,7 @@ def compute_scores(
             average=average,
         )
         assert s is not None
-        avg = [avg_p, avg_r, avg_f1, np.sum(s)]
+        avg = [avg_p, avg_r, avg_f1, np.sum(s, dtype=np.float64)]
 
         report_dict[line_heading] = dict(
             zip(
