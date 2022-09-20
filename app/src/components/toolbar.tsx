@@ -93,6 +93,16 @@ export class ToolBar extends Component<Props> {
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
         break
       }
+      case Key.T_LOW:
+      case Key.T_UP: {
+        e.preventDefault()
+        const config = {
+          ...this.state.user.viewerConfigs[Session.activeViewerId]
+        }
+        config.hideLabeTags = !config.hideLabeTags
+        Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
+        break
+      }
       case Key.X_LOW: {
         if (this.state.session.mode === ModeStatus.ANNOTATING) {
           Session.dispatch(changeModeToSelecting())

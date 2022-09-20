@@ -100,6 +100,7 @@ export class Box2D extends Label2D {
    * @param ratio
    * @param mode
    * @param isTrackLinking
+   * @param hideLabelTags
    * @param sessionMode
    */
   public draw(
@@ -107,6 +108,7 @@ export class Box2D extends Label2D {
     ratio: number,
     mode: DrawMode,
     isTrackLinking: boolean,
+    hideLabelTags: boolean,
     sessionMode: ModeStatus | undefined
   ): void {
     // Set proper drawing styles
@@ -148,7 +150,7 @@ export class Box2D extends Label2D {
     const rect = this._rect
     rectStyle.color = assignColor(0)
     rect.draw(context, ratio, rectStyle)
-    if (mode === DrawMode.VIEW) {
+    if (!hideLabelTags && mode === DrawMode.VIEW) {
       if (this._selected) {
         isTrackLinking = isTrackLinking && true
       } else {

@@ -294,6 +294,7 @@ export abstract class Label2D {
    * @param {number} ratio: display to image size ratio
    * @param {DrawMode} mode
    * @param {boolean} isTrackLinking
+   * @param {boolean} hideLabelTags
    * @param {ModeStatus} sessionMode
    */
   public abstract draw(
@@ -301,6 +302,7 @@ export abstract class Label2D {
     ratio: number,
     mode: DrawMode,
     isTrackLinking: boolean,
+    hideLabelTags: boolean,
     sessionMode: ModeStatus | undefined
   ): void
 

@@ -201,6 +201,8 @@ export interface ViewerConfigType {
   synchronized: boolean
   /** whether to hide non-selected labels */
   hideLabels: boolean
+  /** whether to hide label tags */
+  hideLabeTags: boolean
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {

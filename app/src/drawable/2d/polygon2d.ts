@@ -117,6 +117,7 @@ export class Polygon2D extends Label2D {
    * @param ratio
    * @param mode
    * @param isTrackLinking
+   * @param hideLabelTags
    * @param sessionMode
    */
   public draw(
@@ -124,6 +125,7 @@ export class Polygon2D extends Label2D {
     ratio: number,
     mode: DrawMode,
     isTrackLinking: boolean,
+    hideLabelTags: boolean,
     sessionMode: ModeStatus | undefined
   ): void {
     const numPoints = this._points.length
@@ -279,7 +281,11 @@ export class Polygon2D extends Label2D {
     if (this._label !== null) {
       checked = this._label.checked
     }
-    if (mode === DrawMode.VIEW && this._state !== Polygon2DState.DRAW) {
+    if (
+      !hideLabelTags &&
+      mode === DrawMode.VIEW &&
+      this._state !== Polygon2DState.DRAW
+    ) {
       if (this._selected) {
         isTrackLinking = isTrackLinking && true
       } else {

@@ -11,6 +11,8 @@ General
 +-----------+----------------------------------------------+
 | h         | Hide all the labels except the selected one  |
 +-----------+----------------------------------------------+
+| t         | Hide tags of all labels                      |
++-----------+----------------------------------------------+
 | x         | Switch between ANNOTATING and SELECTING mode |
 +-----------+----------------------------------------------+
 | →         | Right arrow key to go to the next item       |
