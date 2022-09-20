@@ -271,7 +271,7 @@ function convertLabelToImport(
   const polyTypes = [LabelTypeName.POLYGON_2D, LabelTypeName.POLYLINE_2D]
   if (polyTypes.some((p) => labelTypes.includes(p))) {
     // Unfortunately, importing labels with more than one polygons were not
-    // supported before. To avoid potentially broken change, we handle this case
+    // supported before. To avoid potentially breaking change, we handle this case
     // separately.
     if ((labelExport.poly2d?.length ?? 0) > 1) {
       return convertPolygonLabelToImport(
