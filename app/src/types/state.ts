@@ -202,7 +202,7 @@ export interface ViewerConfigType {
   /** whether to hide non-selected labels */
   hideLabels: boolean
   /** whether to hide label tags */
-  hideLabeTags: boolean
+  hideTags: boolean
 }
 
 export interface ImageViewerConfigType extends ViewerConfigType {

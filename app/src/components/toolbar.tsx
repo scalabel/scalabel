@@ -99,7 +99,7 @@ export class ToolBar extends Component<Props> {
         const config = {
           ...this.state.user.viewerConfigs[Session.activeViewerId]
         }
-        config.hideLabeTags = !config.hideLabeTags
+        config.hideTags = !config.hideTags
         Session.dispatch(changeViewerConfig(Session.activeViewerId, config))
         break
       }

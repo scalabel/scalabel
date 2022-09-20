@@ -242,7 +242,7 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         this.controlContext,
         this.displayToImageRatio * UP_RES_RATIO,
         config.hideLabels,
-        config.hideLabeTags,
+        config.hideTags,
         mode
       )
     }
