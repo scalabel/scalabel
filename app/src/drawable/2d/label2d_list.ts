@@ -152,6 +152,7 @@ export class Label2DList {
    * @param {number} ratio: ratio: display to image size ratio
    * @param ratio
    * @param hideLabels
+   * @param hideLabelTags
    * @param sessionMode
    */
   public redraw(
@@ -159,6 +160,7 @@ export class Label2DList {
     controlContext: Context2D,
     ratio: number,
     hideLabels?: boolean,
+    hideLabelTags?: boolean,
     sessionMode?: ModeStatus
   ): void {
     const isTrackLinking = this._state.session.trackLinking
@@ -167,16 +169,19 @@ export class Label2DList {
         ? this._labelList.filter((label) => label.selected)
         : this._labelList
     labelsToDraw.forEach((v) =>
-      v.draw(labelContext, ratio, DrawMode.VIEW, isTrackLinking, sessionMode)
-    )
-    labelsToDraw.forEach((v) =>
-      v.draw(
-        controlContext,
-        ratio,
-        DrawMode.CONTROL,
-        isTrackLinking,
-        sessionMode
-      )
+      [
+        { ctx: labelContext, mode: DrawMode.VIEW },
+        { ctx: controlContext, mode: DrawMode.CONTROL }
+      ].forEach(({ ctx, mode }) => {
+        v.draw(
+          ctx,
+          ratio,
+          mode,
+          isTrackLinking,
+          hideLabelTags ?? false,
+          sessionMode
+        )
+      })
     )
   }
 

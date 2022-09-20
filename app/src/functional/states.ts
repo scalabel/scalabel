@@ -303,7 +303,8 @@ export function makeImageViewerConfig(
     sensor,
     pane,
     synchronized: false,
-    hideLabels: false
+    hideLabels: false,
+    hideTags: false
   }
 }
 
@@ -330,6 +331,7 @@ export function makePointCloudViewerConfig(
     pane,
     synchronized: false,
     hideLabels: false,
+    hideTags: false,
     cameraRotateDir: false,
     colorScheme: ColorSchemeType.HEIGHT,
     cameraTransformed: false
