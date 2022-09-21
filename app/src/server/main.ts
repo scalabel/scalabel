@@ -67,7 +67,12 @@ function startHTTPServer(
   // Set up static handlers for serving html
   // TODO: set up '/' endpoint
   for (const HTMLDir of HTML_DIRS) {
-    app.use(express.static(getAbsSrcPath(HTMLDir), { extensions: ["html"] }))
+    app.use(
+      express.static(getAbsSrcPath(HTMLDir), {
+        extensions: ["html"],
+        index: readonly ? "index_readonly.html" : "index.html"
+      })
+    )
   }
 
   // Set up handlers for serving static files
