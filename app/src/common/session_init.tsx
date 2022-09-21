@@ -47,7 +47,13 @@ export function initSession(containerName: string): void {
     const fp = await fpPromise
     const result = await fp.get()
     const userId = result.visitorId
-    initSessionForTask(taskIndex, projectName, userId, containerName, devMode)
+    await initSessionForTask(
+      taskIndex,
+      projectName,
+      userId,
+      containerName,
+      devMode
+    )
   })().catch((error: Error) => {
     throw error
   })
@@ -62,13 +68,13 @@ export function initSession(containerName: string): void {
  * @param containerName
  * @param devMode
  */
-export function initSessionForTask(
+export async function initSessionForTask(
   taskIndex: number,
   projectName: string,
   userId: string,
   containerName: string,
   devMode: boolean
-): void {
+): Promise<void> {
   // Initialize socket connection to the backend
   const socket = io.connect(location.origin, {
     transports: ["websocket"],
@@ -86,30 +92,24 @@ export function initSessionForTask(
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   // Initialize empty store
-  fetch(Endpoint.GET_CONFIG)
-    .then((resp) => {
-      resp
-        .json()
-        .then((res) => {
-          const readonly = (res.readonly ?? false) as boolean
-          if (readonly) {
-            console.info("Run in readonly mode.")
-          }
+  const resp = await fetch(Endpoint.GET_CONFIG)
+  const res = await resp.json()
 
-          const store = configureStore({}, devMode, syncMiddleware, readonly)
-          Session.store = store
-          Session.readonly = readonly
+  const readonly = (res.readonly ?? false) as boolean
+  if (readonly) {
+    console.info("Run in readonly mode.")
+  }
 
-          // Start the listeners that convert socket.io events to Redux actions
-          // These listeners will handle loading of the initial state data
-          setSocketListeners(store, socket)
+  const store = configureStore({}, devMode, syncMiddleware, readonly)
+  Session.store = store
+  Session.readonly = readonly
 
-          // Set HTML listeners
-          setBodyListeners(store)
-        })
-        .catch(console.error)
-    })
-    .catch(console.error)
+  // Start the listeners that convert socket.io events to Redux actions
+  // These listeners will handle loading of the initial state data
+  setSocketListeners(store, socket)
+
+  // Set HTML listeners
+  setBodyListeners(store)
 }
 
 /**

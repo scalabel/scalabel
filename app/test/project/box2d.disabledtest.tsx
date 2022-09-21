@@ -120,7 +120,7 @@ test(
   async () => {
     // Spawn a canvas and draw labels on this canvas
     // Uses similar code to drawable tests
-    initSessionForTask(
+    await initSessionForTask(
       testConfig.taskIndex,
       testConfig.projectName,
       "fakeId",

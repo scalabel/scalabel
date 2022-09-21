@@ -168,70 +168,89 @@ export class ToolBar extends Component<Props> {
   public render(): React.ReactNode {
     const { categories, treeCategories, attributes } = this.props
     return (
-      <div>
-        {categories !== null ? (
-          <ToolbarCategory
-            categories={categories}
-            treeCategories={treeCategories}
-            headerText={"Category"}
-          />
-        ) : null}
-        <List>
-          {attributes.map((element: Attribute) => (
-            <React.Fragment key={element.name}>
-              {renderTemplate(
-                element.type,
-                this.handleToggle,
-                this.handleAttributeToggle,
-                this.getAlignmentIndex,
-                element.name,
-                element.values
-              )}
-            </React.Fragment>
-          ))}
-        </List>
-        <div>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <div style={{ flexGrow: 1, overflowY: "scroll" }}>
+          {categories !== null ? (
+            <ToolbarCategory
+              categories={categories}
+              treeCategories={treeCategories}
+              headerText={"Category"}
+            />
+          ) : null}
+          <List>
+            {attributes.map((element: Attribute) => (
+              <React.Fragment key={element.name}>
+                {renderTemplate(
+                  element.type,
+                  this.handleToggle,
+                  this.handleAttributeToggle,
+                  this.getAlignmentIndex,
+                  element.name,
+                  element.values
+                )}
+              </React.Fragment>
+            ))}
+          </List>
           <div>
-            {makeButton("Delete", () => {
-              this.deletePressed()
-            })}
-          </div>
-          {(this.state.user.viewerConfigs[0].type ===
-            ViewerConfigTypeName.POINT_CLOUD ||
-            this.state.user.viewerConfigs[0].type ===
-              ViewerConfigTypeName.IMAGE_3D) && (
             <div>
-              {this.state.session.info3D.isBoxSpan ||
-              this.state.session.info3D.boxSpan !== null
-                ? makeButton("Cancel", () => {
-                    this.deactivateSpan()
-                    alert(Severity.WARNING, "Box was not generated")
-                  })
-                : makeButton("Activate span", () => {
-                    this.activateSpan()
-                  })}
-            </div>
-          )}
-          {this.state.task.config.tracking && (
-            <div>
-              {this.state.session.trackLinking
-                ? makeButton("Finish", () => {
-                    this.linkSelectedTracks(this.state)
-                  })
-                : makeButton("Link Tracks", () => {
-                    this.startLinkTrack()
-                  })}
-            </div>
-          )}
-          {this.state.task.config.tracking && (
-            <div>
-              {makeButton("Break Track", () => {
-                this.unlinkSelectedTrack(this.state)
+              {makeButton("Delete", () => {
+                this.deletePressed()
               })}
             </div>
-          )}
+            {(this.state.user.viewerConfigs[0].type ===
+              ViewerConfigTypeName.POINT_CLOUD ||
+              this.state.user.viewerConfigs[0].type ===
+                ViewerConfigTypeName.IMAGE_3D) && (
+              <div>
+                {this.state.session.info3D.isBoxSpan ||
+                this.state.session.info3D.boxSpan !== null
+                  ? makeButton("Cancel", () => {
+                      this.deactivateSpan()
+                      alert(Severity.WARNING, "Box was not generated")
+                    })
+                  : makeButton("Activate span", () => {
+                      this.activateSpan()
+                    })}
+              </div>
+            )}
+            {this.state.task.config.tracking && (
+              <div>
+                {this.state.session.trackLinking
+                  ? makeButton("Finish", () => {
+                      this.linkSelectedTracks(this.state)
+                    })
+                  : makeButton("Link Tracks", () => {
+                      this.startLinkTrack()
+                    })}
+              </div>
+            )}
+            {this.state.task.config.tracking && (
+              <div>
+                {makeButton("Break Track", () => {
+                  this.unlinkSelectedTrack(this.state)
+                })}
+              </div>
+            )}
+          </div>
+          <ToastContainer hideProgressBar transition={Slide} />
         </div>
-        <ToastContainer hideProgressBar transition={Slide} />
+        <div
+          style={{
+            height: 64,
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <span style={{ opacity: 0.5, marginRight: 8 }}>Powered by</span>
+          <a href="https://scalabel.ai/" target="_blank">
+            <img
+              src="https://www.scalabel.ai/images/scalabel_light_blue.svg"
+              style={{ height: 32 }}
+            />
+          </a>
+        </div>
       </div>
     )
   }

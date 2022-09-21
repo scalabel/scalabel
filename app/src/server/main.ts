@@ -59,6 +59,7 @@ function startHTTPServer(
   userManager: UserManager
 ): void {
   const listeners = new Listeners(projectStore, userManager, config)
+  const readonly = config.readonly ?? false
 
   // Set up middleware
   app.use(listeners.loggingHandler)
@@ -72,8 +73,16 @@ function startHTTPServer(
   // Set up handlers for serving static files
   app.use("/img", express.static(getAbsSrcPath("/img")))
   app.use("/css", express.static(getAbsSrcPath("/css")))
-  app.use("/js", express.static(getAbsSrcPath("/js")))
   app.use("/favicon.ico", express.static(getAbsSrcPath("/img/favicon.ico")))
+  if (readonly) {
+    app.use("/js/label.js", express.static(getAbsSrcPath("/js/label.js")))
+    app.use(
+      "/js/label.js.map",
+      express.static(getAbsSrcPath("/js/label.js.map"))
+    )
+  } else {
+    app.use("/js", express.static(getAbsSrcPath("/js")))
+  }
 
   // Set up static handlers for serving items to label
   app.use("/items", express.static(config.storage.itemDir))
@@ -119,7 +128,6 @@ function startHTTPServer(
     listeners.getConfigHandler.bind(listeners)
   )
 
-  const readonly = config.readonly ?? false
   if (!readonly) {
     app.get(
       Endpoint.DELETE_PROJECT,

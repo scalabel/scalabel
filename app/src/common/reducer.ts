@@ -191,7 +191,9 @@ export const readonlyReducer: Reducer<State> = (
   // Remark(hxu): Using state to handle alert does not make sense to me.
   // Nevertheless, we use the existing framework to achieve the purpose.
   const readonlyAlert = addReadonlyAlertAction(state)
-  const canAlert = isFrontend()
+
+  // Don't show an alert, but leave the code for potential future reference.
+  const canAlert = isFrontend() && false
 
   let finalAction: AnyAction | undefined
   if (atype === actionConsts.SEQUENTIAL) {

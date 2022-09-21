@@ -154,12 +154,19 @@ class LabelLayout extends React.Component<Props, LayoutState> {
         onChange={(size) => {
           this.handleOnChange(size, position)
         }}
+        style={{ height: "100%" }}
       >
-        <div className={name1}>{comp1}</div>
-        <div className={name2}>{comp2}</div>
+        <div className={name1} style={{ height: "100%" }}>
+          {comp1}
+        </div>
+        <div className={name2} style={{ height: "100%" }}>
+          {comp2}
+        </div>
       </SplitPane>
     ) : (
-      <div className={name1}>{comp1}</div>
+      <div className={name1} style={{ height: "100%" }}>
+        {comp1}
+      </div>
     )
   }
 
