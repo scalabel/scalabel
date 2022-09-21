@@ -1,0 +1,452 @@
+{
+  "task": {
+    "config": {
+      "projectName": "test",
+      "itemType": "image",
+      "labelTypes": ["polygon2d"],
+      "label2DTemplates": {},
+      "policyTypes": ["linear_interpolation"],
+      "taskSize": 2,
+      "keyInterval": 1,
+      "tracking": true,
+      "handlerUrl": "label",
+      "pageTitle": "2D Segmentation Tracking",
+      "instructionPage": "https://doc.scalabel.ai/instructions/segmentation.html",
+      "bundleFile": "image.js",
+      "categories": [
+        "unlabeled",
+        "dynamic",
+        "ego vehicle",
+        "ground",
+        "static",
+        "parking",
+        "rail track",
+        "road",
+        "sidewalk",
+        "bridge",
+        "building",
+        "bus stop",
+        "fence",
+        "garage",
+        "guard rail",
+        "tunnel",
+        "wall",
+        "banner",
+        "billboard",
+        "fire hydrant",
+        "lane divider",
+        "mail box",
+        "parking sign",
+        "pole",
+        "street light",
+        "traffic cone",
+        "traffic device",
+        "traffic light",
+        "traffic sign",
+        "traffic sign frame",
+        "trash can",
+        "terrain",
+        "vegetation",
+        "sky",
+        "person",
+        "rider",
+        "bicycle",
+        "bus",
+        "car",
+        "caravan",
+        "motorcycle",
+        "trailer",
+        "train",
+        "truck"
+      ],
+      "treeCategories": [
+        {
+          "name": "void",
+          "subcategories": [
+            { "name": "unlabeled" },
+            { "name": "dynamic" },
+            { "name": "ego vehicle" },
+            { "name": "ground" },
+            { "name": "static" }
+          ]
+        },
+        {
+          "name": "flat",
+          "subcategories": [
+            { "name": "parking" },
+            { "name": "rail track" },
+            { "name": "road" },
+            { "name": "sidewalk" }
+          ]
+        },
+        {
+          "name": "construction",
+          "subcategories": [
+            { "name": "bridge" },
+            { "name": "building" },
+            { "name": "bus stop" },
+            { "name": "fence" },
+            { "name": "garage" },
+            { "name": "guard rail" },
+            { "name": "tunnel" },
+            { "name": "wall" }
+          ]
+        },
+        {
+          "name": "object",
+          "subcategories": [
+            { "name": "banner" },
+            { "name": "billboard" },
+            { "name": "fire hydrant" },
+            { "name": "lane divider" },
+            { "name": "mail box" },
+            { "name": "parking sign" },
+            { "name": "pole" },
+            { "name": "street light" },
+            { "name": "traffic cone" },
+            { "name": "traffic device" },
+            { "name": "traffic light" },
+            { "name": "traffic sign" },
+            { "name": "traffic sign frame" },
+            { "name": "trash can" }
+          ]
+        },
+        {
+          "name": "nature",
+          "subcategories": [{ "name": "terrain" }, { "name": "vegetation" }]
+        },
+        { "name": "sky", "subcategories": [{ "name": "sky" }] },
+        {
+          "name": "human",
+          "subcategories": [{ "name": "person" }, { "name": "rider" }]
+        },
+        {
+          "name": "vehicle",
+          "subcategories": [
+            { "name": "bicycle" },
+            { "name": "bus" },
+            { "name": "car" },
+            { "name": "caravan" },
+            { "name": "motorcycle" },
+            { "name": "trailer" },
+            { "name": "train" },
+            { "name": "truck" }
+          ]
+        }
+      ],
+      "attributes": [],
+      "taskId": "000000",
+      "demoMode": false,
+      "autosave": true,
+      "bots": false
+    },
+    "status": { "maxOrder": 6 },
+    "items": [
+      {
+        "id": "0",
+        "index": 0,
+        "videoName": "demo",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000050.jpg"
+        },
+        "labels": {
+          "qiTZ2KtDMjGziJgn": {
+            "id": "qiTZ2KtDMjGziJgn",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "4f1c0dbbf032b625384a7c10b293a2c8",
+            "children": [],
+            "shapes": [
+              "x9c9eGRUpKOHTDXL",
+              "XGwHXQFW0qJOR618",
+              "xvQxh3uKTUond2v9"
+            ],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 1,
+            "manual": true,
+            "changed": false,
+            "checked": false
+          },
+          "BNIPTgmFoKCmiNNz": {
+            "id": "BNIPTgmFoKCmiNNz",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "4f1c0dbbf032b625384a7c10b293a2c8",
+            "children": [],
+            "shapes": [
+              "YY4EOr7McgCzuceS",
+              "CkzCTlRZvNhIOsMc",
+              "DPlQ7f59ysWNqeYT"
+            ],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 3,
+            "manual": true,
+            "changed": false,
+            "checked": false
+          },
+          "4f1c0dbbf032b625384a7c10b293a2c8": {
+            "id": "4f1c0dbbf032b625384a7c10b293a2c8",
+            "item": 0,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "",
+            "children": ["BNIPTgmFoKCmiNNz", "qiTZ2KtDMjGziJgn"],
+            "shapes": [],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 5,
+            "manual": true,
+            "changed": false,
+            "checked": false
+          }
+        },
+        "shapes": {
+          "x9c9eGRUpKOHTDXL": {
+            "label": ["qiTZ2KtDMjGziJgn"],
+            "shapeType": "path_point2d",
+            "id": "x9c9eGRUpKOHTDXL",
+            "x": 341.4483173076923,
+            "y": 450.00000000000006,
+            "pointType": "line"
+          },
+          "XGwHXQFW0qJOR618": {
+            "label": ["qiTZ2KtDMjGziJgn"],
+            "shapeType": "path_point2d",
+            "id": "XGwHXQFW0qJOR618",
+            "x": 407.2175480769231,
+            "y": 303.75000000000006,
+            "pointType": "line"
+          },
+          "xvQxh3uKTUond2v9": {
+            "label": ["qiTZ2KtDMjGziJgn"],
+            "shapeType": "path_point2d",
+            "id": "xvQxh3uKTUond2v9",
+            "x": 514.5252403846155,
+            "y": 456.92307692307696,
+            "pointType": "line"
+          },
+          "YY4EOr7McgCzuceS": {
+            "label": ["BNIPTgmFoKCmiNNz"],
+            "shapeType": "path_point2d",
+            "id": "YY4EOr7McgCzuceS",
+            "x": 588.9483173076924,
+            "y": 443.94230769230774,
+            "pointType": "line"
+          },
+          "CkzCTlRZvNhIOsMc": {
+            "label": ["BNIPTgmFoKCmiNNz"],
+            "shapeType": "path_point2d",
+            "id": "CkzCTlRZvNhIOsMc",
+            "x": 682.4098557692308,
+            "y": 301.1538461538462,
+            "pointType": "line"
+          },
+          "DPlQ7f59ysWNqeYT": {
+            "label": ["BNIPTgmFoKCmiNNz"],
+            "shapeType": "path_point2d",
+            "id": "DPlQ7f59ysWNqeYT",
+            "x": 746.4483173076924,
+            "y": 445.67307692307696,
+            "pointType": "line"
+          }
+        },
+        "timestamp": 0,
+        "names": { "-1": "intersection-0000050.jpg" }
+      },
+      {
+        "id": "1",
+        "index": 1,
+        "videoName": "demo",
+        "urls": {
+          "-1": "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg"
+        },
+        "labels": {
+          "U3iflC31ury9v6K8": {
+            "id": "U3iflC31ury9v6K8",
+            "item": 1,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "7dbb37e4ade4751ae844bc1aec01c831",
+            "children": [],
+            "shapes": [
+              "xazyFb7QxwD3hSL5",
+              "4xx3jZXxLm7ZiwKD",
+              "dSFdTiER8PdqtyLh"
+            ],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 2,
+            "manual": true,
+            "changed": true,
+            "checked": false
+          },
+          "Y802bztvnGTBZGHw": {
+            "id": "Y802bztvnGTBZGHw",
+            "item": 1,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "7dbb37e4ade4751ae844bc1aec01c831",
+            "children": [],
+            "shapes": [
+              "XKN9beQpBZ9QUnfX",
+              "LSWHwTqablFYN6oc",
+              "tSKYALkYltPaUFNo"
+            ],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 4,
+            "manual": false,
+            "changed": false,
+            "checked": false
+          },
+          "7dbb37e4ade4751ae844bc1aec01c831": {
+            "id": "7dbb37e4ade4751ae844bc1aec01c831",
+            "item": 1,
+            "sensors": [-1],
+            "type": "polygon2d",
+            "category": [0],
+            "attributes": {},
+            "parent": "",
+            "children": ["Y802bztvnGTBZGHw", "U3iflC31ury9v6K8"],
+            "shapes": [],
+            "track": "3BL7RpItDkAjlBkd",
+            "order": 6,
+            "manual": true,
+            "changed": false,
+            "checked": false
+          }
+        },
+        "shapes": {
+          "xazyFb7QxwD3hSL5": {
+            "label": ["U3iflC31ury9v6K8"],
+            "shapeType": "path_point2d",
+            "id": "xazyFb7QxwD3hSL5",
+            "x": 341.4483173076923,
+            "y": 450.00000000000006,
+            "pointType": "line"
+          },
+          "4xx3jZXxLm7ZiwKD": {
+            "label": ["U3iflC31ury9v6K8"],
+            "shapeType": "path_point2d",
+            "id": "4xx3jZXxLm7ZiwKD",
+            "x": 407.2175480769231,
+            "y": 303.75000000000006,
+            "pointType": "line"
+          },
+          "dSFdTiER8PdqtyLh": {
+            "label": ["U3iflC31ury9v6K8"],
+            "shapeType": "path_point2d",
+            "id": "dSFdTiER8PdqtyLh",
+            "x": 514.5252403846155,
+            "y": 456.92307692307696,
+            "pointType": "line"
+          },
+          "XKN9beQpBZ9QUnfX": {
+            "label": ["Y802bztvnGTBZGHw"],
+            "shapeType": "path_point2d",
+            "id": "XKN9beQpBZ9QUnfX",
+            "x": 588.9483173076924,
+            "y": 443.94230769230774,
+            "pointType": "line"
+          },
+          "LSWHwTqablFYN6oc": {
+            "label": ["Y802bztvnGTBZGHw"],
+            "shapeType": "path_point2d",
+            "id": "LSWHwTqablFYN6oc",
+            "x": 682.4098557692308,
+            "y": 301.1538461538462,
+            "pointType": "line"
+          },
+          "tSKYALkYltPaUFNo": {
+            "label": ["Y802bztvnGTBZGHw"],
+            "shapeType": "path_point2d",
+            "id": "tSKYALkYltPaUFNo",
+            "x": 746.4483173076924,
+            "y": 445.67307692307696,
+            "pointType": "line"
+          }
+        },
+        "timestamp": 0,
+        "names": { "-1": "intersection-0000051.jpg" }
+      }
+    ],
+    "tracks": {
+      "3BL7RpItDkAjlBkd": {
+        "id": "3BL7RpItDkAjlBkd",
+        "type": "polygon2d",
+        "labels": {
+          "0": "4f1c0dbbf032b625384a7c10b293a2c8",
+          "1": "7dbb37e4ade4751ae844bc1aec01c831"
+        }
+      }
+    },
+    "sensors": { "-1": { "id": -1, "name": "default", "type": "image" } },
+    "progress": { "submissions": [] }
+  },
+  "user": {
+    "id": "",
+    "select": {
+      "item": 0,
+      "labels": [],
+      "shapes": {},
+      "category": 0,
+      "attributes": {},
+      "labelType": 0,
+      "policyType": 0
+    },
+    "layout": {
+      "toolbarWidth": 200,
+      "maxViewerConfigId": 0,
+      "maxPaneId": 0,
+      "rootPane": 0,
+      "panes": {
+        "0": {
+          "id": 0,
+          "viewerId": 0,
+          "parent": -1,
+          "hide": false,
+          "numHorizontalChildren": 0,
+          "numVerticalChildren": 0
+        }
+      }
+    },
+    "viewerConfigs": {
+      "0": {
+        "imageWidth": 0,
+        "imageHeight": 0,
+        "viewScale": 1,
+        "displayLeft": 0,
+        "displayTop": 0,
+        "show": true,
+        "type": "image",
+        "sensor": -1,
+        "pane": 0,
+        "synchronized": false,
+        "hideLabels": false
+      }
+    }
+  },
+  "session": {
+    "id": "g5R2f2Ypxnr1o31R",
+    "startTime": 0,
+    "itemStatuses": [
+      { "sensorDataLoaded": { "-1": true }, "-1": false },
+      { "sensorDataLoaded": { "-1": true }, "-1": false }
+    ],
+    "trackLinking": false,
+    "status": 0,
+    "mode": 0,
+    "numUpdates": 6,
+    "alerts": [],
+    "info3D": { "isBoxSpan": false, "boxSpan": null, "showGroundPlane": false }
+  }
+}

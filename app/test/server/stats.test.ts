@@ -2,6 +2,7 @@ import { AttributeToolType } from "../../src/const/common"
 import * as makers from "../../src/functional/states"
 import * as stats from "../../src/server/stats"
 import { TaskType } from "../../src/types/state"
+import { readSampleState } from "./util/io"
 
 let sampleTask1: TaskType
 let sampleTask2: TaskType
@@ -139,6 +140,11 @@ describe("Simple stat functions", () => {
     expect(stats.countLabelsTask(sampleTask1)).toBe(4)
     expect(stats.countLabelsTask(sampleTask2)).toBe(3)
     expect(stats.countLabelsProject(allTasks)).toBe(7)
+
+    const state = readSampleState(
+      "./app/test/test_states/sample_state_polygon_multi_track.json"
+    )
+    expect(stats.countLabelsTask(state.task)).toBe(2)
   })
 
   test("Count labeled images", () => {

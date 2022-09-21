@@ -1,5 +1,3 @@
-import * as fs from "fs-extra"
-
 import { LabelTypeName, ShapeTypeName } from "../../src/const/common"
 import { makePathPoint2D } from "../../src/functional/states"
 import {
@@ -11,7 +9,7 @@ import {
   convertPolygonToExport,
   convertStateToExport
 } from "../../src/server/export"
-import { PathPointType, State } from "../../src/types/state"
+import { PathPointType } from "../../src/types/state"
 import {
   sampleItemExportImageTagging,
   sampleItemExportImage,
@@ -19,12 +17,16 @@ import {
   sampleStateExportImage,
   sampleStateExportImagePolygon,
   sampleItemExportImage3dBox,
-  sampleStateExportImage3dBox
+  sampleStateExportImage3dBox,
+  sampleStateExportImagePolygonMulti
 } from "../test_states/test_export_objects"
+import { readSampleState } from "./util/io"
 
 const sampleStateFile = "./app/test/test_states/sample_state.json"
 const samplePolygonStateFile =
   "./app/test/test_states/sample_state_polygon.json"
+const samplePolygonMultiStateFile =
+  "./app/test/test_states/sample_state_polygon_multi_track.json"
 const sampleTagStateFile = "./app/test/test_states/sample_state_tag.json"
 const sample3dBoxStateFile = "./app/test/test_states/sample_state_3d_box.json"
 
@@ -43,6 +45,14 @@ describe("test export functionality across multiple labeling types", () => {
       [0, 1],
       [0, 2]
     ])
+  })
+})
+
+describe("test export functionality for polygon", () => {
+  test("export multi-component polygons in track mode", () => {
+    const state = readSampleState(samplePolygonMultiStateFile)
+    const exportedState = convertStateToExport(state)
+    expect(exportedState).toEqual(sampleStateExportImagePolygonMulti)
   })
 })
 
@@ -125,12 +135,3 @@ describe("test export functionality for 3d bounding box", () => {
     }
   })
 })
-
-/**
- * helper function to read sample state
- *
- * @param fileName
- */
-function readSampleState(fileName: string): State {
-  return JSON.parse(fs.readFileSync(fileName, "utf8"))
-}

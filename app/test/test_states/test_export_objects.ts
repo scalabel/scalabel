@@ -565,3 +565,82 @@ export const sampleStateExportImage3dBox: ItemExport[] = [
     }
   }
 ]
+
+export const sampleStateExportImagePolygonMulti: ItemExport[] = [
+  {
+    name: "intersection-0000050.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000050.jpg",
+    videoName: "demo",
+    timestamp: 0,
+    attributes: {},
+    labels: [
+      {
+        id: "3BL7RpItDkAjlBkd",
+        category: "unlabeled",
+        attributes: {},
+        manualShape: true,
+        poly2d: [
+          {
+            vertices: [
+              [341.4483173076923, 450.00000000000006],
+              [407.2175480769231, 303.75000000000006],
+              [514.5252403846155, 456.92307692307696]
+            ],
+            types: "LLL",
+            closed: true
+          },
+          {
+            vertices: [
+              [588.9483173076924, 443.94230769230774],
+              [682.4098557692308, 301.1538461538462],
+              [746.4483173076924, 445.67307692307696]
+            ],
+            types: "LLL",
+            closed: true
+          }
+        ],
+        box2d: null,
+        box3d: null
+      }
+    ],
+    sensor: -1
+  },
+  {
+    name: "intersection-0000051.jpg",
+    url: "https://s3-us-west-2.amazonaws.com/scalabel-public/demo/frames/intersection-0000051.jpg",
+    videoName: "demo",
+    timestamp: 0,
+    attributes: {},
+    labels: [
+      {
+        id: "3BL7RpItDkAjlBkd",
+        category: "unlabeled",
+        attributes: {},
+        manualShape: true,
+        poly2d: [
+          {
+            vertices: [
+              [341.4483173076923, 450.00000000000006],
+              [407.2175480769231, 303.75000000000006],
+              [514.5252403846155, 456.92307692307696]
+            ],
+            types: "LLL",
+            closed: true
+          },
+          {
+            vertices: [
+              [588.9483173076924, 443.94230769230774],
+              [682.4098557692308, 301.1538461538462],
+              [746.4483173076924, 445.67307692307696]
+            ],
+            types: "LLL",
+            closed: true
+          }
+        ],
+        box2d: null,
+        box3d: null
+      }
+    ],
+    sensor: -1
+  }
+]

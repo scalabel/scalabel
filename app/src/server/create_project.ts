@@ -19,7 +19,6 @@ import {
   DatasetExport,
   ItemExport,
   ItemGroupExport,
-  LabelExport,
   SensorExportType
 } from "../types/export"
 import { CreationForm, FormFileData, Project } from "../types/project"
@@ -39,8 +38,6 @@ import { convertItemToImport } from "./import"
 import { ProjectStore } from "./project_store"
 import { Storage } from "./storage"
 import * as util from "./util"
-import { mergeNearbyVertices, polyIsComplex } from "../math/polygon2d"
-import Logger from "./logger"
 import {
   extrinsicsFromExport,
   intrinsicsFromExport,
@@ -556,66 +553,10 @@ function makeItemGroups(
 export function filterIntersectedPolygonsInProject(
   project: Project
 ): [Project, string] {
-  const items = project.items
-  let msg: string = ""
-  let numberOfIntersections = 0
-
-  const newItems = items.map((item) => {
-    let newItem: Partial<ItemExport> = item
-    if (item.labels !== undefined) {
-      const filteredLabels: LabelExport[] = []
-      item.labels.forEach((label) => {
-        if (label.poly2d !== undefined && label.poly2d !== null) {
-          label.poly2d.forEach((poly) => {
-            // If it is a polyline label, do not check intersection
-            if (!poly.closed) {
-              filteredLabels.push(label)
-            } else {
-              // This is a workaround for importing bdd100k labels.
-              // Its polygon may contain vertices that is very close (<1)
-              // And the intersection there always appear under this situation
-              // So we merge them first to avoid intersection
-              poly.vertices = mergeNearbyVertices(poly.vertices, 1)
-              // Check whether the polygon have intersections
-              const intersectionData = polyIsComplex(poly.vertices)
-              if (intersectionData.length > 0) {
-                numberOfIntersections += intersectionData.length
-                intersectionData.forEach((seg) => {
-                  msg = `Image url: ${
-                    item.url !== undefined ? item.url.toString() : ""
-                  }\n`
-                  msg += `polygon ID: ${label.id.toString()}\n`
-                  msg += `Segment1: (${seg[0]}, ${seg[1]}, ${seg[2]}, ${seg[3]})\n`
-                  msg += `Segment2: (${seg[4]}, ${seg[5]}, ${seg[6]}, ${seg[7]})\n`
-                  msg += `\n`
-                })
-              } else {
-                filteredLabels.push(label)
-              }
-            }
-          })
-        } else {
-          filteredLabels.push(label)
-        }
-      })
-      newItem = {
-        ...newItem,
-        labels: filteredLabels
-      }
-    }
-    return newItem
-  })
-
-  if (numberOfIntersections > 0) {
-    msg =
-      `Found and filtered${numberOfIntersections} polygon intersection(s)!\n` +
-      msg +
-      "Please check your data."
-    Logger.warning(msg)
-  }
-
-  project.items = newItems
-  return [project, msg]
+  // Not only is the previous implementation of this function problematic
+  // but also the necessity of this function is questioned. Therefore, we
+  // make it no-op until necessary.
+  return [project, ""]
 }
 
 /**
@@ -796,13 +737,19 @@ export async function createTasks(
 
       if (tracking) {
         for (const label of Object.values(newItem.labels)) {
-          if (isValidId(label.track) && !(label.track in trackMap)) {
-            trackMap[label.track] = makeTrack(
-              { type: label.type, id: label.track },
-              false
-            )
+          // Only use root label to create track.
+          if (isValidId(label.parent)) {
+            continue
           }
-          trackMap[label.track].labels[label.item] = label.id
+
+          const tid = label.track
+          if (!isValidId(tid)) {
+            continue
+          }
+          if (!(tid in trackMap)) {
+            trackMap[tid] = makeTrack({ type: label.type, id: tid }, false)
+          }
+          trackMap[tid].labels[label.item] = label.id
         }
       }
       maxOrder += Object.keys(newItem.labels).length

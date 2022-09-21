@@ -148,7 +148,7 @@ export function convertItemToImport(
           )
         }
 
-        const [importedLabel, importedShapes] = convertLabelToImport(
+        const [importedLabels, importedShapes] = convertLabelToImport(
           labelExport,
           itemIndex,
           sensorId,
@@ -157,15 +157,19 @@ export function convertItemToImport(
           attributes,
           labelId
         )
-        if (isTagging) {
-          importedLabel.type = "tag"
-        }
 
-        if (tracking) {
-          importedLabel.track = labelExport.id.toString()
-        }
+        importedLabels.forEach((l) => {
+          if (isTagging) {
+            l.type = "tag"
+          }
 
-        labels[labelId] = importedLabel
+          if (tracking) {
+            l.track = labelExport.id.toString()
+          }
+
+          labels[l.id] = l
+        })
+
         for (const indexedShape of importedShapes) {
           shapes[indexedShape.id] = indexedShape
         }
@@ -252,8 +256,8 @@ function parseExportAttributes(
  * @param sensorId
  * @param category
  * @param attributes
- * @param newLabelId
  * @param labelTypes
+ * @param newLabelId
  */
 function convertLabelToImport(
   labelExport: LabelExport,
@@ -263,7 +267,23 @@ function convertLabelToImport(
   category?: number[],
   attributes?: { [key: number]: number[] },
   newLabelId?: string
-): [LabelType, ShapeType[]] {
+): [LabelType[], ShapeType[]] {
+  const polyTypes = [LabelTypeName.POLYGON_2D, LabelTypeName.POLYLINE_2D]
+  if (polyTypes.some((p) => labelTypes.includes(p))) {
+    // Unfortunately, importing labels with more than one polygons were not
+    // supported before. To avoid potentially breaking change, we handle this case
+    // separately.
+    if ((labelExport.poly2d?.length ?? 0) > 1) {
+      return convertPolygonLabelToImport(
+        labelExport,
+        item,
+        sensorId,
+        category,
+        attributes
+      )
+    }
+  }
+
   let labelType = LabelTypeName.EMPTY
   let shapes: null | ShapeType[] = null
   let labelId = labelExport.id.toString()
@@ -273,7 +293,6 @@ function convertLabelToImport(
 
   /**
    * Convert each import shape based on their type
-   * TODO: no polyline2d
    */
   if (
     labelTypes.includes(LabelTypeName.BOX_2D) &&
@@ -341,5 +360,83 @@ function convertLabelToImport(
     false
   )
 
-  return [labelImport, shapeImports]
+  return [[labelImport], shapeImports]
+}
+
+/**
+ * convert an external polygon to internal label(s)
+ *
+ * @param labelExport
+ * @param item
+ * @param sensorId
+ * @param category
+ */
+function convertPolygonLabelToImport(
+  labelExport: LabelExport,
+  item: number,
+  sensorId: number,
+  category?: number[],
+  attributes?: { [key: number]: number[] }
+): [LabelType[], ShapeType[]] {
+  const { poly2d: polygons, manualShape: manual } = labelExport
+  if (polygons == null) {
+    return [[], []]
+  }
+
+  // Make code shorter to fit in one line.
+  const LT = LabelTypeName
+  const PT = PathPointType
+
+  const rootId = uid()
+
+  const labels: LabelType[] = []
+  const shapes: ShapeType[] = []
+  polygons.forEach((p) => {
+    const lid = uid()
+
+    const ltype = p.closed ? LT.POLYGON_2D : LT.POLYLINE_2D
+    const points = p.vertices.map(([x, y], i) => {
+      const pointType = p.types[i] === "L" ? PT.LINE : PT.CURVE
+      const point = makePathPoint2D({ x, y, pointType })
+      point.label.push(lid)
+      return point
+    })
+
+    const pids = points.map((p) => p.id)
+    const label = makeLabel(
+      {
+        id: lid,
+        type: ltype,
+        item,
+        shapes: pids,
+        manual,
+        category,
+        attributes,
+        sensors: [sensorId],
+        parent: rootId
+      },
+      false
+    )
+
+    labels.push(label)
+    shapes.push(...points)
+  })
+
+  const root = makeLabel(
+    {
+      id: rootId,
+      item,
+      manual,
+      category,
+      children: labels.map((l) => l.id),
+
+      // The data structure design does not make it clear how the `type` of
+      // the root label of a unioned label should be. Nevertheless, we set it to
+      // `POLYGON_2D` to make everything work.
+      type: LT.POLYGON_2D
+    },
+    false
+  )
+
+  return [[root, ...labels], shapes]
 }

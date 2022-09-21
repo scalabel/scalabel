@@ -48,12 +48,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
    */
   protected getDrawableComponents(): React.ReactElement[] {
     if (this._container !== null && this._viewerConfig !== undefined) {
-      this._container.scrollTop = (
-        this._viewerConfig as ImageViewerConfigType
-      ).displayTop
-      this._container.scrollLeft = (
-        this._viewerConfig as ImageViewerConfigType
-      ).displayLeft
+      const config = this._viewerConfig as ImageViewerConfigType
+      const { displayLeft, displayTop } = config
+
+      const content = this._container.firstElementChild as HTMLElement
+      content.style.marginLeft = `${displayLeft}px`
+      content.style.marginTop = `${displayTop}px`
     }
 
     const views: React.ReactElement[] = []
@@ -196,8 +196,12 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       if (this.isKeyDown(types.Key.META) || this.isKeyDown(types.Key.CONTROL)) {
         const dx = this._mX - oldX
         const dy = this._mY - oldY
-        const displayLeft = this._container.scrollLeft - dx
-        const displayTop = this._container.scrollTop - dy
+
+        const config = this._viewerConfig as ImageViewerConfigType
+        const { displayLeft: ox, displayTop: oy } = config
+
+        const displayLeft = ox + dx
+        const displayTop = oy + dy
         const newConfig = {
           ...this._viewerConfig,
           displayLeft,

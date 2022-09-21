@@ -258,11 +258,12 @@ export class Label2DHandler {
     }
 
     // Check if some modifier is suitable when `Ctrl` is pressed.
-    if (this.isKeyDown(Key.CONTROL)) {
+    if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
       const { selectedLabels: labels } = this._labelList
       const modifier = checkModifierFromKeyboard(labels, e)
       if (modifier != null) {
         // Hit one.
+        e.preventDefault()
 
         // Somehow the `_highlightedLabel` will be set null after entering
         // the modifying mode. Therefore, we remember the old value and
@@ -281,7 +282,7 @@ export class Label2DHandler {
 
     switch (e.key) {
       case Key.L_LOW:
-        if (this.isKeyDown(Key.CONTROL)) {
+        if (this.isKeyDown(Key.CONTROL) || this.isKeyDown(Key.META)) {
           // Track link mode
           Session.dispatch(startLinkTrack())
         } else if (!this._state.task.config.tracking) {

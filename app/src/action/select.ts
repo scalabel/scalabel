@@ -3,7 +3,7 @@ import _ from "lodash"
 import Session from "../common/session"
 import { LabelTypeName } from "../const/common"
 import * as actionTypes from "../types/action"
-import { IdType, Select, State } from "../types/state"
+import { IdType, Select, State, ItemType } from "../types/state"
 import { changeLabelsProps, changeSelect, deleteLabels } from "./common"
 import { deleteTracks, terminateTracks, deleteLabelsFromTracks } from "./track"
 
@@ -126,14 +126,13 @@ export function changeSelectedLabelsAttributes(
         if (itemIndex < select.item) {
           continue
         }
-        if (
-          itemIndex in labelsInTracks &&
-          !(track.labels[itemIndex] in labelsInTracks[itemIndex])
-        ) {
-          labelsInTracks[itemIndex].push(track.labels[itemIndex])
-        } else {
-          labelsInTracks[itemIndex] = [track.labels[itemIndex]]
+        if (!(itemIndex in labelsInTracks)) {
+          labelsInTracks[itemIndex] = []
         }
+        const item = state.task.items[itemIndex]
+        const rootId = track.labels[itemIndex]
+        const ls = collectLinkedLabels(item, rootId)
+        labelsInTracks[itemIndex].push(...ls)
       }
     }
     for (const value of Object.values(labelsInTracks)) {
@@ -173,14 +172,13 @@ export function changeSelectedLabelsCategories(
     for (const labelId of labelIds[0]) {
       const track = state.task.tracks[selectedItem.labels[labelId].track]
       for (const itemIndex of Object.keys(track.labels).map(Number)) {
-        if (
-          itemIndex in labelsInTracks &&
-          !(track.labels[itemIndex] in labelsInTracks[itemIndex])
-        ) {
-          labelsInTracks[itemIndex].push(track.labels[itemIndex])
-        } else {
-          labelsInTracks[itemIndex] = [track.labels[itemIndex]]
+        if (!(itemIndex in labelsInTracks)) {
+          labelsInTracks[itemIndex] = []
         }
+        const item = state.task.items[itemIndex]
+        const rootId = track.labels[itemIndex]
+        const ls = collectLinkedLabels(item, rootId)
+        labelsInTracks[itemIndex].push(...ls)
       }
     }
     for (const value of Object.values(labelsInTracks)) {
@@ -309,4 +307,20 @@ export function selectLabel3dType(
   }
 
   return changeSelect(newSelect)
+}
+
+/**
+ * Collect all labels that are linked together.
+ *
+ * @param item
+ * @param rootId
+ */
+function collectLinkedLabels(item: ItemType, rootId: IdType): string[] {
+  const ls = [rootId]
+  for (let i = 0; i < ls.length; i++) {
+    const currId = ls[i]
+    const curr = item.labels[currId]
+    ls.push(...curr.children)
+  }
+  return ls
 }

@@ -391,16 +391,12 @@ function mergeTracksInItems(
       const idx = Number(itemIndex)
       const item = items[idx]
 
-      // Change current label as well as all its descents.
-      const descents = [labelId]
-      for (let i = 0; i < descents.length; i++) {
-        const currId = descents[i]
-        labelIds[idx].push(currId)
+      // Change current label as well as all its desendants.
+      const desendants = getChildLabelIds(item, labelId, true)
+      desendants.forEach((lid) => {
+        labelIds[idx].push(lid)
         props[idx].push(prop)
-        item.labels[currId].children.forEach((c) => {
-          descents.push(c)
-        })
-      }
+      })
     })
     track.labels = { ...track.labels, ...tracks[i].labels }
   }
@@ -460,27 +456,22 @@ function splitTrackInItems(
 
   _.forEach(track.labels, (labelId, itemIndex) => {
     const idx = Number(itemIndex)
+    const item = items[idx]
 
     if (idx < splitIndex) {
       splitedTrack0.labels[idx] = labelId
     } else {
       splitedTrack1.labels[idx] = labelId
 
-      const descents = [labelId]
-      for (let i = 0; i < descents.length; i++) {
-        const currId = descents[i]
-        labelIds[idx].push(currId)
+      const desendants = getChildLabelIds(item, labelId, true)
+      desendants.forEach((lid) => {
+        labelIds[idx].push(lid)
         if (idx === splitIndex) {
           props[idx].push({ ...prop, manual: true })
         } else {
           props[idx].push({ ...prop })
         }
-
-        const curr = items[idx].labels[currId]
-        curr.children.forEach((l) => {
-          descents.push(l)
-        })
-      }
+      })
     }
   })
 
@@ -701,17 +692,25 @@ export function getLinkedLabelIds(item: ItemType, labelId: IdType): string[] {
  *
  * @param item
  * @param labelId
+ * @param includeRoot
  */
-function getChildLabelIds(item: ItemType, labelId: IdType): string[] {
+function getChildLabelIds(
+  item: ItemType,
+  labelId: IdType,
+  includeRoot = false
+): string[] {
   const labelIds: IdType[] = []
   const label = item.labels[labelId]
   if (label.children.length === 0) {
     labelIds.push(labelId)
   } else {
     for (const child of label.children) {
-      const childLabelIds = getChildLabelIds(item, child)
+      const childLabelIds = getChildLabelIds(item, child, includeRoot)
       for (const childLabelId of childLabelIds) {
         labelIds.push(childLabelId)
+      }
+      if (includeRoot) {
+        labelIds.push(labelId)
       }
     }
   }
@@ -777,21 +776,8 @@ function createParentLabel(
   }
   parentLabel.type = LabelTypeName.EMPTY
   state = addLabel(state, index, parentLabel)
-
   item = state.task.items[index]
-  // Assign the children label properties
-  const newParentLabel = state.task.items[index].labels[parentLabel.id]
 
-  const newLabels = labelsToMerge.map((lbl) => {
-    const nLabel = _.cloneDeep(lbl)
-    nLabel.parent = parentLabel.id
-    nLabel.category = _.cloneDeep(newParentLabel.category)
-    nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
-    if (trackId !== undefined) {
-      nLabel.track = trackId
-    }
-    return nLabel
-  })
   if (trackId !== undefined) {
     // Update track information
     let track = state.task.tracks[trackId]
@@ -801,9 +787,29 @@ function createParentLabel(
     tracks = updateObject(tracks, { [trackId]: track })
   }
 
+  // Assign the children label properties
+  const newParentLabel = item.labels[parentLabel.id]
+  const rootSet = new Set(idList)
+  const childrenList = idList.map((lid) => getChildLabelIds(item, lid, true))
+  const desendants = ([] as string[]).concat(...childrenList)
+  const newDescents = desendants.map((lid) => {
+    const lbl = item.labels[lid]
+    const nLabel = _.cloneDeep(lbl)
+    // Only the directly linking labels shall update their parents.
+    if (rootSet.has(lbl.id)) {
+      nLabel.parent = parentLabel.id
+    }
+    nLabel.category = _.cloneDeep(newParentLabel.category)
+    nLabel.attributes = _.cloneDeep(newParentLabel.attributes)
+    if (trackId !== undefined) {
+      nLabel.track = trackId
+    }
+    return nLabel
+  })
+
   // Update the item
   item = updateObject(item, {
-    labels: updateObject(item.labels, _.zipObject(idList, newLabels))
+    labels: updateObject(item.labels, _.zipObject(desendants, newDescents))
   })
   const items = updateListItem(state.task.items, index, item)
   const task = updateObject(state.task, { items, tracks })
@@ -827,13 +833,19 @@ export function linkLabels(
   }
   // Add a new label to the state
   const item = state.task.items[action.itemIndex]
-  const children = action.labelIds.map((labelId) =>
-    getRootLabelId(item, labelId)
-  )
-  const baseLabel = item.labels[children[0]]
+
+  // Some of the labels may be already linked. Thus we deduplicate all roots.
+  const roots = action.labelIds.map((labelId) => getRootLabelId(item, labelId))
+  const uniqueRoots = [...new Set(roots)]
+  if (uniqueRoots.length === 1) {
+    // No need to link
+    return state
+  }
+
+  const baseLabel = item.labels[uniqueRoots[0]]
   const toLinkTrackIds = [
     ...new Set(
-      children
+      uniqueRoots
         .map((labelId) => item.labels[labelId].track)
         .filter((trackId) => trackId !== "")
     )
@@ -853,14 +865,6 @@ export function linkLabels(
         )
         .filter((lbl) => lbl !== null) as string[]
 
-      // collect all descents
-      for (let i = 0; i < labelIdsToMerge.length; i++) {
-        const currId = labelIdsToMerge[i]
-        taskItem.labels[currId].children.forEach((c) => {
-          labelIdsToMerge.push(c)
-        })
-      }
-
       if (labelIdsToMerge.length > 0) {
         state = createParentLabel(
           state,
@@ -878,7 +882,7 @@ export function linkLabels(
     )
   } else {
     // No track. Only link labels.
-    state = createParentLabel(state, action.itemIndex, children, baseLabel)
+    state = createParentLabel(state, action.itemIndex, uniqueRoots, baseLabel)
   }
   return { ...state }
 }
@@ -1060,15 +1064,10 @@ function deleteLabelsFromItem(
 ): [ItemType, LabelType[]] {
   let labels = item.labels
 
-  // Collect all descents
-  for (let i = 0; i < labelIds.length; i++) {
-    const currId = labelIds[i]
-    item.labels[currId].children.forEach((c) => {
-      labelIds.push(c)
-    })
-  }
-
-  const deletedLabels = pickObject(item.labels, labelIds)
+  // Collect all desendants
+  const childrenList = labelIds.map((lid) => getChildLabelIds(item, lid, true))
+  const desendants = ([] as string[]).concat(...childrenList)
+  const deletedLabels = pickObject(item.labels, desendants)
 
   // Find related labels and shapes
   const updatedLabels: { [key: string]: LabelType } = {}

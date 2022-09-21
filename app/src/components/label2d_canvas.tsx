@@ -290,7 +290,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
     const mousePos = this.getMousePos(e)
     const [labelIndex, handleIndex] = this.fetchHandleId(mousePos)
     if (this._labelHandler.onMouseDown(mousePos, labelIndex, handleIndex)) {
-      e.stopPropagation()
+      // Panning requires the event being propagated to upper view. Not sure
+      // if there is any side-effect of this propagation. Let's see.
+      // e.stopPropagation()
     }
     this._labelList.onDrawableUpdate()
   }
@@ -336,7 +338,9 @@ export class Label2dCanvas extends DrawableCanvas<Props> {
         handleIndex
       )
     ) {
-      e.stopPropagation()
+      // Panning requires the event being propagated to upper view. Not sure
+      // if there is any side-effect of this propagation. Let's see.
+      // e.stopPropagation()
     }
     this._labelList.onDrawableUpdate()
 
