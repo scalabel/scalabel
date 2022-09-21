@@ -20,7 +20,11 @@ import auth from "./middleware/cognitoAuth"
 import { multipartFormData as formDataMiddleware } from "./middleware/multipart"
 import errorHandler from "./middleware/errorHandler"
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
-import { createProjectStore, IProjectStore } from "./project_store"
+import {
+  IProjectStore,
+  ProjectStore,
+  ReadonlyProjectStore
+} from "./project_store"
 import { RedisCache } from "./redis_cache"
 import { RedisClient } from "./redis_client"
 import { RedisPubSub } from "./redis_pub_sub"
@@ -276,7 +280,8 @@ async function checkLegacyProjectFolders(storage: Storage): Promise<void> {
 async function main(): Promise<void> {
   // Initialize config
   const config = await readConfig()
-  if (config.readonly ?? false) {
+  const readonly = config.readonly ?? false
+  if (readonly) {
     Logger.info("Run in readonly mode.")
   }
 
@@ -298,11 +303,9 @@ async function main(): Promise<void> {
   const subscriber = makeRedisPubSub(config)
 
   // Initialize high level managers
-  const projectStore = createProjectStore(
-    storage,
-    redisStore,
-    config.readonly ?? false
-  )
+  const projectStore = readonly
+    ? new ReadonlyProjectStore(storage, redisStore)
+    : new ProjectStore(storage, redisStore)
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 

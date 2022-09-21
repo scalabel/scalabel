@@ -7,10 +7,7 @@ import { EventName } from "../../src/const/connection"
 import { serverConfig } from "../../src/server/defaults"
 import { FileStorage } from "../../src/server/file_storage"
 import { Hub } from "../../src/server/hub"
-import {
-  IProjectStore,
-  createProjectStore
-} from "../../src/server/project_store"
+import { ProjectStore } from "../../src/server/project_store"
 import { RedisCache } from "../../src/server/redis_cache"
 import { RedisClient } from "../../src/server/redis_client"
 import { RedisPubSub } from "../../src/server/redis_pub_sub"
@@ -38,7 +35,7 @@ let sessionId: string
 let userId: string
 let actionListId: string
 let mockStorage: FileStorage
-let mockProjectStore: IProjectStore
+let mockProjectStore: ProjectStore
 let mockUserManager: UserManager
 let mockPubSub: RedisPubSub
 let hub: Hub
@@ -70,7 +67,7 @@ beforeAll(() => {
   const client = new RedisClient(serverConfig.redis)
   const redisStore = new RedisCache(serverConfig.redis, mockStorage, client)
   mockPubSub = new RedisPubSub(client)
-  mockProjectStore = createProjectStore(mockStorage, redisStore)
+  mockProjectStore = new ProjectStore(mockStorage, redisStore)
   mockUserManager = new UserManager(mockProjectStore)
   hub = new Hub(serverConfig, mockProjectStore, mockUserManager, mockPubSub)
 })

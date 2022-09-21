@@ -5,10 +5,7 @@ import { serverConfig } from "../../src/server/defaults"
 import { convertStateToExport } from "../../src/server/export"
 import { FileStorage } from "../../src/server/file_storage"
 import { getTestDir } from "../../src/server/path"
-import {
-  IProjectStore,
-  createProjectStore
-} from "../../src/server/project_store"
+import { ProjectStore } from "../../src/server/project_store"
 import { RedisCache } from "../../src/server/redis_cache"
 import { RedisClient } from "../../src/server/redis_client"
 import { CreationForm, FormFileData, Project } from "../../src/types/project"
@@ -35,7 +32,7 @@ import {
 
 jest.mock("../../src/server/redis_client")
 
-let projectStore: IProjectStore
+let projectStore: ProjectStore
 let dataDir: string
 
 beforeAll(() => {
@@ -43,7 +40,7 @@ beforeAll(() => {
   const storage = new FileStorage(dataDir)
   const client = new RedisClient(serverConfig.redis)
   const redisStore = new RedisCache(serverConfig.redis, storage, client)
-  projectStore = createProjectStore(storage, redisStore)
+  projectStore = new ProjectStore(storage, redisStore)
 })
 
 afterAll(() => {

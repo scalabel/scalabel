@@ -61,27 +61,10 @@ export interface IProjectStore {
 }
 
 /**
- * Create a project store.
- *
- * @param storage
- * @param redisStore
- * @param readonly
- */
-export function createProjectStore(
-  storage: Storage,
-  redisStore: RedisCache,
-  readonly: boolean = false
-): IProjectStore {
-  return readonly
-    ? new ReadonlyProjectStore(storage, redisStore)
-    : new ProjectStore(storage, redisStore)
-}
-
-/**
  * Wraps redis cache and storage basic functionality
  * Exposes higher level methods for writing projects, tasks, etc.
  */
-class ProjectStore implements IProjectStore {
+export class ProjectStore implements IProjectStore {
   /** the redis store */
   protected redisStore: RedisCache
   /** the permanent storage */
@@ -482,7 +465,7 @@ class ProjectStore implements IProjectStore {
 /**
  * A readonly project store.
  */
-class ReadonlyProjectStore extends ProjectStore {
+export class ReadonlyProjectStore extends ProjectStore {
   /**
    * no-op save.
    */

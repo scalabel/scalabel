@@ -6,7 +6,7 @@ import { uid } from "../../src/common/uid"
 import { serverConfig } from "../../src/server/defaults"
 import { FileStorage } from "../../src/server/file_storage"
 import { getTestDir } from "../../src/server/path"
-import { createProjectStore } from "../../src/server/project_store"
+import { ProjectStore } from "../../src/server/project_store"
 import { RedisCache } from "../../src/server/redis_cache"
 import { RedisClient } from "../../src/server/redis_client"
 import { UserManager } from "../../src/server/user_manager"
@@ -27,7 +27,7 @@ beforeAll(() => {
   const storage = new FileStorage(dataDir)
   const client = new RedisClient(serverConfig.redis)
   const redisStore = new RedisCache(serverConfig.redis, storage, client)
-  const projectStore = createProjectStore(storage, redisStore)
+  const projectStore = new ProjectStore(storage, redisStore)
   userManager = new UserManager(projectStore)
 })
 
