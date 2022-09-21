@@ -11,6 +11,7 @@ import Fade from "@material-ui/core/Fade"
 import { Theme, withStyles } from "@material-ui/core/styles"
 import createStyles from "@material-ui/core/styles/createStyles"
 import Typography from "@material-ui/core/Typography"
+import Alert from "@material-ui/lab/Alert"
 import _ from "lodash"
 import React from "react"
 import { connect } from "react-redux"
@@ -157,9 +158,16 @@ class TitleBar extends Component<Props> {
 
     const buttonInfo: ButtonInfo[] = [
       { title: "Instructions", href: instructionLink, icon: fa.faInfo },
-      { title: "Keyboard Usage", href: keyboardLink, icon: fa.faQuestion },
-      { title: "Dashboard", href: dashboardLink, icon: fa.faList }
+      { title: "Keyboard Usage", href: keyboardLink, icon: fa.faQuestion }
     ]
+
+    if (!Session.readonly) {
+      buttonInfo.push({
+        title: "Dashboard",
+        href: dashboardLink,
+        icon: fa.faList
+      })
+    }
 
     const submitHandler = (): void => {
       this.props.submit()
@@ -168,11 +176,13 @@ class TitleBar extends Component<Props> {
         this.props.save()
       }
     }
-    buttonInfo.push({
-      title: "Submit",
-      onClick: submitHandler,
-      icon: fa.faCheck
-    })
+    if (!Session.readonly) {
+      buttonInfo.push({
+        title: "Submit",
+        onClick: submitHandler,
+        icon: fa.faCheck
+      })
+    }
 
     if (!autosave) {
       const saveHandler = (): void => {
@@ -193,6 +203,8 @@ class TitleBar extends Component<Props> {
             <StatusMessageBox>{statusText}</StatusMessageBox>
           </Fade>
           <div className={classes.grow} />
+
+          {Session.readonly && <Alert severity="info">Readonly Mode</Alert>}
           {buttons}
         </Toolbar>
       </AppBar>

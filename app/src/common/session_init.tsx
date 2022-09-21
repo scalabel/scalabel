@@ -9,7 +9,7 @@ import {
   updateAll
 } from "../action/common"
 import { QueryArg } from "../const/common"
-import { EventName } from "../const/connection"
+import { Endpoint, EventName } from "../const/connection"
 import { SyncActionMessageType } from "../types/message"
 import { FullStore } from "../types/redux"
 import { State } from "../types/state"
@@ -86,16 +86,30 @@ export function initSessionForTask(
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   // Initialize empty store
-  const readonly = true // TODO(hxu): fetch from server
-  const store = configureStore({}, devMode, syncMiddleware, readonly)
-  Session.store = store
+  fetch(Endpoint.GET_CONFIG)
+    .then((resp) => {
+      resp
+        .json()
+        .then((res) => {
+          const readonly = res["readonly"]
+          if (readonly) {
+            console.info("Run in readonly mode.")
+          }
 
-  // Start the listeners that convert socket.io events to Redux actions
-  // These listeners will handle loading of the initial state data
-  setSocketListeners(store, socket)
+          const store = configureStore({}, devMode, syncMiddleware, readonly)
+          Session.store = store
+          Session.readonly = readonly
 
-  // Set HTML listeners
-  setBodyListeners(store)
+          // Start the listeners that convert socket.io events to Redux actions
+          // These listeners will handle loading of the initial state data
+          setSocketListeners(store, socket)
+
+          // Set HTML listeners
+          setBodyListeners(store)
+        })
+        .catch(console.error)
+    })
+    .catch(console.error)
 }
 
 /**

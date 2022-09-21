@@ -179,7 +179,6 @@ export const readonlyReducer: Reducer<State> = (
   action: AnyAction
 ): State => {
   const atype = action.type as string
-
   // Redux itself wills send some actions. See
   // https://github.com/reduxjs/redux/blob/v4.1.0/src/utils/actionTypes.js
   // Do note that upgrading Redux may cause the following check to fail.
@@ -192,20 +191,21 @@ export const readonlyReducer: Reducer<State> = (
   // Remark(hxu): Using state to handle alert does not make sense to me.
   // Nevertheless, we use the existing framework to achieve the purpose.
   const readonlyAlert = addReadonlyAlertAction(state)
-  const addAlert = isFrontend()
+  const canAlert = isFrontend()
 
   let finalAction: AnyAction | undefined = undefined
   if (atype === actionConsts.SEQUENTIAL) {
     const seq = action as actionTypes.SequentialAction
     const filtered = seq.actions.filter((a) => readonlyActions.has(a.type))
     const n = seq.actions.length
-    if (n !== filtered.length) {
-      const invalid = seq.actions.filter((a) => !readonlyActions.has(a.type))
-      const types = invalid.map((a) => a.type)
+    const invalid = n !== filtered.length
+    if (invalid) {
+      const as = seq.actions.filter((a) => !readonlyActions.has(a.type))
+      const types = as.map((a) => a.type)
       console.warn(`attempt to apply action ${types} in readonly mode`)
     }
-
-    const actions = n > 0 && addAlert ? [...filtered, readonlyAlert] : filtered
+    const alert = canAlert && n > 0
+    const actions = invalid && alert ? [...filtered, readonlyAlert] : filtered
     seq.actions = actions
     finalAction = actions.length > 0 ? seq : undefined
   } else {
@@ -214,7 +214,7 @@ export const readonlyReducer: Reducer<State> = (
       finalAction = action
     } else {
       console.warn(`attempt to apply action ${atype} in readonly mode`)
-      finalAction = addAlert ? readonlyAlert : undefined
+      finalAction = canAlert ? readonlyAlert : undefined
     }
   }
 
@@ -231,7 +231,7 @@ function addReadonlyAlertAction(state: State): actionTypes.AddAlertAction {
     alert: {
       id: uid(),
       severity: Severity.WARNING,
-      message: "Can not perform this action in read-only mode.",
+      message: "Can not perform this action in readonly mode.",
       timeout: 1000
     }
   }

@@ -20,7 +20,7 @@ import { convertStateToExport } from "./export"
 import { FileStorage } from "./file_storage"
 import Logger from "./logger"
 import { getExportName } from "./path"
-import { ProjectStore } from "./project_store"
+import { IProjectStore } from "./project_store"
 import { S3Storage } from "./s3_storage"
 import {
   getDefaultTaskOptions,
@@ -32,15 +32,18 @@ import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { parseProjectName } from "./util"
 import { QueryArg } from "../const/common"
+import { ServerConfig } from "../types/config"
 
 /**
  * Wraps HTTP listeners
  */
 export class Listeners {
   /** the project store */
-  protected projectStore: ProjectStore
+  protected projectStore: IProjectStore
   /** the user manager */
   protected userManager: UserManager
+  /** the server config */
+  protected config: ServerConfig
 
   /**
    * Constructor
@@ -48,9 +51,14 @@ export class Listeners {
    * @param projectStore
    * @param userManager
    */
-  constructor(projectStore: ProjectStore, userManager: UserManager) {
+  constructor(
+    projectStore: IProjectStore,
+    userManager: UserManager,
+    config: ServerConfig
+  ) {
     this.projectStore = projectStore
     this.userManager = userManager
+    this.config = config
   }
 
   /**
@@ -207,7 +215,10 @@ export class Listeners {
     res: Response,
     requireParam: boolean = true
   ): boolean {
-    if (req.method !== "GET" || (requireParam && req.query === {})) {
+    if (
+      req.method !== "GET" ||
+      (requireParam && Object.keys(req).length === 0)
+    ) {
       res.sendStatus(404)
       res.end()
       return true
@@ -495,5 +506,16 @@ export class Listeners {
       // Alert the user that something failed
       res.status(400).send(filterXSS((err as Error).message))
     }
+  }
+
+  /**
+   * Get the service config
+   *
+   * @param req
+   * @param res
+   */
+  public async getConfigHandler(_: Request, res: Response): Promise<void> {
+    const readonly = this.config.readonly ?? false
+    res.send(JSON.stringify({ readonly }))
   }
 }

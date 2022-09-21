@@ -20,7 +20,7 @@ import auth from "./middleware/cognitoAuth"
 import { multipartFormData as formDataMiddleware } from "./middleware/multipart"
 import errorHandler from "./middleware/errorHandler"
 import { getAbsSrcPath, getRedisConf, HTML_DIRS } from "./path"
-import { ProjectStore } from "./project_store"
+import { createProjectStore, IProjectStore } from "./project_store"
 import { RedisCache } from "./redis_cache"
 import { RedisClient } from "./redis_client"
 import { RedisPubSub } from "./redis_pub_sub"
@@ -51,10 +51,10 @@ declare global {
 function startHTTPServer(
   config: ServerConfig,
   app: Application,
-  projectStore: ProjectStore,
+  projectStore: IProjectStore,
   userManager: UserManager
 ): void {
-  const listeners = new Listeners(projectStore, userManager)
+  const listeners = new Listeners(projectStore, userManager, config)
 
   // Set up middleware
   app.use(listeners.loggingHandler)
@@ -110,29 +110,36 @@ function startHTTPServer(
     listeners.taskMetaDataHandler.bind(listeners)
   )
   app.get(
-    Endpoint.DELETE_PROJECT,
+    Endpoint.GET_CONFIG,
     authMiddleWare,
-    listeners.deleteProjectHandler.bind(listeners)
+    listeners.getConfigHandler.bind(listeners)
   )
+  if (!config.readonly) {
+    app.get(
+      Endpoint.DELETE_PROJECT,
+      authMiddleWare,
+      listeners.deleteProjectHandler.bind(listeners)
+    )
 
-  app.post(
-    Endpoint.POST_PROJECT,
-    authMiddleWare,
-    formDataMiddleware,
-    listeners.postProjectHandler.bind(listeners)
-  )
-  app.post(
-    Endpoint.POST_PROJECT_INTERNAL,
-    authMiddleWare,
-    express.json(),
-    listeners.postProjectInternalHandler.bind(listeners)
-  )
-  app.post(
-    Endpoint.POST_TASKS,
-    authMiddleWare,
-    express.json(),
-    listeners.postTasksHandler.bind(listeners)
-  )
+    app.post(
+      Endpoint.POST_PROJECT,
+      authMiddleWare,
+      formDataMiddleware,
+      listeners.postProjectHandler.bind(listeners)
+    )
+    app.post(
+      Endpoint.POST_PROJECT_INTERNAL,
+      authMiddleWare,
+      express.json(),
+      listeners.postProjectInternalHandler.bind(listeners)
+    )
+    app.post(
+      Endpoint.POST_TASKS,
+      authMiddleWare,
+      express.json(),
+      listeners.postTasksHandler.bind(listeners)
+    )
+  }
   app.use(errorHandler(config))
 }
 
@@ -176,7 +183,7 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
     redisDir = config.storage.data
   }
 
-  const redisProc = child.spawn("redis-server", [
+  const redisArgs = [
     getRedisConf(),
     "--port",
     `${config.redis.port}`,
@@ -186,7 +193,16 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
     redisDir,
     "--protected-mode",
     "yes"
-  ])
+  ]
+  if (config.readonly) {
+    // As long as there are no more than 3 replicas, this setting is effectively
+    // saying that to launch redis in a readonly mode. Although it is
+    // unnecessary if all backend and frontend barriers are implemented
+    // correctly, nevertheless we use this as a final defence against
+    // modifications.
+    redisArgs.push("--min-replicas-to-write", "3")
+  }
+  const redisProc = child.spawn("redis-server", redisArgs)
   redisProc.stdout.on("data", (data) => {
     process.stdout.write(data)
   })
@@ -206,7 +222,7 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
  */
 async function startServers(
   config: ServerConfig,
-  projectStore: ProjectStore,
+  projectStore: IProjectStore,
   userManager: UserManager,
   publisher: RedisPubSub
 ): Promise<void> {
@@ -280,7 +296,11 @@ async function main(): Promise<void> {
   const subscriber = makeRedisPubSub(config)
 
   // Initialize high level managers
-  const projectStore = new ProjectStore(storage, redisStore)
+  const projectStore = createProjectStore(
+    storage,
+    redisStore,
+    config.readonly ?? false
+  )
   const userManager = new UserManager(projectStore, config.user.on)
   await userManager.clearUsers()
 

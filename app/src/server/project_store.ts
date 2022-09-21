@@ -22,11 +22,56 @@ import {
 } from "./util"
 import { ItemExport } from "../types/export"
 
+export interface IProjectStore {
+  // read
+  loadStateMetadata(projectName: string, taskId: string): Promise<StateMetadata>
+  loadState(projectName: string, taskId: string): Promise<State>
+  checkProjectName(projectName: string): Promise<boolean>
+  getExistingProjects(): Promise<string[]>
+  loadProject(projectName: string): Promise<Project>
+  loadProjectInfo(projectName: string): Promise<Project>
+  getTasksInProject(projectName: string): Promise<TaskType[]>
+  getTaskKeysInProject(projectName: string): Promise<string[]>
+  loadTaskStates(projectName: string): Promise<TaskType[]>
+  loadTask(projectName: string, taskId: string): Promise<TaskType>
+  loadUserData(projectName: string): Promise<UserData>
+  loadUserMetadata(): Promise<UserMetadata>
+
+  // write
+  save(
+    key: string,
+    value: string,
+    cache: boolean,
+    metadata: string
+  ): Promise<void>
+  saveState(
+    state: State,
+    projectName: string,
+    taskId: string,
+    stateMetadata: StateMetadata
+  ): Promise<void>
+  saveProject(project: Project): Promise<void>
+  saveTasks(tasks: TaskType[]): Promise<void>
+  saveUserData(userData: UserData): Promise<void>
+  saveUserMetadata(userMetadata: UserMetadata): Promise<void>
+  deleteProject(projectName: string): Promise<void>
+}
+
+export function createProjectStore(
+  storage: Storage,
+  redisStore: RedisCache,
+  readonly: boolean = false
+) {
+  return readonly
+    ? new ReadonlyProjectStore(storage, redisStore)
+    : new ProjectStore(storage, redisStore)
+}
+
 /**
  * Wraps redis cache and storage basic functionality
  * Exposes higher level methods for writing projects, tasks, etc.
  */
-export class ProjectStore {
+class ProjectStore implements IProjectStore {
   /** the redis store */
   protected redisStore: RedisCache
   /** the permanent storage */
@@ -421,5 +466,52 @@ export class ProjectStore {
     state.task.config.labelTypes = labelTypes
 
     return state
+  }
+}
+
+class ReadonlyProjectStore extends ProjectStore {
+  public async save(
+    _key: string,
+    _value: string,
+    _cache?: boolean,
+    _metadata?: string
+  ): Promise<void> {
+    console.debug("opmit [save]")
+    return
+  }
+
+  public async saveState(
+    _state: State,
+    _projectName: string,
+    _taskId: string,
+    _stateMetadata: StateMetadata
+  ): Promise<void> {
+    console.debug("opmit [saveState]")
+    return
+  }
+
+  public async saveProject(_project: Project): Promise<void> {
+    console.debug("opmit [saveProject]")
+    return
+  }
+
+  public async saveTasks(_tasks: TaskType[]): Promise<void> {
+    console.debug("opmit [saveTasks]")
+    return
+  }
+
+  public async saveUserData(_userData: UserData): Promise<void> {
+    console.debug("opmit [saveUserData]")
+    return
+  }
+
+  public async saveUserMetadata(_userMetadata: UserMetadata): Promise<void> {
+    console.debug("opmit [saveUserMetadata]")
+    return
+  }
+
+  public async deleteProject(_projectName: string): Promise<void> {
+    console.debug("opmit [deleteProject]")
+    return
   }
 }

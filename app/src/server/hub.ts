@@ -9,7 +9,7 @@ import { RegisterMessageType, SyncActionMessageType } from "../types/message"
 import { StateMetadata } from "../types/project"
 import Logger from "./logger"
 import * as path from "./path"
-import { ProjectStore } from "./project_store"
+import { IProjectStore } from "./project_store"
 import { RedisPubSub } from "./redis_pub_sub"
 import { SocketServer } from "./socket_interface"
 import { UserManager } from "./user_manager"
@@ -26,7 +26,7 @@ export class Hub {
   /** flag for autosave */
   protected autosave: boolean
   /** the project store */
-  protected projectStore: ProjectStore
+  protected projectStore: IProjectStore
   /** the user manager */
   protected userManager: UserManager
   /** the redis message broker */
@@ -44,7 +44,7 @@ export class Hub {
    */
   constructor(
     config: ServerConfig,
-    projectStore: ProjectStore,
+    projectStore: IProjectStore,
     userManager: UserManager,
     publisher: RedisPubSub
   ) {

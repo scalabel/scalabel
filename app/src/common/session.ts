@@ -30,6 +30,8 @@ class Session {
   /** if in test mode, needed for integration and end to end testing */
   // TODO: when we move to node move this into state
   public testMode: boolean
+  /** if in the readonly mode */
+  public readonly: boolean
 
   /**
    * Constructor
@@ -42,6 +44,7 @@ class Session {
     this.tracks = {}
     this.activeViewerId = -1
     this.testMode = false
+    this.readonly = false
     this.store = configureStore({})
   }
 

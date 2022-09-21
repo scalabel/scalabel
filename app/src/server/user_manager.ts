@@ -1,5 +1,5 @@
 import { UserData, UserMetadata } from "../types/project"
-import { ProjectStore } from "./project_store"
+import { IProjectStore } from "./project_store"
 import { makeUserData, makeUserMetadata } from "./util"
 
 /**
@@ -7,7 +7,7 @@ import { makeUserData, makeUserMetadata } from "./util"
  */
 export class UserManager {
   /** the permanent storage */
-  protected projectStore: ProjectStore
+  protected projectStore: IProjectStore
   /** whether to apply hotfix that disables user management */
   private readonly disable: boolean
 
@@ -17,7 +17,7 @@ export class UserManager {
    * @param projectStore
    * @param userManagement
    */
-  constructor(projectStore: ProjectStore, userManagement: boolean = true) {
+  constructor(projectStore: IProjectStore, userManagement: boolean = true) {
     this.projectStore = projectStore
     this.disable = !userManagement
   }

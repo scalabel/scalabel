@@ -35,7 +35,7 @@ import {
 } from "../types/state"
 import * as defaults from "./defaults"
 import { convertItemToImport } from "./import"
-import { ProjectStore } from "./project_store"
+import { IProjectStore } from "./project_store"
 import { Storage } from "./storage"
 import * as util from "./util"
 import {
@@ -52,7 +52,7 @@ import {
  */
 export async function parseForm(
   fields: { [key: string]: string },
-  projectStore: ProjectStore
+  projectStore: IProjectStore
 ): Promise<CreationForm> {
   // Check that required fields were entered
   let projectName = fields[FormField.PROJECT_NAME]
@@ -619,7 +619,7 @@ function partitionItemsIntoTasks(
  */
 export async function createTasks(
   project: Project,
-  projectStore?: ProjectStore,
+  projectStore?: IProjectStore,
   taskStartNum: number = 0,
   itemStartNum: number = 0,
   returnTask: boolean = false
