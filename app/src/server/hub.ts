@@ -31,6 +31,8 @@ export class Hub {
   protected userManager: UserManager
   /** the redis message broker */
   protected publisher: RedisPubSub
+  /** flag for readonly */
+  protected readonly: boolean
 
   /**
    * Constructor
@@ -52,6 +54,7 @@ export class Hub {
     this.projectStore = projectStore
     this.userManager = userManager
     this.publisher = publisher
+    this.readonly = config.readonly ?? false
   }
 
   /**
@@ -158,7 +161,11 @@ export class Hub {
     const actionIdsSaved = redisMetadata.actionIds
     if (!(actionPacketId in actionIdsSaved) && taskActions.length > 0) {
       const state = await this.projectStore.loadState(projectName, taskId)
-      const [newState, timestamps] = updateStateTimestamp(state, taskActions)
+      const [newState, timestamps] = updateStateTimestamp(
+        state,
+        taskActions,
+        this.readonly
+      )
 
       // Mark the id as saved, and store the timestamps
       actionIdsSaved[actionPacketId] = timestamps

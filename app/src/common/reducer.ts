@@ -6,6 +6,8 @@ import * as span3d from "../functional/span3d"
 import { makeState } from "../functional/states"
 import * as actionTypes from "../types/action"
 import { State } from "../types/state"
+import { Severity } from "../types/common"
+import { uid } from "../common/uid"
 
 /**
  * Process one action
@@ -144,4 +146,97 @@ export const reducer: Reducer<State> = (
     state = reduceOne(state, action as actionTypes.BaseAction)
   }
   return state
+}
+
+const readonlyActions = new Set<string>([
+  actionConsts.INIT_SESSION,
+  actionConsts.CHANGE_SELECT,
+  actionConsts.LOAD_ITEM,
+  actionConsts.UPDATE_ALL,
+  actionConsts.UPDATE_STATE,
+  actionConsts.ADD_VIEWER_CONFIG,
+  actionConsts.UPDATE_PANE,
+  actionConsts.SPLIT_PANE,
+  actionConsts.DELETE_PANE,
+  actionConsts.CHANGE_VIEWER_CONFIG,
+  actionConsts.UPDATE_SESSION_STATUS,
+  actionConsts.CHANGE_SESSION_MODE,
+  actionConsts.ADD_ALERT,
+  actionConsts.CLOSE_ALERT,
+  actionConsts.ACTIVATE_SPAN,
+  actionConsts.DEACTIVATE_SPAN,
+  actionConsts.REGISTER_SPAN_POINT,
+  actionConsts.RESET_SPAN,
+  actionConsts.PAUSE_SPAN,
+  actionConsts.RESUME_SPAN,
+  actionConsts.UNDO_SPAN,
+  actionConsts.TOGGLE_GROUND_PLANE,
+  actionConsts.NULL
+])
+
+export const readonlyReducer: Reducer<State> = (
+  currentState: State | undefined,
+  action: AnyAction
+): State => {
+  const atype = action.type as string
+
+  // Redux itself wills send some actions. See
+  // https://github.com/reduxjs/redux/blob/v4.1.0/src/utils/actionTypes.js
+  // Do note that upgrading Redux may cause the following check to fail.
+  if (atype.startsWith("@@redux")) {
+    return reducer(currentState, action)
+  }
+
+  const state = currentState ?? makeState()
+
+  // Remark(hxu): Using state to handle alert does not make sense to me.
+  // Nevertheless, we use the existing framework to achieve the purpose.
+  const readonlyAlert = addReadonlyAlertAction(state)
+  const addAlert = isFrontend()
+
+  let finalAction: AnyAction | undefined = undefined
+  if (atype === actionConsts.SEQUENTIAL) {
+    const seq = action as actionTypes.SequentialAction
+    const filtered = seq.actions.filter((a) => readonlyActions.has(a.type))
+    const n = seq.actions.length
+    if (n !== filtered.length) {
+      const invalid = seq.actions.filter((a) => !readonlyActions.has(a.type))
+      const types = invalid.map((a) => a.type)
+      console.warn(`attempt to apply action ${types} in readonly mode`)
+    }
+
+    const actions = n > 0 && addAlert ? [...filtered, readonlyAlert] : filtered
+    seq.actions = actions
+    finalAction = actions.length > 0 ? seq : undefined
+  } else {
+    const allow = readonlyActions.has(atype)
+    if (allow) {
+      finalAction = action
+    } else {
+      console.warn(`attempt to apply action ${atype} in readonly mode`)
+      finalAction = addAlert ? readonlyAlert : undefined
+    }
+  }
+
+  return finalAction ? reducer(currentState, finalAction) : state
+}
+
+function addReadonlyAlertAction(state: State): actionTypes.AddAlertAction {
+  return {
+    actionId: uid(),
+    sessionId: state.session.id,
+    userId: state.user.id,
+    type: actionConsts.ADD_ALERT,
+    timestamp: Date.now(),
+    alert: {
+      id: uid(),
+      severity: Severity.WARNING,
+      message: "Can not perform this action in read-only mode.",
+      timeout: 1000
+    }
+  }
+}
+
+function isFrontend(): boolean {
+  return typeof window !== "undefined"
 }

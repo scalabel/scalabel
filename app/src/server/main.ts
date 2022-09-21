@@ -258,6 +258,9 @@ async function checkLegacyProjectFolders(storage: Storage): Promise<void> {
 async function main(): Promise<void> {
   // Initialize config
   const config = await readConfig()
+  if (config.readonly) {
+    Logger.info("Run in readonly mode.")
+  }
 
   // Initialize storage
   const storage = await makeStorage(config.storage.type, config.storage.data)

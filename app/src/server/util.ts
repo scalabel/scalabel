@@ -240,9 +240,10 @@ export function safeParseJSON(data: string): unknown {
  */
 export function updateStateTimestamp(
   state: State,
-  actions: BaseAction[]
+  actions: BaseAction[],
+  readonly: boolean
 ): [State, number[]] {
-  const stateStore = configureStore(state)
+  const stateStore = configureStore(state, false, undefined, readonly)
 
   // For each action, update the store
   const timestamps = []

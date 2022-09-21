@@ -7,7 +7,7 @@ import { ADD_LABELS, DELETE_LABELS } from "../const/action"
 import { makeState } from "../functional/states"
 import { FullStore, ReduxState } from "../types/redux"
 import { State } from "../types/state"
-import { reducer } from "./reducer"
+import { reducer as readwriteReducer, readonlyReducer } from "./reducer"
 
 /**
  * Configure the main store for the state
@@ -23,13 +23,16 @@ import { reducer } from "./reducer"
 export function configureStore(
   initialState: Partial<State>,
   devMode: boolean = false,
-  middleware?: Middleware
+  middleware?: Middleware,
+  readonly?: boolean
 ): FullStore {
   const initialHistory = {
     past: Array<State>(),
     present: makeState(initialState),
     future: Array<State>()
   }
+
+  const reducer = readonly ? readonlyReducer : readwriteReducer
 
   const undoableReducer: Reducer<ReduxState> = undoable(reducer, {
     limit: 20, // Add a limit to history

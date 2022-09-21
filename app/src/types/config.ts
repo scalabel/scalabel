@@ -98,6 +98,8 @@ export interface ServerConfig {
   bot: BotConfig
   /** cognito settings */
   cognito?: CognitoConfig
+  /** readonly */
+  readonly?: boolean
 
   /**
    * Port that server listens on

@@ -86,7 +86,8 @@ export function initSessionForTask(
   const syncMiddleware = makeSyncMiddleware(synchronizer)
 
   // Initialize empty store
-  const store = configureStore({}, devMode, syncMiddleware)
+  const readonly = true // TODO(hxu): fetch from server
+  const store = configureStore({}, devMode, syncMiddleware, readonly)
   Session.store = store
 
   // Start the listeners that convert socket.io events to Redux actions
