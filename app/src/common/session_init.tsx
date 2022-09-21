@@ -91,7 +91,7 @@ export function initSessionForTask(
       resp
         .json()
         .then((res) => {
-          const readonly = res["readonly"]
+          const readonly = (res.readonly ?? false) as boolean
           if (readonly) {
             console.info("Run in readonly mode.")
           }

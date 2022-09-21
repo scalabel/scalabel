@@ -193,7 +193,7 @@ export const readonlyReducer: Reducer<State> = (
   const readonlyAlert = addReadonlyAlertAction(state)
   const canAlert = isFrontend()
 
-  let finalAction: AnyAction | undefined = undefined
+  let finalAction: AnyAction | undefined
   if (atype === actionConsts.SEQUENTIAL) {
     const seq = action as actionTypes.SequentialAction
     const filtered = seq.actions.filter((a) => readonlyActions.has(a.type))
@@ -201,7 +201,7 @@ export const readonlyReducer: Reducer<State> = (
     const invalid = n !== filtered.length
     if (invalid) {
       const as = seq.actions.filter((a) => !readonlyActions.has(a.type))
-      const types = as.map((a) => a.type)
+      const types = as.map((a) => a.type).join(",")
       console.warn(`attempt to apply action ${types} in readonly mode`)
     }
     const alert = canAlert && n > 0
@@ -218,9 +218,14 @@ export const readonlyReducer: Reducer<State> = (
     }
   }
 
-  return finalAction ? reducer(currentState, finalAction) : state
+  return finalAction != null ? reducer(currentState, finalAction) : state
 }
 
+/**
+ * Create an AddAlertAction to indicate being in readonly mode.
+ *
+ * @param state
+ */
 function addReadonlyAlertAction(state: State): actionTypes.AddAlertAction {
   return {
     actionId: uid(),
@@ -237,6 +242,10 @@ function addReadonlyAlertAction(state: State): actionTypes.AddAlertAction {
   }
 }
 
+/**
+ * Check if the script is running in frontend.
+ *
+ */
 function isFrontend(): boolean {
   return typeof window !== "undefined"
 }

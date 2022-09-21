@@ -24,44 +24,54 @@ import { ItemExport } from "../types/export"
 
 export interface IProjectStore {
   // read
-  loadStateMetadata(projectName: string, taskId: string): Promise<StateMetadata>
-  loadState(projectName: string, taskId: string): Promise<State>
-  checkProjectName(projectName: string): Promise<boolean>
-  getExistingProjects(): Promise<string[]>
-  loadProject(projectName: string): Promise<Project>
-  loadProjectInfo(projectName: string): Promise<Project>
-  getTasksInProject(projectName: string): Promise<TaskType[]>
-  getTaskKeysInProject(projectName: string): Promise<string[]>
-  loadTaskStates(projectName: string): Promise<TaskType[]>
-  loadTask(projectName: string, taskId: string): Promise<TaskType>
-  loadUserData(projectName: string): Promise<UserData>
-  loadUserMetadata(): Promise<UserMetadata>
+  loadStateMetadata: (
+    projectName: string,
+    taskId: string
+  ) => Promise<StateMetadata>
+  loadState: (projectName: string, taskId: string) => Promise<State>
+  checkProjectName: (projectName: string) => Promise<boolean>
+  getExistingProjects: () => Promise<string[]>
+  loadProject: (projectName: string) => Promise<Project>
+  loadProjectInfo: (projectName: string) => Promise<Project>
+  getTasksInProject: (projectName: string) => Promise<TaskType[]>
+  getTaskKeysInProject: (projectName: string) => Promise<string[]>
+  loadTaskStates: (projectName: string) => Promise<TaskType[]>
+  loadTask: (projectName: string, taskId: string) => Promise<TaskType>
+  loadUserData: (projectName: string) => Promise<UserData>
+  loadUserMetadata: () => Promise<UserMetadata>
 
   // write
-  save(
+  save: (
     key: string,
     value: string,
     cache: boolean,
     metadata: string
-  ): Promise<void>
-  saveState(
+  ) => Promise<void>
+  saveState: (
     state: State,
     projectName: string,
     taskId: string,
     stateMetadata: StateMetadata
-  ): Promise<void>
-  saveProject(project: Project): Promise<void>
-  saveTasks(tasks: TaskType[]): Promise<void>
-  saveUserData(userData: UserData): Promise<void>
-  saveUserMetadata(userMetadata: UserMetadata): Promise<void>
-  deleteProject(projectName: string): Promise<void>
+  ) => Promise<void>
+  saveProject: (project: Project) => Promise<void>
+  saveTasks: (tasks: TaskType[]) => Promise<void>
+  saveUserData: (userData: UserData) => Promise<void>
+  saveUserMetadata: (userMetadata: UserMetadata) => Promise<void>
+  deleteProject: (projectName: string) => Promise<void>
 }
 
+/**
+ * Create a project store.
+ *
+ * @param storage
+ * @param redisStore
+ * @param readonly
+ */
 export function createProjectStore(
   storage: Storage,
   redisStore: RedisCache,
   readonly: boolean = false
-) {
+): IProjectStore {
   return readonly
     ? new ReadonlyProjectStore(storage, redisStore)
     : new ProjectStore(storage, redisStore)
@@ -469,49 +479,66 @@ class ProjectStore implements IProjectStore {
   }
 }
 
+/**
+ * A readonly project store.
+ */
 class ReadonlyProjectStore extends ProjectStore {
-  public async save(
-    _key: string,
-    _value: string,
-    _cache?: boolean,
-    _metadata?: string
-  ): Promise<void> {
+  /**
+   * no-op save.
+   */
+  public async save(): Promise<void> {
     console.debug("opmit [save]")
-    return
   }
 
-  public async saveState(
-    _state: State,
-    _projectName: string,
-    _taskId: string,
-    _stateMetadata: StateMetadata
-  ): Promise<void> {
+  /**
+   * no-op saveState.
+   */
+  public async saveState(): Promise<void> {
     console.debug("opmit [saveState]")
-    return
   }
 
+  /**
+   * no-op saveProject.
+   *
+   * @param _project
+   */
   public async saveProject(_project: Project): Promise<void> {
     console.debug("opmit [saveProject]")
-    return
   }
 
+  /**
+   * no-op saveTasks.
+   *
+   * @param _tasks
+   */
   public async saveTasks(_tasks: TaskType[]): Promise<void> {
     console.debug("opmit [saveTasks]")
-    return
   }
 
+  /**
+   * no-op saveUserData.
+   *
+   * @param _userData
+   */
   public async saveUserData(_userData: UserData): Promise<void> {
     console.debug("opmit [saveUserData]")
-    return
   }
 
+  /**
+   * no-op saveUserMetadata.
+   *
+   * @param _userMetadata
+   */
   public async saveUserMetadata(_userMetadata: UserMetadata): Promise<void> {
     console.debug("opmit [saveUserMetadata]")
-    return
   }
 
+  /**
+   * no-op deleteProject.
+   *
+   * @param _projectName
+   */
   public async deleteProject(_projectName: string): Promise<void> {
     console.debug("opmit [deleteProject]")
-    return
   }
 }

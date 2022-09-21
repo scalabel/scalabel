@@ -50,6 +50,7 @@ export class Listeners {
    *
    * @param projectStore
    * @param userManager
+   * @param config
    */
   constructor(
     projectStore: IProjectStore,
@@ -512,6 +513,7 @@ export class Listeners {
    * Get the service config
    *
    * @param req
+   * @param _
    * @param res
    */
   public async getConfigHandler(_: Request, res: Response): Promise<void> {

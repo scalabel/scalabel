@@ -237,6 +237,7 @@ export function safeParseJSON(data: string): unknown {
  *
  * @param state
  * @param actions
+ * @param readonly
  */
 export function updateStateTimestamp(
   state: State,

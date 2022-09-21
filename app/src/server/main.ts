@@ -114,7 +114,9 @@ function startHTTPServer(
     authMiddleWare,
     listeners.getConfigHandler.bind(listeners)
   )
-  if (!config.readonly) {
+
+  const readonly = config.readonly ?? false
+  if (!readonly) {
     app.get(
       Endpoint.DELETE_PROJECT,
       authMiddleWare,
@@ -194,7 +196,7 @@ async function launchRedisServer(config: ServerConfig): Promise<void> {
     "--protected-mode",
     "yes"
   ]
-  if (config.readonly) {
+  if (config.readonly ?? false) {
     // As long as there are no more than 3 replicas, this setting is effectively
     // saying that to launch redis in a readonly mode. Although it is
     // unnecessary if all backend and frontend barriers are implemented
@@ -274,7 +276,7 @@ async function checkLegacyProjectFolders(storage: Storage): Promise<void> {
 async function main(): Promise<void> {
   // Initialize config
   const config = await readConfig()
-  if (config.readonly) {
+  if (config.readonly ?? false) {
     Logger.info("Run in readonly mode.")
   }
 

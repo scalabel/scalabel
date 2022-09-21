@@ -18,6 +18,7 @@ import { reducer as readwriteReducer, readonlyReducer } from "./reducer"
  * @param initialState
  * @param devMode
  * @param middleware
+ * @param readonly
  * @returns {Store<ReduxState>}
  */
 export function configureStore(
@@ -31,7 +32,7 @@ export function configureStore(
     present: makeState(initialState),
     future: Array<State>()
   }
-
+  readonly = readonly ?? false
   const reducer = readonly ? readonlyReducer : readwriteReducer
 
   const undoableReducer: Reducer<ReduxState> = undoable(reducer, {
