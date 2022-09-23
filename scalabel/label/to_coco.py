@@ -308,7 +308,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
         )
         videos.append(video)
 
-        for image_anns in video_anns:
+        for i, image_anns in enumerate(video_anns):
             image_id += 1
             img_shape = config.imageSize
             if img_shape is None:
@@ -317,10 +317,10 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 else:
                     raise ValueError("Image shape not defined!")
 
-            frame_index = image_anns.frameIndex
-            assert (
-                frame_index is not None
-            ), "Tracking annotations have no frameIndex"
+            if image_anns.frameIndex is not None:
+                frame_index = image_anns.frameIndex
+            else:
+                frame_index = i
             image = ImgType(
                 video_id=video_id,
                 frame_id=frame_index,
