@@ -7,6 +7,7 @@ from ..unittest.util import get_test_file
 from .coco_typing import AnnType
 from .io import load, load_label_config
 from .to_coco import (
+    scalabel2coco_box_track,
     scalabel2coco_detection,
     scalabel2coco_ins_seg,
     scalabel2coco_pose,
@@ -67,6 +68,33 @@ class TestScalabelToCOCOInsSeg(unittest.TestCase):
     scalabel = load(get_test_file("scalabel_ins_seg.json")).frames
     config = load_label_config(get_test_file("configs.toml"))
     coco = scalabel2coco_ins_seg(scalabel, config)
+
+    def test_type(self) -> None:
+        """Check coco format type."""
+        self.assertTrue(isinstance(self.coco, dict))
+        self.assertEqual(len(self.coco), 4)
+
+    def test_num_images(self) -> None:
+        """Check the number of images is unchanged."""
+        self.assertEqual(len(self.scalabel), len(self.coco["images"]))
+
+    def test_num_anns(self) -> None:
+        """Check the number of annotations is unchanged."""
+        len_scalabel = sum(
+            len(item.labels)
+            for item in self.scalabel
+            if item.labels is not None
+        )
+        len_coco = len(self.coco["annotations"])
+        self.assertEqual(len_scalabel, len_coco)
+
+
+class TestScalabelToCOCOBoxTrack(unittest.TestCase):
+    """Test cases for converting Scalabel segmentations to COCO format."""
+
+    scalabel = load(get_test_file("scalabel_box_track.json")).frames
+    config = load_label_config(get_test_file("configs.toml"))
+    coco = scalabel2coco_box_track(scalabel, config)
 
     def test_type(self) -> None:
         """Check coco format type."""

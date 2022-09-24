@@ -132,7 +132,6 @@ def group_and_sort(inputs: List[Frame]) -> List[List[Frame]]:
     """Group frames by video_name and sort."""
     for frame in inputs:
         assert frame.videoName is not None
-        assert frame.frameIndex is not None
     frames_list: List[List[Frame]] = []
 
     inputs = sorted(inputs, key=lambda frame: str(frame.videoName))
