@@ -26,11 +26,10 @@ describe("test model interface query construction", () => {
       y2: 10
     })
     const itemIndex = 1
-    const query = modelInterface.makeRectQuery(rect, url, itemIndex)
-    expect(query.endpoint).toBe(ModelEndpoint.PREDICT_POLY)
-    expect(query.itemIndex).toBe(itemIndex)
+    const query = modelInterface.makeRectRequest(rect, url, itemIndex)
+    expect(query.itemIndices).toBe(itemIndex)
 
-    const itemData = query.data
+    const itemData = query.data[0]
     expect(itemData.name).toBe(projectName)
     expect(itemData.url).toBe(url)
     expect(itemData.labels[0].box2d).toEqual(rect)
@@ -50,7 +49,7 @@ describe("test model interface query construction", () => {
       labelType
     )
     expect(query.endpoint).toBe(ModelEndpoint.REFINE_POLY)
-    expect(query.itemIndex).toBe(itemIndex)
+    expect(query.itemIndex).toBe([itemIndex])
 
     const itemData = query.data
     expect(itemData.name).toBe(projectName)

@@ -1,5 +1,13 @@
-import { RegisterMessageType } from "../types/message"
+import Logger from "./logger"
+import { RedisConfig } from "../types/config"
+import {
+  ModelStatusMessageType,
+  ModelRegisterMessageType,
+  ModelRequestMessageType,
+  RegisterMessageType
+} from "../types/message"
 import { RedisClient } from "./redis_client"
+import { RedisChannel } from "../const/connection"
 
 /**
  * Wraps redis pub/sub functionality
@@ -7,8 +15,6 @@ import { RedisClient } from "./redis_client"
 export class RedisPubSub {
   /** the pubsub client */
   protected client: RedisClient
-  /** the event name for socket registration */
-  protected registerEvent: string
 
   /**
    * Create new publisher and subscriber clients
@@ -17,28 +23,60 @@ export class RedisPubSub {
    */
   constructor(client: RedisClient) {
     this.client = client
-    this.registerEvent = "registerEvent"
   }
 
   /**
    * Broadcasts registration event of new socket
    *
+   * @param channel
    * @param data
    */
-  public publishRegisterEvent(data: RegisterMessageType): void {
-    this.client.publish(this.registerEvent, JSON.stringify(data))
+  public publishEvent(
+    channel: string,
+    data:
+      | RegisterMessageType
+      | ModelRegisterMessageType
+      | ModelRequestMessageType
+      | ModelStatusMessageType
+  ): void {
+    switch (channel) {
+      case RedisChannel.REGISTER_EVENT:
+        data = data as RegisterMessageType
+        this.client.publish(channel, JSON.stringify(data))
+        break
+      case RedisChannel.MODEL_REGISTER: {
+        data = data as ModelRegisterMessageType
+        this.client.publish(channel, JSON.stringify(data))
+        break
+      }
+      case RedisChannel.MODEL_REQUEST: {
+        data = data as ModelRequestMessageType
+        channel = `${RedisChannel.MODEL_REQUEST}`
+        this.client.xadd(channel, JSON.stringify(data))
+        break
+      }
+      case RedisChannel.MODEL_STATUS: {
+        data = data as ModelStatusMessageType
+        this.client.publish(channel, JSON.stringify(data))
+        break
+      }
+      default:
+        Logger.info(`Channel ${channel} is not valid!`)
+    }
   }
 
   /**
    * Listens for incoming registration events
    *
+   * @param channel
    * @param handler
    */
-  public async subscribeRegisterEvent(
+  public async subscribeEvent(
+    channel: string,
     handler: (channel: string, message: string) => void
   ): Promise<void> {
     this.client.on("message", handler)
-    this.client.subscribe(this.registerEvent)
+    this.client.subscribe(channel)
     // Make sure it's subscribed before any messages are published
     return await new Promise((resolve) => {
       this.client.on("subscribe", () => {
@@ -46,4 +84,29 @@ export class RedisPubSub {
       })
     })
   }
+
+  /**
+   * Listens for incoming registration events
+   *
+   * @param stream
+   * @param handler
+   */
+  // public async subscribeStream(
+  //   stream: string,
+  //   handler: (stream: string, message: string) => void
+  // ): Promise<void> {
+  //   this.client.on("message", handler)
+  //   this.client.xread(stream)
+  // }
+}
+
+/**
+ * Make a publisher or subscriber for redis
+ * Subscribers can't take other actions, so separate clients for pub and sub
+ *
+ * @param config
+ */
+export function makeRedisPubSub(config: RedisConfig): RedisPubSub {
+  const client = new RedisClient(config)
+  return new RedisPubSub(client)
 }

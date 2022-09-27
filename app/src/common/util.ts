@@ -1,4 +1,4 @@
-import { ADD_LABELS } from "../const/action"
+import { PREDICT } from "../const/action"
 import {
   ItemTypeName,
   LabelTypeName,
@@ -145,7 +145,7 @@ export function doesPacketTriggerModel(
     return false
   }
   for (const action of actionPacket.actions) {
-    if (action.type === ADD_LABELS) {
+    if (action.type === PREDICT) {
       return true
     }
   }

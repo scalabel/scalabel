@@ -1682,6 +1682,31 @@ export function changeSessionMode(
 }
 
 /**
+ * Update model status, if it should be updated
+ *
+ * @param state
+ * @param action
+ */
+export function updateModelStatus(
+  state: State,
+  action: actionTypes.UpdateModelStatusAction
+): State {
+  const newStatus = action.newStatus
+
+  const oldSession = state.session
+  // Update mod 1000 since only nearby differences are important
+  const numUpdates = (oldSession.numUpdates + 1) % 1000
+
+  const newSession = updateObject(oldSession, {
+    modelStatus: newStatus,
+    numUpdates
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+/**
  * Add alert to state
  *
  * @param state

@@ -182,6 +182,33 @@ export class RedisClient {
   }
 
   /**
+   * Add message to stream
+   *
+   * @param stream
+   * @param msg
+   */
+  public xadd(stream: string, msg: string): void {
+    this.client.sendCommand("XADD", [stream, "*", "message", msg])
+  }
+
+  /**
+   * Read stream
+   *
+   * @param stream
+   * @param handler
+   */
+  // public xread(
+  //   stream: string,
+  //   handler: (stream: string, message: string) => void
+  // ): void {
+  //   this.client.sendCommand(
+  //     "XREAD",
+  //     ["BLOCK", "0", "STREAMS", stream, "$"],
+  //     handler
+  //   )
+  // }
+
+  /**
    * Wrapper for redis config
    *
    * @param type

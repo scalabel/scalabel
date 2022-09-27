@@ -3,7 +3,7 @@ import socketio from "socket.io"
 
 import { index2str } from "../common/util"
 import * as actionConsts from "../const/action"
-import { EventName } from "../const/connection"
+import { EventName, RedisChannel } from "../const/connection"
 import { ServerConfig } from "../types/config"
 import { RegisterMessageType, SyncActionMessageType } from "../types/message"
 import { StateMetadata } from "../types/project"
@@ -109,7 +109,7 @@ export class Hub {
     const state = await this.projectStore.loadState(projectName, taskId)
     state.session.id = sessionId
     state.task.config.autosave = this.autosave
-    state.task.config.bots = this.bots
+    state.task.config.bots = state.task.config.bots && this.bots
 
     // Connect socket to others in the same room
     const room = path.getRoomName(projectName, taskId, this.sync, sessionId)
@@ -117,7 +117,10 @@ export class Hub {
     // Send backend state to newly registered socket
     socket.emit(EventName.REGISTER_ACK, state)
     // Notify other processes of registration
-    this.publisher.publishRegisterEvent(data)
+    if (state.task.config.bots) {
+      data.labelType = state.task.config.labelTypes[0]
+      this.publisher.publishEvent(RedisChannel.REGISTER_EVENT, data)
+    }
   }
 
   /**
@@ -141,6 +144,9 @@ export class Hub {
 
     const taskActions = actions.filter((action) => {
       return actionConsts.isTaskAction(action)
+    })
+    const modelStatusActions = actions.filter((action) => {
+      return actionConsts.isModelStatusAction(action)
     })
     const actionTypes = Array.from(new Set(actions.map((a) => a.type)).values())
 
@@ -182,11 +188,12 @@ export class Hub {
       }
     }
 
-    if (taskActions.length > 0) {
+    if (taskActions.length > 0 || modelStatusActions.length > 0) {
       // Broadcast task actions to all other sessions in room
       const taskActionMsg: SyncActionMessageType = _.cloneDeep(data)
+      const toBroadcastActions = taskActions.concat(modelStatusActions)
       taskActionMsg.actions = {
-        actions: taskActions,
+        actions: toBroadcastActions,
         id: actionPacketId,
         triggerId
       }

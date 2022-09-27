@@ -68,3 +68,12 @@ doc/media
 build/
 dist/
 scalabel.egg-info
+
+sync.sh
+**/*.pkl
+**/*.pth
+
+*.log
+
+# model files
+models/

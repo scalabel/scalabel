@@ -138,32 +138,34 @@ export class Tag3dCanvas extends DrawableCanvas<Props> {
       const labels = Session.label3dList.labels()
       this._context.clearRect(0, 0, this.canvas.width, this.canvas.height)
       for (const label of labels) {
-        let category =
+        const category =
           label.category.length >= 1 &&
           label.category[0] < this._config.categories.length &&
           label.category[0] >= 0
             ? this._config.categories[label.category[0]]
             : ""
         const attributes = label.attributes
-        if (category === undefined) {
-          category = ""
+        let words: string[] = []
+        if (category !== undefined) {
+          words = category.split(" ")
         }
-        const words = category.split(" ")
         let tag = words[words.length - 1]
 
-        for (const attributeId of Object.keys(attributes)) {
-          const attribute = this._config.attributes[Number(attributeId)]
-          if (attribute.type === "switch") {
-            if (attributes[Number(attributeId)][0] > 0) {
-              tag += "," + attribute.tag
-            }
-          } else if (attribute.type === "list") {
-            if (attributes[Number(attributeId)][0] > 0) {
-              tag +=
-                "," +
-                attribute.tag +
-                ":" +
-                attribute.tagSuffixes[attributes[Number(attributeId)][0]]
+        if (attributes !== undefined) {
+          for (const attributeId of Object.keys(attributes)) {
+            const attribute = this._config.attributes[Number(attributeId)]
+            if (attribute.type === "switch") {
+              if (attributes[Number(attributeId)][0] > 0) {
+                tag += "," + attribute.tag
+              }
+            } else if (attribute.type === "list") {
+              if (attributes[Number(attributeId)][0] > 0) {
+                tag +=
+                  "," +
+                  attribute.tag +
+                  ":" +
+                  attribute.tagSuffixes[attributes[Number(attributeId)][0]]
+              }
             }
           }
         }

@@ -9,9 +9,11 @@ export const UPDATE_TASK = "UPDATE_TASK"
 export const UPDATE_STATE = "UPDATE_STATE"
 export const SUBMIT = "SUBMIT"
 export const UPDATE_SESSION_STATUS = "UPDATE_SESSION_STATUS"
+export const UPDATE_MODEL_STATUS = "UPDATE_MODEL_STATUS"
 export const ADD_ALERT = "ADD_ALERT"
 export const CLOSE_ALERT = "CLOSE_ALERT"
 export const NULL = "NULL"
+export const PREDICT = "PREDICT"
 
 // Item Level
 export const ADD_LABELS = "ADD_LABELS"
@@ -69,7 +71,8 @@ const TASK_ACTION_TYPES = [
   DELETE_LABELS,
   MERGE_TRACKS,
   SPLIT_TRACK,
-  SUBMIT
+  SUBMIT,
+  PREDICT
 ]
 
 /**
@@ -79,6 +82,15 @@ const TASK_ACTION_TYPES = [
  */
 export function isTaskAction(action: actionConsts): boolean {
   return TASK_ACTION_TYPES.includes(action.type)
+}
+
+/**
+ * Checks if the action modifies model status
+ *
+ * @param action
+ */
+export function isModelStatusAction(action: actionConsts): boolean {
+  return action.type === UPDATE_MODEL_STATUS
 }
 
 /**

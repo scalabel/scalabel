@@ -80,6 +80,7 @@ export async function makeStorage(
  * @param keyInterval
  * @param instructionUrl
  * @param demoMode
+ * @param useModel
  */
 export function makeCreationForm(
   projectName = "",
@@ -89,7 +90,8 @@ export function makeCreationForm(
   taskSize = 0,
   keyInterval = 1,
   instructionUrl = "",
-  demoMode = false
+  demoMode = false,
+  useModel = false
 ): CreationForm {
   const form: CreationForm = {
     projectName,
@@ -98,8 +100,9 @@ export function makeCreationForm(
     pageTitle,
     instructionUrl,
     taskSize,
-    keyInterval,
-    demoMode
+    demoMode,
+    useModel,
+    keyInterval
   }
   return form
 }

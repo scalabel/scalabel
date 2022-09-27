@@ -1,7 +1,12 @@
 import { createSelector } from "reselect"
 
 import { ReduxState } from "../types/redux"
-import { ConfigType, ConnectionStatus, SessionType } from "../types/state"
+import {
+  ConfigType,
+  ConnectionStatus,
+  ModelStatus,
+  SessionType
+} from "../types/state"
 
 /**
  * Load the task config
@@ -21,6 +26,13 @@ export const getAutosaveFlag = createSelector(
     return config.autosave
   }
 )
+
+/**
+ * Get whether bot is enabled
+ */
+export const getBotFlag = createSelector([getConfig], (config: ConfigType) => {
+  return config.bots
+})
 
 /**
  * Get title of main page
@@ -68,6 +80,16 @@ export const getSessionStatus = createSelector(
   [getSession],
   (session: SessionType) => {
     return session.status
+  }
+)
+
+/**
+ * Get the status of the session
+ */
+export const getModelStatus = createSelector(
+  [getSession],
+  (session: SessionType) => {
+    return session.modelStatus
   }
 )
 
@@ -141,6 +163,58 @@ export const shouldStatusTextHide = createSelector(
          * since status transitions from NOTIFY_X to X
          * but keeps the same text
          */
+        return true
+      }
+      default: {
+        return false
+      }
+    }
+  }
+)
+
+/**
+ * Get display text based on the session status
+ */
+export const getModelStatusText = createSelector(
+  [getModelStatus],
+  (status: ModelStatus) => {
+    switch (status) {
+      case ModelStatus.INVALID: {
+        return "Model is invalid."
+      }
+      case ModelStatus.LOADING: {
+        return "Model is loading..."
+      }
+      case ModelStatus.READY: {
+        return "Model is ready for inference."
+      }
+      case ModelStatus.IDLE: {
+        return "Model is idle."
+      }
+      default: {
+        return "We do not need model."
+      }
+    }
+  }
+)
+
+/**
+ * Decide whether display text should be shown based on session status
+ * Return true if text should hide
+ */
+export const shouldModelStatusTextHide = createSelector(
+  [getModelStatus, getBotFlag],
+  (status: ModelStatus, bot: boolean) => {
+    if (!bot) {
+      return true
+    }
+    switch (status) {
+      case ModelStatus.INVALID:
+      case ModelStatus.LOADING:
+      case ModelStatus.IDLE: {
+        return false
+      }
+      case ModelStatus.READY: {
         return true
       }
       default: {

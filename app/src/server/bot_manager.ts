@@ -1,18 +1,26 @@
 import { uid } from "../common/uid"
-import { BotConfig } from "../types/config"
-import { BotData, RegisterMessageType } from "../types/message"
+import { RedisChannel } from "../const/connection"
+import { ServerConfig } from "../types/config"
+import {
+  BotData,
+  ModelStatusMessageType,
+  RegisterMessageType
+} from "../types/message"
 import { Bot } from "./bot"
 import Logger from "./logger"
 import { getRedisBotKey, getRedisBotSet } from "./path"
 import { RedisClient } from "./redis_client"
 import { RedisPubSub } from "./redis_pub_sub"
+import { index2str } from "../common/util"
 
 /**
  * Watches redis and spawns virtual sessions as needed
  */
 export class BotManager {
   /** env variables */
-  protected config: BotConfig
+  protected config: ServerConfig
+  /** the redis message broker */
+  protected publisher: RedisPubSub
   /** the redis message broker */
   protected subscriber: RedisPubSub
   /** the redis client for storage */
@@ -24,23 +32,26 @@ export class BotManager {
    * Constructor
    *
    * @param config
+   * @param publisher
    * @param subscriber
    * @param redisClient
    * @param pollTime
    */
   constructor(
-    config: BotConfig,
+    config: ServerConfig,
+    publisher: RedisPubSub,
     subscriber: RedisPubSub,
     redisClient: RedisClient,
     pollTime?: number
   ) {
     this.config = config
+    this.publisher = publisher
     this.subscriber = subscriber
     this.redisClient = redisClient
     if (pollTime !== undefined) {
       this.pollTime = pollTime
     } else {
-      this.pollTime = 1000 * 60 * 5 // 5 minutes in ms
+      this.pollTime = 5 * 1000 * 60 // 5 minutes in ms
     }
   }
 
@@ -49,8 +60,11 @@ export class BotManager {
    */
   public async listen(): Promise<BotData[]> {
     // Listen for new sessions
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    await this.subscriber.subscribeRegisterEvent(this.handleRegister.bind(this))
+    await this.subscriber.subscribeEvent(
+      RedisChannel.REGISTER_EVENT,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      this.handleRegister.bind(this)
+    )
     return await this.restoreBots()
   }
 
@@ -62,7 +76,9 @@ export class BotManager {
     const bots: Bot[] = []
     for (const botKey of botKeys) {
       const botData = await this.getBot(botKey)
-      bots.push(this.makeBot(botData))
+      const bot = this.makeBot(botData)
+      await bot.listen()
+      bots.push(bot)
     }
     return bots
   }
@@ -82,15 +98,23 @@ export class BotManager {
       projectName: data.projectName,
       taskIndex: data.taskIndex,
       botId: "",
-      address: data.address
+      address: data.address,
+      labelType: data.labelType !== undefined ? data.labelType : "box2d"
     }
 
     if (data.bot || (await this.checkBotExists(botData))) {
+      const modelStatusMessage: ModelStatusMessageType = {
+        projectName: botData.projectName,
+        taskId: index2str(botData.taskIndex),
+        active: true
+      }
+      this.publisher.publishEvent(RedisChannel.MODEL_STATUS, modelStatusMessage)
       return botData
     }
     botData.botId = uid()
 
-    this.makeBot(botData)
+    const bot = this.makeBot(botData)
+    await bot.listen()
     await this.saveBot(botData)
     return botData
   }
@@ -159,7 +183,12 @@ export class BotManager {
     Logger.info(
       `Creating bot for project ${botData.projectName}, task ${botData.taskIndex}`
     )
-    const bot = new Bot(botData, this.config.host, this.config.port)
+    const bot = new Bot(
+      botData,
+      this.config.bot.host,
+      this.config.bot.port,
+      this.config.redis
+    )
 
     // Only use this disable if we are certain all the errors are handled
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -184,7 +213,7 @@ export class BotManager {
     } else {
       clearInterval(pollId)
       await this.deleteBot(bot.getData())
-      bot.kill()
+      bot.setActivate(false)
     }
   }
 }

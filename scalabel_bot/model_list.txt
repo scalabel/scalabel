@@ -1,0 +1,2 @@
+dd3d_inference
+fsdet_inference

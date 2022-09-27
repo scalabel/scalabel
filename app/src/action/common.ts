@@ -12,6 +12,7 @@ import {
   DeepPartialState,
   IdType,
   LabelType,
+  ModelStatus,
   ModeStatus,
   PaneType,
   Polygon2DBoundaryCloneStatusType,
@@ -632,6 +633,20 @@ export function save(): actionTypes.SaveAction {
 }
 
 /**
+ * Send a prediction request
+ *
+ * @param itemIndices
+ */
+export function sendPredictionRequest(
+  itemIndices: number[]
+): actionTypes.PredictionAction {
+  return {
+    ...makeBaseAction(actionConsts.PREDICT),
+    itemIndices: itemIndices
+  }
+}
+
+/**
  * Update session status
  *
  * @param status
@@ -722,6 +737,48 @@ export function changeModeToSelecting(): actionTypes.ChangeSessionModeAction {
  */
 export function changeModeToAnnotating(): actionTypes.ChangeSessionModeAction {
   return changeSessionMode(ModeStatus.ANNOTATING)
+}
+
+/**
+ * Update model status
+ *
+ * @param status
+ */
+export function updateModelStatus(
+  status: ModelStatus
+): actionTypes.UpdateModelStatusAction {
+  return {
+    ...makeBaseAction(actionConsts.UPDATE_MODEL_STATUS),
+    newStatus: status
+  }
+}
+
+/**
+ * Mark model status as invalid
+ */
+export function setModelStatusToInvalid(): actionTypes.UpdateModelStatusAction {
+  return updateModelStatus(ModelStatus.INVALID)
+}
+
+/**
+ * Mark model status as loading
+ */
+export function setModelStatusToLoading(): actionTypes.UpdateModelStatusAction {
+  return updateModelStatus(ModelStatus.LOADING)
+}
+
+/**
+ * Mark model status as ready
+ */
+export function setModelStatusToReady(): actionTypes.UpdateModelStatusAction {
+  return updateModelStatus(ModelStatus.READY)
+}
+
+/**
+ * Mark model status as idle
+ */
+export function setModelStatusToIdle(): actionTypes.UpdateModelStatusAction {
+  return updateModelStatus(ModelStatus.IDLE)
 }
 
 /**
