@@ -100,6 +100,7 @@ export class Listeners {
    * @param res
    */
   public async getExportHandler(req: Request, res: Response): Promise<void> {
+    req.setTimeout(2 * 60 * 10000)
     if (this.checkInvalidGet(req, res)) {
       return
     }
@@ -145,11 +146,31 @@ export class Listeners {
           }
         }
       }
-      dataset.frames = items
-      const exportJson = JSON.stringify(dataset, null, "  ")
-      // Set relevant header and send the exported json file
       res.attachment(getExportName(projectName))
-      res.end(Buffer.from(exportJson, "binary"), "binary")
+
+      // Manually stream labels to response, because JSON.stringify fails
+      // for large objects
+      res.write("{\n")
+      Object.keys(dataset)
+        .filter((key) => key !== "frames")
+        .forEach((key) => {
+          res.write(`"${key}": `)
+          // @ts-expect-error
+          res.write(JSON.stringify(dataset[key], null, 2))
+          res.write(",")
+        })
+      res.write(`"frames": [`)
+      let first = true
+      for (const item of items) {
+        if (first) {
+          first = false
+        } else {
+          res.write(",\n")
+        }
+        res.write(JSON.stringify(item, null, 2))
+      }
+      res.write("]\n")
+      res.end("}")
     } catch (error) {
       // TODO: Be more specific about what this error may be
       Logger.error(error as Error)
