@@ -40,7 +40,9 @@ class BDD100K(TrackEvalKittiMOTS):  # type: ignore
         self, gts: List[Frame], results: List[Frame]
     ) -> None:
         """Initialize dataset."""
-        assert len(gts) == len(results)
+        assert len(gts) == len(results), (
+            f"len(gts)={len(gts)}, len(results)={len(results)}"
+        )
         assert gts[0].videoName == results[0].videoName
         self.gts, self.results = gts, results
 

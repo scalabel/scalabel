@@ -115,7 +115,6 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
                 if "bbox" in ann and ann["bbox"] is not None:
                     label.box2d = bbox_to_box2d(ann["bbox"])
                 if "segmentation" in ann:
-                    # Currently only support conversion from polygon.
                     assert ann["segmentation"] is not None
                     if isinstance(ann["segmentation"], list):
                         label.poly2d = polygon_to_poly2ds(ann["segmentation"])
