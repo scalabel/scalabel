@@ -73,13 +73,13 @@ class Label(BaseModel):
 
     id: str
     index: Optional[int] = None
-    manualShape: Optional[bool] = None
-    manualAttributes: Optional[bool] = None
+    # manualShape: Optional[bool] = None
+    # manualAttributes: Optional[bool] = None
     score: Optional[float] = None
     attributes: Optional[Dict[str, Union[bool, int, float, str]]] = None
     category: Optional[str] = None
     box2d: Optional[Box2D]
-    box3d: Optional[Box3D]
+    # box3d: Optional[Box3D]
     poly2d: Optional[List[Poly2D]]
     rle: Optional[RLE]
     graph: Optional[Graph]
@@ -127,8 +127,8 @@ class Frame(BaseModel):
     name: str
     url: Optional[str]
     videoName: Optional[str] = None
-    intrinsics: Optional[Intrinsics] = None
-    extrinsics: Optional[Extrinsics] = None
+    # intrinsics: Optional[Intrinsics] = None
+    # extrinsics: Optional[Extrinsics] = None
     attributes: Optional[Dict[str, Union[str, float]]] = None
     timestamp: Optional[int] = None
     frameIndex: Optional[int] = None

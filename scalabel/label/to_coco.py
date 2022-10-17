@@ -5,7 +5,7 @@ import json
 import os.path as osp
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from pycocotools import mask as mask_utils  # type: ignore
@@ -110,26 +110,35 @@ def set_keypoints(annotation: AnnType, keypoints: List[float]) -> AnnType:
 
 
 def poly2ds_to_coco(
-    annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize
+    annotation: AnnType, poly2d: Optional[List[Poly2D]], shape: ImageSize
 ) -> AnnType:
     """Converting Poly2D to coco format."""
-    mask = poly2ds_to_mask(shape, poly2d)
-    set_seg_object_geometry(annotation, mask)
+    if poly2d is not None and "segmentation" not in annotation:
+        mask = poly2ds_to_mask(shape, poly2d)
+        set_seg_object_geometry(annotation, mask)
     return annotation
 
 
 def poly2ds_list_to_coco(
     shape: List[ImageSize],
     annotations: List[AnnType],
-    poly2ds: List[List[Poly2D]],
+    poly2ds: List[Optional[List[Poly2D]]],
     nproc: int = NPROC,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
-    with Pool(nproc) as pool:
-        annotations = pool.starmap(
-            poly2ds_to_coco,
-            tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
-        )
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            annotations = pool.starmap(
+                poly2ds_to_coco,
+                tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
+            )
+    else:
+        annotations = [
+            poly2ds_to_coco(ann, polys, shp)
+            for ann, polys, shp in tqdm(
+                zip(annotations, poly2ds, shape), total=len(annotations)
+            )
+        ]
 
     sorted(annotations, key=lambda ann: ann["id"])
     return annotations
@@ -216,10 +225,10 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.imageSize
+        img_shape = image_anns.size
         if img_shape is None:
-            if image_anns.size is not None:
-                img_shape = image_anns.size
+            if config.imageSize is not None:
+                img_shape = config.imageSize
             else:
                 raise ValueError("Image shape not defined!")
 
