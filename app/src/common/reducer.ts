@@ -97,6 +97,12 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.ChangeSessionModeAction
       )
+    //todo for overlay
+    case actionConsts.CHANGE_OVERLAYS:
+      return common.changeOverlays(
+        state,
+        action as actionTypes.ChangeOverlaysAction
+      )
     case actionConsts.ADD_ALERT:
       return common.addAlert(state, action as actionTypes.AddAlertAction)
     case actionConsts.CLOSE_ALERT:

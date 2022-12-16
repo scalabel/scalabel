@@ -1659,6 +1659,27 @@ export function updateSessionStatus(
 }
 
 /**
+ * Change overlay visibility
+ * 
+ * @param state
+ * @param action
+ */
+export function changeOverlays(
+  state: State,
+  action: actionTypes.ChangeOverlaysAction
+): State {
+  const newOverlayStatus = action.newOverlayStatus
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    overlayStatus: newOverlayStatus
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+
+/**
  * Change session mode, 'annotating' or 'selecting'
  * When in 'selecting' mode, user could drag annotation by clicking mask
  *

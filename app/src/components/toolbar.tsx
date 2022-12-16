@@ -8,6 +8,7 @@ import { Slide, toast, ToastContainer } from "react-toastify"
 import {
   changeModeToAnnotating,
   changeModeToSelecting,
+  changeOverlays,
   changeSelect,
   changeViewerConfig,
   mergeTracks,
@@ -118,6 +119,18 @@ export class ToolBar extends Component<Props> {
           })
         }
       }
+      case Key.Y_LOW: {
+        if (this.state.session.overlayStatus){
+          Session.dispatch(changeOverlays(false))
+        } else {
+          Session.dispatch(changeOverlays(true))
+        }
+        
+        break
+      }
+        
+        
+      
     }
     this._keyDownMap[e.key] = true
   }

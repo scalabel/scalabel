@@ -697,6 +697,17 @@ export function setStatusToComputing(): actionTypes.UpdateSessionStatusAction {
 }
 
 /**
+ * Change Overlays that are displayed
+ */
+export function changeOverlays(status:boolean): actionTypes.ChangeOverlaysAction {
+  return {
+    ...makeBaseAction(actionConsts.CHANGE_OVERLAYS),
+    newOverlayStatus: status
+  }
+}
+
+
+/**
  * Change session mode
  *
  * @param mode

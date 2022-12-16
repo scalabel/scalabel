@@ -69,10 +69,11 @@
         "en"
     ],
     "spellright.documentTypes": [
+
         "markdown",
         "latex",
         "plaintext",
-        "typescript"
+        // "typescript"
     ],
     "files.exclude": {
         "**/node_modules/**": true,
@@ -84,10 +85,10 @@
     "eslint.options": {
         "configFile": "./.eslintrc.json"
     },
-    "eslint.validate": [
-        "typescript",
-        "typescriptreact"
-    ],
+    // "eslint.validate": [
+    //     "typescript",
+    //     "typescriptreact"
+    // ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/src",
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"

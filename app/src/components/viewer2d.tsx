@@ -26,6 +26,7 @@ import {
 } from "./drawable_viewer"
 import ImageCanvas from "./image_canvas"
 import Label2dCanvas from "./label2d_canvas"
+import SensorOverlay from "./sensor_overlay"
 
 interface ClassType extends ViewerClassTypes {
   /** buttons */
@@ -61,6 +62,13 @@ export class Viewer2D extends DrawableViewer<Viewer2DProps> {
       views.push(
         <ImageCanvas
           key={`imageCanvas${this.props.id}`}
+          display={this._container}
+          id={this.props.id}
+        />
+      )
+      views.push(
+        <SensorOverlay
+          key={`sensorOverlay${this.props.id}`}
           display={this._container}
           id={this.props.id}
         />

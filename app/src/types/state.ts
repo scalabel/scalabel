@@ -519,6 +519,11 @@ export interface ItemStatus {
   sensorDataLoaded: { [id: number]: boolean }
 }
 
+// export interface OverlayStatus{
+//   /** Whether an overlay is currently loaded */
+//   overlayDisplayed: { [id: number]: boolean }
+// }
+
 export const enum ConnectionStatus {
   NOTIFY_SAVED,
   SAVED,
@@ -597,6 +602,8 @@ export interface SessionType {
   alerts: AlertType[]
   /** 3D-specific information */
   info3D: Info3DType
+  /** Active Overlays */
+  overlayStatus: boolean //ToDo: change to array of overlay ids
 }
 
 export interface State {

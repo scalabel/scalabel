@@ -76,6 +76,11 @@ export interface UpdateSessionStatusAction extends BaseAction {
   newStatus: ConnectionStatus
 }
 
+export interface ChangeOverlaysAction extends BaseAction {
+  /** New overlays to activate */
+  newOverlayStatus: boolean //TODO change to array
+}
+
 export interface ChangeSessionModeAction extends BaseAction {
   /** New mode of the session */
   newMode: ModeStatus

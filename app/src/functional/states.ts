@@ -19,6 +19,7 @@ import {
   IntrinsicsType,
   INVALID_ID,
   ItemStatus,
+  //OverlayStatus,
   ItemType,
   LabelType,
   LayoutType,
@@ -637,6 +638,20 @@ export function makeItemStatus(params: Partial<ItemStatus> = {}): ItemStatus {
   }
 }
 
+// /**
+//  * Initialize a Overlay status sate
+//  *
+//  * @param {{}} params
+//  * @returns {OverlayStatus}
+//  */
+//  export function makeOverlayStatus(params: Partial<OverlayStatus> = {}): OverlayStatus {
+//   return {
+//     overlayDisplayed: {},
+//     ...params
+//   }
+// }
+
+
 /**
  * Initialize a item status sate
  *
@@ -670,6 +685,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     numUpdates: 0,
     alerts: [],
     info3D: makeInfo3D(),
+    overlayStatus: false,
     ...params
   }
 }
