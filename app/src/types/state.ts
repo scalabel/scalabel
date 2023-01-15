@@ -603,7 +603,7 @@ export interface SessionType {
   /** 3D-specific information */
   info3D: Info3DType
   /** Active Overlays */
-  overlayStatus: boolean //ToDo: change to array of overlay ids
+  overlayStatus: number[] //ToDo: change to array of overlay ids
 }
 
 export interface State {

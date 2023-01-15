@@ -78,7 +78,7 @@ export interface UpdateSessionStatusAction extends BaseAction {
 
 export interface ChangeOverlaysAction extends BaseAction {
   /** New overlays to activate */
-  newOverlayStatus: boolean //TODO change to array
+  newOverlayStatus: number[] 
 }
 
 export interface ChangeSessionModeAction extends BaseAction {

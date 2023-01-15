@@ -685,7 +685,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     numUpdates: 0,
     alerts: [],
     info3D: makeInfo3D(),
-    overlayStatus: false,
+    overlayStatus: [],
     ...params
   }
 }

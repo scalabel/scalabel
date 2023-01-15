@@ -120,16 +120,23 @@ export class SensorOverlay extends DrawableCanvas<Props> {
     if (this.imageCanvas !== null && this.imageContext !== null) {
       const item = this.state.user.select.item
       //const sensor = this.state.user.viewerConfigs[this.props.id].sensor
-      const sensor = 1
+      
       if (
-        this.state.session.overlayStatus === true &&
-        isFrameLoaded(this.state, item, sensor) &&
-        item < Session.images.length &&
-        sensor in Session.images[item]
+        this.state.session.overlayStatus.length > 0 
       ) {
-        const image = Session.images[item][sensor]
-        // Redraw imageCanvas
-        drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
+        
+        for (const sensor of this.state.session.overlayStatus){
+          if (isFrameLoaded(this.state, item, sensor) &&
+              item < Session.images.length &&
+              sensor in Session.images[item]){
+                const image = Session.images[item][sensor]
+                // Redraw imageCanvas
+                drawImageOnCanvas(this.imageCanvas, this.imageContext, image)
+          } 
+          //TODO: perhaps clear canvas necessary here 
+          
+        }
+        
       } else {
         clearCanvas(this.imageCanvas, this.imageContext)
       }

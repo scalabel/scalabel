@@ -118,18 +118,43 @@ export class ToolBar extends Component<Props> {
             autoClose: 2000
           })
         }
+        break
       }
-      case Key.Y_LOW: {
-        if (this.state.session.overlayStatus){
-          Session.dispatch(changeOverlays(false))
+      case Key.ONE: {
+        if (this.state.session.overlayStatus.includes(1)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(1),1)
+          Session.dispatch(changeOverlays(cur_state))
         } else {
-          Session.dispatch(changeOverlays(true))
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(1)
+          Session.dispatch(changeOverlays(cur_state))
         }
         
         break
       }
-        
-        
+      case Key.TWO:{
+        if (this.state.session.overlayStatus.includes(2)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(2),1)
+          Session.dispatch(changeOverlays(cur_state))
+        } else {
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(2)
+          Session.dispatch(changeOverlays(cur_state))
+        }
+        break
+      }
+      // Currently the first switch attribute gets toggled on key press
+      case Key.V_LOW: {
+        if (this.props.attributes.length > 0) {
+          if (this.props.attributes[0].type === "switch") {
+            this.handleToggle(this.props.attributes[0].name)
+          }
+      
+        }
+        break
+      } 
       
     }
     this._keyDownMap[e.key] = true

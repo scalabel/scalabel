@@ -145,7 +145,11 @@ export enum Key {
   W_LOW = "w",
   X_LOW = "x",
   Y_LOW = "y",
-  Z_LOW = "z"
+  Z_LOW = "z",
+  ZERO = "0",
+  ONE = "1",
+  TWO = "2",
+  THREE = "3"
 }
 
 export enum TrackPolicyType {

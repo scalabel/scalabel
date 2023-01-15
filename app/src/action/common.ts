@@ -699,7 +699,7 @@ export function setStatusToComputing(): actionTypes.UpdateSessionStatusAction {
 /**
  * Change Overlays that are displayed
  */
-export function changeOverlays(status:boolean): actionTypes.ChangeOverlaysAction {
+export function changeOverlays(status:number[]): actionTypes.ChangeOverlaysAction {
   return {
     ...makeBaseAction(actionConsts.CHANGE_OVERLAYS),
     newOverlayStatus: status
