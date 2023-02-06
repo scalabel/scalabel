@@ -25,7 +25,10 @@ def list_full_paths(directory):
 # data_folder
 #   - folder_name
 #       - rgb
+#       - radar
 #       - events.h5
+#       - rgb_timestamps.txt
+#       - radar_timestamps.txt
 #   - folder_name_pointcloud
 #       - lidar
 #       - lidar_timestamps.txt
@@ -50,6 +53,9 @@ if __name__ == '__main__':
     rgb_folder_path = folder_path / "rgb"
     assert rgb_folder_path.is_dir(), "Directory {} does not exist".format(str(rgb_folder_path))
 
+    radar_folder_path = folder_path / "radar/cartesian_filtered_50"
+    assert radar_folder_path.is_dir(), "Directory {} does not exist".format(str(radar_folder_path))
+
     folder_path_pointcloud = data_folder / (folder_name + "_pointcloud")
     assert folder_path_pointcloud.is_dir(), "Directory {} does not exist".format(str(folder_path_pointcloud))
 
@@ -61,21 +67,30 @@ if __name__ == '__main__':
 
     lidar_timestamps_path = folder_path_pointcloud / "lidar_timestamps.txt"
     assert lidar_timestamps_path.is_file(), "File {} does not exist".format(str(lidar_timestamps_path))
+
+    radar_timestamps_path = folder_path / "radar_timestamps.txt"
+    assert radar_timestamps_path.is_file(), "File {} does not exist".format(str(radar_timestamps_path))
     
     rgb_list = list_full_paths(rgb_folder_path)
     lidar_list = list_full_paths(lidar_folder_path)
+    radar_list = list_full_paths(radar_folder_path)
 
     rgb_timestamps = timestamps_reader(rgb_timestamps_path)
     lidar_timestamps = timestamps_reader(lidar_timestamps_path)
+    radar_timestamps = timestamps_reader(radar_timestamps_path)
 
     # dont judge, super inefficent, feel free to improve
     #TODO: cases where there are no lidar ect.
-    file_idx = np.zeros((len(rgb_timestamps),3),dtype=np.int64)
+    file_idx = np.zeros((len(rgb_timestamps),4),dtype=np.int64)
     for i in range(len(rgb_timestamps[:,0])):
         for j in range(len(lidar_timestamps[:,0])):
             if (rgb_timestamps[i,0] <= lidar_timestamps[j,0]):
                 file_idx[i,0] = i
                 file_idx[i,1] = j
+                break
+        for j in range(len(radar_timestamps[:,0])):
+            if (rgb_timestamps[i,0] <= radar_timestamps[j,0]):
+                file_idx[i,3] = j
                 break
     
     # make lidar representations
@@ -84,15 +99,15 @@ if __name__ == '__main__':
         os.makedirs(lidar_projections_path)
 
     # if (len(list_full_paths(lidar_projections_path)) < len(lidar_list)):
-    #     projectPoints(lidar_list[90:120], lidar_projections_path)
-
+    #     projectPoints(lidar_list, lidar_projections_path)
+    projectPoints(lidar_list, lidar_projections_path)
     # make event representations
     event_representations_path = folder_path / "event_img"
     if not os.path.isdir(event_representations_path):
         os.makedirs(event_representations_path)
     
     
-    event_prep = EventPreparer(h5_file_path, event_time_delta_us)
+    event_prep = EventPreparer(h5_file_path, event_time_delta_us, 720, 1280)
     first_event = event_prep.get_start_time_us()
     last_event = event_prep.get_final_time_us()
     if (sum(rgb_timestamps[:,0]>=first_event)>0):
@@ -103,7 +118,7 @@ if __name__ == '__main__':
         last_index = np.argmin(rgb_timestamps[:,0]<=last_event)
     else:
         print("Error")
-    #event_prep.create_representations(rgb_timestamps[first_index:last_index,0], event_representations_path)
+    event_prep.create_representations(rgb_timestamps[first_index:last_index,0], event_representations_path, 1200,1920)
     file_idx[first_index:last_index,2] = np.array(range(last_index-first_index))
 
     event_list = list_full_paths(event_representations_path)
@@ -115,11 +130,13 @@ if __name__ == '__main__':
     for i in file_idx[first_index:last_index,0]:
         lidar_index = file_idx[i,1]
         event_index = file_idx[i,2]
-        if(lidar_index>115):
+        radar_index = file_idx[i,3]
+        if(lidar_index>115): #TODO: remove this
             break
         name_rgb = rgb_list[i].stem
         name_lidar = lidar_img_list[lidar_index].stem
         name_event = event_list[event_index].stem
+        name_radar = radar_list[radar_index].stem + "_radar"
         
         frames.append(
             {
@@ -139,7 +156,13 @@ if __name__ == '__main__':
                 "url": str(event_list[event_index].relative_to(*event_list[event_index].parts[:5])),
                 "timestamp": rgb_timestamps[i,0]/1000000
             })
-        
+        frames.append(
+            {
+                "name": name_radar,
+                "url": str(radar_list[radar_index].relative_to(*radar_list[radar_index].parts[:5])),
+                "timestamp": rgb_timestamps[i,0]/1000000
+            }
+        )
         frameGroups.append(
             {
                 "name": str(i),
@@ -148,7 +171,8 @@ if __name__ == '__main__':
                 "frames": [
                     name_rgb,
                     name_lidar,
-                    name_event
+                    name_event,
+                    name_radar
                 ]
             }
         )

@@ -282,6 +282,8 @@ export interface SensorType {
   extrinsics?: ExtrinsicsType
   /** sensor height */
   height?: number
+  /** radar */
+  radar?: string
 }
 
 export interface SensorMapType {
@@ -603,7 +605,9 @@ export interface SessionType {
   /** 3D-specific information */
   info3D: Info3DType
   /** Active Overlays */
-  overlayStatus: number[] //ToDo: change to array of overlay ids
+  overlayStatus: number[] 
+  /** Radar Status, [x,y,value] */
+  radarStatus: number[]
 }
 
 export interface State {

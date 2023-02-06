@@ -85,9 +85,12 @@ export function toImageCoords(
 export function drawImageOnCanvas(
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
-  image: HTMLImageElement
+  image: HTMLImageElement,
+  skipClear: boolean = false
 ): void {
-  clearCanvas(canvas, context)
+  if (!skipClear){
+    clearCanvas(canvas, context)
+  }
   context.drawImage(
     image,
     0,
@@ -100,6 +103,9 @@ export function drawImageOnCanvas(
     canvas.height
   )
 }
+
+
+
 
 /**
  * Clear the canvas

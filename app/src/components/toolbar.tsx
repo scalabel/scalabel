@@ -145,6 +145,18 @@ export class ToolBar extends Component<Props> {
         }
         break
       }
+      case Key.NINE: {
+        if (this.state.session.overlayStatus.includes(9)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(9),1)
+          Session.dispatch(changeOverlays(cur_state))
+        } else {
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(9)
+          Session.dispatch(changeOverlays(cur_state))
+        } 
+        break
+      }
       // Currently the first switch attribute gets toggled on key press
       case Key.V_LOW: {
         if (this.props.attributes.length > 0) {

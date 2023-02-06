@@ -1678,6 +1678,26 @@ export function changeOverlays(
   })
 }
 
+/**
+ * Change radar_Status
+ * @param state
+ * @param action
+ */
+export function changeRadarStatus(
+  state: State,
+  action: actionTypes.ChangeRadarStatusAction
+): State {
+  const newRadarStatus = action.newRadarStatus
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    radarStatus: newRadarStatus
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
+
 
 /**
  * Change session mode, 'annotating' or 'selecting'

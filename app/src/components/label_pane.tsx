@@ -30,6 +30,7 @@ import HomographyViewer from "./homography_viewer"
 import Image3DViewer from "./image3d_viewer"
 import Viewer2D from "./viewer2d"
 import Viewer3D from "./viewer3d"
+import ViewerRadar from "./viewer_radar"
 
 /**
  * Make drawable viewer based on viewer config
@@ -50,6 +51,8 @@ export function viewerFactory(
       return <Image3DViewer id={viewerId} key={viewerReactKey(viewerId)} />
     case types.ViewerConfigTypeName.HOMOGRAPHY:
       return <HomographyViewer id={viewerId} key={viewerReactKey(viewerId)} />
+    case types.ViewerConfigTypeName.RADAR:
+      return <ViewerRadar id={viewerId} key={viewerReactKey(viewerId)} />
   }
   return <></>
 }
@@ -69,6 +72,8 @@ function viewerTypeFromString(type: string): types.ViewerConfigTypeName {
       return types.ViewerConfigTypeName.IMAGE_3D
     case types.ViewerConfigTypeName.HOMOGRAPHY:
       return types.ViewerConfigTypeName.HOMOGRAPHY
+    case types.ViewerConfigTypeName.RADAR:
+      return types.ViewerConfigTypeName.RADAR
     default:
       return types.ViewerConfigTypeName.UNKNOWN
   }
@@ -137,6 +142,8 @@ class LabelPane extends Component<Props> {
     if (pane.viewerId >= 0) {
       const viewerConfig = this.state.user.viewerConfigs[pane.viewerId]
       const minSensorIds = getMinSensorIds(this.state)
+
+      const isRadarPane = viewerConfig.type === types.ViewerConfigTypeName.RADAR
       const viewerTypeMenu = (
         <Select
           key={`viewerTypeMenu${pane.id}`}
@@ -369,20 +376,27 @@ class LabelPane extends Component<Props> {
       const isImage3d =
         getSensorTypes(this.state).has(types.ViewerConfigTypeName.IMAGE) &&
         this.state.task.config.labelTypes.includes(types.LabelTypeName.BOX_3D)
-      const paneBar = (
-        <Grid
-          key={`paneMenu${pane.id}`}
-          justifyContent={"flex-start"}
-          alignItems={"stretch"}
-          container
-          direction="row"
-        >
-          <div hidden={pane.hide}>
-            {numSensors > 1 || isImage3d ? viewerTypeMenu : null}
-            {numSensors > 1 ? viewerIdMenu : null}
-          </div>
-        </Grid>
-      )
+
+      let paneBar: JSX.Element
+      if (isRadarPane){
+        paneBar = <></>
+      } else {
+        paneBar = (
+          <Grid
+            key={`paneMenu${pane.id}`}
+            justifyContent={"flex-start"}
+            alignItems={"stretch"}
+            container
+            direction="row"
+          >
+            <div hidden={pane.hide}>
+              {numSensors > 1 || isImage3d ? viewerTypeMenu : null}
+              {numSensors > 1 ? viewerIdMenu : null}
+            </div>
+          </Grid>
+        )
+      }
+      
       // Leaf, render viewer container
       return (
         <div>

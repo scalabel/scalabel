@@ -53,7 +53,9 @@ export enum ViewerConfigTypeName {
   POINT_CLOUD = "pointcloud",
   IMAGE_3D = "image_3d",
   HOMOGRAPHY = "homography",
-  UNKNOWN = "unknown"
+  UNKNOWN = "unknown",
+  RADAR = "radar"
+
 }
 
 export enum PathPointType {
@@ -149,7 +151,8 @@ export enum Key {
   ZERO = "0",
   ONE = "1",
   TWO = "2",
-  THREE = "3"
+  THREE = "3",
+  NINE = "9",
 }
 
 export enum TrackPolicyType {

@@ -638,18 +638,7 @@ export function makeItemStatus(params: Partial<ItemStatus> = {}): ItemStatus {
   }
 }
 
-// /**
-//  * Initialize a Overlay status sate
-//  *
-//  * @param {{}} params
-//  * @returns {OverlayStatus}
-//  */
-//  export function makeOverlayStatus(params: Partial<OverlayStatus> = {}): OverlayStatus {
-//   return {
-//     overlayDisplayed: {},
-//     ...params
-//   }
-// }
+
 
 
 /**
@@ -686,6 +675,7 @@ function makeSession(params: Partial<SessionType> = {}): SessionType {
     alerts: [],
     info3D: makeInfo3D(),
     overlayStatus: [],
+    radarStatus: [],
     ...params
   }
 }

@@ -260,8 +260,31 @@ function initViewerConfigs(
       dispatch(addViewerConfig(0, config0))
     }
 
-    // Set up default PC labeling interface
+  
     const paneIds = Object.keys(state.user.layout.panes)
+
+    // Special case for radar sensor, which is always BEV. Split pane into two image panes
+    const last_element_idx = parseInt(Object.keys(state.task.sensors).slice(-1)[0])
+    if (
+      (state.task.sensors[last_element_idx]["radar"] != undefined) && 
+      state.task.sensors[last_element_idx]["radar"] == "BEV" && 
+      paneIds.length === 1
+    ) {
+      
+      dispatch(splitPane(Number(paneIds[0]), SplitType.VERTICAL, 0))
+      state = getState()
+      let config = state.user.viewerConfigs[state.user.layout.maxViewerConfigId]
+      config.sensor = last_element_idx
+      config.type = ViewerConfigTypeName.RADAR
+      dispatch(
+        changeViewerConfig(
+          state.user.layout.maxViewerConfigId,
+          config
+        )
+      )
+    }
+
+    // Set up default PC labeling interface
     if (
       state.task.config.itemType === ItemTypeName.POINT_CLOUD &&
       paneIds.length === 1

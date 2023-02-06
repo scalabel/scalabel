@@ -81,6 +81,11 @@ export interface ChangeOverlaysAction extends BaseAction {
   newOverlayStatus: number[] 
 }
 
+export interface ChangeRadarStatusAction extends BaseAction {
+  /** New radarstatus  */
+  newRadarStatus: number[]
+}
+
 export interface ChangeSessionModeAction extends BaseAction {
   /** New mode of the session */
   newMode: ModeStatus

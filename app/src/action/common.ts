@@ -706,6 +706,16 @@ export function changeOverlays(status:number[]): actionTypes.ChangeOverlaysActio
   }
 }
 
+/**
+ * Change Radar Status
+ */
+export function changeRadarStatus(status:number[]): actionTypes.ChangeRadarStatusAction {
+  return {
+    ...makeBaseAction(actionConsts.CHANGE_RADAR_STATUS),
+    newRadarStatus: status
+  }
+}
+
 
 /**
  * Change session mode
