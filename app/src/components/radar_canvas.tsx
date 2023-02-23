@@ -303,23 +303,20 @@ export class RadarCanvas extends DrawableCanvas<Props> {
       context_tmp.drawImage(image, 0, 0);
       pixel = context_tmp.getImageData(Math.floor(mousePos[0]), Math.floor(mousePos[1]), 1, 1).data
       width = image.width
-      height = image.height
-      //console.log(pixel)
-      //console.log(mousePos)
-      
+      height = image.height  
     }
     if (pixel === undefined || width === undefined || height === undefined) {
       return
     }
+    // UPDATE RADAR SCALE HERE--------------------------------------------------
     let radar_scale = 0.0432 // 0.0432m/pixel
+    // -------------------------------------------------------------------------
     let raw_pos_x = Math.floor(mousePos[0])
     let raw_pos_y = Math.floor(mousePos[1])
     let world_pos_x = (width/2-raw_pos_x) * radar_scale
     let world_pos_y = (height/2-raw_pos_y) * radar_scale
     console.log([world_pos_x, world_pos_y,pixel[0]])
     Session.dispatch(changeRadarStatus([world_pos_x, world_pos_y,pixel[0]]))
-
-    
   }
 
   /**
@@ -331,10 +328,6 @@ export class RadarCanvas extends DrawableCanvas<Props> {
     if (e.button !== 0 || this.checkFreeze()) {
       return
     }
-
-
-
-   
   }
 
   /**

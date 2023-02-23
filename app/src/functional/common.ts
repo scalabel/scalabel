@@ -1697,6 +1697,25 @@ export function changeRadarStatus(
   })
 }
 
+/**
+ * change overlay transparency
+ * @param state
+ * @param action
+ */
+export function changeOverlayTransparency(
+  state: State,
+  action: actionTypes.ChangeOverlayTransparencyAction
+): State {
+  const newOverlayTransparency = action.newOverlayTransparency
+  const oldSession = state.session
+  const newSession = updateObject(oldSession, {
+    overlayTransparency: newOverlayTransparency
+  })
+  return updateObject(state, {
+    session: newSession
+  })
+}
+
 
 
 /**

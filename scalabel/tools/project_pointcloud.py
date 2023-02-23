@@ -48,7 +48,7 @@ def projectPoints(paths_points, path_projection):
         """Scatter plot the points onto the raw Image"""
         plt.clf()
         plt.scatter(uv_img_cords_filterd[0,:], uv_img_cords_filterd[1,:], s = 1, marker = '.' \
-                    ,edgecolors = 'none', c = colors_filterd, cmap = 'jet')
+                    ,edgecolors = 'none', c = np.tanh(3*colors_filterd), cmap = 'jet')
         plt.ylim(1200,0)
         plt.xlim(0,1920)
         plt.axis('off')

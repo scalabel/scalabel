@@ -67,4 +67,4 @@ class EventPreparer:
             im = Image.fromarray(img_alpha)
             
             im.save(str(path/("event_rep_" + str(i).zfill(6)+ ".png")))
-            print("Event Representation generated: " + str(i)+ " out off "+ str(len(timestamps)))
+            print("Event Representation generated: " + str(i)+ " out of "+ str(len(timestamps)))

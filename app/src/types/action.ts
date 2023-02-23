@@ -81,6 +81,11 @@ export interface ChangeOverlaysAction extends BaseAction {
   newOverlayStatus: number[] 
 }
 
+export interface ChangeOverlayTransparencyAction extends BaseAction {
+  /** New transparency of the overlays */
+  newOverlayTransparency: number
+}
+
 export interface ChangeRadarStatusAction extends BaseAction {
   /** New radarstatus  */
   newRadarStatus: number[]

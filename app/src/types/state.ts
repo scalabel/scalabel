@@ -606,6 +606,8 @@ export interface SessionType {
   info3D: Info3DType
   /** Active Overlays */
   overlayStatus: number[] 
+  /** Overlay Transperancy */
+  overlayTransparency: number
   /** Radar Status, [x,y,value] */
   radarStatus: number[]
 }

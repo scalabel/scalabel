@@ -86,11 +86,13 @@ export function drawImageOnCanvas(
   canvas: HTMLCanvasElement,
   context: CanvasRenderingContext2D,
   image: HTMLImageElement,
-  skipClear: boolean = false
+  skipClear: boolean = false,
+  transparency: number = 1, // default to 50% transparency
 ): void {
   if (!skipClear){
     clearCanvas(canvas, context)
   }
+  context.globalAlpha = transparency; // set the global alpha value
   context.drawImage(
     image,
     0,
@@ -102,8 +104,8 @@ export function drawImageOnCanvas(
     canvas.width,
     canvas.height
   )
+  context.globalAlpha = 1; // reset the global alpha value to its default
 }
-
 
 
 

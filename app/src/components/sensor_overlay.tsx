@@ -153,6 +153,7 @@ export class SensorOverlay extends DrawableCanvas<Props> {
       ) {
         
         let first = true
+        let transparancy = this.state.session.overlayTransparency
         for (const sensor of this.state.session.overlayStatus){
           if (isFrameLoaded(this.state, item, sensor) &&
               item < Session.images.length &&
@@ -160,84 +161,61 @@ export class SensorOverlay extends DrawableCanvas<Props> {
               const image = Session.images[item][sensor]
               // Redraw imageCanvas
               if (first){
-                drawImageOnCanvas(this.imageCanvas, this.imageContext, image,false)
+                drawImageOnCanvas(this.imageCanvas, this.imageContext, image,false,transparancy)
                 first = false
               } else {
-                drawImageOnCanvas(this.imageCanvas, this.imageContext, image,true)
+                drawImageOnCanvas(this.imageCanvas, this.imageContext, image,true,transparancy)
               }
           } else if (sensor === 9){
-            // project a bar on the image base on the radarstatus
+            // Project a bar on the image base on the radarstatus
             const image = Session.images[item][0]
             const radarStatus = this.state.session.radarStatus
             if (radarStatus.length > 0){
               const radarWidth = this.imageCanvas.width
               const radarHeight = this.imageCanvas.height
               //convert radastatus to world corrdingates
-              let radarWorldZ = 1
+              let radarWorldY = 1
+            
+              let radar_dot = [-radarStatus[0], radarWorldY, radarStatus[1], 1]
+              let radar_dot_top = [-radarStatus[0], radarWorldY-2, radarStatus[1], 1]
               
-              //let radar_dot = [radarStatus[1]*radar_scale,radarStatus[0]*radar_scale, radarWorldZ, 1]
-              let radar_dot = [radarStatus[0], radarWorldZ, radarStatus[1], 1]
-              let radar_dot_top = [radarStatus[0], radarWorldZ-1.2, radarStatus[1], 1]
-
-
-
-              //calcualte the position of the bar, hardcoded for now
-              //TODO: dont hardcode the conversion matrix
-             
-              
-              // let matrix = [[ 0, -1,  0,  0.106],
-              //               [ 0,  0, -1,  0   ],
-              //               [ 1,  0,  0, -0.05 ],
-              //               [ 0,  0,  0,  1   ]];
-              // let matrix = [[ 0, -1,  0,  0.106],
-              //               [ 0,  0, -1,  0   ],
-              //               [ 1,  0,  0, -1.5 ],
-              //               [ 0,  0,  0,  1   ]];
-              let matrix = [[ 1,  0,  0,  0],
-                            [ 0,  1,  0,  0   ],
-                            [ 0,  0,  1,  0 ],
-                            [ 0,  0,  0,  1   ]];                           
-
-              //let result = matrixMultiplication([radar_dot], matrix)[0];
-              let result = matrixMultiplication(matrix,transpose([radar_dot]));
-              let result_top = matrixMultiplication(matrix,transpose([radar_dot_top]));
+              //Adjust this matrix if radar position is greatly different to camera
+              let transformation_matrix = [[ 1,  0,  0,  0],
+                                            [ 0,  1,  0,  0],
+                                            [ 0,  0,  1,  0],
+                                            [ 0,  0,  0,  1]];   
+                                            
+              //CAMERA INTRINSICS ----------------------------------------------
               let K_rgb = [[1060.7331913771368, 0, 936.1470691648806],
                             [0, 1061.7072593533435, 569.0462088683403],
                             [0, 0, 1]];
-              result.pop()
-              result_top.pop()
-              let result2 = matrixMultiplication( K_rgb,result);
-              let result2_top = matrixMultiplication( K_rgb,result_top);
-        
-              let x = result2[0][0]/result2[2][0]
-              let y = result2[1][0]/result2[2][0]
-              let x_top = result2_top[0][0]/result2_top[2][0]
-              let y_top = result2_top[1][0]/result2_top[2][0]
+              //----------------------------------------------------------------
 
-              console.log(x,y)
-              console.log(x_top,y_top)
+              let transformed_radar_dot = matrixMultiplication(transformation_matrix,transpose([radar_dot]));
+              let transformed_radar_dot_top = matrixMultiplication(transformation_matrix,transpose([radar_dot_top]));
+              
+              transformed_radar_dot.pop()
+              transformed_radar_dot_top.pop()
+
+              let unnormalized_image_cord = matrixMultiplication( K_rgb,transformed_radar_dot);
+              let unnormalized_image_cord_top = matrixMultiplication( K_rgb,transformed_radar_dot_top);
+        
+              let x = unnormalized_image_cord[0][0]/unnormalized_image_cord[2][0]
+              let y = unnormalized_image_cord[1][0]/unnormalized_image_cord[2][0]
+              //let x_top = unnormalized_image_cord_top[0][0]/unnormalized_image_cord_top[2][0]
+              let y_top = unnormalized_image_cord_top[1][0]/unnormalized_image_cord_top[2][0]
 
               let bar_height = y_top - y
+              
               //draw the bar
               this.imageContext.fillStyle =  `hsl(
                 ${radarStatus[2]},
                 50%,
                 50%)`;
               this.imageContext.fillRect((x/image.height)*radarHeight, (y/image.width)*radarWidth, bar_height/10, bar_height)
-               
-              // const radarBarWidth = radarWidth / radarStatus.length
-              // const radarBarHeight = radarHeight / 10
-              // for (let i = 0; i < radarStatus.length; i++){
-              //   const radarBar = radarStatus[i]
-              //   const radarBarX = i * radarBarWidth
-              //   const radarBarY = radarHeight - radarBarHeight
-              //   this.imageContext.fillStyle = radarBar.color
-              //   this.imageContext.fillRect(radarBarX, radarBarY, radarBarWidth, radarBarHeight)
-              // } 
+              
             }
-          }
-          //TODO: perhaps clear canvas necessary here 
-          
+          }    
         }
         
       } else {

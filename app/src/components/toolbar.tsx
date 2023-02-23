@@ -9,6 +9,7 @@ import {
   changeModeToAnnotating,
   changeModeToSelecting,
   changeOverlays,
+  changeOverlayTransparency,
   changeSelect,
   changeViewerConfig,
   mergeTracks,
@@ -145,6 +146,42 @@ export class ToolBar extends Component<Props> {
         }
         break
       }
+      case Key.THREE:{
+        if (this.state.session.overlayStatus.includes(3)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(3),1)
+          Session.dispatch(changeOverlays(cur_state))
+        } else {
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(3)
+          Session.dispatch(changeOverlays(cur_state))
+        }
+        break
+      }
+      case Key.FOUR:{
+        if (this.state.session.overlayStatus.includes(4)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(4),1)
+          Session.dispatch(changeOverlays(cur_state))
+        } else {
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(4)
+          Session.dispatch(changeOverlays(cur_state))
+        }
+        break
+      }
+      case Key.FIVE:{
+        if (this.state.session.overlayStatus.includes(5)){
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.splice(cur_state.indexOf(5),1)
+          Session.dispatch(changeOverlays(cur_state))
+        } else {
+          let cur_state = [...this.state.session.overlayStatus]
+          cur_state.push(5)
+          Session.dispatch(changeOverlays(cur_state))
+        }
+        break
+      }
       case Key.NINE: {
         if (this.state.session.overlayStatus.includes(9)){
           let cur_state = [...this.state.session.overlayStatus]
@@ -157,6 +194,25 @@ export class ToolBar extends Component<Props> {
         } 
         break
       }
+      // Transperancy of the overlay up
+      case Key.Y_LOW: {
+        if (this.state.session.overlayTransparency < 1){
+          Session.dispatch(changeOverlayTransparency(this.state.session.overlayTransparency + 0.1))
+        } else {
+          Session.dispatch(changeOverlayTransparency(1)) //this should never happen
+        }
+        break
+      }
+      // Transperancy of the overlay down
+      case Key.M_LOW: {
+        if (this.state.session.overlayTransparency > 0){
+          Session.dispatch(changeOverlayTransparency(this.state.session.overlayTransparency - 0.1))
+        } else {
+          Session.dispatch(changeOverlayTransparency(0)) //this should never happen
+        }
+        break
+      }
+
       // Currently the first switch attribute gets toggled on key press
       case Key.V_LOW: {
         if (this.props.attributes.length > 0) {

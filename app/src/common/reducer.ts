@@ -103,6 +103,11 @@ function reduceOne(state: State, action: actionTypes.BaseAction): State {
         state,
         action as actionTypes.ChangeOverlaysAction
       )
+    case actionConsts.CHANGE_OVERLAY_TRANSPARENCY:
+      return common.changeOverlayTransparency(
+        state,
+        action as actionTypes.ChangeOverlayTransparencyAction
+      )
     case actionConsts.CHANGE_RADAR_STATUS:
       return common.changeRadarStatus(
         state,
