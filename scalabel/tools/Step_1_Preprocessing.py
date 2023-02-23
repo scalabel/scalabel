@@ -7,6 +7,10 @@ import os
 from project_pointcloud import projectPoints
 from event_preparer import EventPreparer
 
+EVENT_TIME_DELTA_US = 15000
+EVENT_HEIGHT = 720
+EVENT_WIDTH = 1280
+
 """
 Process Step 1: Preprocessing the data
 
@@ -48,7 +52,7 @@ def pre_process_events(h5_file_path, rgb_timestamps, event_time_delta_us):
     if not os.path.isdir(event_representations_path):
         os.makedirs(event_representations_path)
     
-    event_prep = EventPreparer(h5_file_path, event_time_delta_us, 720, 1280)
+    event_prep = EventPreparer(h5_file_path, event_time_delta_us, EVENT_HEIGHT, EVENT_WIDTH)
     first_event = event_prep.get_start_time_us()
     last_event = event_prep.get_final_time_us()
     if (sum(rgb_timestamps[:,0]>=first_event)>0):
@@ -79,7 +83,7 @@ if __name__ == '__main__':
     data_folder = Path(args.data_folder)
     assert data_folder.is_dir(), "Directory {} does not exist".format(str(data_folder)) 
 
-    event_time_delta_us = 15000 #TODO: make parser arg
+    event_time_delta_us = EVENT_TIME_DELTA_US #TODO: make parser arg
 
     # Check which sensors are present -----------------------------------------
     sensor_dict = {
@@ -175,7 +179,6 @@ if __name__ == '__main__':
 
         
         # make json
-        # TODO: make it not dependent on first event
         frames = []
         frameGroups = []
         if not sensor_dict["events"]:

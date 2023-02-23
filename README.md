@@ -29,6 +29,8 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 
 ### Main features
 
+- [Main features](#main-features)
+- [Quick Start](#quick-start)
 - [Creating a new annotation project](#creating-a-new-annotation-project)
 - [Image tagging](#image-tagging)
 - [2D bounding box detection and tracking annotation](#2d-bounding-box-detection-and-tracking-annotation)
@@ -37,6 +39,7 @@ Python](https://img.shields.io/lgtm/grade/python/g/scalabel/scalabel.svg?logo=lg
 - [Real-time session synchronization for seamless collaboration](#real-time-session-synchronization-for-seamless-collaboration)
 - [Semi-automatic annotation with label pre-loading](#semi-automatic-annotation-with-label-pre-loading)
 - [Python API for label handling and visualization](#python-api-for-label-handling-and-visualization)
+- [Contributors](#contributors)
 
 <br>
 
@@ -57,29 +60,12 @@ npm run serve
 
 Open your browser and go to [http://localhost:8686](http://localhost:8686) to use Scalabel. You can check our project [configuration examples](./examples/) to create some sample projects.
 
-We also provide docker image to avoid installing the libraries. To pull the image:
-
-```bash
-docker pull scalabel/www
-```
-
-Launch the server through docker
-
-```bash
-docker run -it -v "`pwd`/local-data:/opt/scalabel/local-data" -p \
-    8686:8686 -p 6379:6379 scalabel/www \
-    node app/dist/main.js \
-    --config /opt/scalabel/local-data/scalabel/config.yml \
-    --max-old-space-size=8192
-```
-
 The Python API can be installed through `pip`:
 
 ```bash
 python3 -m pip install -U scalabel
 ```
 
-For other operating systems or if you wish to use the Docker image, please refer to the [installation guide](https://doc.scalabel.ai/setup.html).
 
 <br>
 
@@ -189,6 +175,79 @@ Deep learning models can be used to assist annotation for large batches of data.
 Python backend provides a convenient API for label handling and visualization. For compatibility with Scalabel's interface, datasets can be converted to the appropriate formats via scripts. Algorithms can be evaluated for each task by uploading the predictions and corresponding ground truth annotations in the Scalabel format. The labels can be easily visualised using the Python interface.
 
 <br>
+
+## Multi-Sensor Annotation
+
+This modified version of Scalable provides a 4-Step process to Annotated selected images
+with the help of alternative sensor input.
+In order to label RGB images with support from various different sensors, that all output different types of data and formats, a 4-step process was developed. First, the raw sensor data gets pre-processed into overlays that a labeler can use for additional context. Then candidate frames can be selected and tagged with attributes followed by one more intermediary processing script  before the images can be finally labeled.
+
+## Step 1: Pre-Processing
+To pre process the data the provided preprocessing script expects the data to be in the following format:
+- data_folder
+  - rgb
+    - img_000000.png
+    - img_000001.png
+    - ...
+  - radar
+    - bev
+      - bev_000000.png
+      - bev_000001.png
+      - ...
+  - lidar
+    - pointcloud_000000.ply
+    - pointcloud_000001.ply
+    - ....
+  - events.h5
+  - rgb_timestamps.txt
+  - radar_timestamps.txt
+  - lidar_timestamps.txt
+
+To execute it simply call the script 
+```bash
+python scalabel/tools/Step_1_Preprocessing.py {path to the data_folder}
+```
+It will create overlays (this may take some time) for the sensors present and also generate a `Main_config.json` and a `Sensors_config.json` file which can be used for the next step. 
+
+The radar BEV's are expected to be centered, meaning the center pixel is where the sensor is expected to be. Further each pixel is expected to be equal to 0.0432m/pixel to change this value or where the the sensor is located in the BEV, adjust the code in file `app/src/components/radar_canvas.tsx:312`
+
+#### Possible Changes to consider:
+
+- In the script you can change the value for the event time delta. Meaning, the amount of events aggregated for each overlay. Change the value `event_time_delta_us` at the top of the file to do so.
+
+- Also at the top of this script you can set the size of the event frame. Default 1280x720
+
+- Adjust the `project_pointcloud.py` file for the calibration between Camera and Lidar, the resolution of the output overlay and to adjust the color mapping if desired. The choice of how to color the projected LiDAR points
+can have a profound effect on the usefulness and readability
+of the LiDAR overlays at different distances in the image.
+The one implemented in the script linearly maps the distances to values between 0 and 1 and then passes it through
+the ”activation” function tanh(3 ∗ x) to map it logarithmically to the color map ”jet” 
+
+## Step 2: Tagging
+
+Open a new scalabel project, choose "Images" and "Tagging" and use the config files provided by the previous step.
+The attribute options available to the labeler can be defined in a separate attribute configuration file. The modification to Scalabel expects the first attribute in this file to be the "Candidate" toggle switch, to allow it to interact with it with the keyboard shortcut [`V`] key. Once the candidates are selected, the labeler can export the data in the dashboard and move to the next step of the process. 
+
+## Step 3: Intermediary Processing
+
+The data needs some intermediary processing for which a script is provided. `scalabel/tools/Step_3_Intermediary_Processing.py`. Call it like this:
+
+```bash
+python scalabel/tools/Step_3_Intermediary_Processing.py {data_folder path} {config_file generated by scalabel path} {Main_config.json file path from Step 1} {watermark png file path}
+```
+
+ In this step the images that are not candidates are water marked as such to ensure that (potentially) third party labelers do not accidentally waste time labeling the wrong images. Further it generates a new configuration file to be used to open the next project in Scalabel in the next step
+
+## Step 4: Labeling
+### Overlays
+The overlays generated in the pre-processing can be overlayed over the RGB image. Using the number keys ([`1`] key, [`2`] key, [`3`] key,...) various overlays can be turned on and off. The default pre-processing script puts the LiDAR overlay on the [`1`] key and the event camera overlay on the [`2`] key. 
+
+ Using the [`Y`] key and [`M`] key the transparency of the overlay can be modified up and down respectively. This can be especially handy if an additional overlay was added in pre-processing displaying the same scene in better weather conditions.
+
+### Radar BEV
+When BEV radar data is available Scalabel will display it to the right of the main labeling window displaying the RGB image. The labeler can click anywhere on the radar BEV and  a projected corresponding pillar will appear on the RGB image as an overlay. This overlay can be toggled using the [`9`] key once a pixel was selected for the first time in the bev. This can be useful to find the location of street borders or walls or the dimensions of a car. 
+
+To adjust the Intrinsics and extrinsics used for this projection. Navigate to the file: `app/src/components/sensor_overlay.tsx:170`
 
 ### Contributors
 

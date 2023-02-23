@@ -70,6 +70,7 @@ if __name__ == "__main__":
     
     # Add watermarks
     print("Adding watermarks")
+    
     for frame in config["frames"]:
         if frame["sensor"] == 0:
             assert "attributes" in frame, f'Frame {frame["name"]} does not have attributes, are you sure you are using the scalabel config file?'
@@ -81,10 +82,10 @@ if __name__ == "__main__":
             image_path = rgb_folder / frame["url"].split("/")[-1]
             assert image_path.exists(), f'Image {image_path} does not exist'
             assert image_path.is_file(), f'Image {image_path} is not a file'
-            image = Image.open(image_path)
-            watermark = Image.open(watermark_file)
-            image.paste(watermark, (0, 0), watermark)
-            image.save(image_path)
+            with Image.open(image_path) as image:
+                watermark = Image.open(watermark_file)
+                image.paste(watermark, (0, 0), watermark)
+                image.save(image_path)
             print("Watermark added to image: ", image_path)
 
     # Save config file
