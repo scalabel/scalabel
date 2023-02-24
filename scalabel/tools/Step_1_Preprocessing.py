@@ -4,6 +4,7 @@ import csv
 import numpy as np
 import json
 import os
+import hdf5plugin
 from project_pointcloud import projectPoints
 from event_preparer import EventPreparer
 
