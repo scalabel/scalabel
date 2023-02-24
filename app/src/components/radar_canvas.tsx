@@ -4,21 +4,15 @@ import { connect } from "react-redux"
 
 import Session from "../common/session"
 import { Key } from "../const/common"
-import { Label2DHandler } from "../drawable/2d/label2d_handler"
-import { Label2DList } from "../drawable/2d/label2d_list"
 import { getCurrentViewerConfig, isFrameLoaded } from "../functional/state_util"
 import { Vector2D } from "../math/vector2d"
 import { label2dViewStyle } from "../styles/label"
-import { ImageViewerConfigType, State } from "../types/state"
+import { ImageViewerConfigType } from "../types/state"
 import {
   clearCanvas,
-  getCurrentImageSize,
-  imageDataToHandleId,
   MAX_SCALE,
   MIN_SCALE,
   normalizeMouseCoordinates,
-  toCanvasCoords,
-  UP_RES_RATIO,
   updateCanvasScale
 } from "../view_config/image"
 import { Crosshair, Crosshair2D } from "./crosshair"
@@ -84,8 +78,6 @@ export class RadarCanvas extends DrawableCanvas<Props> {
   // Keyboard and mouse status
   /** The hashed list of keys currently down */
   private _keyDownMap: { [key: string]: boolean }
-  /** drawable callback */
-  private readonly _drawableUpdateCallback: () => void
 
   /**
    * Constructor, handles subscription to store
@@ -119,7 +111,6 @@ export class RadarCanvas extends DrawableCanvas<Props> {
     this._keyDownListener = (e) => {
       this.onKeyDown(e)
     }
-    this._drawableUpdateCallback = this.redraw.bind(this)
   }
 
   /**
@@ -391,7 +382,7 @@ export class RadarCanvas extends DrawableCanvas<Props> {
    *
    * @param state
    */
-  public updateState(state: State): void {
+  public updateState(): void {
     if (this.display !== this.props.display) {
       this.display = this.props.display
       this.forceUpdate()
@@ -419,23 +410,6 @@ export class RadarCanvas extends DrawableCanvas<Props> {
       )
     }
     return new Vector2D(0, 0)
-  }
-
-  /**
-   * Get the label under the mouse.
-   *
-   * @param {Vector2D} mousePos: position of the mouse
-   * @param mousePos
-   * @return {number[]}
-   */
-  private fetchHandleId(mousePos: Vector2D): number[] {
-    if (this.controlContext !== null) {
-      const [x, y] = toCanvasCoords(mousePos, true, this.displayToImageRatio)
-      const data = this.controlContext.getImageData(x, y, 4, 4).data
-      return imageDataToHandleId(data)
-    } else {
-      return [-1, 0]
-    }
   }
 
   /**
