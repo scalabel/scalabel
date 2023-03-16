@@ -41,6 +41,7 @@ class TETAResult(Result):
     mTETA: float
     mLocA: float
     mAssocA: float
+    mClsA: float
     TETA: List[Dict[str, float]]
     LocA: List[Dict[str, float]]
     AssocA: List[Dict[str, float]]

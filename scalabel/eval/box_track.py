@@ -44,6 +44,9 @@ class BoxTrackResult(Result):
     mHOTA: float
     mMOTA: float
     mIDF1: float
+    mLocA: float
+    mAssocA: float
+    mClsA: float
     mDetA: float
     mAssA: float
     mMOTP: float
