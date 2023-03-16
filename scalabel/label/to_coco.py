@@ -324,8 +324,8 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 width=img_shape.width,
                 id=image_id,
             )
-            if image_anns.url is not None:
-                image["file_name"] = image_anns.url
+            # if image_anns.url is not None:
+            #     image["file_name"] = image_anns.url
             images.append(image)
 
             if image_anns.labels is None:
@@ -512,7 +512,7 @@ def run(args: argparse.Namespace) -> None:
     if config is None:
         raise ValueError(
             "Dataset config is not specified. Please use --config"
-            " to specify a config for this dataset."
+            " to specify a `config` for this dataset."
         )
 
     logger.info("Start format converting...")

@@ -55,7 +55,7 @@ class Result(BaseModel):
         for scores_list in data_check.values():
             assert len(scores_list) == len(ref_scores_list)
             for scores, ref_scores in zip(scores_list, ref_scores_list):
-                assert scores.keys() == ref_scores.keys()
+                assert scores.keys() == ref_scores.keys(),print('score.keys',scores.keys(),'ref_scores', ref_scores.keys())
         super().__init__(**data)
         cur_index = 1
         self._row_breaks = [1]

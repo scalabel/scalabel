@@ -13,7 +13,7 @@ from scalabel.label.typing import Config, Frame
 from .box_track import bdd100k_to_scalabel, BoxTrackResult
 from .hotas import evaluate_seg_track_hota
 from .mots import acc_single_video_mots, evaluate_seg_track
-
+from .tetas import evaluate_seg_track_teta
 
 def evaluate_seg_track_all(
     gts: List[List[Frame]],
@@ -54,7 +54,8 @@ def evaluate_seg_track_all(
         nproc,
     )
     hota_result = evaluate_seg_track_hota(gts, results, config, nproc)
-    result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict()})
+    teta_result = evaluate_seg_track_teta(gts, results, config, nproc)
+    result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict(), **teta_result.dict()})
     logger.info("evaluation finishes with %.1f s.", t)
     return result
 

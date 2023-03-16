@@ -11,9 +11,9 @@ from typing import Dict, List, Union
 
 import numpy as np
 
-import trackeval
-from trackeval.datasets import BDD100K as TrackEvalBDD100K
-from trackeval.eval import eval_sequence
+import teta
+from teta.datasets import BDD as TrackEvalBDD100K
+from teta.eval import eval_sequence
 from trackeval.utils import TrackEvalException
 
 from ..common.io import open_write_text
@@ -26,34 +26,35 @@ from ..label.utils import get_leaf_categories, get_parent_categories
 from .result import AVERAGE, OVERALL, Result, ScoresList
 from .utils import label_ids_to_int
 
-HOTAScore = Dict[str, Dict[str, Dict[str, NDArrayF64]]]
+TETAScore = Dict[str, Dict[str, Dict[str, NDArrayF64]]]
 
-METRICS = [trackeval.metrics.HOTA(), trackeval.metrics.Count()]
+METRICS = [teta.metrics.TETA(exhaustive=True)]
 METRIC_NAMES = [metric.get_name() for metric in METRICS]
-SCORES = ["HOTA", "DetA", "AssA", "DetRe", "DetPr", "AssRe", "AssPr", "LocA"]
-SCORE_TO_AVERAGE = set(["HOTA", "DetA", "AssA"])
+SCORES = ["TETA", "LocA", "AssocA", "ClsA", "LocRe", "LocPr",
+          "AssocRe", "AssocPr", "ClsRe", "ClsPr"]
+SCORE_TO_AVERAGE = set(["TETA", "LocA", "AssocA", "ClsA"])
 
 
-class HOTAResult(Result):
-    """The class for HOTA tracking evaluation results."""
+class TETAResult(Result):
+    """The class for TETA tracking evaluation results."""
 
-    mHOTA: float
-    mDetA: float
-    mAssA: float
-    HOTA: List[Dict[str, float]]
-    DetA: List[Dict[str, float]]
-    AssA: List[Dict[str, float]]
-    DetRe: List[Dict[str, float]]
-    DetPr: List[Dict[str, float]]
-    AssRe: List[Dict[str, float]]
-    AssPr: List[Dict[str, float]]
+    mTETA: float
+    mLocA: float
+    mAssocA: float
+    TETA: List[Dict[str, float]]
     LocA: List[Dict[str, float]]
-    Dets: List[Dict[str, int]]
-    IDs: List[Dict[str, int]]
+    AssocA: List[Dict[str, float]]
+    ClsA: List[Dict[str, float]]
+    LocRe: List[Dict[str, float]]
+    LocPr: List[Dict[str, float]]
+    AssocRe: List[Dict[str, float]]
+    AssocPr: List[Dict[str, float]]
+    ClsRe: List[Dict[str, float]]
+    ClsPr: List[Dict[str, float]]
 
 
 class BDD100K(TrackEvalBDD100K):  # type: ignore
-    """HOTA dataset class for BDD100K."""
+    """TETA dataset class for BDD100K."""
 
     def __init__(  # pylint: disable=super-init-not-called
         self, gts: List[Frame], results: List[Frame]
@@ -74,11 +75,32 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
             "motorcycle",
             "bicycle",
         ]
+        self.class_name_to_class_id = {
+            "pedestrian": 1,
+            "rider": 2,
+            "other person": 3,
+            "car": 4,
+            "bus": 5,
+            "truck": 6,
+            "train": 7,
+            "trailer": 8,
+            "other vehicle": 9,
+            "motorcycle": 10,
+            "bicycle": 11,
+        }
+
         self.classes_to_eval = valid_classes
         self.class_list = [
             cls.lower() if cls.lower() in valid_classes else None
             for cls in self.classes_to_eval
         ]
+
+        self.cls_name2clsid = {
+            k: v for k, v in self.class_name_to_class_id.items() if k in self.class_list
+        }
+        self.clsid2cls_name = {
+            v: k for k, v in self.class_name_to_class_id.items() if k in self.class_list
+        }
         if not all(self.class_list):
             raise TrackEvalException(
                 "Attempted to evaluate an invalid class. Only classes "
@@ -103,19 +125,7 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
             ],
         }
         self.distractor_classes = ["other person", "trailer", "other vehicle"]
-        self.class_name_to_class_id = {
-            "pedestrian": 1,
-            "rider": 2,
-            "other person": 3,
-            "car": 4,
-            "bus": 5,
-            "truck": 6,
-            "train": 7,
-            "trailer": 8,
-            "other vehicle": 9,
-            "motorcycle": 10,
-            "bicycle": 11,
-        }
+
 
     def get_display_name(self, tracker: str) -> str:
         """Get display name of tracker."""
@@ -124,6 +134,35 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
     def get_output_fol(self, tracker: str) -> str:
         """Get output folder (useless)."""
         return ""
+
+    def _compute_valid_imgs_mappings(self, gts: List[Frame]):
+        """Computes mappings from videos to corresponding tracks and images."""
+
+        valid_img_ids = []
+
+        for frame in gts:
+            if frame.labels is None or frame.labels == []:
+                continue
+            else:
+                valid_img_ids.append(frame.videoName + str(frame.frameIndex))
+
+        return  valid_img_ids
+
+    def _compute_image_to_timestep_mappings(self):
+        """Computes a mapping from images to timestep in sequence."""
+        images = {}
+        for image in self.gts:
+            images[image.videoName + str(image.frameIndex)] = image
+
+        curr_imgs = [img_id for img_id in self.valid_img_ids]
+        curr_imgs = sorted(curr_imgs, key=lambda x: images[x].frameIndex)
+        imgs_to_timestep = {
+            curr_imgs[i]: i for i in range(len(curr_imgs))
+        }
+
+        return imgs_to_timestep
+
+
 
     def _load_raw_file(self, tracker, seq, is_gt):
         """Setup HOTA raw data."""
@@ -160,8 +199,8 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
                         [
                             labels[i].box2d.x1,
                             labels[i].box2d.y1,
-                            labels[i].box2d.x2,
-                            labels[i].box2d.y2,
+                            labels[i].box2d.x2 - labels[i].box2d.x1 + 1,
+                            labels[i].box2d.y2 - labels[i].box2d.y1 + 1,
                         ]
                         for i in keep_ids
                     ]
@@ -187,8 +226,8 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
                             [
                                 labels[i].box2d.x1,
                                 labels[i].box2d.y1,
-                                labels[i].box2d.x2,
-                                labels[i].box2d.y2,
+                                labels[i].box2d.x2 - labels[i].box2d.x1 + 1,
+                                labels[i].box2d.y2 - labels[i].box2d.y1 + 1,
                             ]
                             for i in ig_ids
                         ]
@@ -206,9 +245,9 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
             }
         else:
             key_map = {
-                "ids": "tracker_ids",
-                "classes": "tracker_classes",
-                "dets": "tracker_dets",
+                "ids": "tk_ids",
+                "classes": "tk_classes",
+                "dets": "tk_dets",
             }
         for k, v in key_map.items():
             raw_data[v] = raw_data.pop(k)
@@ -219,7 +258,7 @@ class BDD100K(TrackEvalBDD100K):  # type: ignore
 
 def evaluate_videos(
     gts: List[Frame], results: List[Frame]
-) -> Dict[str, HOTAScore]:
+) -> Dict[str, TETAScore]:
     """Evaluate videos."""
     dset, seq = BDD100K(gts, results), gts[0].videoName
     assert seq is not None
@@ -232,64 +271,80 @@ def evaluate_videos(
 
 
 def combine_results(
-    res: Dict[str, HOTAScore],
+    res: Dict[str, TETAScore],
     class_list: List[str],
     super_classes: Dict[str, List[Category]],
-) -> HOTAScore:
+) -> TETAResult:
     """Combine evaluation results."""
-    combined_cls_keys = []
+    # collecting combined cls keys (cls averaged, det averaged, super classes)
+    cls_keys = []
     res["COMBINED_SEQ"] = {}
     # combine sequences for each class
     for c_cls in class_list:
         res["COMBINED_SEQ"][c_cls] = {}
-        for metric, metric_name in zip(METRICS, METRIC_NAMES):
+        for metric, mname in zip(METRICS, METRIC_NAMES):
             curr_res = {
-                seq_key: seq_value[c_cls][metric_name]
+                seq_key: seq_value[c_cls][mname]
                 for seq_key, seq_value in res.items()
                 if seq_key != "COMBINED_SEQ"
             }
-            res["COMBINED_SEQ"][c_cls][metric_name] = metric.combine_sequences(
-                curr_res
-            )
+            # combine results over all sequences and then over all classes
+            res["COMBINED_SEQ"][c_cls][mname] = metric.combine_sequences(curr_res)
+
     # combine classes
-    combined_cls_keys += [AVERAGE, OVERALL, "all"]
-    res["COMBINED_SEQ"][AVERAGE] = {}
-    res["COMBINED_SEQ"][OVERALL] = {}
-    for metric, metric_name in zip(METRICS, METRIC_NAMES):
-        cls_res = {
-            cls_key: cls_value[metric_name]
-            for cls_key, cls_value in res["COMBINED_SEQ"].items()
-            if cls_key not in combined_cls_keys
-        }
-        res["COMBINED_SEQ"][AVERAGE][
-            metric_name
-        ] = metric.combine_classes_class_averaged(cls_res)
-        res["COMBINED_SEQ"][OVERALL][
-            metric_name
-        ] = metric.combine_classes_det_averaged(cls_res)
+
+    video_keys = ["COMBINED_SEQ"]
+    for v_key in video_keys:
+        cls_keys += [AVERAGE,OVERALL]
+        res[v_key][AVERAGE] = {}
+        for metric, mname in zip(METRICS, METRIC_NAMES):
+            cls_res = {
+                cls_key: cls_value[mname]
+                for cls_key, cls_value in res[v_key].items()
+                if cls_key not in cls_keys
+            }
+            res[v_key]["AVERAGE"][
+                mname
+            ] = metric.combine_classes_class_averaged(
+                cls_res, ignore_empty=True
+            )
+        res[v_key][OVERALL] = {}
+        for metric, mname in zip(METRICS, METRIC_NAMES):
+            cls_res = {
+                cls_key: cls_value[mname]
+                for cls_key, cls_value in res[v_key].items()
+                if cls_key not in cls_keys
+            }
+            res[v_key]["OVERALL"][
+                mname
+            ] = metric.combine_classes_det_averaged(
+                cls_res
+            )
+
     # combine classes to super classes
     if super_classes:
         for cat, sub_cats in super_classes.items():
             sub_cats_names = [c.name for c in sub_cats]
-            combined_cls_keys.append(cat)
+            cls_keys.append(cat)
             res["COMBINED_SEQ"][cat] = {}
-            for metric, metric_name in zip(METRICS, METRIC_NAMES):
+            for metric, mname in zip(METRICS, METRIC_NAMES):
                 cat_res = {
-                    cls_key: cls_value[metric_name]
+                    cls_key: cls_value[mname]
                     for cls_key, cls_value in res["COMBINED_SEQ"].items()
                     if cls_key in sub_cats_names
                 }
                 res["COMBINED_SEQ"][cat][
-                    metric_name
+                    mname
                 ] = metric.combine_classes_det_averaged(cat_res)
+
     return res["COMBINED_SEQ"]
 
 
 def generate_results(
-    scores: HOTAScore,
+    scores: TETAScore,
     classes: List[Category],
     super_classes: Dict[str, List[Category]],
-) -> HOTAResult:
+) -> TETAResult:
     """Compute summary metrics for evaluation results."""
     basic_set = [c.name for c in classes]
     super_set = list(super_classes.keys())
@@ -301,7 +356,10 @@ def generate_results(
     res_dict: Dict[str, Union[int, float, ScoresList]] = {
         metric: [
             {
-                class_name: score["HOTA"][metric].mean() * 100.0
+                class_name: score["TETA"][50][metric].mean() * 100.0
+                # class_name: METRICS[0]._summary_row(
+                #             score['TETA'][50]
+                #         )
                 for class_name, score in scores.items()
                 if class_name in class_name_set
             }
@@ -309,34 +367,22 @@ def generate_results(
         ]
         for metric in SCORES
     }
+
     res_dict.update(
         {
-            metric: [
-                {
-                    class_name: score["Count"][metric]  # type: ignore
-                    for class_name, score in scores.items()
-                    if class_name in class_name_set
-                }
-                for class_name_set in class_name_sets
-            ]
-            for metric in ["Dets", "IDs"]
-        }
-    )
-    res_dict.update(
-        {
-            "m" + metric: scores[AVERAGE]["HOTA"][metric].mean() * 100.0
+            "m" + metric: scores['AVERAGE']["TETA"][50][metric].mean() * 100.0
             for metric in SCORE_TO_AVERAGE
         }
     )
-    return HOTAResult(**res_dict)
+    return TETAResult(**res_dict)
 
 
-def evaluate_track_hota(
+def evaluate_track_teta(
     gts: List[List[Frame]],
     results: List[List[Frame]],
     config: Config,
     nproc: int = NPROC,
-) -> HOTAResult:
+) -> TETAResult:
     """Evaluate HOTA metrics for a Scalabel format dataset.
 
     Args:
@@ -348,7 +394,7 @@ def evaluate_track_hota(
     Returns:
         TrackResult: evaluation results.
     """
-    logger.info("Tracking evaluation with HOTA metrics.")
+    logger.info("Tracking evaluation with TETA metrics.")
     t = time.time()
     assert len(gts) == len(results)
 
@@ -419,7 +465,7 @@ if __name__ == "__main__":
             "Dataset config is not specified. Please use --config"
             " to specify a config for this dataset."
         )
-    eval_result = evaluate_track_hota(
+    eval_result = evaluate_track_teta(
         group_and_sort(gt_frames),
         group_and_sort(load(args.result, args.nproc).frames),
         cfg,
@@ -430,9 +476,3 @@ if __name__ == "__main__":
     if args.out_file:
         with open_write_text(args.out_file) as fp:
             json.dump(eval_result.dict(), fp, indent=2)
-
-
-
-
-
-

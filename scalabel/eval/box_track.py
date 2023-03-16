@@ -2,7 +2,10 @@
 import argparse
 import json
 import time
-from typing import Dict, List, Optional
+import math
+from typing import Dict, List, Optional,  AbstractSet, Union
+
+import numpy as np
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -12,6 +15,7 @@ from ..label.transforms import box2d_to_bbox
 from ..label.typing import Config, Frame, Label
 from ..label.utils import get_leaf_categories
 from .hota import evaluate_track_hota
+from .teta import evaluate_track_teta
 from .mot import acc_single_video_mot, evaluate_track
 from .result import Result
 
@@ -29,19 +33,33 @@ NAME_MAPPING = {
     "van": "car",
 }
 
+Scores = Dict[str, Union[int, float]]
+ScoresList = List[Scores]
+AVERAGE = "AVERAGE"
+OVERALL = "OVERALL"
 
 class BoxTrackResult(Result):
     """The class for bounding box tracking evaluation results."""
-
+    mTETA: float
     mHOTA: float
     mMOTA: float
     mIDF1: float
     mDetA: float
     mAssA: float
     mMOTP: float
+    TETA: List[Dict[str, float]]
     HOTA: List[Dict[str, float]]
     MOTA: List[Dict[str, float]]
     IDF1: List[Dict[str, float]]
+    LocA: List[Dict[str, float]]
+    AssocA: List[Dict[str, float]]
+    ClsA: List[Dict[str, float]]
+    LocRe: List[Dict[str, float]]
+    LocPr: List[Dict[str, float]]
+    AssocRe: List[Dict[str, float]]
+    AssocPr: List[Dict[str, float]]
+    ClsRe: List[Dict[str, float]]
+    ClsPr: List[Dict[str, float]]
     DetA: List[Dict[str, float]]
     AssA: List[Dict[str, float]]
     DetRe: List[Dict[str, float]]
@@ -69,6 +87,62 @@ class BoxTrackResult(Result):
         """Convert the data into a printable string."""
         return self.table(exclude=set(EXCLUDE_METRICS))
 
+    def summary(
+        self,
+        include: Optional[AbstractSet[str]] = None,
+        exclude: Optional[AbstractSet[str]] = None,
+    ) -> Scores:
+        """Convert the data into a flattened dict as the summary.
+
+        This function is different to the `.dict()` function.
+        As a comparison, `.dict()` will export all data fields as a nested
+        dict, While `.summary()` only exports most important information,
+        like the overall scores, as a flattened compact dict.
+
+        Args:
+            include (set[str]): Optional, the metrics to convert
+            exclude (set[str]): Optional, the metrics not to convert
+        Returns:
+            dict[str, int | float]: returned summary of the result
+        """
+        summary_dict: Dict[str, Union[int, float]] = {}
+        for metric, scores_list in self.dict(
+            include=include, exclude=exclude  # type: ignore
+        ).items():
+            if not isinstance(scores_list, list):
+                summary_dict[metric] = scores_list
+            elif metric =='TETA':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL)
+                for key in scores_list[0]:
+                    summary_dict[metric +'-'+key] = scores_list[0][key]
+
+            elif metric == 'HOTA':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL)
+                for key in scores_list[0]:
+                    summary_dict[metric +'-'+key] = scores_list[0][key]
+
+            elif metric == 'MOTA':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL)
+                for key in scores_list[0]:
+                    summary_dict[metric + '-' + key] = scores_list[0][key]
+
+            elif metric == 'IDF1':
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL)
+                for key in scores_list[0]:
+                    summary_dict[metric + '-' + key] = scores_list[0][key]
+
+            else:
+                summary_dict[metric] = scores_list[-1].get(
+                    OVERALL, scores_list[-1].get(AVERAGE)
+                )
+        for metric in summary_dict:
+            if math.isnan(summary_dict[metric]):
+                summary_dict[metric] = '-'
+        return summary_dict
 
 def deal_bdd100k_category(
     label: Label, cat_name2id: Dict[str, int]
@@ -136,6 +210,8 @@ def evaluate_box_track(
     t = time.time()
     gts = [bdd100k_to_scalabel(gt, config) for gt in gts]
     results = [bdd100k_to_scalabel(result, config) for result in results]
+    hota_result = evaluate_track_hota(gts, results, config, nproc)
+    teta_result = evaluate_track_teta(gts, results, config, nproc)
     mot_result = evaluate_track(
         acc_single_video_mot,
         gts,
@@ -146,8 +222,7 @@ def evaluate_box_track(
         ignore_unknown_cats,
         nproc,
     )
-    hota_result = evaluate_track_hota(gts, results, config, nproc)
-    result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict()})
+    result = BoxTrackResult(**{**mot_result.dict(), **hota_result.dict(), **teta_result.dict()})
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return result

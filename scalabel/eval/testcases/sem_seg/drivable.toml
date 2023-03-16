@@ -1,0 +1,9 @@
+[imageSize]
+height = 720
+width = 1280
+
+[[categories]]
+name = "direct"
+
+[[categories]]
+name = "alternative"
