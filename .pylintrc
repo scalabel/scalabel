@@ -53,7 +53,8 @@ enable=use-symbolic-message-instead,useless-suppression,fixme
 # --disable=W"
 
 # C0413: ignore wrong import order since we use isort for that
-disable=R0801, C0413
+# R1735: using dict literal dict() is fine
+disable=R0801, C0413, R1735
 
 
 
