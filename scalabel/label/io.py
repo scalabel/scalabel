@@ -102,7 +102,7 @@ def load(
         if ret_cfg is not None:
             cfg = ret_cfg
     elif osp.isdir(inputs):
-        files = glob.glob(osp.join(inputs, "*.json"))
+        files = sorted(glob.glob(osp.join(inputs, "*.json")))
         for file_ in files:
             ret_cfg = process_file(file_)
             if cfg is None and ret_cfg is not None:

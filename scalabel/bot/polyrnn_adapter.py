@@ -30,7 +30,7 @@ class PolyrnnAdapter(SegBase):
         """Convert rectangles to polygons."""
         # marshal into segmentation codebase's format
         inputs = []
-        for (img, bbox) in zip(imgs, bboxes):
+        for img, bbox in zip(imgs, bboxes):
             instance = {"img": img, "bbox": bbox}
             component: Dict[str, NDArrayF64] = {
                 "poly": np.array([[-1.0, -1.0]], dtype=np.float64)

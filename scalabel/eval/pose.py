@@ -12,7 +12,7 @@ from typing import Callable, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval, Params  # type: ignore
+from pycocotools.cocoeval import COCOeval, Params
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -56,7 +56,7 @@ class PoseResult(Result):
             ]
             for metric in metrics
         }
-        return cls(**empty_scores)
+        return cls(**empty_scores)  # type: ignore
 
 
 class ParamsV2(Params):  # type: ignore
@@ -229,7 +229,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             metric: [{OVERALL: get_score_func(None)}]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return PoseResult(**res_dict)
+        return PoseResult(**res_dict)  # type: ignore
 
 
 def evaluate_pose(

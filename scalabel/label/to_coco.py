@@ -8,7 +8,7 @@ from multiprocessing import Pool
 from typing import Callable, Dict, List, Tuple
 
 import numpy as np
-from pycocotools import mask as mask_utils  # type: ignore
+from pycocotools import mask as mask_utils
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -93,9 +93,8 @@ def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
     if not mask.sum():
         return annotation
 
-    rle = mask_utils.encode(
-        np.array(mask[:, :, None], order="F", dtype="uint8")
-    )[0]
+    mask_np = np.array(mask[:, :, None], order="F", dtype="uint8")
+    rle = mask_utils.encode(mask_np)[0]
     rle["counts"] = rle["counts"].decode("utf-8")
     annotation = set_rle_object_geometry(annotation, RLE(**rle))
     return annotation

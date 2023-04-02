@@ -230,7 +230,7 @@ def evaluate_sem_seg(
     num_classes = len(cat_map) + 1
     hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
-    for (hist_, gt_id_set_) in hist_and_gt_id_sets:
+    for hist_, gt_id_set_ in hist_and_gt_id_sets:
         hist += hist_
         gt_id_set.update(gt_id_set_)
 
@@ -252,7 +252,7 @@ def evaluate_sem_seg(
     )
 
     logger.info("GT id set [%s]", ",".join(str(s) for s in gt_id_set))
-    return SegResult(**res_dict)
+    return SegResult(**res_dict)  # type: ignore
 
 
 def parse_arguments() -> argparse.Namespace:

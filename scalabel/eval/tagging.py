@@ -70,10 +70,7 @@ def confusion_matrix(
     true_sum = np.zeros(len(labels))
     pred_sum = tp_sum = true_sum
     if len(tp_bins):
-        tp_sum = np.bincount(
-            tp_bins,
-            minlength=len(labels),
-        )  # type: ignore
+        tp_sum = np.bincount(tp_bins, minlength=len(labels))  # type: ignore
 
     if len(y_pred):
         pred_sum = np.bincount(y_pred, minlength=len(labels))  # type: ignore
@@ -243,8 +240,7 @@ class TaggingResult(Result):
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include,
-            exclude=exclude,
+            include=include, exclude=exclude
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -316,7 +312,7 @@ def evaluate_tagging(
         assert isinstance(m, str)
         outputs[m].append(v)
         outputs[m].append({AVERAGE: np.nanmean(list(v.values()))})
-    return TaggingResult(**outputs)
+    return TaggingResult(**outputs)  # type: ignore
 
 
 def parse_arguments() -> argparse.Namespace:

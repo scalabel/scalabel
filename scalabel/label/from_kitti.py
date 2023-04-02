@@ -449,7 +449,7 @@ def from_kitti(
 
                 cam2global = Extrinsics(
                     location=(position[0] + offset, position[1], position[2]),
-                    rotation=rotation,
+                    rotation=rotation,  # type: ignore
                 )
 
                 if osp.exists(label_dir):

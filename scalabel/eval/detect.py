@@ -13,7 +13,7 @@ from typing import AbstractSet, Callable, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval  # type: ignore
+from pycocotools.cocoeval import COCOeval
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -83,7 +83,7 @@ class DetResult(Result):
             ]
             for metric in metrics
         }
-        return cls(**empty_scores)
+        return cls(**empty_scores)  # type: ignore
 
 
 class COCOV2(COCO):  # type: ignore
@@ -289,7 +289,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             ]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(**res_dict)
+        return DetResult(**res_dict)  # type: ignore
 
 
 def evaluate_det(

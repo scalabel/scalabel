@@ -232,7 +232,7 @@ def generate_results(
     for bound_pixel, f_score in zip(BOUND_PIXELS, task2arr[AVERAGE]):
         res_dict[f"F1_pix{bound_pixel}"][-1][AVERAGE] = f_score
 
-    return BoundaryResult(**res_dict)
+    return BoundaryResult(**res_dict)  # type: ignore
 
 
 def evaluate_boundary(

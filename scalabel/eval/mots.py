@@ -8,7 +8,7 @@ from typing import Callable, List, Optional
 
 import motmetrics as mm
 import numpy as np
-from pycocotools.mask import iou  # type: ignore
+from pycocotools.mask import iou
 
 from scalabel.common.io import open_write_text
 from scalabel.common.logger import logger

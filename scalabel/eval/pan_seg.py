@@ -34,7 +34,7 @@ from functools import partial
 from multiprocessing import Pool
 from typing import AbstractSet, Dict, List, Optional, Union
 
-import pycocotools.mask as coco_mask  # type: ignore
+import pycocotools.mask as coco_mask
 from tqdm import tqdm
 
 from scalabel.common.io import open_write_text
@@ -301,7 +301,7 @@ def evaluate_pan_seg(
     for metric, score in result.items():
         res_dict[metric][2][OVERALL] = score
 
-    return PanSegResult(**res_dict)
+    return PanSegResult(**res_dict)  # type: ignore
 
 
 def parse_arguments() -> argparse.Namespace:

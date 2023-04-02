@@ -60,7 +60,7 @@ def from_crowdhuman(input_path: str, image_path: str = "./Images/") -> Dataset:
                 labels=parse_annotations(frame_json["gtboxes"]),
             )
             frames.append(frame)
-    dataset = Dataset(
+    dataset = Dataset(  # type: ignore
         frames=frames, config=Config(categories=[Category(name="pedestrian")])
     )
     return dataset

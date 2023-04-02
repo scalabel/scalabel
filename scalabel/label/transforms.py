@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.path import Path
 from nanoid import generate  # type: ignore
-from pycocotools import mask as mask_utils  # type: ignore
+from pycocotools import mask as mask_utils
 
 from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType, RLEType
@@ -92,21 +92,26 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
         point_num = len(poly) // 2
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
+        poly2d = Poly2D(
+            vertices=vertices,  # type: ignore
+            types="L" * point_num,
+            closed=True,
+        )
         poly2ds.append(poly2d)
     return poly2ds
 
 
 def coco_rle_to_rle(rle: RLEType) -> RLE:
     """Convert COCO RLE into Scalabel RLE."""
-    size = rle["size"]
     if isinstance(rle["counts"], str):
         counts = rle["counts"]
     elif isinstance(rle["counts"], list):
-        counts = mask_utils.frPyObjects(rle, *size)["counts"].decode("utf-8")
+        counts = mask_utils.frPyObjects(rle, rle["size"][0], rle["size"][1])[
+            "counts"
+        ].decode("utf-8")
     else:
         counts = rle["counts"].decode("utf-8")
-    return RLE(counts=counts, size=size)
+    return RLE(counts=counts, size=rle["size"])
 
 
 def poly_to_patch(
