@@ -21,11 +21,12 @@ try:
         utils,
     )
 
+    # pylint: disable=no-member
     classes_type2name = {
-        label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",  # type: ignore
-        label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",  # type: ignore
-        label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",  # type: ignore
-        label_pb2.Label.Type.TYPE_SIGN: "sign",  # type: ignore
+        label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
+        label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",
+        label_pb2.Label.Type.TYPE_CYCLIST: "cyclist",
+        label_pb2.Label.Type.TYPE_SIGN: "sign",
     }
     # pylint: enable=no-member
 except ImportError:
