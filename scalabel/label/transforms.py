@@ -92,7 +92,11 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
         point_num = len(poly) // 2
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
+        poly2d = Poly2D(
+            vertices=vertices,  # type: ignore
+            types="L" * point_num,
+            closed=True,
+        )
         poly2ds.append(poly2d)
     return poly2ds
 
@@ -103,7 +107,7 @@ def coco_rle_to_rle(rle: RLEType) -> RLE:
         counts = rle["counts"]
     elif isinstance(rle["counts"], list):
         counts = mask_utils.frPyObjects(rle, rle["size"][0], rle["size"][1])[
-            "counts"  # type: ignore
+            "counts"
         ].decode("utf-8")
     else:
         counts = rle["counts"].decode("utf-8")
@@ -216,9 +220,7 @@ def mask_to_rle(mask: NDArrayU8) -> RLE:
     assert 2 <= len(mask.shape) <= 3
     if len(mask.shape) == 2:
         mask = mask[:, :, None]
-    rle = mask_utils.encode(np.array(mask, order="F", dtype="uint8"))[
-        0  # type: ignore
-    ]
+    rle = mask_utils.encode(np.array(mask, order="F", dtype="uint8"))[0]
     return RLE(counts=rle["counts"].decode("utf-8"), size=rle["size"])
 
 
@@ -235,15 +237,15 @@ def frame_to_rles(
 
 def rle_to_mask(rle: RLE) -> NDArrayU8:
     """Converting RLE to mask."""
-    mask: NDArrayU8 = (
-        mask_utils.decode(dict(rle)) > 0  # type: ignore
-    ).astype(np.uint8, copy=False)
+    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(
+        np.uint8, copy=False
+    )
     return mask
 
 
 def rle_to_box2d(rle: RLE) -> Box2D:
     """Converting RLE to Box2D."""
-    bbox = mask_utils.toBbox(rle.dict()).tolist()  # type: ignore
+    bbox = mask_utils.toBbox(rle.dict()).tolist()
     return bbox_to_box2d(bbox)
 
 

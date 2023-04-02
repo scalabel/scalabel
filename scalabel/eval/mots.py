@@ -100,7 +100,7 @@ def acc_single_video_mots(
             elif len(gt_rles_c) != 0 and len(pred_rles_c) == 0:
                 distances = np.full((len(gt_rles_c), 0), np.nan)
             else:
-                ious_c = iou(  # type: ignore
+                ious_c = iou(
                     pred_rles_c,
                     gt_rles_c,
                     [False for _ in range(len(gt_rles_c))],

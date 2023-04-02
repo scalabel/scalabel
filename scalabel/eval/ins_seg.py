@@ -62,7 +62,7 @@ def evaluate_ins_seg(
     for ann in pred_res:
         if "bbox" in ann:
             ann.pop("bbox")
-    coco_dt = coco_gt.loadRes(pred_res)  # type: ignore
+    coco_dt = coco_gt.loadRes(pred_res)
 
     cat_ids = coco_dt.getCatIds()
     cat_names = [cat["name"] for cat in coco_dt.loadCats(cat_ids)]

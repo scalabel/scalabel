@@ -46,7 +46,7 @@ class SegResult(Result):
         """Convert the seg result into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude  # type: ignore
+            include=include, exclude=exclude
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
@@ -68,7 +68,7 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return (  # type: ignore
+    return (
         np.bincount(
             size * groundtruth[k].astype(int, copy=False) + prediction[k],
             minlength=size**2,
@@ -252,7 +252,7 @@ def evaluate_sem_seg(
     )
 
     logger.info("GT id set [%s]", ",".join(str(s) for s in gt_id_set))
-    return SegResult(**res_dict)
+    return SegResult(**res_dict)  # type: ignore
 
 
 def parse_arguments() -> argparse.Namespace:

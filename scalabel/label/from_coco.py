@@ -60,7 +60,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
             name=category["name"]
         )
     assert None not in cats
-    config = Config(categories=cats)
+    config = Config(categories=cats)  # type: ignore
 
     img_id2anns: Dict[int, List[AnnType]] = {
         img_id: [] for img_id in img_id2img

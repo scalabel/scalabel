@@ -76,7 +76,7 @@ class PanSegResult(Result):
         """Convert the pan_seg data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude  # type: ignore
+            include=include, exclude=exclude
         ).items():
             summary_dict[f"{metric}/{STUFF}"] = scores_list[1][STUFF]
             summary_dict[f"{metric}/{THING}"] = scores_list[1][THING]
@@ -180,12 +180,12 @@ def pq_per_image(
         image_size=image_size,
     )
 
-    ious = coco_mask.iou(  # type: ignore
+    ious = coco_mask.iou(
         pred_rles,
         gt_rles,
         [False for _ in range(len(gt_rles))],
     ).T
-    iofs = coco_mask.iou(  # type: ignore
+    iofs = coco_mask.iou(
         pred_rles,
         gt_rles,
         [True for _ in range(len(gt_rles))],
@@ -301,7 +301,7 @@ def evaluate_pan_seg(
     for metric, score in result.items():
         res_dict[metric][2][OVERALL] = score
 
-    return PanSegResult(**res_dict)
+    return PanSegResult(**res_dict)  # type: ignore
 
 
 def parse_arguments() -> argparse.Namespace:

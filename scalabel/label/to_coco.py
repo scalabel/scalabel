@@ -81,8 +81,8 @@ def set_box_object_geometry(annotation: AnnType, label: Label) -> AnnType:
 def set_rle_object_geometry(annotation: AnnType, rle: RLE) -> AnnType:
     """Parsing bbox and area from rle ann."""
     segmentation: RLEType = dict(counts=rle.counts, size=rle.size)
-    bbox = mask_utils.toBbox(segmentation).tolist()  # type: ignore
-    area = mask_utils.area(segmentation).tolist()  # type: ignore
+    bbox = mask_utils.toBbox(segmentation).tolist()
+    area = mask_utils.area(segmentation).tolist()
     annotation.update(dict(bbox=bbox, area=area))
     annotation.update(dict(segmentation=segmentation))
     return annotation
@@ -94,7 +94,7 @@ def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
         return annotation
 
     mask_np = np.array(mask[:, :, None], order="F", dtype="uint8")
-    rle = mask_utils.encode(mask_np)[0]  # type: ignore
+    rle = mask_utils.encode(mask_np)[0]
     rle["counts"] = rle["counts"].decode("utf-8")
     annotation = set_rle_object_geometry(annotation, RLE(**rle))
     return annotation
