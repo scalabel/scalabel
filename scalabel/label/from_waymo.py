@@ -21,7 +21,6 @@ try:
         utils,
     )
 
-    # pylint: disable=no-member
     classes_type2name = {
         label_pb2.Label.Type.TYPE_VEHICLE: "vehicle",
         label_pb2.Label.Type.TYPE_PEDESTRIAN: "pedestrian",

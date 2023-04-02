@@ -45,7 +45,7 @@ def unique_labels(y_true: NDArrayI32, y_pred: NDArrayI32) -> NDArrayI32:
     ys_labels: Iterable[np.int32] = set(
         chain.from_iterable(set(np.unique(y)) for y in (y_true, y_pred))
     )
-    return np.array(sorted(ys_labels))
+    return np.array(sorted(ys_labels))  # type: ignore
 
 
 def confusion_matrix(
@@ -70,15 +70,12 @@ def confusion_matrix(
     true_sum = np.zeros(len(labels))
     pred_sum = tp_sum = true_sum
     if len(tp_bins):
-        tp_sum = np.bincount(
-            tp_bins,
-            minlength=len(labels),
-        )  # type: ignore
+        tp_sum = np.bincount(tp_bins, minlength=len(labels))
 
     if len(y_pred):
-        pred_sum = np.bincount(y_pred, minlength=len(labels))  # type: ignore
+        pred_sum = np.bincount(y_pred, minlength=len(labels))
     if len(y_true):
-        true_sum = np.bincount(y_true, minlength=len(labels))  # type: ignore
+        true_sum = np.bincount(y_true, minlength=len(labels))
 
     # retain only selected labels
     indices = np.searchsorted(sorted_labels, labels[:n_labels])
@@ -148,9 +145,9 @@ def precision_recall_fscore(
     weights = None
     if average is not None:
         assert average != "binary" or len(precision) == 1
-        precision = np.average(precision, weights=weights)  # type: ignore
-        recall = np.average(recall, weights=weights)  # type: ignore
-        f_score = np.average(f_score, weights=weights)  # type: ignore
+        precision = np.average(precision, weights=weights)
+        recall = np.average(recall, weights=weights)
+        f_score = np.average(f_score, weights=weights)
         true_sum = None  # return no support
 
     return precision, recall, f_score, true_sum
@@ -243,8 +240,7 @@ class TaggingResult(Result):
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include,
-            exclude=exclude,
+            include=include, exclude=exclude  # type: ignore
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score

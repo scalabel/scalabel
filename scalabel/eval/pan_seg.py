@@ -34,7 +34,7 @@ from functools import partial
 from multiprocessing import Pool
 from typing import AbstractSet, Dict, List, Optional, Union
 
-import pycocotools.mask as coco_mask  # type: ignore
+import pycocotools.mask as coco_mask
 from tqdm import tqdm
 
 from scalabel.common.io import open_write_text
@@ -76,7 +76,7 @@ class PanSegResult(Result):
         """Convert the pan_seg data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include, exclude=exclude  # type: ignore
         ).items():
             summary_dict[f"{metric}/{STUFF}"] = scores_list[1][STUFF]
             summary_dict[f"{metric}/{THING}"] = scores_list[1][THING]
@@ -180,12 +180,12 @@ def pq_per_image(
         image_size=image_size,
     )
 
-    ious = coco_mask.iou(
+    ious = coco_mask.iou(  # type: ignore
         pred_rles,
         gt_rles,
         [False for _ in range(len(gt_rles))],
     ).T
-    iofs = coco_mask.iou(
+    iofs = coco_mask.iou(  # type: ignore
         pred_rles,
         gt_rles,
         [True for _ in range(len(gt_rles))],

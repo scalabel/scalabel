@@ -13,7 +13,7 @@ from typing import AbstractSet, Callable, Dict, List, Optional
 
 import numpy as np
 from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval  # type: ignore
+from pycocotools.cocoeval import COCOeval
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -86,7 +86,7 @@ class DetResult(Result):
         return cls(**empty_scores)
 
 
-class COCOV2(COCO):  # type: ignore
+class COCOV2(COCO):
     """Modify the COCO API to support annotations dictionary as input."""
 
     def __init__(
@@ -102,11 +102,11 @@ class COCOV2(COCO):  # type: ignore
             assert isinstance(
                 annotations, dict
             ), f"annotation file format {type(annotations)} not supported"
-            self.dataset = annotations
+            self.dataset = annotations  # type: ignore
             self.createIndex()
 
 
-class COCOevalV2(COCOeval):  # type: ignore
+class COCOevalV2(COCOeval):
     """Modify the COCOeval API to speedup and suppress the printing."""
 
     def __init__(
@@ -118,11 +118,13 @@ class COCOevalV2(COCOeval):  # type: ignore
         nproc: int = NPROC,
     ):
         """Init."""
-        super().__init__(cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType)
+        super().__init__(
+            cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType  # type: ignore
+        )
         self.cat_names = cat_names
         self.nproc = nproc
 
-        max_dets = self.params.maxDets  # type: ignore
+        max_dets = self.params.maxDets
         self.get_score_funcs: Dict[
             str, Callable[[Optional[int]], float]
         ] = dict(
@@ -186,7 +188,7 @@ class COCOevalV2(COCOeval):  # type: ignore
 
     def evaluate(self) -> None:
         """Run per image evaluation on given images."""
-        p = self.params  # type: ignore
+        p = self.params
         # add backward compatibility if useSegm is specified in params
         p.imgIds = list(np.unique(p.imgIds))
         if p.useCats:
@@ -194,7 +196,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         p.maxDets = sorted(p.maxDets)
         self.params = p
 
-        self._prepare()
+        self._prepare()  # type: ignore
         # loop through images, area range, max detection number
         cat_ids = p.catIds if p.useCats else [-1]
 
@@ -213,7 +215,9 @@ class COCOevalV2(COCOeval):  # type: ignore
             to_updates = [self.compute_match(i) for i in range(len(p.imgIds))]
 
         eval_num = len(p.catIds) * len(p.areaRng) * len(p.imgIds)
-        self.evalImgs: List[DictStrAny] = [{} for _ in range(eval_num)]
+        self.evalImgs: List[DictStrAny] = [
+            {} for _ in range(eval_num)  # type: ignore
+        ]
         for to_update in to_updates:
             for ind, item in to_update.items():
                 self.evalImgs[ind] = item
@@ -232,8 +236,11 @@ class COCOevalV2(COCOeval):  # type: ignore
                 eval_ind: int = (
                     cat_ind * area_num * img_num + area_ind * img_num + img_ind
                 )
-                to_updates[eval_ind] = self.evaluateImg(
-                    p.imgIds[img_ind], cat_id, area_rng, p.maxDets[-1]
+                to_updates[eval_ind] = self.evaluateImg(  # type: ignore
+                    p.imgIds[img_ind],
+                    cat_id,
+                    area_rng,  # type: ignore
+                    p.maxDets[-1],
                 )
         return to_updates
 
@@ -249,7 +256,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         p = self.params
         aind = [i for i, aRng in enumerate(p.areaRngLbl) if aRng == area_rng]
         mind = [i for i, mDet in enumerate(p.maxDets) if mDet == max_dets]
-        s = self.eval[metric]
+        s = self.eval[metric]  # type: ignore
         cat_ids: NDArrayI32 = np.array(p.catIds, dtype=np.int32)
         if iou_thr is not None:
             t = np.where(iou_thr == p.iouThrs)[0]
@@ -276,7 +283,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             mean_s = np.mean(s[s > -1])
         return mean_s * 100
 
-    def summarize(self) -> DetResult:
+    def summarize(self) -> DetResult:  # type: ignore
         """Compute summary metrics for evaluation results."""
         cat_ids = self.params.catIds + [None]
         res_dict = {
@@ -319,7 +326,7 @@ def evaluate_det(
     pred_res = scalabel2coco_detection(pred_frames, config)["annotations"]
     if not pred_res:
         return DetResult.empty(coco_gt)
-    coco_dt = coco_gt.loadRes(pred_res)
+    coco_dt = coco_gt.loadRes(pred_res)  # type: ignore
 
     cat_ids = coco_dt.getCatIds()
     cat_names = [cat["name"] for cat in coco_dt.loadCats(cat_ids)]

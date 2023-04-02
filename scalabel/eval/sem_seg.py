@@ -46,7 +46,7 @@ class SegResult(Result):
         """Convert the seg result into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include, exclude=exclude  # type: ignore
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
@@ -68,7 +68,7 @@ def fast_hist(
         np.greater_equal(groundtruth, 0),
         np.less(groundtruth, size - 1),
     )
-    return (
+    return (  # type: ignore
         np.bincount(
             size * groundtruth[k].astype(int, copy=False) + prediction[k],
             minlength=size**2,
@@ -230,7 +230,7 @@ def evaluate_sem_seg(
     num_classes = len(cat_map) + 1
     hist: NDArrayI32 = np.zeros((num_classes, num_classes), dtype=np.int32)
     gt_id_set = set()
-    for (hist_, gt_id_set_) in hist_and_gt_id_sets:
+    for hist_, gt_id_set_ in hist_and_gt_id_sets:
         hist += hist_
         gt_id_set.update(gt_id_set_)
 
