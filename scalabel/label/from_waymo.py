@@ -169,13 +169,17 @@ def parse_lidar_labels(
                 alpha=rotation_y_to_alpha(heading, center_lidar),
             )
             labels.append(
-                Label(category=class_name, box2d=None, box3d=box3d, id=label.id)
+                Label(
+                    category=class_name, box2d=None, box3d=box3d, id=label.id
+                )
             )
     else:
         cam2car = get_matrix_from_extrinsics(calib)
         car2cam = np.linalg.inv(cam2car)
         proj_lidar_labels = [
-            l.labels for l in frame.projected_lidar_labels if l.name == camera_id
+            l.labels
+            for l in frame.projected_lidar_labels
+            if l.name == camera_id
         ][0]
         for label in proj_lidar_labels:
             laser_label_id = label.id.replace(camera, "")[:-1]
@@ -199,7 +203,9 @@ def parse_lidar_labels(
                     ]
                 ]
             )
-            center_cam = tuple(np.dot(car2cam, cart2hom(center).T)[:3, 0].tolist())
+            center_cam = tuple(
+                np.dot(car2cam, cart2hom(center).T)[:3, 0].tolist()
+            )
             heading = heading_transform(laser_box3d, car2cam)
             dim = laser_box3d.height, laser_box3d.width, laser_box3d.length
             box3d = Box3D(
@@ -216,15 +222,21 @@ def parse_lidar_labels(
                 label.box.center_y + label.box.width / 2,
             )
             labels.append(
-                Label(category=class_name, box2d=box2d, box3d=box3d, id=label.id)
+                Label(
+                    category=class_name, box2d=box2d, box3d=box3d, id=label.id
+                )
             )
     return labels
 
 
-def parse_camera_labels(frame: dataset_pb2.Frame, camera_id: int) -> List[Label]:
+def parse_camera_labels(
+    frame: dataset_pb2.Frame, camera_id: int
+) -> List[Label]:
     """Parse the camera-based annotations."""
     labels = []
-    camera_labels = [l.labels for l in frame.camera_labels if l.name == camera_id][0]
+    camera_labels = [
+        l.labels for l in frame.camera_labels if l.name == camera_id
+    ][0]
     for label in camera_labels:
         if not label:
             continue
@@ -334,7 +346,9 @@ def parse_frame(
         url = os.path.join(sequence, camera, frame_name)
         img_filepath = os.path.join(output_dir, sequence, camera, frame_name)
 
-        img_name = frame.context.name + "_" + camera.lower() + f"_{frame_id:07d}.jpg"
+        img_name = (
+            frame.context.name + "_" + camera.lower() + f"_{frame_id:07d}.jpg"
+        )
 
         if save_images and not os.path.exists(img_filepath):
             if not os.path.exists(os.path.dirname(img_filepath)):
@@ -365,10 +379,14 @@ def parse_frame(
     url = f"segment-{frame.context.name}_with_camera_labels.tfrecord"
 
     lidar2car_mat: NDArrayF64 = np.array(
-        frame.context.laser_calibrations[lasers_name2id["TOP"]].extrinsic.transform,
+        frame.context.laser_calibrations[
+            lasers_name2id["TOP"]
+        ].extrinsic.transform,
         dtype=np.float64,
     ).reshape(4, 4)
-    lidar2global_mat = np.dot(get_matrix_from_extrinsics(car2global), lidar2car_mat)
+    lidar2global_mat = np.dot(
+        get_matrix_from_extrinsics(car2global), lidar2car_mat
+    )
 
     lidar2car = get_extrinsics_from_matrix(lidar2car_mat)
     lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
@@ -435,7 +453,9 @@ def from_waymo(
         frames.extend(f)
         groups.extend(g)
 
-    cfg = Config(categories=[Category(name=n) for n in classes_type2name.values()])
+    cfg = Config(
+        categories=[Category(name=n) for n in classes_type2name.values()]
+    )
     dataset = Dataset(frames=frames, groups=groups, config=cfg)
     return dataset
 

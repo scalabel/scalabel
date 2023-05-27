@@ -34,7 +34,9 @@ def get_extrinsics_from_matrix(matrix: NDArrayF64) -> Extrinsics:
     """Get extrinsics data structure from 4x4 matrix."""
     extrinsics = Extrinsics(
         location=(matrix[0, -1], matrix[1, -1], matrix[2, -1]),
-        rotation=tuple(Rotation.from_matrix(matrix[:3, :3]).as_euler("xyz").tolist()),
+        rotation=tuple(
+            Rotation.from_matrix(matrix[:3, :3]).as_euler("xyz").tolist()
+        ),
     )
     return extrinsics
 
@@ -118,7 +120,9 @@ def cart2hom(pts_3d: NDArrayF64) -> NDArrayF64:
     return pts_3d_hom
 
 
-def project_points_to_image(points: NDArrayF64, intrinsics: NDArrayF64) -> NDArrayF64:
+def project_points_to_image(
+    points: NDArrayF64, intrinsics: NDArrayF64
+) -> NDArrayF64:
     """Project Nx3 points to Nx2 pixel coordinates with 3x3 intrinsics."""
     hom_cam_coords = points / points[:, 2:3]
     pts_2d = np.dot(hom_cam_coords, np.transpose(intrinsics))
@@ -126,7 +130,9 @@ def project_points_to_image(points: NDArrayF64, intrinsics: NDArrayF64) -> NDArr
     return res
 
 
-def rotation_y_to_alpha(rotation_y: float, center: Tuple[float, float, float]) -> float:
+def rotation_y_to_alpha(
+    rotation_y: float, center: Tuple[float, float, float]
+) -> float:
     """Convert rotation around y-axis to viewpoint angle (alpha)."""
     alpha = rotation_y - math.atan2(center[0], center[2])
     if alpha > math.pi:

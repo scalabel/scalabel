@@ -37,7 +37,8 @@ def get_coco_categories(config: Config) -> List[CatType]:
     """Get CatType categories for saving these in COCO format annotations."""
     categories = get_leaf_categories(config.categories)
     result = [
-        CatType(id=i + 1, name=category.name) for i, category in enumerate(categories)
+        CatType(id=i + 1, name=category.name)
+        for i, category in enumerate(categories)
     ]
     return result
 
@@ -143,7 +144,9 @@ def poly_to_patch(
 def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     """Converting Poly2D to mask."""
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches(shape.width / fig.get_dpi(), shape.height / fig.get_dpi())
+    fig.set_size_inches(
+        shape.width / fig.get_dpi(), shape.height / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
     ax.set_xlim(0, shape.width)
@@ -168,7 +171,9 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     return mask
 
 
-def frame_to_masks(shape: ImageSize, poly2ds: List[List[Poly2D]]) -> List[NDArrayU8]:
+def frame_to_masks(
+    shape: ImageSize, poly2ds: List[List[Poly2D]]
+) -> List[NDArrayU8]:
     """Converting a frame of poly2ds to masks/bitmasks. Removes overlaps."""
     height, width = shape.height, shape.width
     fig = plt.figure(facecolor="0")
@@ -232,7 +237,9 @@ def frame_to_rles(
 
 def rle_to_mask(rle: RLE) -> NDArrayU8:
     """Converting RLE to mask."""
-    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(np.uint8, copy=False)
+    mask: NDArrayU8 = (mask_utils.decode(dict(rle)) > 0).astype(
+        np.uint8, copy=False
+    )
     return mask
 
 

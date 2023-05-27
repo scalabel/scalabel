@@ -55,7 +55,9 @@ class SegResult(Result):
         return summary_dict
 
 
-def fast_hist(groundtruth: NDArrayU8, prediction: NDArrayU8, size: int) -> NDArrayI32:
+def fast_hist(
+    groundtruth: NDArrayU8, prediction: NDArrayU8, size: int
+) -> NDArrayI32:
     """Compute the histogram."""
     prediction = prediction.copy()
     # Out-of-range values as `ignored`
@@ -78,7 +80,9 @@ def fast_hist(groundtruth: NDArrayU8, prediction: NDArrayU8, size: int) -> NDArr
 
 def per_class_iou(hist: NDArrayI32) -> NDArrayF64:
     """Calculate per class iou."""
-    ious: NDArrayF64 = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
+    ious: NDArrayF64 = np.diag(hist) / (
+        hist.sum(1) + hist.sum(0) - np.diag(hist)
+    )
     ious[np.isnan(ious)] = 0
     # Last class as `ignored`
     res: NDArrayF64 = ious[:-1].astype(np.float64, copy=False)
@@ -254,8 +258,12 @@ def evaluate_sem_seg(
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="Segmentation evaluation.")
-    parser.add_argument("--gt", "-g", required=True, help="path to seg ground truth")
-    parser.add_argument("--result", "-r", required=True, help="path to seg results")
+    parser.add_argument(
+        "--gt", "-g", required=True, help="path to seg ground truth"
+    )
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to seg results"
+    )
     parser.add_argument(
         "--config",
         "-c",

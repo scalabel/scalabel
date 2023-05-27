@@ -164,7 +164,8 @@ def pq_per_image(
         pred_frame.labels is None
         or not pred_frame.labels
         or all(
-            label.rle is None and label.poly2d is None for label in pred_frame.labels
+            label.rle is None and label.poly2d is None
+            for label in pred_frame.labels
         )
     ):
         # no predictions for image
@@ -235,8 +236,12 @@ def evaluate_pan_seg(
     assert all(
         category.isThing is not None for category in categories
     ), "isThing should be defined for all categories for PanSeg."
-    categories_stuff = [category for category in categories if not category.isThing]
-    categories_thing = [category for category in categories if category.isThing]
+    categories_stuff = [
+        category for category in categories if not category.isThing
+    ]
+    categories_thing = [
+        category for category in categories if category.isThing
+    ]
     category_names = [category.name for category in categories]
     pred_frames = reorder_preds(ann_frames, pred_frames)
     label_ids_to_int(ann_frames)
@@ -301,9 +306,15 @@ def evaluate_pan_seg(
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(description="Panoptic segmentation evaluation.")
-    parser.add_argument("--gt", "-g", required=True, help="path to panseg ground truth")
-    parser.add_argument("--result", "-r", required=True, help="path to panseg results")
+    parser = argparse.ArgumentParser(
+        description="Panoptic segmentation evaluation."
+    )
+    parser.add_argument(
+        "--gt", "-g", required=True, help="path to panseg ground truth"
+    )
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to panseg results"
+    )
     parser.add_argument(
         "--config",
         "-c",

@@ -47,7 +47,9 @@ class Result(BaseModel):
         evaluation metrics.
         """
         data_check: Dict[str, ScoresList] = {
-            metric: cont for metric, cont in data.items() if isinstance(cont, list)
+            metric: cont
+            for metric, cont in data.items()
+            if isinstance(cont, list)
         }
         ref_scores_list = data_check[list(data_check.keys())[0]]
         for scores_list in data_check.values():

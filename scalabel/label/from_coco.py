@@ -46,18 +46,24 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
-    cats: List[Optional[Category]] = [None for _ in range(len(coco["categories"]))]
+    cats: List[Optional[Category]] = [
+        None for _ in range(len(coco["categories"]))
+    ]
     cat_id2name = {}
     uniq_catids = set(category["id"] for category in coco["categories"])
     assert len(uniq_catids) == len(coco["categories"])
     uniq_catids_list = sorted(list(uniq_catids))
     for category in coco["categories"]:
         cat_id2name[category["id"]] = category["name"]
-        cats[uniq_catids_list.index(category["id"])] = Category(name=category["name"])
+        cats[uniq_catids_list.index(category["id"])] = Category(
+            name=category["name"]
+        )
     assert None not in cats
     config = Config(categories=cats)
 
-    img_id2anns: Dict[int, List[AnnType]] = {img_id: [] for img_id in img_id2img}
+    img_id2anns: Dict[int, List[AnnType]] = {
+        img_id: [] for img_id in img_id2img
+    }
     for ann in coco["annotations"]:
         if ann["image_id"] not in img_id2anns:
             continue
@@ -93,7 +99,9 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
             anns = sorted(img_id2anns[img_id], key=lambda ann: ann["id"])
             for i, ann in enumerate(anns):
                 label = Label(
-                    id=ann.get("scalabel_id", str(ann.get("instance_id", ann["id"]))),
+                    id=ann.get(
+                        "scalabel_id", str(ann.get("instance_id", ann["id"]))
+                    ),
                     index=i + 1,
                     attributes=dict(
                         crowd=bool(ann.get("iscrowd", None)),

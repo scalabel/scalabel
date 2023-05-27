@@ -69,7 +69,9 @@ class ParamsV2(Params):  # type: ignore
         super().__init__(iouType)
         self.maxDets = [20]
         if sigmas is not None:
-            self.kpt_oks_sigmas: NDArrayF64 = np.array(sigmas, dtype=np.float64)
+            self.kpt_oks_sigmas: NDArrayF64 = np.array(
+                sigmas, dtype=np.float64
+            )
 
 
 class COCOV2(COCO):  # type: ignore
@@ -112,7 +114,9 @@ class COCOevalV2(COCOeval):  # type: ignore
         self.cat_names = cat_names
         self.nproc = nproc
 
-        self.get_score_funcs: Dict[str, Callable[[Optional[int]], float]] = dict(
+        self.get_score_funcs: Dict[
+            str, Callable[[Optional[int]], float]
+        ] = dict(
             AP=self.get_score,
             AP50=partial(self.get_score, iou_thr=0.5),
             AP75=partial(self.get_score, iou_thr=0.75),
@@ -278,8 +282,12 @@ def evaluate_pose(
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="Pose evaluation.")
-    parser.add_argument("--gt", "-g", required=True, help="path to pose ground truth")
-    parser.add_argument("--result", "-r", required=True, help="path to pose results")
+    parser.add_argument(
+        "--gt", "-g", required=True, help="path to pose ground truth"
+    )
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to pose results"
+    )
     parser.add_argument(
         "--config",
         "-c",

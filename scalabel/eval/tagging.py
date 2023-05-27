@@ -214,9 +214,9 @@ def compute_scores(
         )
 
     if "accuracy" in report_dict:
-        report_dict["accuracy"] = cast(Dict[str, float], report_dict["accuracy"])[
-            "precision"
-        ]
+        report_dict["accuracy"] = cast(
+            Dict[str, float], report_dict["accuracy"]
+        )["precision"]
     return report_dict
 
 
@@ -292,8 +292,12 @@ def evaluate_tagging(
             met = metric if metric != "f1-score" else "f1_score"
             out[met] = {}
             for cat in classes:
-                m: float = cast(Dict[str, float], scores.get(cat, {})).get(metric, 0.0)
-                out[met][f"{tag}.{cat}"] = m * 100.0 if cat in scores else np.nan
+                m: float = cast(Dict[str, float], scores.get(cat, {})).get(
+                    metric, 0.0
+                )
+                out[met][f"{tag}.{cat}"] = (
+                    m * 100.0 if cat in scores else np.nan
+                )
             avgs[met][tag.upper()] = (
                 cast(Dict[str, float], scores["macro avg"])[metric] * 100.0
                 if len(scores) > 3
@@ -317,7 +321,9 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--gt", "-g", required=True, help="path to tagging ground truth"
     )
-    parser.add_argument("--result", "-r", required=True, help="path to tagging results")
+    parser.add_argument(
+        "--result", "-r", required=True, help="path to tagging results"
+    )
     parser.add_argument(
         "--config",
         "-c",
