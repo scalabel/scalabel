@@ -189,8 +189,9 @@ def aggregate_accs(
     for video_ind, _accs in enumerate(video_accs):
         for cls_ind, acc in enumerate(_accs):
             if (
-                len(acc._events["Type"]) == 0
-            ):  # pylint: disable=protected-access
+                len(acc._events["Type"])  # pylint: disable=protected-access
+                == 0
+            ):
                 continue
             name = f"{classes[cls_ind].name}_{video_ind}"
             class_accs[cls_ind].append(acc)
