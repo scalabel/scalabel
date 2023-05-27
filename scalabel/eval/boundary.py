@@ -87,7 +87,7 @@ class BoundaryResult(Result):
         """Convert data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -95,9 +95,7 @@ class BoundaryResult(Result):
         return summary_dict
 
 
-def eval_bdry_per_thr(
-    gt_mask: NDArrayU8, pd_mask: NDArrayU8, bound_pix: int
-) -> float:
+def eval_bdry_per_thr(gt_mask: NDArrayU8, pd_mask: NDArrayU8, bound_pix: int) -> float:
     """Compute mean, recall, and decay from per-threshold evaluation."""
     gt_dil = binary_dilation(gt_mask, disk(bound_pix))
     pd_dil = binary_dilation(pd_mask, disk(bound_pix))
@@ -147,24 +145,16 @@ def eval_bdry_per_frame(
         gt_frame.labels = []
     if pred_frame.labels is None:
         pred_frame.labels = []
-    gt_masks = {
-        l.category: l.rle for l in gt_frame.labels if l.rle is not None
-    }
-    pd_masks = {
-        l.category: l.rle for l in pred_frame.labels if l.rle is not None
-    }
+    gt_masks = {l.category: l.rle for l in gt_frame.labels if l.rle is not None}
+    pd_masks = {l.category: l.rle for l in pred_frame.labels if l.rle is not None}
     for task_name, cats in categories.items():
         task_scores: List[List[float]] = []
         for cat in cats:
             gt_mask: NDArrayU8 = (
-                rle_to_mask(gt_masks[cat.name])
-                if cat.name in gt_masks
-                else blank_mask
+                rle_to_mask(gt_masks[cat.name]) if cat.name in gt_masks else blank_mask
             )
             pd_mask: NDArrayU8 = (
-                rle_to_mask(pd_masks[cat.name])
-                if cat.name in pd_masks
-                else blank_mask
+                rle_to_mask(pd_masks[cat.name]) if cat.name in pd_masks else blank_mask
             )
             cat_scores = [
                 eval_bdry_per_thr(
@@ -208,8 +198,7 @@ def generate_results(
 ) -> BoundaryResult:
     """Render the evaluation results."""
     res_dict: Dict[str, ScoresList] = {
-        f"F1_pix{bound_pixel}": [{} for _ in range(5)]
-        for bound_pixel in BOUND_PIXELS
+        f"F1_pix{bound_pixel}": [{} for _ in range(5)] for bound_pixel in BOUND_PIXELS
     }
 
     cur_ind = 0
@@ -232,7 +221,7 @@ def generate_results(
     for bound_pixel, f_score in zip(BOUND_PIXELS, task2arr[AVERAGE]):
         res_dict[f"F1_pix{bound_pixel}"][-1][AVERAGE] = f_score
 
-    return BoundaryResult(**res_dict)  # type: ignore
+    return BoundaryResult(**res_dict)
 
 
 def evaluate_boundary(

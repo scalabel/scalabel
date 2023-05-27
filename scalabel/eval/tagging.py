@@ -214,9 +214,9 @@ def compute_scores(
         )
 
     if "accuracy" in report_dict:
-        report_dict["accuracy"] = cast(
-            Dict[str, float], report_dict["accuracy"]
-        )["precision"]
+        report_dict["accuracy"] = cast(Dict[str, float], report_dict["accuracy"])[
+            "precision"
+        ]
     return report_dict
 
 
@@ -240,7 +240,7 @@ class TaggingResult(Result):
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -292,12 +292,8 @@ def evaluate_tagging(
             met = metric if metric != "f1-score" else "f1_score"
             out[met] = {}
             for cat in classes:
-                m: float = cast(Dict[str, float], scores.get(cat, {})).get(
-                    metric, 0.0
-                )
-                out[met][f"{tag}.{cat}"] = (
-                    m * 100.0 if cat in scores else np.nan
-                )
+                m: float = cast(Dict[str, float], scores.get(cat, {})).get(metric, 0.0)
+                out[met][f"{tag}.{cat}"] = m * 100.0 if cat in scores else np.nan
             avgs[met][tag.upper()] = (
                 cast(Dict[str, float], scores["macro avg"])[metric] * 100.0
                 if len(scores) > 3
@@ -312,7 +308,7 @@ def evaluate_tagging(
         assert isinstance(m, str)
         outputs[m].append(v)
         outputs[m].append({AVERAGE: np.nanmean(list(v.values()))})
-    return TaggingResult(**outputs)  # type: ignore
+    return TaggingResult(**outputs)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -321,9 +317,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--gt", "-g", required=True, help="path to tagging ground truth"
     )
-    parser.add_argument(
-        "--result", "-r", required=True, help="path to tagging results"
-    )
+    parser.add_argument("--result", "-r", required=True, help="path to tagging results")
     parser.add_argument(
         "--config",
         "-c",

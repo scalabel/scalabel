@@ -47,9 +47,7 @@ class Result(BaseModel):
         evaluation metrics.
         """
         data_check: Dict[str, ScoresList] = {
-            metric: cont
-            for metric, cont in data.items()
-            if isinstance(cont, list)
+            metric: cont for metric, cont in data.items() if isinstance(cont, list)
         }
         ref_scores_list = data_check[list(data_check.keys())[0]]
         for scores_list in data_check.values():
@@ -99,7 +97,7 @@ class Result(BaseModel):
         """
         frame_dict: Dict[str, Scores] = defaultdict(dict)
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             if not isinstance(scores_list, list):
                 continue
@@ -157,7 +155,7 @@ class Result(BaseModel):
         """
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list

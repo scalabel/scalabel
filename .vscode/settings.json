@@ -20,7 +20,7 @@
             79
         ],
         // Python use black as formatter
-        "editor.defaultFormatter": null
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "[typescript]": {
         "editor.tabSize": 2,
@@ -55,7 +55,7 @@
         "editor.insertSpaces": true,
         "editor.tabSize": 2
     },
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.linting.pylintEnabled": true,
     "python.linting.mypyEnabled": true,
     "python.linting.pydocstyleEnabled": true,

@@ -142,9 +142,7 @@ def get_extrinsics(
 ) -> Tuple[Extrinsics, Extrinsics]:
     """Convert KITTI velodyne to global extrinsics."""
     lidar2cam_mat = np.dot(rect, velo2cam)
-    lidar2global_mat = np.dot(
-        get_matrix_from_extrinsics(cam2global), lidar2cam_mat
-    )
+    lidar2global_mat = np.dot(get_matrix_from_extrinsics(cam2global), lidar2cam_mat)
     lidar2cam = get_extrinsics_from_matrix(lidar2cam_mat)
     lidar2global = get_extrinsics_from_matrix(lidar2global_mat)
     return lidar2cam, lidar2global
@@ -320,9 +318,7 @@ def from_kitti_det(
             )
 
             if osp.exists(label_dir):
-                label_file = osp.join(
-                    label_dir, f"{img_name.split('.')[0]}.txt"
-                )
+                label_file = osp.join(label_dir, f"{img_name.split('.')[0]}.txt")
                 labels_dict, _, _ = parse_label(
                     data_type, label_file, trackid_maps, global_track_id
                 )
@@ -421,14 +417,10 @@ def from_kitti(
             poses = [KittiPoseParser(fields[i]) for i in range(len(fields))]
 
             rotation = tuple(
-                R.from_matrix(poses[frame_idx].rotation)
-                .as_euler("xyz")
-                .tolist()
+                R.from_matrix(poses[frame_idx].rotation).as_euler("xyz").tolist()
             )
             position = tuple(
-                np.array(
-                    poses[frame_idx].position - poses[0].position
-                ).tolist()
+                np.array(poses[frame_idx].position - poses[0].position).tolist()
             )
 
             frame_names = []
@@ -449,7 +441,7 @@ def from_kitti(
 
                 cam2global = Extrinsics(
                     location=(position[0] + offset, position[1], position[2]),
-                    rotation=rotation,  # type: ignore
+                    rotation=rotation,
                 )
 
                 if osp.exists(label_dir):
@@ -491,15 +483,11 @@ def from_kitti(
                     velodyne_names,
                 )
 
-            group_name = "_".join(
-                velodyne_name.split(velodyne_dir)[-1].split("/")[1:]
-            )
+            group_name = "_".join(velodyne_name.split(velodyne_dir)[-1].split("/")[1:])
 
             url = data_type + velodyne_name.split(data_type)[-1]
 
-            lidar2cam, lidar2global = get_extrinsics(
-                rect, velo2cam, cam2global
-            )
+            lidar2cam, lidar2global = get_extrinsics(rect, velo2cam, cam2global)
 
             groups.append(
                 FrameGroup(

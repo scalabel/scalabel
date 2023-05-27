@@ -67,10 +67,7 @@ class DetResult(Result):
         """Return empty results."""
         metrics = cls.__fields__.keys()
         cat_names = OrderedDict(
-            [
-                (cat_id, cat_name["name"])
-                for cat_id, cat_name in coco_gt.cats.items()
-            ]
+            [(cat_id, cat_name["name"]) for cat_id, cat_name in coco_gt.cats.items()]
         )
         cat_ids_in = set(ann["category_id"] for ann in coco_gt.anns.values())
         empty_scores = {
@@ -83,7 +80,7 @@ class DetResult(Result):
             ]
             for metric in metrics
         }
-        return cls(**empty_scores)  # type: ignore
+        return cls(**empty_scores)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -123,9 +120,7 @@ class COCOevalV2(COCOeval):  # type: ignore
         self.nproc = nproc
 
         max_dets = self.params.maxDets  # type: ignore
-        self.get_score_funcs: Dict[
-            str, Callable[[Optional[int]], float]
-        ] = dict(
+        self.get_score_funcs: Dict[str, Callable[[Optional[int]], float]] = dict(
             AP=self.get_score,
             AP50=partial(
                 self.get_score,
@@ -158,12 +153,8 @@ class COCOevalV2(COCOeval):  # type: ignore
                 max_dets=max_dets[2],
             ),
             AR1=partial(self.get_score, metric="recall", max_dets=max_dets[0]),
-            AR10=partial(
-                self.get_score, metric="recall", max_dets=max_dets[1]
-            ),
-            AR100=partial(
-                self.get_score, metric="recall", max_dets=max_dets[2]
-            ),
+            AR10=partial(self.get_score, metric="recall", max_dets=max_dets[1]),
+            AR100=partial(self.get_score, metric="recall", max_dets=max_dets[2]),
             ARs=partial(
                 self.get_score,
                 metric="recall",
@@ -289,7 +280,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             ]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(**res_dict)  # type: ignore
+        return DetResult(**res_dict)
 
 
 def evaluate_det(

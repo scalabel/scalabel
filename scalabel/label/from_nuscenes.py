@@ -109,8 +109,7 @@ def load_data(filepath: str, version: str) -> Tuple[NuScenes, pd.DataFrame]:
 
     for start_time, record in sorted(records):
         start_time = (
-            data.get("sample", record["first_sample_token"])["timestamp"]
-            / 1000000
+            data.get("sample", record["first_sample_token"])["timestamp"] / 1000000
         )
         token = record["token"]
         name = record["name"]
@@ -147,9 +146,7 @@ def quaternion_to_yaw(quat: Quaternion, in_image_frame: bool = True) -> float:
 
 def yaw_to_quaternion(yaw: float) -> Quaternion:
     """Convert yaw angle  to quaternion representation."""
-    return Quaternion(
-        scalar=np.cos(yaw / 2), vector=[0, 0, np.sin(yaw / 2)]
-    ).elements
+    return Quaternion(scalar=np.cos(yaw / 2), vector=[0, 0, np.sin(yaw / 2)]).elements
 
 
 def transform_boxes(
@@ -159,9 +156,7 @@ def transform_boxes(
 
     Note: mutates input boxes.
     """
-    translation_car: NDArrayF64 = -np.array(
-        ego_pose["translation"], dtype=np.float64
-    )
+    translation_car: NDArrayF64 = -np.array(ego_pose["translation"], dtype=np.float64)
     rotation_car = Quaternion(ego_pose["rotation"]).inverse
     translation_sensor: NDArrayF64 = -np.array(
         car_from_sensor["translation"], dtype=np.float64
@@ -206,9 +201,7 @@ def parse_labels(
                     # Project 3d box to 2d.
                     corners = box.corners()
                     corner_coords = (
-                        view_points(corners, intrinsic_matrix, True)
-                        .T[:, :2]
-                        .tolist()
+                        view_points(corners, intrinsic_matrix, True).T[:, :2].tolist()
                     )
                     # Keep only corners that fall within the image, transform
                     box2d = xyxy_to_box2d(*post_process_coords(corner_coords))
@@ -223,7 +216,7 @@ def parse_labels(
                     category=box_class,
                     box2d=box2d,
                     box3d=Box3D(
-                        location=xyz,  # type: ignore
+                        location=xyz,
                         dimension=(h, w, l),
                         orientation=(0, roty, 0),
                         alpha=rotation_y_to_alpha(roty, xyz),  # type: ignore
@@ -235,9 +228,7 @@ def parse_labels(
     return None
 
 
-def get_extrinsics(
-    ego_pose: DictStrAny, car_from_sensor: DictStrAny
-) -> Extrinsics:
+def get_extrinsics(ego_pose: DictStrAny, car_from_sensor: DictStrAny) -> Extrinsics:
     """Convert NuScenes ego pose / sensor_to_car to global extrinsics."""
     global_from_car = transform_matrix(
         ego_pose["translation"],
@@ -255,9 +246,7 @@ def get_extrinsics(
 
 def calibration_to_intrinsics(calibration: DictStrAny) -> Intrinsics:
     """Convert calibration ego pose to Intrinsics."""
-    matrix: NDArrayF64 = np.array(
-        calibration["camera_intrinsic"], dtype=np.float64
-    )
+    matrix: NDArrayF64 = np.array(calibration["camera_intrinsic"], dtype=np.float64)
     return get_intrinsics_from_matrix(matrix)
 
 
@@ -273,14 +262,10 @@ def parse_frame(
     ego_pose_cam = data.get("ego_pose", cam_data["ego_pose_token"])
     cam_filepath = cam_data["filename"]
     img_wh = (cam_data["width"], cam_data["height"])
-    calibration_cam = data.get(
-        "calibrated_sensor", cam_data["calibrated_sensor_token"]
-    )
+    calibration_cam = data.get("calibrated_sensor", cam_data["calibrated_sensor_token"])
     labels: Optional[List[Label]] = None
     if boxes is not None:
-        labels = parse_labels(
-            data, boxes, ego_pose_cam, calibration_cam, img_wh
-        )
+        labels = parse_labels(data, boxes, ego_pose_cam, calibration_cam, img_wh)
 
     frame = Frame(
         name=os.path.basename(cam_filepath),

@@ -188,10 +188,7 @@ def aggregate_accs(
     class_accs: List[List[mm.MOTAccumulator]] = [[] for _ in classes]
     for video_ind, _accs in enumerate(video_accs):
         for cls_ind, acc in enumerate(_accs):
-            if (
-                len(acc._events["Type"])  # pylint: disable=protected-access
-                == 0
-            ):
+            if len(acc._events["Type"]) == 0:  # pylint: disable=protected-access
                 continue
             name = f"{classes[cls_ind].name}_{video_ind}"
             class_accs[cls_ind].append(acc)
@@ -200,18 +197,12 @@ def aggregate_accs(
     # super categories (if any)
     for super_cls, cls in super_classes.items():
         class_names.append(super_cls)
-        metric_names.append(
-            [n for c in cls for n in metric_names[classes.index(c)]]
-        )
-        class_accs.append(
-            [a for c in cls for a in class_accs[classes.index(c)]]
-        )
+        metric_names.append([n for c in cls for n in metric_names[classes.index(c)]])
+        class_accs.append([a for c in cls for a in class_accs[classes.index(c)]])
 
     # overall
     class_names.append(OVERALL)
-    metric_names.append(
-        [n for name in metric_names[: len(classes)] for n in name]
-    )
+    metric_names.append([n for name in metric_names[: len(classes)] for n in name])
     class_accs.append([a for acc in class_accs[: len(classes)] for a in acc])
 
     return class_names, metric_names, class_accs
@@ -319,10 +310,8 @@ def generate_results(
         ]
         for metric, scores in nested_dict.items()
     }
-    res_dict.update(
-        {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
-    )
-    return TrackResult(**res_dict)  # type: ignore
+    res_dict.update({"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE})
+    return TrackResult(**res_dict)
 
 
 def evaluate_track(
@@ -402,9 +391,7 @@ def evaluate_track(
         ]
 
     metrics = list(METRIC_MAPS.values())
-    result = generate_results(
-        flat_dicts, class_names, metrics, classes, super_classes
-    )
+    result = generate_results(flat_dicts, class_names, metrics, classes, super_classes)
     t = time.time() - t
     logger.info("evaluation finishes with %.1f s.", t)
     return result
@@ -413,12 +400,8 @@ def evaluate_track(
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
     parser = argparse.ArgumentParser(description="MOT evaluation.")
-    parser.add_argument(
-        "--gt", "-g", required=True, help="path to mot ground truth"
-    )
-    parser.add_argument(
-        "--result", "-r", required=True, help="path to mot results"
-    )
+    parser.add_argument("--gt", "-g", required=True, help="path to mot ground truth")
+    parser.add_argument("--result", "-r", required=True, help="path to mot results")
     parser.add_argument(
         "--config",
         "-c",

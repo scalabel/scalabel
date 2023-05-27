@@ -76,7 +76,7 @@ class PanSegResult(Result):
         """Convert the pan_seg data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             summary_dict[f"{metric}/{STUFF}"] = scores_list[1][STUFF]
             summary_dict[f"{metric}/{THING}"] = scores_list[1][THING]
@@ -164,8 +164,7 @@ def pq_per_image(
         pred_frame.labels is None
         or not pred_frame.labels
         or all(
-            label.rle is None and label.poly2d is None
-            for label in pred_frame.labels
+            label.rle is None and label.poly2d is None for label in pred_frame.labels
         )
     ):
         # no predictions for image
@@ -236,12 +235,8 @@ def evaluate_pan_seg(
     assert all(
         category.isThing is not None for category in categories
     ), "isThing should be defined for all categories for PanSeg."
-    categories_stuff = [
-        category for category in categories if not category.isThing
-    ]
-    categories_thing = [
-        category for category in categories if category.isThing
-    ]
+    categories_stuff = [category for category in categories if not category.isThing]
+    categories_thing = [category for category in categories if category.isThing]
     category_names = [category.name for category in categories]
     pred_frames = reorder_preds(ann_frames, pred_frames)
     label_ids_to_int(ann_frames)
@@ -301,20 +296,14 @@ def evaluate_pan_seg(
     for metric, score in result.items():
         res_dict[metric][2][OVERALL] = score
 
-    return PanSegResult(**res_dict)  # type: ignore
+    return PanSegResult(**res_dict)
 
 
 def parse_arguments() -> argparse.Namespace:
     """Parse the arguments."""
-    parser = argparse.ArgumentParser(
-        description="Panoptic segmentation evaluation."
-    )
-    parser.add_argument(
-        "--gt", "-g", required=True, help="path to panseg ground truth"
-    )
-    parser.add_argument(
-        "--result", "-r", required=True, help="path to panseg results"
-    )
+    parser = argparse.ArgumentParser(description="Panoptic segmentation evaluation.")
+    parser.add_argument("--gt", "-g", required=True, help="path to panseg ground truth")
+    parser.add_argument("--result", "-r", required=True, help="path to panseg results")
     parser.add_argument(
         "--config",
         "-c",
