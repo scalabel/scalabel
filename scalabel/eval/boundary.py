@@ -87,7 +87,7 @@ class BoundaryResult(Result):
         """Convert data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include or set(), exclude=exclude or set()
+            include=include, exclude=exclude  # type: ignore
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
