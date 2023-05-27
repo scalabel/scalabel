@@ -76,7 +76,7 @@ class PanSegResult(Result):
         """Convert the pan_seg data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             summary_dict[f"{metric}/{STUFF}"] = scores_list[1][STUFF]
             summary_dict[f"{metric}/{THING}"] = scores_list[1][THING]
@@ -301,7 +301,7 @@ def evaluate_pan_seg(
     for metric, score in result.items():
         res_dict[metric][2][OVERALL] = score
 
-    return PanSegResult(**res_dict)  # type: ignore
+    return PanSegResult(**res_dict)
 
 
 def parse_arguments() -> argparse.Namespace:

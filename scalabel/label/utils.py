@@ -34,7 +34,7 @@ def get_extrinsics_from_matrix(matrix: NDArrayF64) -> Extrinsics:
     """Get extrinsics data structure from 4x4 matrix."""
     extrinsics = Extrinsics(
         location=(matrix[0, -1], matrix[1, -1], matrix[2, -1]),
-        rotation=tuple(  # type: ignore
+        rotation=tuple(
             Rotation.from_matrix(matrix[:3, :3]).as_euler("xyz").tolist()
         ),
     )

@@ -240,7 +240,7 @@ class TaggingResult(Result):
         """Convert tagging results into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -312,7 +312,7 @@ def evaluate_tagging(
         assert isinstance(m, str)
         outputs[m].append(v)
         outputs[m].append({AVERAGE: np.nanmean(list(v.values()))})
-    return TaggingResult(**outputs)  # type: ignore
+    return TaggingResult(**outputs)
 
 
 def parse_arguments() -> argparse.Namespace:

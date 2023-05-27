@@ -93,7 +93,7 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
         poly2d = Poly2D(
-            vertices=vertices,  # type: ignore
+            vertices=vertices,
             types="L" * point_num,
             closed=True,
         )

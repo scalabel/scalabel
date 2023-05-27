@@ -46,7 +46,7 @@ class SegResult(Result):
         """Convert the seg result into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include or set(), exclude=exclude or set()
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
@@ -252,7 +252,7 @@ def evaluate_sem_seg(
     )
 
     logger.info("GT id set [%s]", ",".join(str(s) for s in gt_id_set))
-    return SegResult(**res_dict)  # type: ignore
+    return SegResult(**res_dict)
 
 
 def parse_arguments() -> argparse.Namespace:
