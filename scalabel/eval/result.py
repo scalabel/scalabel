@@ -157,7 +157,7 @@ class Result(BaseModel):
         """
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude   # type: ignore
+            include=include, exclude=exclude  # type: ignore
         ).items():
             if not isinstance(scores_list, list):
                 summary_dict[metric] = scores_list
