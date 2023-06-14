@@ -322,7 +322,7 @@ def generate_results(
     res_dict.update(
         {"m" + metric: ave_dict[metric] for metric in METRIC_TO_AVERAGE}
     )
-    return TrackResult(**res_dict)  # type: ignore
+    return TrackResult(**res_dict)
 
 
 def evaluate_track(

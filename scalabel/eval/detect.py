@@ -83,7 +83,7 @@ class DetResult(Result):
             ]
             for metric in metrics
         }
-        return cls(**empty_scores)  # type: ignore
+        return cls(**empty_scores)
 
 
 class COCOV2(COCO):  # type: ignore
@@ -289,7 +289,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             ]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return DetResult(**res_dict)  # type: ignore
+        return DetResult(**res_dict)
 
 
 def evaluate_det(
