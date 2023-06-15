@@ -56,7 +56,7 @@ class PoseResult(Result):
             ]
             for metric in metrics
         }
-        return cls(**empty_scores)  # type: ignore
+        return cls(**empty_scores)
 
 
 class ParamsV2(Params):  # type: ignore
@@ -229,7 +229,7 @@ class COCOevalV2(COCOeval):  # type: ignore
             metric: [{OVERALL: get_score_func(None)}]
             for metric, get_score_func in self.get_score_funcs.items()
         }
-        return PoseResult(**res_dict)  # type: ignore
+        return PoseResult(**res_dict)
 
 
 def evaluate_pose(

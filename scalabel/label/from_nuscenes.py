@@ -223,7 +223,7 @@ def parse_labels(
                     category=box_class,
                     box2d=box2d,
                     box3d=Box3D(
-                        location=xyz,  # type: ignore
+                        location=xyz,
                         dimension=(h, w, l),
                         orientation=(0, roty, 0),
                         alpha=rotation_y_to_alpha(roty, xyz),  # type: ignore

@@ -210,7 +210,7 @@ def parse_lidar_labels(
             dim = laser_box3d.height, laser_box3d.width, laser_box3d.length
             box3d = Box3D(
                 orientation=(0.0, heading, 0.0),
-                location=center_cam,  # type: ignore
+                location=center_cam,
                 dimension=dim,
                 alpha=rotation_y_to_alpha(heading, center_cam),  # type: ignore
             )

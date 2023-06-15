@@ -42,8 +42,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
     vid_id2name: Optional[Dict[int, str]] = None
     if "videos" in coco:
         vid_id2name = {
-            video["id"]: video["name"]
-            for video in coco["videos"]  # type: ignore
+            vid["id"]: vid["name"] for vid in coco["videos"]  # type: ignore
         }
     img_id2img: Dict[int, ImgType] = {img["id"]: img for img in coco["images"]}
 
@@ -60,7 +59,7 @@ def coco_to_scalabel(coco: GtType) -> Tuple[List[Frame], Config]:
             name=category["name"]
         )
     assert None not in cats
-    config = Config(categories=cats)  # type: ignore
+    config = Config(categories=cats)
 
     img_id2anns: Dict[int, List[AnnType]] = {
         img_id: [] for img_id in img_id2img

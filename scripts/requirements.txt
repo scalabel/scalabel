@@ -14,7 +14,7 @@ plyfile
 protobuf
 psutil
 pycocotools
-pydantic
+pydantic==1.9.1
 pyparsing
 pyquaternion
 python-dateutil

@@ -87,7 +87,7 @@ class BoundaryResult(Result):
         """Convert data into a flattened dict as the summary."""
         summary_dict: Dict[str, Union[int, float]] = {}
         for metric, scores_list in self.dict(
-            include=include, exclude=exclude
+            include=include, exclude=exclude  # type: ignore
         ).items():
             for category, score in scores_list[-2].items():
                 summary_dict[f"{metric}/{category}"] = score
@@ -232,7 +232,7 @@ def generate_results(
     for bound_pixel, f_score in zip(BOUND_PIXELS, task2arr[AVERAGE]):
         res_dict[f"F1_pix{bound_pixel}"][-1][AVERAGE] = f_score
 
-    return BoundaryResult(**res_dict)  # type: ignore
+    return BoundaryResult(**res_dict)
 
 
 def evaluate_boundary(

@@ -75,7 +75,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.9", "3.10.10"]
 
     steps:
       - uses: actions/checkout@v3
