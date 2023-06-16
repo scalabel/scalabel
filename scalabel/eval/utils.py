@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from pycocotools import mask as mask_utils
 from tqdm import tqdm
 
 from scalabel.common.logger import logger
@@ -46,32 +47,34 @@ def label_ids_to_int(frames: List[Frame]) -> None:
                     label.id = str(ids_to_int[label.id])
 
 
-def check_overlap_frame(
-    frame: Frame, categories: List[str], image_size: Optional[ImageSize] = None
-) -> bool:
+def check_overlap_frame(frame: Frame, categories: List[str]) -> bool:
     """Check overlap of segmentation masks for a single frame."""
     if frame.labels is None:
         return False
-    overlap_mask: NDArrayU8 = np.zeros((0), dtype=np.uint8)
+    overlap_mask = None
     for label in frame.labels:
         if label.category not in categories:
             continue
         if label.rle is None and label.poly2d is None:
             continue
         if label.rle is not None:
-            mask = rle_to_mask(label.rle)
+            mask = dict(counts=label.rle.counts, size=label.rle.size)
         elif label.poly2d is not None:
-            assert (
-                image_size is not None
-            ), "Requires ImageSize for Poly2D conversion to RLE"
-            mask = poly2ds_to_mask(image_size, label.poly2d)
-        if len(overlap_mask) == 0:
+            raise ValueError("Polygons should not be used during evaluation.")
+        if overlap_mask is None:
             overlap_mask = mask
         else:
-            if np.logical_and(overlap_mask, mask).any():
+            if (
+                mask_utils.area(
+                    mask_utils.merge([overlap_mask, mask], intersect=True)
+                )
+                != 0.0
+            ):
                 # found overlap
                 return True
-            overlap_mask += mask
+            overlap_mask = mask_utils.merge(
+                [overlap_mask, mask], intersect=False
+            )
     return False
 
 
@@ -96,7 +99,7 @@ def check_overlap(
             )
     else:
         overlaps = [
-            check_overlap_frame(frame, category_names, config.imageSize)
+            check_overlap_frame(frame, category_names)
             for frame in tqdm(frames)
         ]
     for is_overlap, frame in zip(overlaps, frames):
