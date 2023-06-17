@@ -1,6 +1,6 @@
 """Test cases for from_mot.py."""
-from ..unittest.util import get_test_file
-from .from_mot import parse_annotations
+from tests.util import get_test_file
+from scalabel.label.from_mot import parse_annotations
 
 
 def test_parse_annotations() -> None:

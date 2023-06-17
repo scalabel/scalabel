@@ -68,7 +68,7 @@ jobs:
       - name: Test
         run: |
           export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
-          python3 -m pytest --pyargs scalabel
+          python3 -m pytest --pyargs tests
 
   python-mac:
     name: test py${{ matrix.python-version }} on mac
@@ -98,7 +98,7 @@ jobs:
         env:
           MPLBACKEND: TkAgg
           PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
-        run: python3 -m pytest --pyargs scalabel
+        run: python3 -m pytest --pyargs tests
 
   nodejs:
     runs-on: ubuntu-latest

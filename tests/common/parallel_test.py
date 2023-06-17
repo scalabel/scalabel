@@ -1,7 +1,7 @@
 """Test parallel."""
 from typing import Tuple
 
-from .parallel import pmap
+from scalabel.common.parallel import pmap
 
 
 def add(num: Tuple[int, int]) -> int:
