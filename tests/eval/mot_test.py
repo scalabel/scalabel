@@ -5,11 +5,11 @@ import unittest
 import numpy as np
 import pytest
 
-from ..common.typing import NDArrayF64
-from ..label.io import group_and_sort, load, load_label_config
-from ..label.typing import Category
-from ..unittest.util import get_test_file
-from .mot import acc_single_video_mot, compute_average, evaluate_track
+from scalabel.common.typing import NDArrayF64
+from scalabel.label.io import group_and_sort, load, load_label_config
+from scalabel.label.typing import Category
+from tests.util import get_test_file
+from scalabel.eval.mot import acc_single_video_mot, compute_average, evaluate_track
 
 
 class TestComputeAverage(unittest.TestCase):

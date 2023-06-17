@@ -4,10 +4,10 @@ import unittest
 
 import numpy as np
 
-from ..common.typing import NDArrayF64
-from ..label.io import load, load_label_config
-from ..unittest.util import get_test_file
-from .boundary import evaluate_boundary
+from tests.util import get_test_file
+from scalabel.common.typing import NDArrayF64
+from scalabel.label.io import load, load_label_config
+from scalabel.eval.boundary import evaluate_boundary
 
 
 class TestScalabelBoundaryEval(unittest.TestCase):

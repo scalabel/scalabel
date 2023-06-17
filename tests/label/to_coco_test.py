@@ -3,10 +3,10 @@ import unittest
 
 import numpy as np
 
-from ..unittest.util import get_test_file
-from .coco_typing import AnnType
-from .io import load, load_label_config
-from .to_coco import (
+from tests.util import get_test_file
+from scalabel.label.coco_typing import AnnType
+from scalabel.label.io import load, load_label_config
+from scalabel.label.to_coco import (
     scalabel2coco_box_track,
     scalabel2coco_detection,
     scalabel2coco_ins_seg,

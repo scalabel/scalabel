@@ -4,7 +4,7 @@ import unittest
 
 from scalabel.label.io import load, load_label_config
 
-from .utils import (
+from scalabel.eval.utils import (
     check_overlap,
     check_overlap_frame,
     combine_stuff_masks,

@@ -5,7 +5,7 @@ import unittest
 from scalabel.label.io import load, load_label_config
 from scalabel.label.typing import Category
 
-from .pan_seg import PQStat, evaluate_pan_seg
+from scalabel.eval.pan_seg import PQStat, evaluate_pan_seg
 
 
 class TestPQStat(unittest.TestCase):

@@ -4,22 +4,22 @@ import unittest
 
 import numpy as np
 
-from ..common.typing import NDArrayF64
-from ..label.io import load, load_label_config
-from ..unittest.util import get_test_file
-from .detect import evaluate_det
+from scalabel.common.typing import NDArrayF64
+from scalabel.label.io import load, load_label_config
+from tests.util import get_test_file
+from scalabel.eval.ins_seg import evaluate_ins_seg
 
 
-class TestScalabelDetectEval(unittest.TestCase):
-    """Test cases for Scalabel detection evaluation."""
+class TestScalabelInsSegEval(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation evaluation."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
-    preds_path = f"{cur_dir}/testcases/det/bbox_predictions.json"
+    gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
+    preds_path = f"{cur_dir}/testcases/ins_seg/ins_seg_preds.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("det/det_configs.toml"))
-    result = evaluate_det(gts, preds, config, nproc=1)
+    config = load_label_config(get_test_file("ins_seg/ins_seg_configs.toml"))
+    result = evaluate_ins_seg(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
@@ -34,8 +34,6 @@ class TestScalabelDetectEval(unittest.TestCase):
                 "train",
                 "motorcycle",
                 "bicycle",
-                "traffic light",
-                "traffic sign",
                 "OVERALL",
             ]
         )
@@ -44,17 +42,15 @@ class TestScalabelDetectEval(unittest.TestCase):
         data_arr = data_frame.to_numpy()
         aps: NDArrayF64 = np.array(
             [
-                41.37670388,
-                41.70985554,
-                66.14185519,
-                50.07078219,
-                0.30253025,
-                -1.0,
-                4.57462895,
+                60.198019801980195,
+                49.99999999999999,
+                33.66336633663366,
+                69.99999999999999,
                 -1.0,
                 -1.0,
                 -1.0,
-                34.02939267,
+                29.999999999999993,
+                48.77227722772277,
             ],
             dtype=np.float64,
         )
@@ -64,18 +60,18 @@ class TestScalabelDetectEval(unittest.TestCase):
 
         overall_scores: NDArrayF64 = np.array(
             [
-                34.02939267,
-                55.32390041,
-                34.9387336,
-                20.91624814,
-                48.43646525,
-                64.28530467,
-                23.8773384,
-                38.05003678,
-                40.9516045,
-                25.55304933,
-                58.38594872,
-                66.04261954,
+                48.77227722772277,
+                86.73267326732673,
+                36.83168316831682,
+                0.0,
+                53.399339933993396,
+                50.247524752475236,
+                44.66666666666667,
+                48.66666666666667,
+                48.66666666666667,
+                0.0,
+                53.333333333333336,
+                50.0,
             ],
             dtype=np.float64,
         )
@@ -89,28 +85,26 @@ class TestScalabelDetectEval(unittest.TestCase):
         """Check evaluation scores' correctness."""
         summary = self.result.summary()
         overall_reference = {
-            "AP/pedestrian": 41.37670388442971,
-            "AP/rider": 41.70985553789942,
-            "AP/car": 66.14185518719762,
-            "AP/truck": 50.07078219289907,
-            "AP/bus": 0.3025302530253025,
+            "AP/pedestrian": 60.198019801980195,
+            "AP/rider": 49.99999999999999,
+            "AP/car": 33.66336633663366,
+            "AP/truck": 69.99999999999999,
+            "AP/bus": -1.0,
             "AP/train": -1.0,
-            "AP/motorcycle": 4.574628954954978,
-            "AP/bicycle": -1.0,
-            "AP/traffic light": -1.0,
-            "AP/traffic sign": -1.0,
-            "AP": 34.029392668401016,
-            "AP50": 55.323900409039695,
-            "AP75": 34.93873359997877,
-            "APs": 20.91624813537171,
-            "APm": 48.4364652499885,
-            "APl": 64.28530466767323,
-            "AR1": 23.877338403079264,
-            "AR10": 38.050036781867405,
-            "AR100": 40.95160450224777,
-            "ARs": 25.5530493279957,
-            "ARm": 58.38594871794871,
-            "ARl": 66.04261954261955,
+            "AP/motorcycle": -1.0,
+            "AP/bicycle": 29.999999999999993,
+            "AP": 48.77227722772277,
+            "AP50": 86.73267326732673,
+            "AP75": 36.83168316831682,
+            "APs": 0.0,
+            "APm": 53.399339933993396,
+            "APl": 50.247524752475236,
+            "AR1": 44.66666666666667,
+            "AR10": 48.66666666666667,
+            "AR100": 48.66666666666667,
+            "ARs": 0.0,
+            "ARm": 53.333333333333336,
+            "ARl": 50.0,
         }
         self.assertSetEqual(set(summary.keys()), set(overall_reference.keys()))
         for name, score in summary.items():
@@ -119,16 +113,16 @@ class TestScalabelDetectEval(unittest.TestCase):
             self.assertAlmostEqual(score, overall_reference[name])
 
 
-class TestScalabelDetectEvalEmpty(unittest.TestCase):
-    """Test cases for Scalabel detection evaluation on empty test cases."""
+class TestScalabelInsSegEvalEmpty(unittest.TestCase):
+    """Test cases for Scalabel instance segmentation on empty test cases."""
 
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    gts_path = f"{cur_dir}/testcases/box_track/track_sample_anns.json"
-    preds_path = f"{cur_dir}/testcases/det/bbox_predictions_empty.json"
+    gts_path = f"{cur_dir}/testcases/ins_seg/ins_seg_rle_sample.json"
+    preds_path = f"{cur_dir}/testcases/ins_seg/ins_seg_preds_empty.json"
     gts = load(gts_path).frames
     preds = load(preds_path).frames
-    config = load_label_config(get_test_file("det/det_configs.toml"))
-    result = evaluate_det(gts, preds, config, nproc=1)
+    config = load_label_config(get_test_file("ins_seg/ins_seg_configs.toml"))
+    result = evaluate_ins_seg(gts, preds, config, nproc=1)
 
     def test_frame(self) -> None:
         """Test case for the function frame()."""
@@ -143,8 +137,6 @@ class TestScalabelDetectEvalEmpty(unittest.TestCase):
                 "train",
                 "motorcycle",
                 "bicycle",
-                "traffic light",
-                "traffic sign",
                 "OVERALL",
             ]
         )
@@ -152,8 +144,7 @@ class TestScalabelDetectEvalEmpty(unittest.TestCase):
 
         data_arr = data_frame.to_numpy()
         aps: NDArrayF64 = np.array(
-            [0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -1.0, -1.0, -1.0, 0.0],
-            dtype=np.float64,
+            [0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float64
         )
         self.assertTrue(
             np.isclose(np.nan_to_num(data_arr[:, 0], nan=-1.0), aps).all()
@@ -174,12 +165,10 @@ class TestScalabelDetectEvalEmpty(unittest.TestCase):
             "AP/rider": 0.0,
             "AP/car": 0.0,
             "AP/truck": 0.0,
-            "AP/bus": 0.0,
+            "AP/bus": -1.0,
             "AP/train": -1.0,
-            "AP/motorcycle": 0.0,
-            "AP/bicycle": -1.0,
-            "AP/traffic light": -1.0,
-            "AP/traffic sign": -1.0,
+            "AP/motorcycle": -1.0,
+            "AP/bicycle": 0.0,
             "AP": 0.0,
             "AP50": 0.0,
             "AP75": 0.0,

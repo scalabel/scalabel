@@ -4,10 +4,10 @@ import unittest
 
 import numpy as np
 
-from ..common.typing import NDArrayF64
-from ..label.io import load, load_label_config
-from ..unittest.util import get_test_file
-from .sem_seg import evaluate_sem_seg
+from scalabel.common.typing import NDArrayF64
+from scalabel.label.io import load, load_label_config
+from tests.util import get_test_file
+from scalabel.eval.sem_seg import evaluate_sem_seg
 
 
 class TestScalabelSemSegEval(unittest.TestCase):

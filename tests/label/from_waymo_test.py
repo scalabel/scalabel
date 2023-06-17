@@ -3,11 +3,11 @@ import os
 import shutil
 from argparse import Namespace
 
-from ..common.parallel import NPROC
-from ..unittest.util import get_test_file
-from .from_waymo import run
-from .io import load
-from .test_utils import compare_groups_results, compare_results
+from scalabel.common.parallel import NPROC
+from tests.util import get_test_file
+from scalabel.label.from_waymo import run
+from scalabel.label.io import load
+from scalabel.label.test_utils import compare_groups_results, compare_results
 
 
 def test_run() -> None:
