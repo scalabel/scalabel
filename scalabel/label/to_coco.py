@@ -5,10 +5,10 @@ import json
 import os.path as osp
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
-from pycocotools import mask as mask_utils
+from pycocotools import mask as mask_utils  # type: ignore
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -93,8 +93,9 @@ def set_seg_object_geometry(annotation: AnnType, mask: NDArrayU8) -> AnnType:
     if not mask.sum():
         return annotation
 
-    mask_np = np.array(mask[:, :, None], order="F", dtype="uint8")
-    rle = mask_utils.encode(mask_np)[0]
+    rle = mask_utils.encode(
+        np.array(mask[:, :, None], order="F", dtype="uint8")
+    )[0]
     rle["counts"] = rle["counts"].decode("utf-8")
     annotation = set_rle_object_geometry(annotation, RLE(**rle))
     return annotation
@@ -109,26 +110,35 @@ def set_keypoints(annotation: AnnType, keypoints: List[float]) -> AnnType:
 
 
 def poly2ds_to_coco(
-    annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize
+    annotation: AnnType, poly2d: Optional[List[Poly2D]], shape: ImageSize
 ) -> AnnType:
     """Converting Poly2D to coco format."""
-    mask = poly2ds_to_mask(shape, poly2d)
-    set_seg_object_geometry(annotation, mask)
+    if poly2d is not None and "segmentation" not in annotation:
+        mask = poly2ds_to_mask(shape, poly2d)
+        set_seg_object_geometry(annotation, mask)
     return annotation
 
 
 def poly2ds_list_to_coco(
     shape: List[ImageSize],
     annotations: List[AnnType],
-    poly2ds: List[List[Poly2D]],
+    poly2ds: List[Optional[List[Poly2D]]],
     nproc: int = NPROC,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
-    with Pool(nproc) as pool:
-        annotations = pool.starmap(
-            poly2ds_to_coco,
-            tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
-        )
+    if nproc > 1:
+        with Pool(nproc) as pool:
+            annotations = pool.starmap(
+                poly2ds_to_coco,
+                tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
+            )
+    else:
+        annotations = [
+            poly2ds_to_coco(ann, polys, shp)
+            for ann, polys, shp in tqdm(
+                zip(annotations, poly2ds, shape), total=len(annotations)
+            )
+        ]
 
     sorted(annotations, key=lambda ann: ann["id"])
     return annotations
@@ -164,7 +174,6 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["file_name"] = image_anns.url
@@ -216,10 +225,10 @@ def scalabel2coco_ins_seg(
     shapes = []
     for image_anns in tqdm(frames):
         image_id += 1
-        img_shape = config.imageSize
+        img_shape = image_anns.size
         if img_shape is None:
-            if image_anns.size is not None:
-                img_shape = image_anns.size
+            if config.imageSize is not None:
+                img_shape = config.imageSize
             else:
                 raise ValueError("Image shape not defined!")
 
@@ -228,7 +237,6 @@ def scalabel2coco_ins_seg(
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["file_name"] = image_anns.url
@@ -300,14 +308,11 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
         video_id += 1
         video_name = video_anns[0].videoName
-        video_attributes = video_anns[0].attributes
         assert video_name is not None, "Tracking annotations have no videoName"
-        video = VidType(
-            id=video_id, name=video_name, attributes=video_attributes
-        )
+        video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
-        for i, image_anns in enumerate(video_anns):
+        for image_anns in video_anns:
             image_id += 1
             img_shape = config.imageSize
             if img_shape is None:
@@ -316,10 +321,10 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 else:
                     raise ValueError("Image shape not defined!")
 
-            if image_anns.frameIndex is not None:
-                frame_index = image_anns.frameIndex
-            else:
-                frame_index = i
+            frame_index = image_anns.frameIndex
+            assert (
+                frame_index is not None
+            ), "Tracking annotations have no frameIndex"
             image = ImgType(
                 video_id=video_id,
                 frame_id=frame_index,
@@ -327,7 +332,6 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
                 height=img_shape.height,
                 width=img_shape.width,
                 id=image_id,
-                attributes=video_attributes,
             )
             if image_anns.url is not None:
                 image["file_name"] = image_anns.url
@@ -389,11 +393,8 @@ def scalabel2coco_seg_track(
 
         video_id += 1
         video_name = video_anns[0].videoName
-        video_attributes = video_anns[0].attributes
         assert video_name is not None, "Tracking annotations have no videoName"
-        video = VidType(
-            id=video_id, name=video_name, attributes=video_attributes
-        )
+        video = VidType(id=video_id, name=video_name)
         videos.append(video)
 
         for image_anns in frames:
@@ -412,7 +413,6 @@ def scalabel2coco_seg_track(
                 height=img_shape.height,
                 width=img_shape.width,
                 id=image_id,
-                attributes=video_attributes,
             )
             shapes.append(img_shape)
             if image_anns.url is not None:
@@ -475,7 +475,6 @@ def scalabel2coco_pose(frames: List[Frame], config: Config) -> GtType:
             height=img_shape.height,
             width=img_shape.width,
             id=image_id,
-            attributes=image_anns.attributes,
         )
         if image_anns.url is not None:
             image["coco_url"] = image_anns.url
