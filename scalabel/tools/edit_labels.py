@@ -1,4 +1,4 @@
-"""Edit the label and image list files in BDD100K format."""
+"""Edit the label and image list files in Scalabel format."""
 
 import argparse
 import json
@@ -16,7 +16,7 @@ LabelObject = Dict[str, Any]  # type: ignore
 def parse_arguments() -> argparse.Namespace:
     """Parse arguments."""
     parser = argparse.ArgumentParser(
-        description="Edit the label and image list files in BDD100K format"
+        description="Edit the label and image list files in Scalabel format"
     )
     parser.add_argument(
         "--add-url",
@@ -35,7 +35,7 @@ def parse_arguments() -> argparse.Namespace:
         "-i",
         type=str,
         nargs="+",
-        help="path to the input bdd100k format files",
+        help="path to the input Scalabel format files",
     )
     parser.add_argument(
         "--output",

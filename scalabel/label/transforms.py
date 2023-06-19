@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Optional, Tuple
 
+import matplotlib
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,6 +14,11 @@ from ..common.typing import NDArrayU8
 from .coco_typing import CatType, PolygonType, RLEType
 from .typing import RLE, Box2D, Config, Edge, Graph, ImageSize, Node, Poly2D
 from .utils import get_leaf_categories
+
+matplotlib.rcParams["figure.subplot.left"] = 0
+matplotlib.rcParams["figure.subplot.bottom"] = 0
+matplotlib.rcParams["figure.subplot.right"] = 1
+matplotlib.rcParams["figure.subplot.top"] = 1
 
 __all__ = [
     "get_coco_categories",
@@ -86,32 +92,27 @@ def bbox_to_box2d(bbox: List[float]) -> Box2D:
 
 
 def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
-    """Convert COCO polygon into Scalabel Box2Ds."""
+    """Convert COCO polygon into Scalabel Poly2Ds."""
     poly2ds: List[Poly2D] = []
     for poly in polygon:
         point_num = len(poly) // 2
         assert 2 * point_num == len(poly)
         vertices = [[poly[2 * i], poly[2 * i + 1]] for i in range(point_num)]
-        poly2d = Poly2D(
-            vertices=vertices,
-            types="L" * point_num,
-            closed=True,
-        )
+        poly2d = Poly2D(vertices=vertices, types="L" * point_num, closed=True)
         poly2ds.append(poly2d)
     return poly2ds
 
 
 def coco_rle_to_rle(rle: RLEType) -> RLE:
     """Convert COCO RLE into Scalabel RLE."""
+    size = rle["size"]
     if isinstance(rle["counts"], str):
         counts = rle["counts"]
     elif isinstance(rle["counts"], list):
-        counts = mask_utils.frPyObjects(rle, rle["size"][0], rle["size"][1])[
-            "counts"
-        ].decode("utf-8")
+        counts = mask_utils.frPyObjects(rle, *size)["counts"].decode("utf-8")
     else:
         counts = rle["counts"].decode("utf-8")
-    return RLE(counts=counts, size=rle["size"])
+    return RLE(counts=counts, size=size)
 
 
 def poly_to_patch(
@@ -143,9 +144,10 @@ def poly_to_patch(
 
 def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     """Converting Poly2D to mask."""
+    height, width = shape.height, shape.width
     fig = plt.figure(facecolor="0")
     fig.set_size_inches(
-        shape.width / fig.get_dpi(), shape.height / fig.get_dpi()
+        (width + 0.5) / fig.get_dpi(), (height + 0.5) / fig.get_dpi()
     )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
@@ -166,7 +168,7 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
 
     fig.canvas.draw()
     mask: NDArrayU8 = np.frombuffer(fig.canvas.tostring_rgb(), np.uint8)
-    mask = mask.reshape((shape.height, shape.width, -1))[..., 0]
+    mask = mask.reshape((height, width, -1))[..., 0]
     plt.close()
     return mask
 
@@ -177,7 +179,9 @@ def frame_to_masks(
     """Converting a frame of poly2ds to masks/bitmasks. Removes overlaps."""
     height, width = shape.height, shape.width
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches((width / fig.get_dpi()), height / fig.get_dpi())
+    fig.set_size_inches(
+        (width + 0.5) / fig.get_dpi(), (height + 0.5) / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
     ax.set_xlim(0, width)
