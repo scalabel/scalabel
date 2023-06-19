@@ -146,7 +146,9 @@ def poly2ds_to_mask(shape: ImageSize, poly2d: List[Poly2D]) -> NDArrayU8:
     """Converting Poly2D to mask."""
     height, width = shape.height, shape.width
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches((width) / fig.get_dpi(), (height) / fig.get_dpi())
+    fig.set_size_inches(
+        (width + 0.5) / fig.get_dpi(), (height + 0.5) / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
     ax.set_xlim(0, shape.width)
@@ -177,7 +179,9 @@ def frame_to_masks(
     """Converting a frame of poly2ds to masks/bitmasks. Removes overlaps."""
     height, width = shape.height, shape.width
     fig = plt.figure(facecolor="0")
-    fig.set_size_inches((width) / fig.get_dpi(), (height) / fig.get_dpi())
+    fig.set_size_inches(
+        (width + 0.5) / fig.get_dpi(), (height + 0.5) / fig.get_dpi()
+    )
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis("off")
     ax.set_xlim(0, width)
