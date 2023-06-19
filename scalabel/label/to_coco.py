@@ -8,7 +8,7 @@ from multiprocessing import Pool
 from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
-from pycocotools import mask as mask_utils  # type: ignore
+from pycocotools import mask as mask_utils
 
 from ..common.io import open_write_text
 from ..common.logger import logger
@@ -217,7 +217,7 @@ def scalabel2coco_ins_seg(
     image_id, ann_id = 0, 0
     images: List[ImgType] = []
     annotations: List[AnnType] = []
-    poly2ds: List[List[Poly2D]] = []
+    poly2ds: List[Optional[List[Poly2D]]] = []
 
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
@@ -309,7 +309,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
         video_id += 1
         video_name = video_anns[0].videoName
         assert video_name is not None, "Tracking annotations have no videoName"
-        video = VidType(id=video_id, name=video_name)
+        video = VidType(id=video_id, name=video_name, attributes=None)
         videos.append(video)
 
         for image_anns in video_anns:
@@ -381,7 +381,7 @@ def scalabel2coco_seg_track(
     videos: List[VidType] = []
     images: List[ImgType] = []
     annotations: List[AnnType] = []
-    poly2ds: List[List[Poly2D]] = []
+    poly2ds: List[Optional[List[Poly2D]]] = []
 
     categories = get_leaf_categories(config.categories)
     cat_name2id = {cat.name: i + 1 for i, cat in enumerate(categories)}
@@ -394,7 +394,7 @@ def scalabel2coco_seg_track(
         video_id += 1
         video_name = video_anns[0].videoName
         assert video_name is not None, "Tracking annotations have no videoName"
-        video = VidType(id=video_id, name=video_name)
+        video = VidType(id=video_id, name=video_name, attributes=None)
         videos.append(video)
 
         for image_anns in frames:
