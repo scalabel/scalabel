@@ -101,6 +101,16 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
     return poly2ds
 
 
+def poly2ds_to_polygon(poly2ds: List[Poly2D]) -> PolygonType:
+    """Convert Scalabel Box2Ds into COCO polygon."""
+    polygon: PolygonType = []
+    for poly2d in poly2ds:
+        vertices = poly2d.vertices
+        poly = [v for vertex in vertices for v in vertex]
+        polygon.append(poly)
+    return polygon
+
+
 def coco_rle_to_rle(rle: RLEType) -> RLE:
     """Convert COCO RLE into Scalabel RLE."""
     if isinstance(rle["counts"], str):
