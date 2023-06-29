@@ -5,7 +5,7 @@ import json
 import os.path as osp
 from functools import partial
 from multiprocessing import Pool
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Union
 
 import numpy as np
 from pycocotools import mask as mask_utils
@@ -22,6 +22,7 @@ from .transforms import (
     get_coco_categories,
     graph_to_keypoints,
     poly2ds_to_mask,
+    poly2ds_to_polygon,
 )
 from .typing import RLE, Config, Frame, Graph, ImageSize, Label, Poly2D
 from .utils import check_crowd, check_ignored, get_leaf_categories
@@ -64,6 +65,12 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         default=None,
         help="Configuration for COCO categories",
+    )
+    parser.add_argument(
+        "-p",
+        "--polygon",
+        action="store_true",
+        help="Save segmentation as COCO polygons",
     )
     return parser.parse_args()
 
@@ -109,9 +116,13 @@ def set_keypoints(annotation: AnnType, keypoints: List[float]) -> AnnType:
 
 
 def poly2ds_to_coco(
-    annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize
+    annotation: AnnType, poly2d: List[Poly2D], shape: ImageSize, polygon: bool = False
 ) -> AnnType:
     """Converting Poly2D to coco format."""
+    if polygon:
+        annotation.update(dict(segmentation=poly2ds_to_polygon(poly2d)))
+        return annotation
+
     mask = poly2ds_to_mask(shape, poly2d)
     set_seg_object_geometry(annotation, mask)
     return annotation
@@ -122,12 +133,13 @@ def poly2ds_list_to_coco(
     annotations: List[AnnType],
     poly2ds: List[List[Poly2D]],
     nproc: int = NPROC,
+    polygon: bool = False,
 ) -> List[AnnType]:
     """Execute the Poly2D to coco conversion in parallel."""
     with Pool(nproc) as pool:
         annotations = pool.starmap(
             poly2ds_to_coco,
-            tqdm(zip(annotations, poly2ds, shape), total=len(annotations)),
+            tqdm(zip(annotations, poly2ds, shape, polygon), total=len(annotations)),
         )
 
     sorted(annotations, key=lambda ann: ann["id"])
@@ -202,7 +214,7 @@ def scalabel2coco_detection(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_ins_seg(
-    frames: List[Frame], config: Config, nproc: int = NPROC
+    frames: List[Frame], config: Config, nproc: int = NPROC, polygon: bool = False
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     image_id, ann_id = 0, 0
@@ -261,7 +273,7 @@ def scalabel2coco_ins_seg(
             shapes.append(img_shape)
 
     if len(annotations) > 0 and "segmentation" not in annotations[0]:
-        annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
+        annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc, polygon)
     return GtType(
         type="instance",
         categories=get_coco_categories(config),
@@ -369,7 +381,7 @@ def scalabel2coco_box_track(frames: List[Frame], config: Config) -> GtType:
 
 
 def scalabel2coco_seg_track(
-    frames: List[Frame], config: Config, nproc: int = NPROC
+    frames: List[Frame], config: Config, nproc: int = NPROC, polygon: bool = False
 ) -> GtType:
     """Convert Scalabel format to COCO instance segmentation."""
     frames_list = group_and_sort(frames)
@@ -446,7 +458,7 @@ def scalabel2coco_seg_track(
                 annotations.append(annotation)
                 poly2ds.append(label.poly2d)
 
-    annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc)
+    annotations = poly2ds_list_to_coco(shapes, annotations, poly2ds, nproc, polygon)
     return GtType(
         categories=get_coco_categories(config),
         videos=videos,
@@ -539,6 +551,7 @@ def run(args: argparse.Namespace) -> None:
                 seg_track=scalabel2coco_seg_track,
             )[args.mode],
             nproc=args.nproc,
+            polygon=args.polygon,
         )
     coco = convert_func(frames, config)
 
