@@ -1,6 +1,8 @@
 """Test cases for transforms.py."""
 import json
+from typing import List
 import unittest
+from pydantic import parse_obj_as
 
 import numpy as np
 
@@ -19,6 +21,7 @@ from scalabel.label.transforms import (
     mask_to_rle,
     nodes_to_edges,
     poly2ds_to_mask,
+    poly2ds_to_polygon,
     polygon_to_poly2ds,
     rle_to_box2d,
 )
@@ -47,7 +50,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
         self.assertEqual(box2d, gt_box2d)
 
     def test_polygon_to_poly2ds(self) -> None:
-        """Check the function for bbox to Box2D."""
+        """Check the function for polygon to Poly2Ds."""
         poly_file = get_test_file("polygon.npy")
         polygon = np.load(poly_file).tolist()
 
@@ -62,6 +65,19 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
             self.assertAlmostEqual(vertice[1], polygon[0][2 * i + 1])
         for c in types:
             self.assertEqual(c, "L")
+
+    def test_poly2ds_to_polygon(self) -> None:
+        """Check the function for Poly2Ds to COCO polygons."""
+        json_file = get_test_file("poly2ds_to_polygon.json")
+        with open_read_text(json_file) as fp:
+            poly2ds = json.load(fp)
+
+        poly_file = get_test_file("polygon.npy")
+        test_polygon = np.load(poly_file).tolist()
+
+        polygon = poly2ds_to_polygon(parse_obj_as(List[Poly2D], poly2ds))
+
+        assert polygon == test_polygon
 
     def test_coco_rle_to_rle(self) -> None:
         """Check the function for COCO RLE to Scalabel RLE."""
