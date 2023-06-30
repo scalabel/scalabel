@@ -102,7 +102,7 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
 
 
 def poly2ds_to_polygon(poly2ds: List[Poly2D]) -> PolygonType:
-    """Convert Scalabel Box2Ds into COCO polygon."""
+    """Convert Scalabel Box2Ds into COCO polygons."""
     polygon: PolygonType = []
     for poly2d in poly2ds:
         vertices = poly2d.vertices
