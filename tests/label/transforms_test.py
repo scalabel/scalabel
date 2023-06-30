@@ -50,7 +50,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
         self.assertEqual(box2d, gt_box2d)
 
     def test_polygon_to_poly2ds(self) -> None:
-        """Check the function for bbox to Box2D."""
+        """Check the function for polygon to Poly2Ds."""
         poly_file = get_test_file("polygon.npy")
         polygon = np.load(poly_file).tolist()
 
@@ -67,7 +67,7 @@ class TestCOCO2ScalabelFuncs(unittest.TestCase):
             self.assertEqual(c, "L")
 
     def test_poly2ds_to_polygon(self) -> None:
-        """Check the function for Box2D to COCO polygons."""
+        """Check the function for Poly2Ds to COCO polygons."""
         json_file = get_test_file("poly2ds_to_polygon.json")
         with open_read_text(json_file) as fp:
             poly2ds = json.load(fp)

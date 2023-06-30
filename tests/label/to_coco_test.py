@@ -45,7 +45,7 @@ class TestMaskToPolygon(unittest.TestCase):
     """Test cases for conversion from Mask to COCO."""
 
     def test_poly2ds_to_coco(self) -> None:
-        """Check the poly2d to coco conversion."""
+        """Check the Poly2ds to COCO polygons conversion."""
         poly_file = get_test_file("polygon.npy")
         polygon = np.load(poly_file).tolist()
         ann = AnnType(id=1, image_id=1, category_id=1, iscrowd=0, ignore=0)
