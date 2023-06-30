@@ -42,7 +42,7 @@ class TestMaskToCoco(unittest.TestCase):
 
 
 class TestMaskToPolygon(unittest.TestCase):
-    """Test cases for conversion from Mask to COCO ."""
+    """Test cases for conversion from Mask to COCO."""
 
     def test_poly2ds_to_coco(self) -> None:
         """Check the poly2d to coco conversion."""
