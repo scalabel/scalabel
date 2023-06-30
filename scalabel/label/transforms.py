@@ -86,7 +86,7 @@ def bbox_to_box2d(bbox: List[float]) -> Box2D:
 
 
 def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
-    """Convert COCO polygon into Scalabel Box2Ds."""
+    """Convert COCO polygon into Scalabel Poly2Ds."""
     poly2ds: List[Poly2D] = []
     for poly in polygon:
         point_num = len(poly) // 2
@@ -102,7 +102,7 @@ def polygon_to_poly2ds(polygon: PolygonType) -> List[Poly2D]:
 
 
 def poly2ds_to_polygon(poly2ds: List[Poly2D]) -> PolygonType:
-    """Convert Scalabel Box2Ds into COCO polygons."""
+    """Convert Scalabel Poly2Ds into COCO polygons."""
     polygon: PolygonType = []
     for poly2d in poly2ds:
         vertices = poly2d.vertices
