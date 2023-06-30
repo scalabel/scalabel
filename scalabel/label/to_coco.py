@@ -143,7 +143,7 @@ def poly2ds_list_to_coco(
         annotations = pool.starmap(
             poly2ds_to_coco,
             tqdm(
-                zip(annotations, poly2ds, shape, polygon),
+                zip(annotations, poly2ds, shape, [polygon] * len(annotations)),
                 total=len(annotations),
             ),
         )
