@@ -1,12 +1,18 @@
 """Test cases for to_coco_test.py."""
+import json
+from typing import List
 import unittest
 
 import numpy as np
+from pydantic import parse_obj_as
+from scalabel.common.io import open_read_text
+from scalabel.label.typing import ImageSize, Poly2D
 
 from tests.util import get_test_file
 from scalabel.label.coco_typing import AnnType
 from scalabel.label.io import load, load_label_config
 from scalabel.label.to_coco import (
+    poly2ds_to_coco,
     scalabel2coco_box_track,
     scalabel2coco_detection,
     scalabel2coco_ins_seg,
@@ -33,6 +39,23 @@ class TestMaskToCoco(unittest.TestCase):
         )
         self.assertAlmostEqual(ann["area"], 108081.0)  # type: ignore
         self.assertDictEqual(ann["segmentation"], gt_rle)  # type: ignore
+
+
+class TestMaskToPolygon(unittest.TestCase):
+    """Test cases for conversion from Mask to COCO ."""
+
+    def test_poly2ds_to_coco(self) -> None:
+        """Check the poly2d to coco conversion."""
+        poly_file = get_test_file("polygon.npy")
+        polygon = np.load(poly_file).tolist()
+        ann = AnnType(id=1, image_id=1, category_id=1, iscrowd=0, ignore=0)
+
+        json_file = get_test_file("poly2ds_to_polygon.json")
+        with open_read_text(json_file) as fp:
+            poly2ds = json.load(fp)
+
+        ann = poly2ds_to_coco(ann, parse_obj_as(List[Poly2D], poly2ds), ImageSize(width=1, height=1), True)
+        assert ann["segmentation"] == polygon
 
 
 class TestScalabelToCOCODetection(unittest.TestCase):
@@ -86,6 +109,16 @@ class TestScalabelToCOCOInsSeg(unittest.TestCase):
             if item.labels is not None
         )
         len_coco = len(self.coco["annotations"])
+        self.assertEqual(len_scalabel, len_coco)
+
+    def test_polygon(self) -> None:
+        coco = scalabel2coco_ins_seg(self.scalabel, self.config, polygon=True)
+        len_scalabel = sum(
+            len(item.labels)
+            for item in self.scalabel
+            if item.labels is not None
+        )
+        len_coco = len(coco["annotations"])
         self.assertEqual(len_scalabel, len_coco)
 
 
