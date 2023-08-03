@@ -162,6 +162,7 @@ def per_image_hist(
     num_classes = len(categories) + 1  # add an `ignored` class
     assert num_classes >= 2
     assert num_classes <= ignore_label
+    image_size = ann_frame.size if ann_frame.size is not None else image_size
     gt = frame_to_mask(ann_frame, categories, image_size, ignore_label)
     gt = gt.copy()
     gt[gt == ignore_label] = num_classes - 1
