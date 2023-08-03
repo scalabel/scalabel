@@ -1,4 +1,4 @@
-"""Convert kitti to Scalabel format."""
+"""Convert KITTI 3D to Scalabel format."""
 import argparse
 import copy
 import math

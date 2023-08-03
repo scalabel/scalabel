@@ -227,8 +227,8 @@ class LabelViewer:
             self.draw_attributes(frame)
         if with_box2d:
             self.draw_box2ds(labels, with_tags=with_tags)
-        if with_box3d and frame.intrinsics is not None:
-            self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
+        # if with_box3d and frame.intrinsics is not None:
+        #     self.draw_box3ds(labels, frame.intrinsics, with_tags=with_tags)
         if with_poly2d and (not with_rle or not has_rle):
             self.draw_poly2ds(
                 labels,
