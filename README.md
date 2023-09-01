@@ -1,3 +1,7 @@
+### NOTE
+
+We released a new platform for visual learning from human feedback, called [nutsh](https://github.com/SysCV/nutsh). It is in active development and it covers most of the functionalies of Scalabel with many more features.
+
 <p align="center"><img width=250 src="https://s3-us-west-2.amazonaws.com/scalabel-public/www/logo/scalable_dark.svg" /></p>
 
 ---
