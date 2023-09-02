@@ -113,8 +113,8 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def check_video_format(name: str) -> bool:
-    """Accept only mov, avi, and mp4."""
-    if name.endswith((".mov", ".avi", ".mp4")):
+    """Accept only mov, avi, mp4 and mkv."""
+    if name.endswith((".mov", ".avi", ".mp4", ".mkv")):
         return True
     return False
 
