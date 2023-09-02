@@ -23,7 +23,9 @@ beforeAll(async () => {
   dataDir = getTestDir("test-data-redis")
   storage = new FileStorage(dataDir)
   client = new RedisClient(config.redis)
+  await client.setup()
   defaultStore = new RedisCache(config.redis, storage, client)
+  await defaultStore.setup()
   // NumWrites used as a counter across all tests that spawn files
   numWrites = 0
 })
@@ -56,6 +58,7 @@ describe("Test redis cache", () => {
     const timeoutConfig = _.clone(config)
     timeoutConfig.redis.writebackTime = 0.2
     const store = new RedisCache(timeoutConfig.redis, storage, client)
+    await store.setup()
 
     const key = "testKey1"
     await store.set(key, "testvalue")
@@ -69,6 +72,7 @@ describe("Test redis cache", () => {
     const actionConfig = _.clone(config)
     actionConfig.redis.writebackCount = 5
     const store = new RedisCache(actionConfig.redis, storage, client)
+    await store.setup()
 
     const key = "testKey2"
     for (let i = 0; i < 4; i++) {
@@ -84,6 +88,7 @@ describe("Test redis cache", () => {
     const actionConfig = _.clone(config)
     actionConfig.redis.writebackCount = 5
     const store = new RedisCache(actionConfig.redis, storage, client)
+    await store.setup()
     await checkFileCount()
     for (let i = 0; i < 5; i += 1) {
       await store.set("key", "value")

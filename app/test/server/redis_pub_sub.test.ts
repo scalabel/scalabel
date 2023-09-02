@@ -11,7 +11,9 @@ let subscriber: RedisPubSub
 beforeAll(async () => {
   const config = getTestConfig()
   pubClient = new RedisClient(config.redis)
+  await pubClient.setup()
   subClient = new RedisClient(config.redis)
+  await subClient.setup()
   publisher = new RedisPubSub(pubClient)
   subscriber = new RedisPubSub(subClient)
 })
@@ -39,6 +41,6 @@ describe("Test redis publish/subscribe functionality", () => {
       address: "address",
       bot: false
     }
-    publisher.publishRegisterEvent(sentData)
+    await publisher.publishRegisterEvent(sentData)
   })
 })

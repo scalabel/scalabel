@@ -1,8 +1,10 @@
-import * as redis from "redis"
-import { promisify } from "util"
+import { createClient, RedisClientType } from "@redis/client"
 
 import { RedisConfig } from "../types/config"
 import Logger from "./logger"
+
+const redisClient = createClient()
+type RedisClientMultiCommandType = ReturnType<typeof redisClient.multi>
 
 /**
  * Exposes promisified versions of the necessary methods on a redis client
@@ -10,9 +12,9 @@ import Logger from "./logger"
  */
 export class RedisClient {
   /** The redis client for standard key value ops */
-  protected client: redis.RedisClient
+  protected client: RedisClientType
   /** The redis client for pub/sub of events */
-  protected pubSub: redis.RedisClient
+  protected pubSub: RedisClientType
 
   /**
    * Constructor
@@ -21,8 +23,16 @@ export class RedisClient {
    * @param withLogging
    */
   constructor(config: RedisConfig, withLogging = false) {
-    this.client = redis.createClient(config.port)
-    this.pubSub = redis.createClient(config.port)
+    this.client = createClient({
+      socket: {
+        port: config.port
+      }
+    })
+    this.pubSub = createClient({
+      socket: {
+        port: config.port
+      }
+    })
 
     this.client.on("error", (err: Error) => {
       if (withLogging) {
@@ -34,6 +44,17 @@ export class RedisClient {
         Logger.error(err)
       }
     })
+  }
+
+  /** Connect redis clients to the server */
+  public async setup(): Promise<void> {
+    await this.client.connect().catch(async (err) => {
+      return await Promise.reject(err)
+    })
+    await this.pubSub.connect().catch(async (err) => {
+      return await Promise.reject(err)
+    })
+    return await Promise.resolve()
   }
 
   /**
@@ -55,8 +76,10 @@ export class RedisClient {
    *
    * @param channel
    */
-  public subscribe(channel: string): void {
-    this.pubSub.subscribe(channel)
+  public async subscribe(channel: string): Promise<void> {
+    await this.pubSub.subscribe(channel, (message, channelName) => {
+      console.log(message, channelName)
+    })
   }
 
   /**
@@ -65,8 +88,8 @@ export class RedisClient {
    * @param channel
    * @param message
    */
-  public publish(channel: string, message: string): void {
-    this.pubSub.publish(channel, message)
+  public async publish(channel: string, message: string): Promise<void> {
+    await this.pubSub.publish(channel, message)
   }
 
   /**
@@ -75,11 +98,11 @@ export class RedisClient {
    * @param key
    */
   public async del(key: string): Promise<void> {
-    this.client.del(key)
+    await this.client.del(key)
   }
 
   /** Start an atomic transaction */
-  public multi(): redis.Multi {
+  public multi(): RedisClientMultiCommandType {
     return this.client.multi()
   }
 
@@ -89,9 +112,7 @@ export class RedisClient {
    * @param key
    */
   public async get(key: string): Promise<string | null> {
-    const redisGetAsync = promisify(this.client.get).bind(this.client)
-    const redisValue: string | null = await redisGetAsync(key)
-    return redisValue
+    return await this.client.get(key)
   }
 
   /**
@@ -100,14 +121,9 @@ export class RedisClient {
    * @param key
    */
   public async exists(key: string): Promise<boolean> {
+    const exists = await this.client.exists(key)
     return await new Promise((resolve) => {
-      this.client.exists(key, (_err: Error | null, exists: number) => {
-        if (exists === 0) {
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
+      resolve(exists !== 0)
     })
   }
 
@@ -118,7 +134,7 @@ export class RedisClient {
    * @param value
    */
   public async setAdd(key: string, value: string): Promise<void> {
-    this.client.sadd(key, value)
+    await this.client.sAdd(key, value)
   }
 
   /**
@@ -128,7 +144,7 @@ export class RedisClient {
    * @param value
    */
   public async setRemove(key: string, value: string): Promise<void> {
-    this.client.srem(key, value)
+    await this.client.sRem(key, value)
   }
 
   /**
@@ -137,10 +153,7 @@ export class RedisClient {
    * @param key
    */
   public async getSetMembers(key: string): Promise<string[]> {
-    const redisSetMembersAsync = promisify(this.client.smembers).bind(
-      this.client
-    )
-    return await redisSetMembersAsync(key)
+    return await this.client.sMembers(key)
   }
 
   /**
@@ -150,13 +163,12 @@ export class RedisClient {
    * @param timeout
    * @param value
    */
-  public async psetex(
+  public async pSetEx(
     key: string,
     timeout: number,
     value: string
   ): Promise<void> {
-    const redisSetExAsync = promisify(this.client.psetex).bind(this.client)
-    await redisSetExAsync(key, timeout, value)
+    await this.client.pSetEx(key, timeout, value)
   }
 
   /**
@@ -166,8 +178,7 @@ export class RedisClient {
    * @param value
    */
   public async set(key: string, value: string): Promise<void> {
-    const redisSetAsync = promisify(this.client.set).bind(this.client)
-    await redisSetAsync(key, value)
+    await this.client.set(key, value)
   }
 
   /**
@@ -177,26 +188,25 @@ export class RedisClient {
    * @param prefix
    */
   public async getKeysWithPrefix(prefix: string): Promise<string[]> {
-    const redisGetKeysWithPrefix = promisify(this.client.keys).bind(this.client)
-    return await redisGetKeysWithPrefix(prefix + "*")
+    return await this.client.keys(prefix + "*")
   }
 
   /**
    * Wrapper for redis config
    *
-   * @param type
    * @param name
    * @param value
    */
-  public config(type: string, name: string, value: string): void {
-    this.client.on("ready", () => {
-      this.client.config(type, name, value)
-    })
+  public configSet(name: string, value: string): void {
+    const asyncFunc: () => void = async () => {
+      await this.client.configSet(name, value)
+    }
+    this.client.on("ready", asyncFunc)
   }
 
   /** Close the connection to the server */
   public async close(): Promise<void> {
-    await promisify(this.client.quit).bind(this.client)()
-    await promisify(this.pubSub.quit).bind(this.pubSub)()
+    await this.client.quit()
+    await this.pubSub.quit()
   }
 }

@@ -25,8 +25,8 @@ export class RedisPubSub {
    *
    * @param data
    */
-  public publishRegisterEvent(data: RegisterMessageType): void {
-    this.client.publish(this.registerEvent, JSON.stringify(data))
+  public async publishRegisterEvent(data: RegisterMessageType): Promise<void> {
+    await this.client.publish(this.registerEvent, JSON.stringify(data))
   }
 
   /**
@@ -38,7 +38,7 @@ export class RedisPubSub {
     handler: (channel: string, message: string) => void
   ): Promise<void> {
     this.client.on("message", handler)
-    this.client.subscribe(this.registerEvent)
+    await this.client.subscribe(this.registerEvent)
     // Make sure it's subscribed before any messages are published
     return await new Promise((resolve) => {
       this.client.on("subscribe", () => {

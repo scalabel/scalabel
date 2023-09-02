@@ -19,14 +19,16 @@ let projectName: string
 let projectName2: string
 let dataDir: string
 
-beforeAll(() => {
+beforeAll(async () => {
   projectName = "myProject"
   projectName2 = "myProject2"
   dataDir = getTestDir("test-user-data")
   makeProjectDir(dataDir, projectName)
   const storage = new FileStorage(dataDir)
   const client = new RedisClient(serverConfig.redis)
+  await client.setup()
   const redisStore = new RedisCache(serverConfig.redis, storage, client)
+  await redisStore.setup()
   const projectStore = new ProjectStore(storage, redisStore)
   userManager = new UserManager(projectStore)
 })

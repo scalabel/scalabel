@@ -7,6 +7,7 @@ let client: RedisClient
 
 beforeAll(async () => {
   client = new RedisClient(getTestConfig().redis)
+  await client.setup()
 })
 
 afterAll(async () => {
@@ -18,7 +19,10 @@ describe("Test that redis clients catch errors", () => {
     const config = getTestConfig()
     config.redis.port = 6385
     const failClient = new RedisClient(config.redis)
-    await failClient.close()
+    await failClient.setup().catch(async (err) => {
+      await failClient.close()
+      expect(err).toBeDefined()
+    })
   })
 })
 
@@ -29,8 +33,7 @@ describe("Test redis functions that are not tested elsewhere", () => {
     for (const memberKey of memberKeys) {
       await client.setAdd(setName, memberKey)
     }
-
-    const actualMemberKeys = await client.getSetMembers(setName)
+    const actualMemberKeys: string[] = await client.getSetMembers(setName)
     expect(actualMemberKeys.sort()).toEqual(memberKeys.sort())
 
     for (const memberKey of memberKeys) {

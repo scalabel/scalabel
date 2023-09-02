@@ -35,11 +35,13 @@ jest.mock("../../src/server/redis_client")
 let projectStore: ProjectStore
 let dataDir: string
 
-beforeAll(() => {
+beforeAll(async () => {
   dataDir = getTestDir("create-project-data")
   const storage = new FileStorage(dataDir)
   const client = new RedisClient(serverConfig.redis)
+  await client.setup()
   const redisStore = new RedisCache(serverConfig.redis, storage, client)
+  await redisStore.setup()
   projectStore = new ProjectStore(storage, redisStore)
 })
 
