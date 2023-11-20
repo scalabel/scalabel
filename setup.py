@@ -39,7 +39,7 @@ setuptools.setup(
         "plyfile",
         "psutil",
         "pycocotools",
-        "pydantic",
+        "pydantic==1.9.0",  # Specifying version 1.9.0
         "pyparsing",
         "python-dateutil",
         "PyYAML",
@@ -49,5 +49,6 @@ setuptools.setup(
         "toml",
         'joblib'
     ],
+
     include_package_data=True,
 )
