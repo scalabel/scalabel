@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "source-map-support/register"
 
 import * as child from "child_process"
@@ -27,6 +28,8 @@ import { RedisPubSub } from "./redis_pub_sub"
 import { Storage } from "./storage"
 import { UserManager } from "./user_manager"
 import { makeStorage } from "./util"
+import { convertStateToExport } from "./export"
+import * as fs from "fs"
 
 declare global {
   // formidable expects a type extension for this.
@@ -285,8 +288,63 @@ async function main(): Promise<void> {
   await startServers(config, projectStore, userManager, publisher)
 }
 
-main()
-  .then()
-  .catch((error: Error) => {
-    Logger.error(error)
+// main()
+//   .then()
+//   .catch((error: Error) => {
+//     Logger.error(error)
+//   })
+
+const dataset = {
+  frames: [],
+  config: {
+    attributes: [],
+    categories: []
+  }
+}
+const projPath =
+  "/home/ubuntu/scalabel/local-data/scalabel/projects/pano10k_class_correction_train/saved/"
+
+const tasks = fs.readdirSync(projPath)
+let items = []
+for (const task of tasks) {
+  const taskDir = projPath + task
+  const taskSavedList = fs.readdirSync(taskDir)
+  const taskSaved = taskSavedList[taskSavedList.length - 1]
+  const taskFilePath = taskDir + "/" + taskSaved
+  const state = JSON.parse(fs.readFileSync(taskFilePath))
+  items = items.concat(convertStateToExport(state))
+  if (dataset.config.attributes?.length === 0) {
+    dataset.config.attributes = state.task.config.attributes
+  }
+  if (dataset.config.categories?.length === 0) {
+    dataset.config.categories = state.task.config.treeCategories
+  }
+}
+dataset.frames = items
+
+const outpath = "export.json"
+const stream = fs.createWriteStream(outpath)
+stream.write("{\n")
+Object.keys(dataset)
+  .filter((key) => key !== "frames")
+  .forEach((key) => {
+    stream.write(`"${key}": `)
+    // @ts-expect-error
+    stream.write(JSON.stringify(dataset[key], null, 2))
+    stream.write(",")
   })
+stream.write(`"frames": [`)
+let first = true
+for (const item of items) {
+  console.log(`Writing item ${item.name}`)
+  if (first) {
+    first = false
+  } else {
+    stream.write(",\n")
+  }
+  stream.write(JSON.stringify(item, null, 2))
+}
+stream.write("]\n")
+stream.end("}")
+
+console.log(`Wrote to ${outpath}`)
