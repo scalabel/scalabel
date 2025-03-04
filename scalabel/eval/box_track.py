@@ -41,14 +41,14 @@ OVERALL = "OVERALL"
 class BoxTrackResult(Result):
     """The class for bounding box tracking evaluation results."""
     mTETA: float
-    mHOTA: float
-    mMOTA: float
     mIDF1: float
-    mLocA: float
     mAssocA: float
+    mLocA: float
     mClsA: float
+    mHOTA: float
     mDetA: float
     mAssA: float
+    mMOTA: float
     mMOTP: float
     TETA: List[Dict[str, float]]
     HOTA: List[Dict[str, float]]

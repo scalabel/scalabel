@@ -146,9 +146,9 @@ class Category(BaseModel):
     """Define Scalabel label attributes."""
 
     name: str
-    subcategories: Optional[List["Category"]]
+    subcategories: Optional[List["Category"]] =None
     isThing: Optional[bool] = None  # for panoptic segmentation
-    color: Optional[Tuple[float, float, float]]
+    color: Optional[Tuple[float, float, float]] = None
 
 
 Category.update_forward_refs()
@@ -159,20 +159,20 @@ class Attribute(BaseModel):
 
     name: str
     type: str
-    tag: Optional[str]
-    tagPrefix: Optional[str]
-    tagSuffixes: Optional[List[str]]
-    values: Optional[List[str]]
+    tag: Optional[str] = None
+    tagPrefix: Optional[str] = None
+    tagSuffixes: Optional[List[str]] = None
+    values: Optional[List[str]] = None
 
 
 class Config(BaseModel):
     """Define metadata of the dataset."""
 
     # optional image size info to make memory pre-allocation possible
-    imageSize: Optional[ImageSize]
-    attributes: Optional[List[Attribute]]
+    imageSize: Optional[ImageSize] = None
+    attributes: Optional[List[Attribute]]  = None
     categories: List[Category]
-    poseSigmas: Optional[List[float]]
+    poseSigmas: Optional[List[float]]  = None
 
 
 class FrameGroup(Frame):
@@ -185,5 +185,5 @@ class Dataset(BaseModel):
     """Define dataset components."""
 
     frames: List[Frame]
-    groups: Optional[List[FrameGroup]]
-    config: Optional[Config]
+    groups: Optional[List[FrameGroup]] = None
+    config: Optional[Config] = None
