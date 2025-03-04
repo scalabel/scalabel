@@ -124,8 +124,8 @@ class Extrinsics(BaseModel):
 class Frame(BaseModel):
     """Frame."""
 
-    name: str
-    url: Optional[str]
+    name: str = None
+    url: Optional[str] = None
     videoName: Optional[str] = None
     intrinsics: Optional[Intrinsics] = None
     extrinsics: Optional[Extrinsics] = None
