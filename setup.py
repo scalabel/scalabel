@@ -39,7 +39,7 @@ setuptools.setup(
         "plyfile",
         "psutil",
         "pycocotools",
-        "pydantic==1.9.0",  # Specifying version 1.9.0
+        "pydantic==2.7",  # Specifying version 1.9.0
         "pyparsing",
         "python-dateutil",
         "PyYAML",
