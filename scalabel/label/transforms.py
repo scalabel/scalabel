@@ -293,19 +293,19 @@ def nodes_to_edges(
     return edges
 
 
-def graph_to_keypoints(graph: Graph) -> List[float]:
+def graph_to_keypoints(graph: Graph, use_score: bool = False) -> List[float]:
     """Converting Graph to COCO keypoints."""
     keypoints = []
     for node in graph.nodes:
         c3 = 0.0
-        if node.score is not None:
+        if use_score and node.score is not None:
             c3 = node.score
-        else:
-            if graph.type is not None:
-                if graph.type.startswith("Pose2D"):
-                    if node.visibility == "V":
-                        c3 = 2.0
-                    elif node.visibility == "N":
-                        c3 = 1.0
+            continue
+        if graph.type is not None:
+            if graph.type.startswith("Pose2D"):
+                if node.visibility == "V":
+                    c3 = 2.0
+                elif node.visibility == "N":
+                    c3 = 1.0
         keypoints.extend([node.location[0], node.location[1], c3])
     return keypoints
